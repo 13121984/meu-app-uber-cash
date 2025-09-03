@@ -3,7 +3,7 @@
 
 import { collection, addDoc, Timestamp, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory, MaintenanceData } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/components/relatorios/reports-filter';
@@ -30,6 +30,17 @@ export interface FuelExpense {
     total: number;
 }
 
+export interface ProfitEvolutionData {
+    date: string;
+    lucro: number;
+}
+
+export interface DailyTripsData {
+    date: string;
+    viagens: number;
+}
+
+
 export interface ReportData {
   totalGanho: number;
   totalLucro: number;
@@ -39,6 +50,14 @@ export interface ReportData {
   earningsByCategory: EarningsByCategory[];
   tripsByCategory: TripsByCategory[];
   fuelExpenses: FuelExpense[];
+  totalKm: number;
+  totalHoras: number;
+  totalViagens: number;
+  ganhoPorHora: number;
+  ganhoPorKm: number;
+  eficiencia: number;
+  profitEvolution: ProfitEvolutionData[];
+  dailyTrips: DailyTripsData[];
 }
 
 export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
@@ -182,70 +201,107 @@ export async function getDashboardData() {
 export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilterValues): Promise<ReportData> {
   const now = new Date();
   let filteredDays: WorkDay[] = [];
+  let interval: { start: Date; end: Date } | null = null;
 
   switch (filters.type) {
     case 'all':
+      if (allWorkDays.length > 0) {
+        const dates = allWorkDays.map(d => d.date);
+        interval = { start: new Date(Math.min(...dates.map(d => d.getTime()))), end: new Date(Math.max(...dates.map(d => d.getTime()))) };
+      }
       filteredDays = allWorkDays;
       break;
     case 'today':
-      filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start: startOfDay(now), end: endOfDay(now) }));
+      interval = { start: startOfDay(now), end: endOfDay(now) };
       break;
     case 'thisWeek':
-      filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start: startOfWeek(now), end: endOfWeek(now) }));
+      interval = { start: startOfWeek(now), end: endOfWeek(now) };
       break;
     case 'thisMonth':
-      filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start: startOfMonth(now), end: endOfMonth(now) }));
+      interval = { start: startOfMonth(now), end: endOfMonth(now) };
       break;
     case 'specificMonth':
       if (filters.year !== undefined && filters.month !== undefined) {
-        const start = startOfMonth(new Date(filters.year, filters.month));
-        const end = endOfMonth(new Date(filters.year, filters.month));
-        filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start, end }));
+        interval = { start: startOfMonth(new Date(filters.year, filters.month)), end: endOfMonth(new Date(filters.year, filters.month)) };
       }
       break;
     case 'specificYear':
       if (filters.year !== undefined) {
-        const start = startOfYear(new Date(filters.year, 0));
-        const end = endOfYear(new Date(filters.year, 0));
-        filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start, end }));
+        interval = { start: startOfYear(new Date(filters.year, 0)), end: endOfYear(new Date(filters.year, 0)) };
       }
       break;
     case 'custom':
        if (filters.dateRange?.from) {
-        const fromDate = startOfDay(filters.dateRange.from);
-        const toDate = filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from);
-        filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start: fromDate, end: toDate }));
+        interval = { start: startOfDay(filters.dateRange.from), end: filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from) };
       }
       break;
   }
+  
+  if (interval) {
+    filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, interval!));
+  }
+
 
   // --- Cálculos ---
   const earningsByCategoryMap = new Map<string, number>();
   const tripsByCategoryMap = new Map<string, number>();
   const fuelExpensesMap = new Map<string, number>();
+  const dailyDataMap = new Map<string, { lucro: number, viagens: number }>();
 
-  let totalGanho = 0;
-  let totalCombustivel = 0;
-  let totalExtras = 0;
+  let totalGanho = 0, totalCombustivel = 0, totalExtras = 0, totalKm = 0, totalHoras = 0, totalViagens = 0, totalLitros = 0;
 
   filteredDays.forEach(day => {
-    totalGanho += day.earnings.reduce((sum, e) => sum + e.amount, 0);
-    totalCombustivel += day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+    const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
+    const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+    const dailyTrips = day.earnings.reduce((sum, e) => sum + e.trips, 0);
+
+    totalGanho += dailyEarnings;
+    totalCombustivel += dailyFuel;
     totalExtras += day.maintenance.amount;
+    totalKm += day.km;
+    totalHoras += day.hours;
+    totalViagens += dailyTrips;
+
+    day.fuelEntries.forEach(fuel => {
+        if(fuel.price > 0) totalLitros += fuel.paid / fuel.price;
+        fuelExpensesMap.set(fuel.type, (fuelExpensesMap.get(fuel.type) || 0) + fuel.paid);
+    });
 
     day.earnings.forEach(earning => {
         earningsByCategoryMap.set(earning.category, (earningsByCategoryMap.get(earning.category) || 0) + earning.amount);
         tripsByCategoryMap.set(earning.category, (tripsByCategoryMap.get(earning.category) || 0) + earning.trips);
     });
 
-    day.fuelEntries.forEach(fuel => {
-        fuelExpensesMap.set(fuel.type, (fuelExpensesMap.get(fuel.type) || 0) + fuel.paid);
-    });
+    const dateKey = format(day.date, 'yyyy-MM-dd');
+    const currentDaily = dailyDataMap.get(dateKey) || { lucro: 0, viagens: 0 };
+    currentDaily.lucro += dailyEarnings - dailyFuel;
+    currentDaily.viagens += dailyTrips;
+    dailyDataMap.set(dateKey, currentDaily);
   });
+  
+  const profitEvolution: ProfitEvolutionData[] = [];
+  const dailyTrips: DailyTripsData[] = [];
+  if (interval) {
+      eachDayOfInterval(interval).forEach(date => {
+          const dateKey = format(date, 'yyyy-MM-dd');
+          const data = dailyDataMap.get(dateKey);
+          profitEvolution.push({ date: format(date, 'dd/MM'), lucro: data?.lucro ?? 0 });
+          dailyTrips.push({ date: format(date, 'dd/MM'), viagens: data?.viagens ?? 0 });
+      })
+  } else if (dailyDataMap.size > 0) {
+      // Fallback for 'all' when interval is not set initially
+      [...dailyDataMap.entries()].sort().forEach(([dateKey, data]) => {
+          profitEvolution.push({ date: format(new Date(dateKey), 'dd/MM'), lucro: data.lucro });
+          dailyTrips.push({ date: format(new Date(dateKey), 'dd/MM'), viagens: data.viagens });
+      })
+  }
+
 
   const totalGastos = totalCombustivel + totalExtras;
-  const totalLucro = totalGanho - totalCombustivel; // Mantendo a regra de lucro (sem descontar manutenção)
-
+  const totalLucro = totalGanho - totalCombustivel; 
+  const ganhoPorHora = totalHoras > 0 ? totalGanho / totalHoras : 0;
+  const ganhoPorKm = totalKm > 0 ? totalGanho / totalKm : 0;
+  const eficiencia = totalKm > 0 && totalLitros > 0 ? totalKm / totalLitros : 0;
   const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
   const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
   const fuelExpenses: FuelExpense[] = Array.from(fuelExpensesMap, ([type, total]) => ({ type, total }));
@@ -253,17 +309,24 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   const profitComposition = [
     { name: 'Lucro Líquido', value: totalLucro, fill: 'hsl(var(--chart-1))', totalGanho },
     { name: 'Combustível', value: totalCombustivel, fill: 'hsl(var(--chart-5))', totalGanho },
-    // { name: 'Manutenção', value: totalExtras, fill: 'hsl(var(--chart-3))' },
   ];
   
   return {
     totalGanho,
     totalLucro,
     totalGastos,
-    diasTrabalhados: filteredDays.length,
+    diasTrabalhados: new Set(filteredDays.map(d => d.date.toDateString())).size,
     profitComposition,
     earningsByCategory,
     tripsByCategory,
     fuelExpenses,
+    totalKm,
+    totalHoras,
+    totalViagens,
+    ganhoPorHora,
+    ganhoPorKm,
+    eficiencia,
+    profitEvolution,
+    dailyTrips,
   };
 }
