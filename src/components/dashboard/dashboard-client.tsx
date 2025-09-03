@@ -45,9 +45,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     { title: "Total Ganho", value: data.totalGanho, icon: DollarSign, isCurrency: true, positive: true },
     { title: "Total Lucro", value: data.totalLucro, icon: DollarSign, isCurrency: true, positive: true },
     { title: "Total Combustível", value: data.totalCombustivel, icon: Fuel, isCurrency: true, negative: true },
-    { title: "Total KM", value: data.totalKm, icon: Map, unit: "km" },
-    { title: "Total Horas", value: data.totalHoras, icon: Hourglass, unit: "h" },
-    { title: "Dias Trabalhados", value: data.diasTrabalhados, icon: CalendarDays },
+    { title: "Total KM", value: data.totalKm, icon: Map, unit: "km", color: "text-blue-500" },
+    { title: "Total Horas", value: data.totalHoras, icon: Hourglass, unit: "h", color: "text-amber-500" },
+    { title: "Dias Trabalhados", value: data.diasTrabalhados, icon: CalendarDays, color: "text-indigo-500" },
   ]
 
   const progress = data.meta.target > 0 ? (data.totalLucro / data.meta.target) * 100 : 0;

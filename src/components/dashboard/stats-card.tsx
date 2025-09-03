@@ -10,9 +10,10 @@ type StatsCardProps = {
   precision?: number
   positive?: boolean
   negative?: boolean
+  color?: string
 }
 
-export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precision = 0, positive, negative }: StatsCardProps) {
+export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precision = 0, positive, negative, color }: StatsCardProps) {
   const formattedValue = isCurrency
     ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
     : value.toFixed(precision)
@@ -24,7 +25,8 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
         <Icon className={cn(
           "h-4 w-4 text-muted-foreground",
           positive && "text-green-600",
-          negative && "text-red-600"
+          negative && "text-red-600",
+          color
         )} />
       </CardHeader>
       <CardContent>
