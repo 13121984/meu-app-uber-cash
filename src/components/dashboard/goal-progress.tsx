@@ -22,7 +22,7 @@ type GoalProgressProps = {
 };
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [goalCompleted, setGoalCompleted] = useState(false);
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
@@ -30,13 +30,17 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   useEffect(() => {
     // Ativa o pop-up apenas uma vez quando a meta é atingida
     if (isComplete && !goalCompleted) {
-      setShowConfetti(true);
+      setShowPopup(true);
       setGoalCompleted(true); // Marca que a meta foi completada para não mostrar de novo
+    }
+    // Se o progresso regredir, permite que a comemoração aconteça novamente no futuro
+    if (!isComplete && goalCompleted) {
+      setGoalCompleted(false);
     }
   }, [isComplete, goalCompleted]);
 
   const handleClose = () => {
-    setShowConfetti(false);
+    setShowPopup(false);
   };
 
 
@@ -56,6 +60,7 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
             <Car
               className="relative h-10 w-10 text-primary drop-shadow-lg"
               style={{ transform: 'translateY(-4px)' }}
+              fill="currentColor"
             />
           </div>
           
@@ -74,8 +79,8 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
         </div>
       </Card>
 
-      <AlertDialog open={showConfetti} onOpenChange={setShowConfetti}>
-        {showConfetti && <Confetti />}
+      <AlertDialog open={showPopup} onOpenChange={setShowPopup}>
+        {showPopup && <Confetti />}
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-3xl font-headline text-center text-primary">Meta Atingida!</AlertDialogTitle>

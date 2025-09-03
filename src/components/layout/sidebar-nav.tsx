@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -31,7 +32,7 @@ export function SidebarNav() {
     <>
       <SidebarHeader>
         <div className="flex items-center gap-2 p-2">
-          <Car className="w-8 h-8 text-primary" />
+          <Car className="w-8 h-8 text-primary" fill="currentColor" />
           <h1 className="text-xl font-headline font-semibold text-primary">Rota Certa</h1>
         </div>
       </SidebarHeader>
