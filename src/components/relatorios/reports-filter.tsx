@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { exportToSheet } from '@/ai/flows/export-flow';
 import { toast } from '@/hooks/use-toast';
+import { getReportData, WorkDay } from '@/services/work-day.service';
+
 
 export const ReportFilterValuesSchema = z.object({
     type: z.enum(['all', 'today', 'thisWeek', 'thisMonth', 'specificMonth', 'specificYear', 'custom']),
@@ -27,6 +29,7 @@ export type ReportFilterValues = z.infer<typeof ReportFilterValuesSchema>;
 
 interface ReportsFilterProps {
   onFilterChange: (filters: ReportFilterValues) => void;
+  allWorkDays: WorkDay[]; // Recebe todos os dados para poder filtrar e exportar
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -35,7 +38,7 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
 }));
 
-export function ReportsFilter({ onFilterChange }: ReportsFilterProps) {
+export function ReportsFilter({ onFilterChange, allWorkDays }: ReportsFilterProps) {
   const [filterType, setFilterType] = useState<ReportFilterValues['type']>('thisMonth');
   const [year, setYear] = useState<number>(getYear(new Date()));
   const [month, setMonth] = useState<number>(new Date().getMonth());
@@ -67,8 +70,11 @@ export function ReportsFilter({ onFilterChange }: ReportsFilterProps) {
             } else if (filterType === 'custom') {
                 filters.dateRange = dateRange;
             }
+            
+            // Filtra os dados brutos aqui antes de enviar para o flow
+            const { rawWorkDays } = await getReportData(allWorkDays, filters);
 
-            const result = await exportToSheet({ filters });
+            const result = await exportToSheet(rawWorkDays);
 
             toast({
                 title: (

@@ -43,11 +43,13 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    setIsLoading(true);
-    getReportData(initialData, filters).then(data => {
+    async function fetchData() {
+        setIsLoading(true);
+        const data = await getReportData(initialData, filters);
         setReportData(data);
         setIsLoading(false);
-    });
+    }
+    fetchData();
   }, [initialData, filters]);
 
   const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -61,7 +63,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
         </h1>
       </div>
 
-      <ReportsFilter onFilterChange={setFilters} />
+      <ReportsFilter onFilterChange={setFilters} allWorkDays={initialData} />
       
       {isLoading ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed bg-card border-border">
