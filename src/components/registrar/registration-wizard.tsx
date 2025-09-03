@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useReducer } from 'react';
-import { Check, Loader2, CheckCircle } from 'lucide-react';
+import { Check, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Step1Info } from './step1-info';
@@ -10,6 +10,7 @@ import { Step3Fuel } from './step3-fuel';
 import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
+import { addWorkDay } from '@/services/work-day.service';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -84,29 +85,43 @@ export function RegistrationWizard() {
   
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Mark the final step as complete before submitting
     if (!completedSteps.includes(currentStep)) {
         setCompletedSteps([...completedSteps, currentStep]);
     }
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Submitting data:', state);
-    
-    toast({
-        title: (
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-500" />
-            <span className="font-bold">Sucesso!</span>
-          </div>
-        ),
-        description: "Seu dia de trabalho foi registrado.",
-        variant: "default",
-    })
+    try {
+      const result = await addWorkDay(state);
 
-    setIsSubmitting(false);
-    // Maybe redirect or reset form
+      if (result.success) {
+        toast({
+            title: (
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span className="font-bold">Sucesso!</span>
+              </div>
+            ),
+            description: "Seu dia de trabalho foi registrado.",
+            variant: "default",
+        });
+        // You can reset the form or redirect the user here
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <span className="font-bold">Erro ao Salvar!</span>
+            </div>
+          ),
+          description: "Não foi possível registrar seu dia de trabalho. Tente novamente.",
+          variant: "destructive",
+      });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   const renderStep = () => {
@@ -118,6 +133,8 @@ export function RegistrationWizard() {
       default: return null;
     }
   };
+
+  const isLastStep = currentStep === steps.length;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -159,7 +176,7 @@ export function RegistrationWizard() {
           <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
             Voltar
           </Button>
-          {currentStep < steps.length ? (
+          {!isLastStep ? (
             <Button onClick={handleNext} disabled={isSubmitting}>
               Próximo
             </Button>
