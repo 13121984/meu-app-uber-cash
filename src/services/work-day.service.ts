@@ -5,6 +5,8 @@ import { collection, addDoc, Timestamp, getDocs, query, orderBy, where } from "f
 import { db } from "@/lib/firebase";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
+import { getGoals, Goals } from './goal.service';
+
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -64,7 +66,7 @@ export async function getWorkDays(): Promise<WorkDay[]> {
     }
 }
 
-function calculatePeriodData(workDays: WorkDay[], period: string): PeriodData {
+function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals): PeriodData {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
 
@@ -82,12 +84,11 @@ function calculatePeriodData(workDays: WorkDay[], period: string): PeriodData {
     workDays.forEach(day => {
         const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
         const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-        const dailyExtras = day.maintenance.amount;
+        // O lucro não considera mais a manutenção
         const dailyProfit = dailyEarnings - dailyFuel;
 
         data.totalGanho += dailyEarnings;
         data.totalCombustivel += dailyFuel;
-        data.totalExtras += dailyExtras;
         data.totalLucro += dailyProfit;
         data.totalKm += day.km;
         data.totalHoras += day.hours;
@@ -106,28 +107,34 @@ function calculatePeriodData(workDays: WorkDay[], period: string): PeriodData {
     const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
     const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
 
+    let targetGoal = 0;
+    if (period === 'diária') targetGoal = goals.daily;
+    if (period === 'semanal') targetGoal = goals.weekly;
+    if (period === 'mensal') targetGoal = goals.monthly;
+
     return {
         ...data,
         ganhoPorHora: data.totalHoras > 0 ? data.totalGanho / data.totalHoras : 0,
         ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.totalKm : 0,
         earningsByCategory,
         tripsByCategory,
-        meta: { target: 0, period: period }, 
+        meta: { target: targetGoal, period: period },
     };
 }
 
 
 export async function getDashboardData() {
     const allWorkDays = await getWorkDays();
+    const goals = await getGoals();
     const now = new Date();
 
     const todayWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfDay(now), end: endOfDay(now) }));
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
 
-    const hoje = calculatePeriodData(todayWorkDays, "diária");
-    const semana = calculatePeriodData(thisWeekWorkDays, "semanal");
-    const mes = calculatePeriodData(thisMonthWorkDays, "mensal");
+    const hoje = calculatePeriodData(todayWorkDays, "diária", goals);
+    const semana = calculatePeriodData(thisWeekWorkDays, "semanal", goals);
+    const mes = calculatePeriodData(thisMonthWorkDays, "mensal", goals);
 
     return { hoje, semana, mes };
 }
