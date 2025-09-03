@@ -13,7 +13,6 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Confetti } from "./confetti";
-import { Card } from '../ui/card';
 
 type GoalProgressProps = {
   progress: number;
@@ -28,12 +27,10 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const clampedProgress = Math.min(progress, 100);
 
   useEffect(() => {
-    // Ativa o pop-up apenas uma vez quando a meta é atingida
     if (isComplete && !goalCompleted) {
       setShowPopup(true);
-      setGoalCompleted(true); // Marca que a meta foi completada para não mostrar de novo
+      setGoalCompleted(true);
     }
-    // Se o progresso regredir, permite que a comemoração aconteça novamente no futuro
     if (!isComplete && goalCompleted) {
       setGoalCompleted(false);
     }
@@ -42,54 +39,62 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const handleClose = () => {
     setShowPopup(false);
   };
-
+  
+  const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const remaining = target - current;
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-6 pt-4">
-      {/* Road container */}
-      <div className="w-full px-4">
-        <div className="relative h-16 w-full rounded-lg bg-gray-700 dark:bg-gray-800 p-2 overflow-hidden shadow-inner">
-          {/* Dashed line */}
-          <div className="absolute top-1/2 left-0 w-full h-1 border-t-4 border-dashed border-yellow-400 -translate-y-1/2"></div>
-          
-          {/* Car with shadow */}
+    <div className="flex flex-col items-center justify-center space-y-4">
+      {/* Progress Bar */}
+      <div className="w-full px-1">
+        <div className="relative h-2 w-full rounded-full bg-gray-700 dark:bg-gray-800">
+          {/* Progress fill */}
+          <div 
+            className="h-full rounded-full bg-primary transition-all duration-500"
+            style={{ width: `${clampedProgress}%`}}
+          />
+          {/* Car Icon */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 transition-all duration-1000 ease-out"
-            style={{ left: `calc(${clampedProgress}% - 20px)` }}
+            className="absolute top-1/2 -translate-y-1/2 transition-all duration-500"
+            style={{ left: `calc(${clampedProgress}% - 16px)` }}
           >
-            <Car
-              className="relative h-10 w-10 text-primary drop-shadow-lg"
-              style={{ transform: 'translateY(-4px)' }}
-              fill="currentColor"
-            />
+            <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center">
+              <Car
+                className="h-5 w-5 text-primary"
+                fill="currentColor"
+              />
+            </div>
           </div>
-          
-          {/* Finish Line */}
-          <Flag className="absolute top-1/2 right-4 -translate-y-1/2 h-8 w-8 text-green-500 drop-shadow-md" />
+           {/* Start and End markers */}
+           <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
+           <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-card rounded-full border-2 border-foreground" />
         </div>
+         <div className="w-full h-px border-b border-dashed border-gray-600 mt-1" />
+
       </div>
 
       {/* Progress Info */}
-      <Card className="bg-secondary/50 w-full">
-        <div className="p-4 text-center">
-            <p className="font-semibold text-2xl text-primary">{clampedProgress.toFixed(1)}%</p>
-            <p className="text-sm text-muted-foreground mt-1">
-            {current.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} de {target.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </p>
-        </div>
-      </Card>
+      <div className="text-center">
+        <p className="font-semibold text-lg text-foreground">{clampedProgress.toFixed(0)}% da meta</p>
+        <p className="text-sm text-muted-foreground">
+          {formatCurrency(current)} de {formatCurrency(target)}
+        </p>
+         {remaining > 0 && (
+          <p className="text-xs text-yellow-400 mt-2">Faltam {formatCurrency(remaining)} para sua meta</p>
+        )}
+      </div>
 
       <AlertDialog open={showPopup} onOpenChange={setShowPopup}>
         {showPopup && <Confetti />}
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-3xl font-headline text-center text-primary">Meta Atingida!</AlertDialogTitle>
-            <AlertDialogDescription className="text-center pt-2">
+            <AlertDialogDescription className="text-center pt-2 text-muted-foreground">
               Você conseguiu! Continue acelerando para o próximo objetivo!
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={handleClose}>Fechar</AlertDialogAction>
+            <AlertDialogAction onClick={handleClose} className="bg-primary hover:bg-primary/90">Fechar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

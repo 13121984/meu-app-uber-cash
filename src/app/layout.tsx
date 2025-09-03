@@ -5,7 +5,7 @@ import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Rota Certa',
+  title: 'Uber Cash',
   description: 'Seu app para gestão de ganhos como motorista de aplicativo.',
 };
 
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="h-full">
+    <html lang="pt-BR" className="h-full dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -27,7 +27,7 @@ export default function RootLayout({
             <SidebarNav />
           </Sidebar>
           <SidebarInset>
-              <main className="p-4 md:p-6">
+              <main className="p-4 md:p-6 lg:p-8">
                 <div className="md:hidden mb-4">
                   <SidebarTrigger />
                 </div>

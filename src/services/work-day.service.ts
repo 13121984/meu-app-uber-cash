@@ -9,7 +9,7 @@ import { getGoals, Goals } from './goal.service';
 
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
-export type FuelEntry = { id: number; type: string; paid: number; price: number };
+export type FuelEntry = { id:number; type: string; paid: number; price: number };
 
 export interface WorkDay {
   id?: string;
@@ -76,7 +76,7 @@ function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals):
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
 
-    const data: Omit<PeriodData, 'meta' | 'ganhoPorHora' | 'ganhoPorKm' | 'earningsByCategory' | 'tripsByCategory'> = {
+    const data = {
         totalGanho: 0,
         totalLucro: 0,
         totalCombustivel: 0,
@@ -85,12 +85,12 @@ function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals):
         totalKm: 0,
         totalHoras: 0,
         totalViagens: 0,
+        totalLitros: 0,
     };
 
     workDays.forEach(day => {
         const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
         const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-        // O lucro não considera mais a manutenção
         const dailyProfit = dailyEarnings - dailyFuel;
 
         data.totalGanho += dailyEarnings;
@@ -98,6 +98,12 @@ function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals):
         data.totalLucro += dailyProfit;
         data.totalKm += day.km;
         data.totalHoras += day.hours;
+        
+        day.fuelEntries.forEach(fuel => {
+            if (fuel.price > 0) {
+                data.totalLitros += fuel.paid / fuel.price;
+            }
+        });
         
         day.earnings.forEach(earning => {
             const currentTotal = earningsByCategoryMap.get(earning.category) || 0;
@@ -122,6 +128,7 @@ function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals):
         ...data,
         ganhoPorHora: data.totalHoras > 0 ? data.totalGanho / data.totalHoras : 0,
         ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.totalKm : 0,
+        eficiencia: data.totalKm > 0 && data.totalLitros > 0 ? data.totalKm / data.totalLitros : 0,
         earningsByCategory,
         tripsByCategory,
         meta: { target: targetGoal, period: period },

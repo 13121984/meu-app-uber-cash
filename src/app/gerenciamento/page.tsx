@@ -9,7 +9,7 @@ export default async function GerenciamentoPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Histórico de Registros</h1>
+        <h1 className="text-3xl font-bold font-headline">Gerenciar Ganhos</h1>
         <p className="text-muted-foreground">Visualize e edite seus dias de trabalho passados.</p>
       </div>
       <HistoryClient data={workDays} />

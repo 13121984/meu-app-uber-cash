@@ -1,42 +1,33 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 type StatsCardProps = {
   title: string
   value: number
+  subtitle: string
   icon: React.ElementType
   isCurrency?: boolean
   unit?: string
   precision?: number
-  positive?: boolean
-  negative?: boolean
-  color?: string
+  iconBg?: string
+  iconColor?: string
 }
 
-export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precision = 0, positive, negative, color }: StatsCardProps) {
+export function StatsCard({ title, value, subtitle, icon: Icon, isCurrency, unit, precision = 0, iconBg, iconColor }: StatsCardProps) {
   const formattedValue = isCurrency
     ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
-    : value.toFixed(precision)
+    : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={cn(
-          "h-4 w-4 text-muted-foreground",
-          positive && "text-green-600",
-          negative && "text-red-600",
-          color
-        )} />
-      </CardHeader>
-      <CardContent>
-        <div className={cn(
-          "text-2xl font-bold",
-          positive && "text-green-600 dark:text-green-500",
-          negative && "text-red-600 dark:text-red-500"
-        )}>
-          {formattedValue} {unit && !isCurrency && <span className="text-base font-normal text-muted-foreground">{unit}</span>}
+    <Card className="bg-card border-border">
+      <CardContent className="p-4 flex flex-col gap-4">
+        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", iconBg)}>
+            <Icon className={cn("h-5 w-5", iconColor)} />
+        </div>
+        <div>
+            <p className="text-2xl font-bold">{formattedValue}</p>
+            <p className="text-sm text-muted-foreground">{title}{subtitle}</p>
         </div>
       </CardContent>
     </Card>
