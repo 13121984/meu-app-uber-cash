@@ -42,7 +42,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const data = initialData[period]
 
   const stats = [
-    { title: "Total Ganho", value: data.totalGanho, icon: DollarSign, isCurrency: true },
+    { title: "Total Ganho", value: data.totalGanho, icon: DollarSign, isCurrency: true, positive: true },
     { title: "Total Lucro", value: data.totalLucro, icon: DollarSign, isCurrency: true, positive: true },
     { title: "Total Combustível", value: data.totalCombustivel, icon: Fuel, isCurrency: true, negative: true },
     { title: "Total KM", value: data.totalKm, icon: Map, unit: "km" },

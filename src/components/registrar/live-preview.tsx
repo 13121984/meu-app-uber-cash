@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import type { Earning, FuelEntry } from './registration-wizard';
+import { cn } from '@/lib/utils';
 
 interface LivePreviewProps {
   data: {
@@ -16,10 +17,10 @@ interface LivePreviewProps {
   };
 }
 
-const StatItem = ({ label, value }: { label: string; value: string }) => (
+const StatItem = ({ label, value, className }: { label: string; value: string, className?: string }) => (
   <div className="flex justify-between items-center text-sm">
     <p className="text-muted-foreground">{label}</p>
-    <p className="font-semibold">{value}</p>
+    <p className={cn("font-semibold", className)}>{value}</p>
   </div>
 );
 
@@ -63,16 +64,16 @@ export function LivePreview({ data }: LivePreviewProps) {
         <CardTitle className="font-headline">Prévia dos Cálculos</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="bg-primary/10 p-4 rounded-lg text-center">
-            <p className="text-sm text-primary font-semibold">Lucro Líquido</p>
-            <p className="text-3xl font-bold text-primary">{formatCurrency(calculations.lucroLiquido)}</p>
+        <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg text-center">
+            <p className="text-sm text-green-700 dark:text-green-400 font-semibold">Lucro Líquido</p>
+            <p className="text-3xl font-bold text-green-600 dark:text-green-500">{formatCurrency(calculations.lucroLiquido)}</p>
         </div>
 
         <Separator />
         
-        <StatItem label="Total Ganhos" value={formatCurrency(calculations.totalGanhos)} />
-        <StatItem label="Gastos (Combustível)" value={formatCurrency(calculations.totalCombustiveis)} />
-        <StatItem label="Gastos (Extras)" value={formatCurrency(calculations.totalDespesasExtras)} />
+        <StatItem label="Total Ganhos" value={formatCurrency(calculations.totalGanhos)} className="text-green-600 dark:text-green-500" />
+        <StatItem label="Gastos (Combustível)" value={formatCurrency(calculations.totalCombustiveis)} className="text-red-600 dark:text-red-500" />
+        <StatItem label="Gastos (Extras)" value={formatCurrency(calculations.totalDespesasExtras)} className="text-red-600 dark:text-red-500" />
         
         <Separator />
         
@@ -82,13 +83,13 @@ export function LivePreview({ data }: LivePreviewProps) {
         
         <Separator />
         
-        <StatItem label="Ganho/Hora (Bruto)" value={formatCurrency(calculations.ganhoPorHoraBruto)} />
-        <StatItem label="Ganho/Hora (Líquido)" value={formatCurrency(calculations.ganhoPorHoraLiquido)} />
+        <StatItem label="Ganho/Hora (Bruto)" value={formatCurrency(calculations.ganhoPorHoraBruto)} className="text-green-600 dark:text-green-500" />
+        <StatItem label="Ganho/Hora (Líquido)" value={formatCurrency(calculations.ganhoPorHoraLiquido)} className="text-green-600 dark:text-green-500" />
 
         <Separator />
 
-        <StatItem label="Ganho/KM (Bruto)" value={formatCurrency(calculations.ganhoPorKmBruto)} />
-        <StatItem label="Ganho/KM (Líquido)" value={formatCurrency(calculations.ganhoPorKmLiquido)} />
+        <StatItem label="Ganho/KM (Bruto)" value={formatCurrency(calculations.ganhoPorKmBruto)} className="text-green-600 dark:text-green-500" />
+        <StatItem label="Ganho/KM (Líquido)" value={formatCurrency(calculations.ganhoPorKmLiquido)} className="text-green-600 dark:text-green-500" />
       </CardContent>
     </Card>
   );
