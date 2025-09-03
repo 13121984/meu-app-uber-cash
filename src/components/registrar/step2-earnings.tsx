@@ -2,7 +2,7 @@
 "use client";
 
 import { Dispatch } from 'react';
-import { PlusCircle, Trash2, Car, DollarSign, SackDollar } from 'lucide-react';
+import { PlusCircle, Trash2, Car, DollarSign, CircleDollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,7 +44,7 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold font-headline flex items-center gap-2">
-            <SackDollar className="h-6 w-6 text-green-600"/>
+            <CircleDollarSign className="h-6 w-6 text-green-600"/>
             <span>Ganhos do Dia</span>
         </h2>
         <Button size="sm" onClick={handleAddEarning}>
