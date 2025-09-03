@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -15,7 +16,7 @@ type StatsCardProps = {
 
 export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precision = 0, positive, negative, color }: StatsCardProps) {
   const formattedValue = isCurrency
-    ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+    ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
     : value.toFixed(precision)
 
   return (

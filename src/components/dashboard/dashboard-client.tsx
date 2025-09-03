@@ -2,15 +2,26 @@
 "use client"
 
 import React, { useState } from "react"
-import { DollarSign, Fuel, Gauge, Hourglass, Map, PlusCircle, Wrench, CalendarDays } from "lucide-react"
+import { DollarSign, Fuel, Map, Hourglass, CalendarDays, TrendingUp, Clock, PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatsCard } from "./stats-card"
 import { GoalProgress } from "./goal-progress"
 import { EarningsPieChart } from "./earnings-chart"
+import { EarningsBarChart } from "./earnings-bar-chart"
+import { TripsBarChart } from "./trips-bar-chart"
 import Link from "next/link"
-import { WorkDay } from "@/services/work-day.service"
+
+export interface EarningsByCategory {
+    name: string;
+    total: number;
+}
+
+export interface TripsByCategory {
+    name: string;
+    total: number;
+}
 
 export interface PeriodData {
   totalGanho: number;
@@ -20,7 +31,11 @@ export interface PeriodData {
   diasTrabalhados: number;
   totalKm: number;
   totalHoras: number;
+  ganhoPorHora: number;
+  ganhoPorKm: number;
   totalViagens: number;
+  earningsByCategory: EarningsByCategory[];
+  tripsByCategory: TripsByCategory[];
   meta: { target: number; period: string };
 }
 
@@ -48,11 +63,13 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     { title: "Total KM", value: data.totalKm, icon: Map, unit: "km", color: "text-blue-500" },
     { title: "Total Horas", value: data.totalHoras, icon: Hourglass, unit: "h", color: "text-amber-500" },
     { title: "Dias Trabalhados", value: data.diasTrabalhados, icon: CalendarDays, color: "text-indigo-500" },
+    { title: "Ganho/Hora", value: data.ganhoPorHora, icon: Clock, isCurrency: true, color: "text-purple-500", precision: 2 },
+    { title: "Ganho/KM", value: data.ganhoPorKm, icon: TrendingUp, isCurrency: true, color: "text-pink-500", precision: 2 },
   ]
 
   const progress = data.meta.target > 0 ? (data.totalLucro / data.meta.target) * 100 : 0;
   
-  const chartData = [
+  const pieChartData = [
     { name: 'Lucro Líquido', value: data.totalLucro, fill: 'hsl(var(--chart-1))', totalGanho: data.totalGanho },
     { name: 'Combustível', value: data.totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho: data.totalGanho },
   ].filter(item => item.value > 0);
@@ -83,7 +100,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         <TabsContent value="mes" />
       </Tabs>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <StatsCard key={stat.title} {...stat} />
         ))}
@@ -95,8 +112,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             <CardTitle className="font-headline">Composição dos Ganhos</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            {chartData.length > 0 ? (
-                <EarningsPieChart data={chartData} />
+            {pieChartData.length > 0 ? (
+                <EarningsPieChart data={pieChartData} />
             ) : (
                 <div className="flex items-center justify-center h-[350px] text-muted-foreground">
                     Sem dados para exibir no gráfico.
@@ -110,6 +127,37 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           </CardHeader>
           <CardContent>
             <GoalProgress progress={progress} target={data.meta.target} current={data.totalLucro} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+         <Card>
+          <CardHeader>
+            <CardTitle className="font-headline">Ganhos por Plataforma</CardTitle>
+          </CardHeader>
+          <CardContent>
+             {data.earningsByCategory.length > 0 ? (
+                <EarningsBarChart data={data.earningsByCategory} />
+            ) : (
+                <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                    Sem dados de ganhos para exibir.
+                </div>
+            )}
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader>
+            <CardTitle className="font-headline">Viagens por Plataforma</CardTitle>
+          </CardHeader>
+          <CardContent>
+             {data.tripsByCategory.length > 0 ? (
+                <TripsBarChart data={data.tripsByCategory} />
+            ) : (
+                <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                    Sem dados de viagens para exibir.
+                </div>
+            )}
           </CardContent>
         </Card>
       </div>

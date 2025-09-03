@@ -4,7 +4,7 @@
 import { collection, addDoc, Timestamp, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval } from 'date-fns';
-import { PeriodData } from "@/components/dashboard/dashboard-client";
+import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -60,13 +60,15 @@ export async function getWorkDays(): Promise<WorkDay[]> {
         return workDays;
     } catch (error) {
         console.error("Error getting documents: ", error);
-        // Retorna um array vazio em caso de erro para não quebrar a UI
         return [];
     }
 }
 
 function calculatePeriodData(workDays: WorkDay[], period: string): PeriodData {
-    const data: PeriodData = {
+    const earningsByCategoryMap = new Map<string, number>();
+    const tripsByCategoryMap = new Map<string, number>();
+
+    const data: Omit<PeriodData, 'meta' | 'ganhoPorHora' | 'ganhoPorKm' | 'earningsByCategory' | 'tripsByCategory'> = {
         totalGanho: 0,
         totalLucro: 0,
         totalCombustivel: 0,
@@ -75,27 +77,43 @@ function calculatePeriodData(workDays: WorkDay[], period: string): PeriodData {
         totalKm: 0,
         totalHoras: 0,
         totalViagens: 0,
-        meta: { target: 0, period: period }, 
     };
 
     workDays.forEach(day => {
         const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
         const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const dailyExtras = day.maintenance.amount;
-        // Lucro agora é apenas Ganhos - Combustível
         const dailyProfit = dailyEarnings - dailyFuel;
-        const dailyTrips = day.earnings.reduce((sum, e) => sum + e.trips, 0);
 
         data.totalGanho += dailyEarnings;
         data.totalCombustivel += dailyFuel;
-        data.totalExtras += dailyExtras; // Ainda rastreamos, mas não usamos no lucro
+        data.totalExtras += dailyExtras;
         data.totalLucro += dailyProfit;
         data.totalKm += day.km;
         data.totalHoras += day.hours;
-        data.totalViagens += dailyTrips;
+        
+        day.earnings.forEach(earning => {
+            const currentTotal = earningsByCategoryMap.get(earning.category) || 0;
+            earningsByCategoryMap.set(earning.category, currentTotal + earning.amount);
+            
+            const currentTrips = tripsByCategoryMap.get(earning.category) || 0;
+            tripsByCategoryMap.set(earning.category, currentTrips + earning.trips);
+            
+            data.totalViagens += earning.trips;
+        });
     });
 
-    return data;
+    const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
+    const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
+
+    return {
+        ...data,
+        ganhoPorHora: data.totalHoras > 0 ? data.totalGanho / data.totalHoras : 0,
+        ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.totalKm : 0,
+        earningsByCategory,
+        tripsByCategory,
+        meta: { target: 0, period: period }, 
+    };
 }
 
 
@@ -103,7 +121,6 @@ export async function getDashboardData() {
     const allWorkDays = await getWorkDays();
     const now = new Date();
 
-    // Filtros de datas
     const todayWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfDay(now), end: endOfDay(now) }));
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
