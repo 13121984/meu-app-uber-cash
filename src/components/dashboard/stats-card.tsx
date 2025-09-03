@@ -26,8 +26,8 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
       <CardContent>
         <div className={cn(
           "text-2xl font-bold",
-          positive && "text-green-500",
-          negative && "text-destructive"
+          positive && "text-green-600 dark:text-green-500",
+          negative && "text-red-600 dark:text-red-500"
         )}>
           {formattedValue} {unit && !isCurrency && <span className="text-base font-normal text-muted-foreground">{unit}</span>}
         </div>

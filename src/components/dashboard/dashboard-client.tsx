@@ -1,20 +1,21 @@
 "use client"
 
 import React, { useState } from "react"
-import { DollarSign, Fuel, Gauge, Hourglass, Map, PlusCircle } from "lucide-react"
+import { DollarSign, Fuel, Gauge, Hourglass, Map, PlusCircle, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatsCard } from "./stats-card"
 import { GoalProgress } from "./goal-progress"
-import { EarningsChart } from "./earnings-chart"
+import { EarningsPieChart } from "./earnings-chart"
 import Link from "next/link"
 
 const mockData = {
   hoje: {
     totalGanho: 150.75,
-    totalLucro: 95.25,
+    totalLucro: 85.25,
     totalCombustivel: 55.50,
+    totalExtras: 10.00,
     diasTrabalhados: 1,
     totalKm: 120,
     totalHoras: 6.5,
@@ -23,8 +24,9 @@ const mockData = {
   },
   semana: {
     totalGanho: 850.40,
-    totalLucro: 550.90,
+    totalLucro: 510.90,
     totalCombustivel: 299.50,
+    totalExtras: 40.00,
     diasTrabalhados: 5,
     totalKm: 750,
     totalHoras: 40,
@@ -33,8 +35,9 @@ const mockData = {
   },
   mes: {
     totalGanho: 3800.00,
-    totalLucro: 2600.50,
+    totalLucro: 2450.50,
     totalCombustivel: 1199.50,
+    totalExtras: 150.00,
     diasTrabalhados: 22,
     totalKm: 3100,
     totalHoras: 180,
@@ -53,12 +56,18 @@ export function DashboardClient() {
     { title: "Total Ganho", value: data.totalGanho, icon: DollarSign, isCurrency: true },
     { title: "Total Lucro", value: data.totalLucro, icon: DollarSign, isCurrency: true, positive: true },
     { title: "Total Combustível", value: data.totalCombustivel, icon: Fuel, isCurrency: true, negative: true },
+    { title: "Despesas Extras", value: data.totalExtras, icon: Wrench, isCurrency: true, negative: true },
     { title: "Total KM", value: data.totalKm, icon: Map, unit: "km" },
     { title: "Total Horas", value: data.totalHoras, icon: Hourglass, unit: "h" },
-    { title: "Eficiência", value: data.totalKm / (data.totalCombustivel / 5), icon: Gauge, unit: "km/l", precision: 2 },
   ]
 
   const progress = (data.totalLucro / data.meta.target) * 100
+  
+  const chartData = [
+    { name: 'Lucro', value: data.totalLucro, fill: 'hsl(var(--chart-1))', totalGanho: data.totalGanho },
+    { name: 'Combustível', value: data.totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho: data.totalGanho },
+    { name: 'Extras', value: data.totalExtras, fill: 'hsl(var(--chart-3))', totalGanho: data.totalGanho },
+  ]
 
   return (
     <div className="space-y-6">
@@ -95,10 +104,10 @@ export function DashboardClient() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle className="font-headline">Ganhos vs Despesas</CardTitle>
+            <CardTitle className="font-headline">Composição dos Ganhos</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <EarningsChart />
+            <EarningsPieChart data={chartData} />
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">
