@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { DollarSign, Fuel, Gauge, Hourglass, Map, PlusCircle, Wrench } from "lucide-react"
+import { DollarSign, Fuel, Gauge, Hourglass, Map, PlusCircle, Wrench, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -47,6 +47,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     { title: "Total Combustível", value: data.totalCombustivel, icon: Fuel, isCurrency: true, negative: true },
     { title: "Total KM", value: data.totalKm, icon: Map, unit: "km" },
     { title: "Total Horas", value: data.totalHoras, icon: Hourglass, unit: "h" },
+    { title: "Dias Trabalhados", value: data.diasTrabalhados, icon: CalendarDays },
   ]
 
   const progress = data.meta.target > 0 ? (data.totalLucro / data.meta.target) * 100 : 0;
