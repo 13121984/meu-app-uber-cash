@@ -73,7 +73,7 @@ export function GoalForm({ initialData }: GoalFormProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-6 w-6" />
+            <Target className="h-6 w-6 text-primary" />
             <span>Defina suas Metas de Lucro</span>
           </CardTitle>
           <CardDescription>
