@@ -1,3 +1,4 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -47,8 +48,7 @@ export const columns: ColumnDef<WorkDay>[] = [
     cell: ({ row }) => {
       const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
       const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-      const maintenance = row.original.maintenance.amount;
-      const profit = earnings - fuel - maintenance;
+      const profit = earnings - fuel;
       return <div className="text-green-600 font-semibold">{formatCurrency(profit)}</div>
     }
   },
@@ -62,12 +62,10 @@ export const columns: ColumnDef<WorkDay>[] = [
   },
    {
     accessorKey: "totalGastos",
-    header: "Total Gastos",
+    header: "Gastos (Combustível)",
     cell: ({ row }) => {
       const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-      const maintenance = row.original.maintenance.amount;
-      const expenses = fuel + maintenance;
-      return <div className="text-red-600">{formatCurrency(expenses)}</div>
+      return <div className="text-red-600">{formatCurrency(fuel)}</div>
     }
   },
   {

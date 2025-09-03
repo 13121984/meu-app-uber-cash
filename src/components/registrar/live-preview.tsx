@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from 'react';
@@ -28,7 +29,8 @@ export function LivePreview({ data }: LivePreviewProps) {
     const totalCombustiveis = data.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
     const totalDespesasExtras = data.maintenance.amount || 0;
     const totalGastos = totalCombustiveis + totalDespesasExtras;
-    const lucroLiquido = totalGanhos - totalGastos;
+    // Lucro Líquido para o preview agora também reflete a nova regra (sem manutenção)
+    const lucroLiquido = totalGanhos - totalCombustiveis;
     const totalViagens = data.earnings.reduce((sum, e) => sum + e.trips, 0);
     const totalLitros = data.fuelEntries.reduce((sum, f) => sum + (f.price > 0 ? f.paid / f.price : 0), 0);
     const eficiencia = data.km > 0 && totalLitros > 0 ? data.km / totalLitros : 0;
@@ -69,8 +71,8 @@ export function LivePreview({ data }: LivePreviewProps) {
         <Separator />
         
         <StatItem label="Total Ganhos" value={formatCurrency(calculations.totalGanhos)} />
-        <StatItem label="Total Gastos" value={formatCurrency(calculations.totalGastos)} />
-        <StatItem label="Total Desp. Extras" value={formatCurrency(calculations.totalDespesasExtras)} />
+        <StatItem label="Gastos (Combustível)" value={formatCurrency(calculations.totalCombustiveis)} />
+        <StatItem label="Gastos (Extras)" value={formatCurrency(calculations.totalDespesasExtras)} />
         
         <Separator />
         

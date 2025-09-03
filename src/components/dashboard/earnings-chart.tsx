@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Pie, PieChart, ResponsiveContainer, Cell, Legend, Tooltip } from "recharts"
@@ -8,26 +9,30 @@ interface EarningsPieChartProps {
     name: string;
     value: number;
     fill: string;
+    totalGanho: number;
   }[];
 }
 
 const chartConfig = {
   lucro: {
-    label: "Lucro",
+    label: "Lucro Líquido",
     color: "hsl(var(--chart-1))",
   },
   combustivel: {
     label: "Combustível",
     color: "hsl(var(--chart-2))",
   },
-  extras: {
-    label: "Extras",
-    color: "hsl(var(--chart-3))",
-  },
 } satisfies ChartConfig
 
 export function EarningsPieChart({ data }: EarningsPieChartProps) {
-  const totalValue = data.reduce((acc, entry) => acc + entry.value, 0);
+  const totalGanho = data[0]?.totalGanho || 0;
+  
+  // O gráfico agora é baseado no Ganho Bruto, não na soma das partes
+  const chartData = data.map(item => ({
+    ...item,
+    // O valor de cada fatia continua o mesmo, mas o percentual será calculado sobre o totalGanho
+  }));
+
 
   return (
     <ChartContainer config={chartConfig} className="h-[350px] w-full">
@@ -37,9 +42,9 @@ export function EarningsPieChart({ data }: EarningsPieChartProps) {
             cursor={{ fill: 'hsl(var(--muted))' }}
             content={<ChartTooltipContent 
               formatter={(value, name, props) => {
-                const totalGanho = props.payload.totalGanho;
-                if (totalGanho > 0) {
-                  return `${(value as number).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${((value as number) / totalGanho * 100).toFixed(1)}%)`
+                const totalGanhoBruto = props.payload?.totalGanho;
+                if (totalGanhoBruto > 0) {
+                  return `${(value as number).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${((value as number) / totalGanhoBruto * 100).toFixed(1)}%)`
                 }
                 return `${(value as number).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
               }}
@@ -47,7 +52,7 @@ export function EarningsPieChart({ data }: EarningsPieChartProps) {
             />}
           />
           <Pie
-            data={data}
+            data={chartData}
             dataKey="value"
             nameKey="name"
             cx="50%"
@@ -61,16 +66,20 @@ export function EarningsPieChart({ data }: EarningsPieChartProps) {
               const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
               const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
 
-              if ((percent * 100) < 5) return null;
+              if (totalGanho <= 0) return null;
+              
+              const currentPercent = (data[index].value / totalGanho) * 100;
+
+              if (currentPercent < 5) return null;
 
               return (
                 <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="text-xs font-bold">
-                  {`${(percent * 100).toFixed(0)}%`}
+                  {`${currentPercent.toFixed(0)}%`}
                 </text>
               );
             }}
           >
-            {data.map((entry) => (
+            {chartData.map((entry) => (
               <Cell key={`cell-${entry.name}`} fill={entry.fill} />
             ))}
           </Pie>

@@ -82,12 +82,13 @@ function calculatePeriodData(workDays: WorkDay[], period: string): PeriodData {
         const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
         const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const dailyExtras = day.maintenance.amount;
-        const dailyProfit = dailyEarnings - dailyFuel - dailyExtras;
+        // Lucro agora é apenas Ganhos - Combustível
+        const dailyProfit = dailyEarnings - dailyFuel;
         const dailyTrips = day.earnings.reduce((sum, e) => sum + e.trips, 0);
 
         data.totalGanho += dailyEarnings;
         data.totalCombustivel += dailyFuel;
-        data.totalExtras += dailyExtras;
+        data.totalExtras += dailyExtras; // Ainda rastreamos, mas não usamos no lucro
         data.totalLucro += dailyProfit;
         data.totalKm += day.km;
         data.totalHoras += day.hours;
@@ -110,11 +111,6 @@ export async function getDashboardData() {
     const hoje = calculatePeriodData(todayWorkDays, "diária");
     const semana = calculatePeriodData(thisWeekWorkDays, "semanal");
     const mes = calculatePeriodData(thisMonthWorkDays, "mensal");
-
-    // Futuramente, as metas virão do banco de dados.
-    // hoje.meta.target = 200;
-    // semana.meta.target = 1000;
-    // mes.meta.target = 4000;
 
     return { hoje, semana, mes };
 }

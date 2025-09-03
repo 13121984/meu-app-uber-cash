@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from "react"
@@ -44,7 +45,6 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     { title: "Total Ganho", value: data.totalGanho, icon: DollarSign, isCurrency: true },
     { title: "Total Lucro", value: data.totalLucro, icon: DollarSign, isCurrency: true, positive: true },
     { title: "Total Combustível", value: data.totalCombustivel, icon: Fuel, isCurrency: true, negative: true },
-    { title: "Despesas Extras", value: data.totalExtras, icon: Wrench, isCurrency: true, negative: true },
     { title: "Total KM", value: data.totalKm, icon: Map, unit: "km" },
     { title: "Total Horas", value: data.totalHoras, icon: Hourglass, unit: "h" },
   ]
@@ -52,9 +52,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const progress = data.meta.target > 0 ? (data.totalLucro / data.meta.target) * 100 : 0;
   
   const chartData = [
-    { name: 'Lucro', value: data.totalLucro, fill: 'hsl(var(--chart-1))', totalGanho: data.totalGanho },
+    { name: 'Lucro Líquido', value: data.totalLucro, fill: 'hsl(var(--chart-1))', totalGanho: data.totalGanho },
     { name: 'Combustível', value: data.totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho: data.totalGanho },
-    { name: 'Extras', value: data.totalExtras, fill: 'hsl(var(--chart-3))', totalGanho: data.totalGanho },
   ].filter(item => item.value > 0);
 
   return (
