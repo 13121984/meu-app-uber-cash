@@ -127,7 +127,7 @@ export function GoalForm({ initialData }: GoalFormProps) {
             <Label htmlFor="monthly">Meta Mensal</Label>
              <div className="relative">
                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Controller-
+                <Controller
                     name="monthly"
                     control={control}
                     render={({ field }) => (
