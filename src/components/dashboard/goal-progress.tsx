@@ -23,15 +23,17 @@ type GoalProgressProps = {
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const [showConfetti, setShowConfetti] = useState(false);
+  const [goalCompleted, setGoalCompleted] = useState(false);
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
 
   useEffect(() => {
     // Ativa o pop-up apenas uma vez quando a meta é atingida
-    if (isComplete && !showConfetti) {
+    if (isComplete && !goalCompleted) {
       setShowConfetti(true);
+      setGoalCompleted(true); // Marca que a meta foi completada para não mostrar de novo
     }
-  }, [isComplete, showConfetti]);
+  }, [isComplete, goalCompleted]);
 
   const handleClose = () => {
     setShowConfetti(false);
