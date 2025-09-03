@@ -1,8 +1,7 @@
 "use client"
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 
 const chartData = [
   { date: "Seg", earnings: 186, expenses: 80 },
@@ -14,31 +13,44 @@ const chartData = [
   { date: "Dom", earnings: 350, expenses: 50 },
 ]
 
+const chartConfig = {
+  earnings: {
+    label: "Ganhos",
+    color: "hsl(var(--primary))",
+  },
+  expenses: {
+    label: "Despesas",
+    color: "hsl(var(--accent))",
+  },
+} satisfies ChartConfig
+
 export function EarningsChart() {
   return (
     <div className="h-[350px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData}>
-          <CartesianGrid vertical={false} strokeDasharray="3 3" />
-          <XAxis
-            dataKey="date"
-            stroke="#888888"
-            fontSize={12}
-            tickLine={false}
-            axisLine={false}
-          />
-          <YAxis
-            stroke="#888888"
-            fontSize={12}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(value) => `R$${value}`}
-          />
-          <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
-          <Bar dataKey="earnings" fill="hsl(var(--primary))" name="Ganhos" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="expenses" fill="hsl(var(--accent))" name="Despesas" radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+        <ChartContainer config={chartConfig} className="h-full w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} accessibilityLayer>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="date"
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => `R$${value}`}
+              />
+              <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
+              <Bar dataKey="earnings" fill="var(--color-earnings)" name="Ganhos" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expenses" fill="var(--color-expenses)" name="Despesas" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+      </ChartContainer>
     </div>
   )
 }
