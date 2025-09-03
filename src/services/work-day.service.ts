@@ -3,9 +3,10 @@
 
 import { collection, addDoc, Timestamp, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory, MaintenanceData } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
+import type { ReportFilterValues } from '@/components/relatorios/reports-filter';
 
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
@@ -22,6 +23,22 @@ export interface WorkDay {
     description: string;
     amount: number;
   };
+}
+
+export interface FuelExpense {
+    type: string;
+    total: number;
+}
+
+export interface ReportData {
+  totalGanho: number;
+  totalLucro: number;
+  totalGastos: number;
+  diasTrabalhados: number;
+  profitComposition: { name: string; value: number; fill: string; totalGanho: number; }[];
+  earningsByCategory: EarningsByCategory[];
+  tripsByCategory: TripsByCategory[];
+  fuelExpenses: FuelExpense[];
 }
 
 export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
@@ -53,14 +70,11 @@ export async function getWorkDays(): Promise<WorkDay[]> {
         const workDays: WorkDay[] = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            // Converte o Timestamp do Firestore para um objeto Date do JavaScript
-            // Isso evita o erro de serialização entre Server e Client Components
             const workDayData = {
                 id: doc.id,
                 ...data,
                 date: (data.date as Timestamp).toDate(),
             };
-            // O campo 'createdAt' não é usado na UI, então podemos removê-lo para segurança.
             delete (workDayData as any).createdAt;
             
             workDays.push(workDayData as WorkDay);
@@ -161,4 +175,95 @@ export async function getDashboardData() {
     const mes = calculatePeriodData(thisMonthWorkDays, "mensal", goals);
 
     return { hoje, semana, mes };
+}
+
+
+// Nova função para a página de Relatórios
+export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilterValues): Promise<ReportData> {
+  const now = new Date();
+  let filteredDays: WorkDay[] = [];
+
+  switch (filters.type) {
+    case 'all':
+      filteredDays = allWorkDays;
+      break;
+    case 'today':
+      filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start: startOfDay(now), end: endOfDay(now) }));
+      break;
+    case 'thisWeek':
+      filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start: startOfWeek(now), end: endOfWeek(now) }));
+      break;
+    case 'thisMonth':
+      filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start: startOfMonth(now), end: endOfMonth(now) }));
+      break;
+    case 'specificMonth':
+      if (filters.year !== undefined && filters.month !== undefined) {
+        const start = startOfMonth(new Date(filters.year, filters.month));
+        const end = endOfMonth(new Date(filters.year, filters.month));
+        filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start, end }));
+      }
+      break;
+    case 'specificYear':
+      if (filters.year !== undefined) {
+        const start = startOfYear(new Date(filters.year, 0));
+        const end = endOfYear(new Date(filters.year, 0));
+        filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start, end }));
+      }
+      break;
+    case 'custom':
+       if (filters.dateRange?.from) {
+        const fromDate = startOfDay(filters.dateRange.from);
+        const toDate = filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from);
+        filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, { start: fromDate, end: toDate }));
+      }
+      break;
+  }
+
+  // --- Cálculos ---
+  const earningsByCategoryMap = new Map<string, number>();
+  const tripsByCategoryMap = new Map<string, number>();
+  const fuelExpensesMap = new Map<string, number>();
+
+  let totalGanho = 0;
+  let totalCombustivel = 0;
+  let totalExtras = 0;
+
+  filteredDays.forEach(day => {
+    totalGanho += day.earnings.reduce((sum, e) => sum + e.amount, 0);
+    totalCombustivel += day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+    totalExtras += day.maintenance.amount;
+
+    day.earnings.forEach(earning => {
+        earningsByCategoryMap.set(earning.category, (earningsByCategoryMap.get(earning.category) || 0) + earning.amount);
+        tripsByCategoryMap.set(earning.category, (tripsByCategoryMap.get(earning.category) || 0) + earning.trips);
+    });
+
+    day.fuelEntries.forEach(fuel => {
+        fuelExpensesMap.set(fuel.type, (fuelExpensesMap.get(fuel.type) || 0) + fuel.paid);
+    });
+  });
+
+  const totalGastos = totalCombustivel + totalExtras;
+  const totalLucro = totalGanho - totalCombustivel; // Mantendo a regra de lucro (sem descontar manutenção)
+
+  const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
+  const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
+  const fuelExpenses: FuelExpense[] = Array.from(fuelExpensesMap, ([type, total]) => ({ type, total }));
+
+  const profitComposition = [
+    { name: 'Lucro Líquido', value: totalLucro, fill: 'hsl(var(--chart-1))', totalGanho },
+    { name: 'Combustível', value: totalCombustivel, fill: 'hsl(var(--chart-5))', totalGanho },
+    // { name: 'Manutenção', value: totalExtras, fill: 'hsl(var(--chart-3))' },
+  ];
+  
+  return {
+    totalGanho,
+    totalLucro,
+    totalGastos,
+    diasTrabalhados: filteredDays.length,
+    profitComposition,
+    earningsByCategory,
+    tripsByCategory,
+    fuelExpenses,
+  };
 }
