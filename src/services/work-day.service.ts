@@ -53,11 +53,17 @@ export async function getWorkDays(): Promise<WorkDay[]> {
         const workDays: WorkDay[] = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            workDays.push({
+            // Converte o Timestamp do Firestore para um objeto Date do JavaScript
+            // Isso evita o erro de serialização entre Server e Client Components
+            const workDayData = {
                 id: doc.id,
                 ...data,
                 date: (data.date as Timestamp).toDate(),
-            } as WorkDay);
+            };
+            // O campo 'createdAt' não é usado na UI, então podemos removê-lo para segurança.
+            delete (workDayData as any).createdAt;
+            
+            workDays.push(workDayData as WorkDay);
         });
         return workDays;
     } catch (error) {
