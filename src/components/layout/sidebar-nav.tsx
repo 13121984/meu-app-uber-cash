@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart, History, LayoutDashboard, PlusCircle, Target, Truck } from "lucide-react"
+import { BarChart, History, LayoutDashboard, PlusCircle, Target, Car } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -31,24 +31,23 @@ export function SidebarNav() {
     <>
       <SidebarHeader>
         <div className="flex items-center gap-2 p-2">
-          <Truck className="w-8 h-8 text-primary" />
+          <Car className="w-8 h-8 text-primary" />
           <h1 className="text-xl font-headline font-semibold text-primary">Rota Certa</h1>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
           {menuItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname === item.href}
-                tooltip={item.label}
-              >
-                <Link href={item.href}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
+             <SidebarMenuItem key={item.href}>
+              <Link href={item.href} passHref>
+                <SidebarMenuButton
+                  isActive={pathname === item.href}
+                  tooltip={item.label}
+                >
+                    <item.icon />
+                    <span>{item.label}</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
