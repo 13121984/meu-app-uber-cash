@@ -1,23 +1,29 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Download } from 'lucide-react';
+import { Calendar as CalendarIcon, Download, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { format, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
+import { z } from 'zod';
+import { exportToSheet } from '@/ai/flows/export-flow';
+import { toast } from '@/hooks/use-toast';
 
-export interface ReportFilterValues {
-    type: 'all' | 'today' | 'thisWeek' | 'thisMonth' | 'specificMonth' | 'specificYear' | 'custom';
-    year?: number;
-    month?: number;
-    dateRange?: DateRange;
-}
+export const ReportFilterValuesSchema = z.object({
+    type: z.enum(['all', 'today', 'thisWeek', 'thisMonth', 'specificMonth', 'specificYear', 'custom']),
+    year: z.number().optional(),
+    month: z.number().optional(),
+    dateRange: z.custom<DateRange>().optional(),
+});
+
+
+export type ReportFilterValues = z.infer<typeof ReportFilterValuesSchema>;
 
 interface ReportsFilterProps {
   onFilterChange: (filters: ReportFilterValues) => void;
@@ -34,9 +40,9 @@ export function ReportsFilter({ onFilterChange }: ReportsFilterProps) {
   const [year, setYear] = useState<number>(getYear(new Date()));
   const [month, setMonth] = useState<number>(new Date().getMonth());
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [isPending, startTransition] = useTransition();
   
   useEffect(() => {
-    // Mapeia o estado local para o objeto de filtros e chama o callback
     const filters: ReportFilterValues = { type: filterType };
     if (filterType === 'specificMonth') {
         filters.year = year;
@@ -50,8 +56,50 @@ export function ReportsFilter({ onFilterChange }: ReportsFilterProps) {
   }, [filterType, year, month, dateRange, onFilterChange]);
   
   const handleDownload = () => {
-      // Lógica para download (a ser implementada)
-      console.log("Downloading report with filters:", { filterType, year, month, dateRange });
+      startTransition(async () => {
+        try {
+            const filters: ReportFilterValues = { type: filterType };
+            if (filterType === 'specificMonth') {
+                filters.year = year;
+                filters.month = month;
+            } else if (filterType === 'specificYear') {
+                filters.year = year;
+            } else if (filterType === 'custom') {
+                filters.dateRange = dateRange;
+            }
+
+            const result = await exportToSheet({ filters });
+
+            toast({
+                title: (
+                    <div className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <span className="font-bold">Planilha Criada!</span>
+                    </div>
+                ),
+                description: "Sua planilha está pronta para ser visualizada.",
+                action: (
+                    <Button variant="outline" size="sm" asChild>
+                        <a href={result.spreadsheetUrl} target="_blank" rel="noopener noreferrer">
+                            Abrir
+                        </a>
+                    </Button>
+                ),
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: (
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
+                        <span className="font-bold">Erro ao Exportar</span>
+                    </div>
+                ),
+                description: "Não foi possível criar a planilha. Verifique as configurações e tente novamente.",
+                variant: "destructive",
+            });
+        }
+      });
   }
 
   return (
@@ -145,9 +193,9 @@ export function ReportsFilter({ onFilterChange }: ReportsFilterProps) {
 
       <div className="flex-grow"></div>
       
-      <Button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
-          <Download className="mr-2 h-4 w-4" />
-          Baixar
+      <Button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto" disabled={isPending}>
+          {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          {isPending ? 'Exportando...' : 'Baixar'}
       </Button>
 
     </div>

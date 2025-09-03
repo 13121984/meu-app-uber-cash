@@ -58,6 +58,7 @@ export interface ReportData {
   eficiencia: number;
   profitEvolution: ProfitEvolutionData[];
   dailyTrips: DailyTripsData[];
+  rawWorkDays: WorkDay[]; // Adicionado para exportação
 }
 
 export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
@@ -238,7 +239,12 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   }
   
   if (interval) {
-    filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, interval!));
+    // Se allWorkDays estiver vazio, busca todos os dias
+    const sourceDays = allWorkDays.length > 0 ? allWorkDays : await getWorkDays();
+    filteredDays = sourceDays.filter(d => isWithinInterval(d.date, interval!));
+  } else {
+    // Caso especial para 'all' quando não há dados iniciais
+    filteredDays = allWorkDays.length > 0 ? allWorkDays : await getWorkDays();
   }
 
 
@@ -328,5 +334,6 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     eficiencia,
     profitEvolution,
     dailyTrips,
+    rawWorkDays: filteredDays,
   };
 }
