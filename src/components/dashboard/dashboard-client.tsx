@@ -2,12 +2,15 @@
 "use client"
 
 import React, { useState } from "react"
-import { DollarSign, Fuel, Map, Hourglass, TrendingUp, Clock, Car, Settings, Wrench, Zap } from "lucide-react"
+import { DollarSign, Fuel, Map, Hourglass, TrendingUp, Clock, Car, Settings, Wrench, Zap, BarChart3, GripVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatsCard } from "./stats-card"
 import { GoalProgress } from "./goal-progress"
 import { cn } from "@/lib/utils"
+import { EarningsBarChart } from "./earnings-bar-chart"
+import { TripsBarChart } from "./trips-bar-chart"
+import { MaintenanceSummary } from "./maintenance-summary"
 
 export interface EarningsByCategory {
     name: string;
@@ -17,6 +20,11 @@ export interface EarningsByCategory {
 export interface TripsByCategory {
     name: string;
     total: number;
+}
+
+export interface MaintenanceData {
+  totalSpent: number;
+  servicesPerformed: number;
 }
 
 export interface PeriodData {
@@ -33,6 +41,7 @@ export interface PeriodData {
   eficiencia: number;
   earningsByCategory: EarningsByCategory[];
   tripsByCategory: TripsByCategory[];
+  maintenance: MaintenanceData;
   meta: { target: number; period: string };
 }
 
@@ -65,8 +74,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   ]
   const periodMap = {
       hoje: "Hoje",
-      semana: "Semana",
-      mes: "Mês"
+      semana: "Esta Semana",
+      mes: "Este Mês"
   }
   const progress = data.meta.target > 0 ? (data.totalLucro / data.meta.target) * 100 : 0;
   
@@ -95,19 +104,47 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
       <Card className="bg-card border-border">
           <CardHeader>
-              <CardTitle className="font-headline text-lg">Mês Referência</CardTitle>
+              <CardTitle className="font-headline text-lg">Resumo de {periodMap[period]}</CardTitle>
           </CardHeader>
           <CardContent>
             <GoalProgress progress={progress} target={data.meta.target} current={data.totalLucro} />
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-6">
+                {stats.map((stat) => (
+                  <StatsCard key={stat.title} {...stat} />
+                ))}
+              </div>
           </CardContent>
         </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <StatsCard key={stat.title} {...stat} subtitle={`/Este ${periodMap[period]}`} />
-        ))}
-      </div>
+      <MaintenanceSummary data={initialData.mes.maintenance} />
 
+      <Card className="bg-card border-border">
+          <CardHeader>
+              <CardTitle className="font-headline text-lg flex items-center gap-2">
+                <BarChart3 className="w-6 h-6 text-primary" />
+                Análise do Mês
+              </CardTitle>
+              <CardDescription>
+                Detalhes sobre o desempenho das suas corridas durante este mês.
+              </CardDescription>
+          </CardHeader>
+          <CardContent className="grid md:grid-cols-2 gap-8">
+             <div>
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <GripVertical className="w-5 h-5 text-muted-foreground" />
+                  Ganhos por Categoria
+                </h3>
+                <EarningsBarChart data={initialData.mes.earningsByCategory} />
+            </div>
+             <div>
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <GripVertical className="w-5 h-5 text-muted-foreground" />
+                  Viagens por Categoria
+                </h3>
+                <TripsBarChart data={initialData.mes.tripsByCategory} />
+            </div>
+          </CardContent>
+        </Card>
     </div>
   )
 }

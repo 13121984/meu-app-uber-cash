@@ -4,7 +4,7 @@
 import { collection, addDoc, Timestamp, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval } from 'date-fns';
-import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
+import { PeriodData, EarningsByCategory, TripsByCategory, MaintenanceData } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 
 
@@ -88,6 +88,11 @@ function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals):
         totalLitros: 0,
     };
 
+    const maintenanceData: MaintenanceData = {
+        totalSpent: 0,
+        servicesPerformed: 0,
+    };
+
     workDays.forEach(day => {
         const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
         const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
@@ -99,6 +104,11 @@ function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals):
         data.totalKm += day.km;
         data.totalHoras += day.hours;
         
+        if (day.maintenance && day.maintenance.amount > 0) {
+            maintenanceData.totalSpent += day.maintenance.amount;
+            maintenanceData.servicesPerformed += 1;
+        }
+
         day.fuelEntries.forEach(fuel => {
             if (fuel.price > 0) {
                 data.totalLitros += fuel.paid / fuel.price;
@@ -131,6 +141,7 @@ function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals):
         eficiencia: data.totalKm > 0 && data.totalLitros > 0 ? data.totalKm / data.totalLitros : 0,
         earningsByCategory,
         tripsByCategory,
+        maintenance: maintenanceData,
         meta: { target: targetGoal, period: period },
     };
 }
