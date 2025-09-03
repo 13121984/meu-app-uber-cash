@@ -38,8 +38,14 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
 
 export async function getWorkDays(): Promise<WorkDay[]> {
     try {
-        const q = query(collection(db, "workdays"), orderBy("date", "desc"));
+        const workdaysCollection = collection(db, "workdays");
+        const q = query(workdaysCollection, orderBy("date", "desc"));
         const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            return [];
+        }
+
         const workDays: WorkDay[] = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
@@ -52,6 +58,7 @@ export async function getWorkDays(): Promise<WorkDay[]> {
         return workDays;
     } catch (error) {
         console.error("Error getting documents: ", error);
+        // Retorna um array vazio em caso de erro para não quebrar a UI
         return [];
     }
 }
