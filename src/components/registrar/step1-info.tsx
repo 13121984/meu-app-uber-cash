@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Dispatch } from 'react';
@@ -64,7 +65,7 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
         <div>
           <Label htmlFor="km">KM Rodados</Label>
           <div className="relative">
-            <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-500" />
             <Input
               id="km"
               type="number"
@@ -78,7 +79,7 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
         <div>
           <Label htmlFor="hours">Horas Trabalhadas</Label>
            <div className="relative">
-             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500" />
             <Input
               id="hours"
               type="number"

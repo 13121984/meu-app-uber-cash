@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Dispatch } from 'react';
@@ -42,14 +43,17 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold font-headline">Abastecimentos</h2>
-        <Button size="sm" onClick={handleAddFuelEntry} variant="secondary">
-          <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Abastecimento
+        <h2 className="text-xl font-semibold font-headline flex items-center gap-2">
+            <Fuel className="h-6 w-6 text-red-600"/>
+            <span>Abastecimentos</span>
+        </h2>
+        <Button size="sm" onClick={handleAddFuelEntry} variant="outline">
+          <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
         </Button>
       </div>
       
       {data.fuelEntries.length === 0 && (
-        <p className="text-muted-foreground text-center py-4">Clique em "Adicionar Abastecimento" se abasteceu hoje.</p>
+        <p className="text-muted-foreground text-center py-4">Clique em "Adicionar" se abasteceu hoje.</p>
       )}
 
       <div className="space-y-4">
@@ -78,9 +82,8 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor={`fuel-paid-${index}`}>Valor Pago</Label>
-                     <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Label htmlFor={`fuel-paid-${index}`}>Valor Pago</Label>                     <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600" />
                         <Input
                           id={`fuel-paid-${index}`}
                           type="number"
@@ -94,8 +97,7 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <Label htmlFor={`fuel-price-${index}`}>Preço por {unit}</Label>
-                        <div className="relative">
+                        <Label htmlFor={`fuel-price-${index}`}>Preço por {unit}</Label>                        <div className="relative">
                             <Fuel className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
                             id={`fuel-price-${index}`}

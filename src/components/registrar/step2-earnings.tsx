@@ -1,7 +1,8 @@
+
 "use client";
 
 import { Dispatch } from 'react';
-import { PlusCircle, Trash2, Car, DollarSign } from 'lucide-react';
+import { PlusCircle, Trash2, Car, DollarSign, SackDollar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,7 +43,10 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold font-headline">Ganhos do Dia</h2>
+        <h2 className="text-xl font-semibold font-headline flex items-center gap-2">
+            <SackDollar className="h-6 w-6 text-green-600"/>
+            <span>Ganhos do Dia</span>
+        </h2>
         <Button size="sm" onClick={handleAddEarning}>
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Ganho
         </Button>
@@ -74,9 +78,8 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor={`trips-${index}`}>Nº de Viagens</Label>
-                   <div className="relative">
-                    <Car className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Label htmlFor={`trips-${index}`}>Nº de Viagens</Label>                   <div className="relative">
+                    <Car className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
                     <Input
                       id={`trips-${index}`}
                       type="number"
@@ -90,9 +93,8 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
                 </div>
               </div>
               <div>
-                <Label htmlFor={`amount-${index}`}>Valor Ganho</Label>
-                 <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Label htmlFor={`amount-${index}`}>Valor Ganho</Label>                 <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
                     <Input
                       id={`amount-${index}`}
                       type="number"
