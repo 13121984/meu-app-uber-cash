@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useReducer, useMemo } from 'react';
-import { Check, Edit, Loader2, CheckCircle } from 'lucide-react';
+import React, { useState, useReducer } from 'react';
+import { Check, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Step1Info } from './step1-info';
@@ -84,11 +84,13 @@ export function RegistrationWizard() {
   
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    // Mark the final step as complete before submitting
+    if (!completedSteps.includes(currentStep)) {
+        setCompletedSteps([...completedSteps, currentStep]);
+    }
+    
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Here you would call your Supabase queries
-    // e.g., upsert_work_day, insert_earnings_bulk, etc.
     
     console.log('Submitting data:', state);
     
@@ -106,8 +108,6 @@ export function RegistrationWizard() {
     setIsSubmitting(false);
     // Maybe redirect or reset form
   };
-
-  const isComplete = completedSteps.length === steps.length;
 
   const renderStep = () => {
     switch (currentStep) {
@@ -159,12 +159,11 @@ export function RegistrationWizard() {
           <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
             Voltar
           </Button>
-          {currentStep < steps.length && (
+          {currentStep < steps.length ? (
             <Button onClick={handleNext} disabled={isSubmitting}>
               Próximo
             </Button>
-          )}
-          {isComplete && currentStep === steps.length && (
+          ) : (
              <Button onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {isSubmitting ? 'Salvando...' : 'Salvar Registro'}

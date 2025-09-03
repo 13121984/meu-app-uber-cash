@@ -40,6 +40,7 @@ export function LivePreview({ data }: LivePreviewProps) {
     return {
       totalGanhos,
       totalCombustiveis,
+      totalDespesasExtras,
       totalGastos,
       lucroLiquido,
       totalViagens,
@@ -69,6 +70,7 @@ export function LivePreview({ data }: LivePreviewProps) {
         
         <StatItem label="Total Ganhos" value={formatCurrency(calculations.totalGanhos)} />
         <StatItem label="Total Gastos" value={formatCurrency(calculations.totalGastos)} />
+        <StatItem label="Total Desp. Extras" value={formatCurrency(calculations.totalDespesasExtras)} />
         
         <Separator />
         
