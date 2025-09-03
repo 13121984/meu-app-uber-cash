@@ -9,48 +9,36 @@ import { StatsCard } from "./stats-card"
 import { GoalProgress } from "./goal-progress"
 import { EarningsPieChart } from "./earnings-chart"
 import Link from "next/link"
+import { WorkDay } from "@/services/work-day.service"
 
-const mockData = {
-  hoje: {
-    totalGanho: 150.75,
-    totalLucro: 85.25,
-    totalCombustivel: 55.50,
-    totalExtras: 10.00,
-    diasTrabalhados: 1,
-    totalKm: 120,
-    totalHoras: 6.5,
-    totalViagens: 15,
-    meta: { target: 200, period: "diária" },
-  },
-  semana: {
-    totalGanho: 850.40,
-    totalLucro: 510.90,
-    totalCombustivel: 299.50,
-    totalExtras: 40.00,
-    diasTrabalhados: 5,
-    totalKm: 750,
-    totalHoras: 40,
-    totalViagens: 102,
-    meta: { target: 1000, period: "semanal" },
-  },
-  mes: {
-    totalGanho: 3800.00,
-    totalLucro: 2450.50,
-    totalCombustivel: 1199.50,
-    totalExtras: 150.00,
-    diasTrabalhados: 22,
-    totalKm: 3100,
-    totalHoras: 180,
-    totalViagens: 450,
-    meta: { target: 4000, period: "mensal" },
-  },
+export interface PeriodData {
+  totalGanho: number;
+  totalLucro: number;
+  totalCombustivel: number;
+  totalExtras: number;
+  diasTrabalhados: number;
+  totalKm: number;
+  totalHoras: number;
+  totalViagens: number;
+  meta: { target: number; period: string };
 }
+
+export interface DashboardData {
+  hoje: PeriodData;
+  semana: PeriodData;
+  mes: PeriodData;
+}
+
+interface DashboardClientProps {
+  initialData: DashboardData;
+}
+
 
 type Period = "hoje" | "semana" | "mes"
 
-export function DashboardClient() {
+export function DashboardClient({ initialData }: DashboardClientProps) {
   const [period, setPeriod] = useState<Period>("hoje")
-  const data = mockData[period]
+  const data = initialData[period]
 
   const stats = [
     { title: "Total Ganho", value: data.totalGanho, icon: DollarSign, isCurrency: true },
@@ -61,13 +49,13 @@ export function DashboardClient() {
     { title: "Total Horas", value: data.totalHoras, icon: Hourglass, unit: "h" },
   ]
 
-  const progress = (data.totalLucro / data.meta.target) * 100
+  const progress = data.meta.target > 0 ? (data.totalLucro / data.meta.target) * 100 : 0;
   
   const chartData = [
     { name: 'Lucro', value: data.totalLucro, fill: 'hsl(var(--chart-1))', totalGanho: data.totalGanho },
     { name: 'Combustível', value: data.totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho: data.totalGanho },
     { name: 'Extras', value: data.totalExtras, fill: 'hsl(var(--chart-3))', totalGanho: data.totalGanho },
-  ]
+  ].filter(item => item.value > 0);
 
   return (
     <div className="space-y-6">
@@ -107,7 +95,13 @@ export function DashboardClient() {
             <CardTitle className="font-headline">Composição dos Ganhos</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <EarningsPieChart data={chartData} />
+            {chartData.length > 0 ? (
+                <EarningsPieChart data={chartData} />
+            ) : (
+                <div className="flex items-center justify-center h-[350px] text-muted-foreground">
+                    Sem dados para exibir no gráfico.
+                </div>
+            )}
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">

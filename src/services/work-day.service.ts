@@ -1,7 +1,9 @@
 "use server";
 
-import { collection, addDoc, Timestamp, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, addDoc, Timestamp, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval } from 'date-fns';
+import { PeriodData } from "@/components/dashboard/dashboard-client";
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -52,4 +54,58 @@ export async function getWorkDays(): Promise<WorkDay[]> {
         console.error("Error getting documents: ", error);
         return [];
     }
+}
+
+function calculatePeriodData(workDays: WorkDay[]): PeriodData {
+    const data: PeriodData = {
+        totalGanho: 0,
+        totalLucro: 0,
+        totalCombustivel: 0,
+        totalExtras: 0,
+        diasTrabalhados: workDays.length,
+        totalKm: 0,
+        totalHoras: 0,
+        totalViagens: 0,
+        meta: { target: 0, period: "" }, // Metas serão implementadas depois
+    };
+
+    workDays.forEach(day => {
+        const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
+        const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+        const dailyExtras = day.maintenance.amount;
+        const dailyProfit = dailyEarnings - dailyFuel - dailyExtras;
+        const dailyTrips = day.earnings.reduce((sum, e) => sum + e.trips, 0);
+
+        data.totalGanho += dailyEarnings;
+        data.totalCombustivel += dailyFuel;
+        data.totalExtras += dailyExtras;
+        data.totalLucro += dailyProfit;
+        data.totalKm += day.km;
+        data.totalHoras += day.hours;
+        data.totalViagens += dailyTrips;
+    });
+
+    return data;
+}
+
+
+export async function getDashboardData() {
+    const allWorkDays = await getWorkDays();
+    const now = new Date();
+
+    // Filtros de datas
+    const todayWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfDay(now), end: endOfDay(now) }));
+    const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
+    const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
+
+    const hoje = calculatePeriodData(todayWorkDays);
+    hoje.meta = { target: 200, period: "diária" }; // Mock meta
+
+    const semana = calculatePeriodData(thisWeekWorkDays);
+    semana.meta = { target: 1000, period: "semanal" }; // Mock meta
+
+    const mes = calculatePeriodData(thisMonthWorkDays);
+    mes.meta = { target: 4000, period: "mensal" }; // Mock meta
+
+    return { hoje, semana, mes };
 }

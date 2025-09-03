@@ -1,5 +1,7 @@
-import { DashboardClient } from '@/components/dashboard/dashboard-client';
+import { DashboardClient, type DashboardData } from '@/components/dashboard/dashboard-client';
+import { getDashboardData } from '@/services/work-day.service';
 
-export default function DashboardPage() {
-  return <DashboardClient />;
+export default async function DashboardPage() {
+  const dashboardData: DashboardData = await getDashboardData();
+  return <DashboardClient initialData={dashboardData} />;
 }
