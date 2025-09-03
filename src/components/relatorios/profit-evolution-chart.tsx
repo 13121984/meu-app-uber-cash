@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import type { ProfitEvolutionData } from "@/services/work-day.service"
 
@@ -20,16 +20,11 @@ export function ProfitEvolutionChart({ data }: ProfitEvolutionChartProps) {
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
       <ResponsiveContainer>
-        <AreaChart 
+        <BarChart 
             data={data}
             margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+            barCategoryGap="20%"
         >
-          <defs>
-            <linearGradient id="fillLucro" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="var(--color-lucro)" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="var(--color-lucro)" stopOpacity={0.1} />
-            </linearGradient>
-          </defs>
           <XAxis 
             dataKey="date" 
             tickLine={false} 
@@ -56,15 +51,12 @@ export function ProfitEvolutionChart({ data }: ProfitEvolutionChartProps) {
                 labelFormatter={(label) => `Data: ${label}`}
             />} 
           />
-          <Area 
+          <Bar 
             dataKey="lucro" 
-            type="monotone" 
-            fill="url(#fillLucro)" 
-            stroke="var(--color-lucro)" 
-            stackId="1" 
-            strokeWidth={2}
+            fill="var(--color-lucro)" 
+            radius={[4, 4, 0, 0]}
             />
-        </AreaChart>
+        </BarChart>
       </ResponsiveContainer>
     </ChartContainer>
   )

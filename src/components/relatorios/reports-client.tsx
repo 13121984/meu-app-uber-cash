@@ -98,28 +98,26 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                 </CardContent>
             </Card>
 
-            <div className="grid lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-1">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-lg flex items-center gap-2">
-                            <PieChartIcon className="w-5 h-5 text-primary" />
-                            Composição do Lucro
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <EarningsPieChart data={reportData.profitComposition} />
-                    </CardContent>
-                </Card>
-                
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-lg">Evolução do Lucro no Período</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ProfitEvolutionChart data={reportData.profitEvolution} />
-                    </CardContent>
-                </Card>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg flex items-center gap-2">
+                        <PieChartIcon className="w-5 h-5 text-primary" />
+                        Composição do Lucro
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <EarningsPieChart data={reportData.profitComposition} />
+                </CardContent>
+            </Card>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Evolução do Lucro no Período</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ProfitEvolutionChart data={reportData.profitEvolution} />
+                </CardContent>
+            </Card>
 
              <div className="grid lg:grid-cols-2 gap-8">
                 <Card>
