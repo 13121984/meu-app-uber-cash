@@ -47,7 +47,7 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
             <Fuel className="h-6 w-6 text-red-600"/>
             <span>Abastecimentos</span>
         </h2>
-        <Button size="sm" onClick={handleAddFuelEntry} variant="outline">
+        <Button size="sm" onClick={handleAddFuelEntry} variant="destructive">
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
         </Button>
       </div>
