@@ -84,7 +84,7 @@ export function GoalForm({ initialData }: GoalFormProps) {
           <div className="space-y-2">
             <Label htmlFor="daily">Meta Diária</Label>
             <div className="relative">
-               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
                 <Controller
                     name="daily"
                     control={control}
@@ -107,7 +107,7 @@ export function GoalForm({ initialData }: GoalFormProps) {
           <div className="space-y-2">
             <Label htmlFor="weekly">Meta Semanal</Label>
              <div className="relative">
-               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
                 <Controller
                     name="weekly"
                     control={control}
@@ -128,7 +128,7 @@ export function GoalForm({ initialData }: GoalFormProps) {
           <div className="space-y-2">
             <Label htmlFor="monthly">Meta Mensal</Label>
              <div className="relative">
-               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
                 <Controller
                     name="monthly"
                     control={control}
