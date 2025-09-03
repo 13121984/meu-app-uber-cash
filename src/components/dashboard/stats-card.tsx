@@ -19,16 +19,16 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
     : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
 
   return (
-    <Card className="bg-secondary/50 border-border p-4 flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-             <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", iconBg)}>
-                <Icon className={cn("h-5 w-5", iconColor)} />
-            </div>
-            <div>
-                 <p className="text-xl font-bold">{formattedValue}</p>
-            </div>
+    <Card className="bg-secondary/50 border-border p-4">
+      <CardContent className="flex items-center gap-4 p-0">
+        <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center", iconBg)}>
+          <Icon className={cn("h-6 w-6", iconColor)} />
         </div>
-        <p className="text-sm text-muted-foreground ml-1">{title}</p>
+        <div className="flex flex-col">
+          <p className="text-2xl font-bold">{formattedValue}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
+        </div>
+      </CardContent>
     </Card>
   )
 }

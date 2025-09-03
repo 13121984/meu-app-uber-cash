@@ -65,11 +65,11 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const stats = [
     { title: "Lucro Líquido", value: data.totalLucro, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
     { title: "Viagens", value: data.totalViagens, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
-    { title: "KM", value: data.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
+    { title: "KM Rodados", value: data.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
     { title: "Horas", value: data.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
     { title: "Ganho/Hora", value: data.ganhoPorHora, icon: TrendingUp, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
     { title: "Ganho/KM", value: data.ganhoPorKm, icon: TrendingUp, isCurrency: true, iconBg: "bg-blue-500/20", iconColor: "text-blue-400", precision: 2 },
-    { title: "Eficiência", value: data.eficiencia, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
+    { title: "Eficiência Média", value: data.eficiencia, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
     { title: "Combustível", value: data.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
   ]
   const periodMap = {
@@ -84,6 +84,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline">Painel de Controle</h1>
+          <p className="text-muted-foreground">Resumo de {periodMap[period]}</p>
         </div>
          <div className="flex items-center gap-2">
             {(["hoje", "semana", "mes"] as Period[]).map(p => (
@@ -101,20 +102,22 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             ))}
         </div>
       </div>
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <StatsCard key={stat.title} {...stat} />
+          ))}
+      </div>
 
       <Card className="bg-card border-border">
           <CardHeader>
-              <CardTitle className="font-headline text-lg">Resumo de {periodMap[period]}</CardTitle>
+              <CardTitle className="font-headline text-lg">Meta de Lucro ({periodMap[period]})</CardTitle>
           </CardHeader>
           <CardContent>
             <GoalProgress progress={progress} target={data.meta.target} current={data.totalLucro} />
-             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-6">
-                {stats.map((stat) => (
-                  <StatsCard key={stat.title} {...stat} />
-                ))}
-              </div>
           </CardContent>
-        </Card>
+      </Card>
+
 
       <MaintenanceSummary data={initialData.mes.maintenance} />
 
