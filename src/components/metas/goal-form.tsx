@@ -93,7 +93,9 @@ export function GoalForm({ initialData }: GoalFormProps) {
                         id="daily"
                         type="number"
                         placeholder="Ex: 200"
-                        {...field}
+                        // Mostra string vazia se o valor for 0
+                        value={field.value === 0 ? '' : field.value}
+                        // Converte para float ou 0 se o campo estiver vazio
                         onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                         className="pl-10"
                         />
@@ -114,7 +116,7 @@ export function GoalForm({ initialData }: GoalFormProps) {
                         id="weekly"
                         type="number"
                         placeholder="Ex: 1000"
-                        {...field}
+                        value={field.value === 0 ? '' : field.value}
                         onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                         className="pl-10"
                         />
@@ -135,7 +137,7 @@ export function GoalForm({ initialData }: GoalFormProps) {
                         id="monthly"
                         type="number"
                         placeholder="Ex: 4000"
-                        {...field}
+                        value={field.value === 0 ? '' : field.value}
                         onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                         className="pl-10"
                         />
