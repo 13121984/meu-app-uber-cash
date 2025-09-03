@@ -1,8 +1,8 @@
+
 "use client"
 
 import React from 'react';
 import { Car, Flag } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -13,6 +13,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Confetti } from "./confetti";
+import { Card } from '../ui/card';
 
 type GoalProgressProps = {
   progress: number;
@@ -25,30 +26,38 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const clampedProgress = Math.min(progress, 100);
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 pt-4">
-      <div className="w-full">
-        <div className="relative h-10 w-full">
-          {/* Road */}
-          <div className="absolute top-1/2 left-0 w-full h-1 bg-muted rounded-full -translate-y-1/2" />
+    <div className="flex flex-col items-center justify-center space-y-6 pt-4">
+      {/* Road container */}
+      <div className="w-full px-4">
+        <div className="relative h-16 w-full rounded-lg bg-gray-700 dark:bg-gray-800 p-2 overflow-hidden shadow-inner">
+          {/* Dashed line */}
+          <div className="absolute top-1/2 left-0 w-full h-1 border-t-4 border-dashed border-yellow-400 -translate-y-1/2"></div>
           
-          {/* Car */}
-          <Car
-            className="absolute top-1/2 -translate-y-1/2 h-6 w-6 text-primary transition-all duration-1000 ease-out"
-            style={{ left: `calc(${clampedProgress}% - 12px)` }}
-          />
+          {/* Car with shadow */}
+          <div
+            className="absolute top-1/2 -translate-y-1/2 transition-all duration-1000 ease-out"
+            style={{ left: `calc(${clampedProgress}% - 20px)` }}
+          >
+            <Car
+              className="relative h-10 w-10 text-primary drop-shadow-lg"
+              style={{ transform: 'translateY(-4px)' }}
+            />
+          </div>
           
           {/* Finish Line */}
-          <Flag className="absolute top-1/2 right-0 -translate-y-1/2 h-6 w-6 text-green-500" />
+          <Flag className="absolute top-1/2 right-4 -translate-y-1/2 h-8 w-8 text-green-500 drop-shadow-md" />
         </div>
-        <Progress value={clampedProgress} className="h-2 mt-2" />
       </div>
 
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">
-          {current.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {target.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-        </p>
-        <p className="font-semibold text-lg">{clampedProgress.toFixed(1)}%</p>
-      </div>
+      {/* Progress Info */}
+      <Card className="bg-secondary/50 w-full">
+        <div className="p-4 text-center">
+            <p className="font-semibold text-2xl text-primary">{clampedProgress.toFixed(1)}%</p>
+            <p className="text-sm text-muted-foreground mt-1">
+            {current.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} de {target.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </p>
+        </div>
+      </Card>
 
       <AlertDialog open={isComplete}>
         {isComplete && <Confetti />}
