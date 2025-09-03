@@ -1,3 +1,4 @@
+
 "use server";
 
 import { collection, addDoc, Timestamp, getDocs, query, orderBy, where } from "firebase/firestore";
@@ -43,6 +44,7 @@ export async function getWorkDays(): Promise<WorkDay[]> {
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
+            console.log("No documents found in workdays collection.");
             return [];
         }
 
@@ -63,7 +65,7 @@ export async function getWorkDays(): Promise<WorkDay[]> {
     }
 }
 
-function calculatePeriodData(workDays: WorkDay[]): PeriodData {
+function calculatePeriodData(workDays: WorkDay[], period: string): PeriodData {
     const data: PeriodData = {
         totalGanho: 0,
         totalLucro: 0,
@@ -73,7 +75,7 @@ function calculatePeriodData(workDays: WorkDay[]): PeriodData {
         totalKm: 0,
         totalHoras: 0,
         totalViagens: 0,
-        meta: { target: 0, period: "" }, // Metas serão implementadas depois
+        meta: { target: 0, period: period }, 
     };
 
     workDays.forEach(day => {
@@ -105,14 +107,14 @@ export async function getDashboardData() {
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
 
-    const hoje = calculatePeriodData(todayWorkDays);
-    hoje.meta = { target: 200, period: "diária" }; // Mock meta
+    const hoje = calculatePeriodData(todayWorkDays, "diária");
+    const semana = calculatePeriodData(thisWeekWorkDays, "semanal");
+    const mes = calculatePeriodData(thisMonthWorkDays, "mensal");
 
-    const semana = calculatePeriodData(thisWeekWorkDays);
-    semana.meta = { target: 1000, period: "semanal" }; // Mock meta
-
-    const mes = calculatePeriodData(thisMonthWorkDays);
-    mes.meta = { target: 4000, period: "mensal" }; // Mock meta
+    // Futuramente, as metas virão do banco de dados.
+    // hoje.meta.target = 200;
+    // semana.meta.target = 1000;
+    // mes.meta.target = 4000;
 
     return { hoje, semana, mes };
 }
