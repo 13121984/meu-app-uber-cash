@@ -1,7 +1,7 @@
 
 "use client"
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Car, Flag } from "lucide-react";
 import {
   AlertDialog,
@@ -22,8 +22,21 @@ type GoalProgressProps = {
 };
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
+  const [showConfetti, setShowConfetti] = useState(false);
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
+
+  useEffect(() => {
+    // Ativa o pop-up apenas uma vez quando a meta é atingida
+    if (isComplete && !showConfetti) {
+      setShowConfetti(true);
+    }
+  }, [isComplete, showConfetti]);
+
+  const handleClose = () => {
+    setShowConfetti(false);
+  };
+
 
   return (
     <div className="flex flex-col items-center justify-center space-y-6 pt-4">
@@ -59,17 +72,17 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
         </div>
       </Card>
 
-      <AlertDialog open={isComplete}>
-        {isComplete && <Confetti />}
+      <AlertDialog open={showConfetti} onOpenChange={setShowConfetti}>
+        {showConfetti && <Confetti />}
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-headline text-center text-accent">Meta Atingida!</AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
+            <AlertDialogTitle className="text-3xl font-headline text-center text-primary">Meta Atingida!</AlertDialogTitle>
+            <AlertDialogDescription className="text-center pt-2">
               Você conseguiu! Continue acelerando para o próximo objetivo!
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction>Fechar</AlertDialogAction>
+            <AlertDialogAction onClick={handleClose}>Fechar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

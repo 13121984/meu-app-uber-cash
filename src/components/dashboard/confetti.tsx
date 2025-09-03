@@ -1,29 +1,32 @@
+
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 
-const confettiColors = ['#FF8C00', '#CC6600', '#FFA500', '#FFD700', '#FFFFFF'];
+const confettiColors = ['#FFC700', '#FF8C00', '#4CAF50', '#2196F3', '#FFFFFF', '#FF5722'];
 
-const ConfettiPiece = ({ id, style }: { id: number, style: React.CSSProperties }) => (
+const ConfettiPiece = memo(({ style }: { style: React.CSSProperties }) => (
   <div
-    key={id}
-    className="absolute w-2 h-4 rounded-sm animate-confetti-rain"
-    style={style}
+    className="absolute w-2 h-4 rounded-sm"
+    style={{ ...style, animation: `confetti-fall ${2 + Math.random() * 2}s linear forwards` }}
   />
-);
+));
+ConfettiPiece.displayName = 'ConfettiPiece';
 
 export function Confetti() {
   const [pieces, setPieces] = useState<React.ReactNode[]>([]);
 
   useEffect(() => {
-    const newPieces = Array.from({ length: 100 }).map((_, i) => {
+    const newPieces = Array.from({ length: 150 }).map((_, i) => {
       const style: React.CSSProperties = {
         left: `${Math.random() * 100}vw`,
+        top: `${-20 + Math.random() * -80}px`,
         backgroundColor: confettiColors[Math.floor(Math.random() * confettiColors.length)],
-        animationDelay: `${Math.random() * 2}s`,
         transform: `rotate(${Math.random() * 360}deg)`,
+        opacity: 0,
+        animationDelay: `${Math.random() * 1.5}s`,
       };
-      return <ConfettiPiece key={i} id={i} style={style} />;
+      return <ConfettiPiece key={i} style={style} />;
     });
     setPieces(newPieces);
   }, []);
