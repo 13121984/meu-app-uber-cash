@@ -44,7 +44,7 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold font-headline">Abastecimentos</h2>
         <Button size="sm" onClick={handleAddFuelEntry} variant="secondary">
-          <PlusCircle className="mr-2 h-4 w-4 text-red-500" /> Adicionar Abastecimento
+          <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Abastecimento
         </Button>
       </div>
       

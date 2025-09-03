@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useReducer, useMemo } from 'react';
-import { Check, Edit, Loader2 } from 'lucide-react';
+import { Check, Edit, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Step1Info } from './step1-info';
@@ -93,7 +93,12 @@ export function RegistrationWizard() {
     console.log('Submitting data:', state);
     
     toast({
-        title: "✅ Sucesso!",
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span className="font-bold">Sucesso!</span>
+          </div>
+        ),
         description: "Seu dia de trabalho foi registrado.",
         variant: "default",
     })

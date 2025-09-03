@@ -54,7 +54,7 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
         {isComplete && <Confetti />}
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-headline text-center text-accent">🎉 Meta Atingida! 🎉</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl font-headline text-center text-accent">Meta Atingida!</AlertDialogTitle>
             <AlertDialogDescription className="text-center">
               Você conseguiu! Continue acelerando para o próximo objetivo!
             </AlertDialogDescription>
