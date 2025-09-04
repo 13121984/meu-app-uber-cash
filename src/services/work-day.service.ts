@@ -78,23 +78,20 @@ export interface ReportData {
 }
 
 const workDaysFilePath = path.join(process.cwd(), 'data', 'work-days.json');
-let workDaysCache: WorkDay[] | null = null;
 
-async function readWorkDays(force = false): Promise<WorkDay[]> {
-  if (workDaysCache && !force) {
-    return workDaysCache;
-  }
+async function readWorkDays(): Promise<WorkDay[]> {
   try {
     await fs.access(workDaysFilePath);
     const fileContent = await fs.readFile(workDaysFilePath, 'utf8');
-    workDaysCache = (JSON.parse(fileContent) as any[]).map(day => ({
+    // Important: Re-hydrate dates, as they are stored as strings in JSON
+    return (JSON.parse(fileContent) as any[]).map(day => ({
         ...day,
         date: new Date(day.date),
     }));
-    return workDaysCache as WorkDay[];
   } catch (error) {
     // If file doesn't exist or is empty
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        await writeWorkDays([]); // Create the file if it doesn't exist
         return [];
     }
     throw error;
@@ -106,13 +103,12 @@ async function writeWorkDays(data: WorkDay[]): Promise<void> {
     // Sort by date descending before writing
     const sortedData = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     await fs.writeFile(workDaysFilePath, JSON.stringify(sortedData, null, 2), 'utf8');
-    workDaysCache = null; // Invalidate cache
 }
 
 
 export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
   try {
-    const allWorkDays = await readWorkDays(true);
+    const allWorkDays = await readWorkDays();
     const newWorkDay: WorkDay = {
         ...data,
         id: Date.now().toString(),
@@ -132,7 +128,7 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
 
 export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     try {
-        const allWorkDays = await readWorkDays(true);
+        const allWorkDays = await readWorkDays();
         const workDaysMap = new Map<string, WorkDay>();
 
         // Pré-popula o mapa com os dias de trabalho existentes
@@ -212,7 +208,7 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
 
 export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id'>): Promise<{ success: boolean; error?: string }> {
   try {
-    const allWorkDays = await readWorkDays(true);
+    const allWorkDays = await readWorkDays();
     const index = allWorkDays.findIndex(r => r.id === id);
     if (index === -1) {
         return { success: false, error: "Registro não encontrado." };
@@ -229,7 +225,7 @@ export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id'>): Prom
 
 export async function deleteWorkDay(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    let allWorkDays = await readWorkDays(true);
+    let allWorkDays = await readWorkDays();
     const initialLength = allWorkDays.length;
     allWorkDays = allWorkDays.filter(r => r.id !== id);
     if(allWorkDays.length === initialLength){
@@ -245,7 +241,7 @@ export async function deleteWorkDay(id: string): Promise<{ success: boolean; err
 
 export async function deleteWorkDays(idsToDelete: string[]): Promise<{ success: boolean; error?: string }> {
     try {
-        let allWorkDays = await readWorkDays(true);
+        let allWorkDays = await readWorkDays();
         const initialLength = allWorkDays.length;
         const idsSet = new Set(idsToDelete);
         allWorkDays = allWorkDays.filter(day => !idsSet.has(day.id));
