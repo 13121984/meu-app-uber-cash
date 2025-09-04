@@ -14,9 +14,13 @@ type StatsCardProps = {
 }
 
 export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precision = 0, iconBg, iconColor }: StatsCardProps) {
-  const formattedValue = isCurrency
-    ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
-    : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
+  const isValidNumber = typeof value === 'number' && !isNaN(value);
+
+  const formattedValue = isValidNumber
+    ? isCurrency
+      ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
+      : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
+    : "—";
 
   return (
     <Card className="bg-secondary/50 border-border p-4">
