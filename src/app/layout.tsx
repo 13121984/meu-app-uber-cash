@@ -58,17 +58,15 @@ export default async function RootLayout({
       <body className="font-body antialiased h-full bg-background">
         <SidebarProvider>
             <Sidebar>
-            <SidebarNav />
+              <SidebarNav />
             </Sidebar>
             <SidebarInset>
-                <ScrollArea className="h-full">
-                    <main className="p-4 md:p-6 lg:p-8">
-                        <div className="md:hidden mb-4">
-                        <SidebarTrigger />
-                        </div>
-                        {children}
-                    </main>
-                </ScrollArea>
+                <main className="p-4 md:p-6 lg:p-8 h-full">
+                    <div className="md:hidden mb-4">
+                      <SidebarTrigger />
+                    </div>
+                    {children}
+                </main>
             </SidebarInset>
         </SidebarProvider>
         <Toaster />
@@ -76,3 +74,5 @@ export default async function RootLayout({
     </html>
   );
 }
+
+    

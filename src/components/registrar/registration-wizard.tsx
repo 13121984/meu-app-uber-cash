@@ -80,8 +80,13 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
 
   useEffect(() => {
       // Quando o initialData mudar (no modo de edição), reseta o estado do formulário
+      // e o passo para o início.
       dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) })
-  }, [initialData])
+      if(isEditing) {
+        setCurrentStep(1);
+        setCompletedSteps([1,2,3,4]);
+      }
+  }, [initialData, isEditing])
 
 
   const resetWizard = () => {
@@ -236,3 +241,5 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
     </div>
   );
 }
+
+    
