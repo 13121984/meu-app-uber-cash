@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -23,26 +23,34 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { Maintenance, deleteMaintenance, deleteAllMaintenance } from "@/services/maintenance.service";
+import { Maintenance, deleteMaintenance, deleteAllMaintenance, getMaintenanceRecords } from "@/services/maintenance.service";
 import { MaintenanceForm } from "./maintenance-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Wrench, Trash2, Edit } from 'lucide-react';
+import { PlusCircle, Wrench, Trash2, Edit, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
-
-interface MaintenanceClientProps {
-  initialRecords: Maintenance[];
-}
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-export function MaintenanceClient({ initialRecords }: MaintenanceClientProps) {
-  const [records, setRecords] = useState(initialRecords);
+export function MaintenanceClient() {
+  const [records, setRecords] = useState<Maintenance[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<Maintenance | null>(null);
   
+  useEffect(() => {
+    const fetchRecords = async () => {
+      setIsLoading(true);
+      const initialRecords = await getMaintenanceRecords();
+      setRecords(initialRecords);
+      setIsLoading(false);
+    }
+    fetchRecords();
+  }, []);
+
   // Atualiza os registros localmente quando o formulário é submetido com sucesso
   const handleSuccess = (newRecord: Maintenance) => {
       if (selectedRecord) {
@@ -50,7 +58,7 @@ export function MaintenanceClient({ initialRecords }: MaintenanceClientProps) {
         setRecords(records.map(r => r.id === newRecord.id ? newRecord : r));
       } else {
         // Adicionando
-        setRecords([newRecord, ...records]);
+        setRecords([newRecord, ...records].sort((a, b) => b.date.getTime() - a.date.getTime()));
       }
       setIsFormOpen(false);
       setSelectedRecord(null);
@@ -110,7 +118,13 @@ export function MaintenanceClient({ initialRecords }: MaintenanceClientProps) {
                 </div>
             </CardHeader>
             <CardContent>
-                {records.length === 0 ? (
+                {isLoading ? (
+                  <div className="space-y-4">
+                      <Skeleton className="h-20 w-full" />
+                      <Skeleton className="h-20 w-full" />
+                      <Skeleton className="h-20 w-full" />
+                  </div>
+                ) : records.length === 0 ? (
                 <div className="text-center py-20 text-muted-foreground">
                     <Wrench className="mx-auto h-12 w-12" />
                     <p className="mt-4 font-semibold">Nenhum registro de manutenção ainda</p>

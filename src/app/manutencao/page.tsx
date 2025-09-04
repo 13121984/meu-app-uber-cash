@@ -1,12 +1,8 @@
 
 import { Wrench } from 'lucide-react';
-import { getMaintenanceRecords } from '@/services/maintenance.service';
 import { MaintenanceClient } from '@/components/manutencao/maintenance-client';
 
-export const dynamic = 'force-dynamic';
-
-export default async function ManutencaoPage() {
-  const maintenanceRecords = await getMaintenanceRecords();
+export default function ManutencaoPage() {
   
   return (
     <div className="space-y-6">
@@ -17,7 +13,7 @@ export default async function ManutencaoPage() {
         </h1>
         <p className="text-muted-foreground">Adicione e gerencie os gastos com a manutenção do seu veículo.</p>
       </div>
-      <MaintenanceClient initialRecords={maintenanceRecords} />
+      <MaintenanceClient />
     </div>
   );
 }
