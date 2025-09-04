@@ -86,11 +86,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-headline">Painel de Controle</h1>
-          <p className="text-muted-foreground">Resumo de {periodMap[period]}</p>
-        </div>
+      <div className="text-center w-full">
+        <h1 className="text-4xl font-bold font-headline">Painel de Controle</h1>
+        <p className="text-muted-foreground">Resumo de {periodMap[period]}</p>
       </div>
       
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
