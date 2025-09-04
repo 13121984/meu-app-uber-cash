@@ -26,7 +26,7 @@ export function TopBar() {
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
                     <Car className="h-7 w-7 text-primary" />
-                    <span className="hidden sm:inline-block font-headline">Rota Certa</span>
+                    <span className="font-headline">Rota Certa</span>
                 </Link>
             </div>
             <nav className="flex items-center gap-1">
