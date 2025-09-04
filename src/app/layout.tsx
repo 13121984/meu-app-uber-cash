@@ -6,6 +6,7 @@ import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const metadata: Metadata = {
   title: 'Uber Cash',
@@ -35,12 +36,14 @@ export default async function RootLayout({
             <SidebarNav />
             </Sidebar>
             <SidebarInset>
-                <main className="p-4 md:p-6 lg:p-8">
-                    <div className="md:hidden mb-4">
-                    <SidebarTrigger />
-                    </div>
-                    {children}
-                </main>
+                <ScrollArea className="h-full">
+                    <main className="p-4 md:p-6 lg:p-8">
+                        <div className="md:hidden mb-4">
+                        <SidebarTrigger />
+                        </div>
+                        {children}
+                    </main>
+                </ScrollArea>
             </SidebarInset>
         </SidebarProvider>
         <Toaster />
