@@ -6,11 +6,19 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
     signOut,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    GoogleAuthProvider,
+    signInWithPopup
 } from "firebase/auth";
 import { app } from "@/lib/firebase";
 
 export const auth = getAuth(app);
+
+const googleProvider = new GoogleAuthProvider();
+
+export const signInWithGoogle = () => {
+    return signInWithPopup(auth, googleProvider);
+};
 
 export const signup = (email: string, password: string) => {
     return createUserWithEmailAndPassword(auth, email, password);
@@ -27,4 +35,3 @@ export const logout = () => {
 export const sendPasswordReset = (email: string) => {
     return sendPasswordResetEmail(auth, email);
 };
-

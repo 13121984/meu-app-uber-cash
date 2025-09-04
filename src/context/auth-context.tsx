@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, login as loginService, signup as signupService, logout as logoutService, sendPasswordReset as sendPasswordResetService } from '@/services/auth.service';
+import { auth, login as loginService, signup as signupService, logout as logoutService, sendPasswordReset as sendPasswordResetService, signInWithGoogle as signInWithGoogleService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -13,6 +13,7 @@ interface AuthContextType {
   signup: typeof signupService;
   logout: () => void;
   sendPasswordReset: typeof sendPasswordResetService;
+  signInWithGoogle: typeof signInWithGoogleService;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signup: signupService,
     logout,
     sendPasswordReset: sendPasswordResetService,
+    signInWithGoogle: signInWithGoogleService,
   };
 
   return (
