@@ -6,6 +6,7 @@ import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
 import { SidebarProvider, Sidebar, SidebarTrigger } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
+import { Car } from 'lucide-react';
 
 const APP_NAME = "Rota Certa";
 const APP_DEFAULT_TITLE = "Rota Certa";
@@ -56,6 +57,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className="font-body antialiased h-full bg-background">
         <SidebarProvider>
@@ -65,7 +67,9 @@ export default async function RootLayout({
               </Sidebar>
               <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
                  <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-                   <SidebarTrigger className="sm:hidden" />
+                   <SidebarTrigger className="sm:hidden">
+                     <Car className="h-6 w-6 text-primary" />
+                   </SidebarTrigger>
                  </header>
                 <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
                     {children}

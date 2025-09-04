@@ -12,9 +12,19 @@ type GoalProgressProps = {
   current: number;
 };
 
+// Simple cash register sound in Base64 format
+const cashRegisterSound = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAABoR2tGYWFFAAAAAPcAAAN3AAAAAAAAAFl+ZWW3s1sLdGAAAAAAAAAIjbQBAAAAAAEAAAIiUKgZn3oAAAGPBAEABAAgAAEABpVoaWdodG9uZQAAAAAAbHVrYXNhbG1lbnRpbmVsbG9nYW5kZXZAAAAAAP/7QMQAAAAAAAAAAAAAAAAAAAAAAARsYXZjNTguOTEuMTAwBICAgAgAgIAHAAACAET/wkAAASIgaJkAMgAABwAAAnQCkQhEAEQwBIDS8AAAAAAD/8A/wD4AAAAA//pAQHwAAAAEwADAnQAAAD/8A/wDwAAAAAABYhEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGolEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAHYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAIAAAAAAAAggAB/AAD//dAwAAMAAAN4AAANIAAD/9gYBAkAAjSRgYhL//dAwLAAKAAAN4AAANIAAD/9gYBAkAEDSRgYhL//dAwqQAnAAAN4AAANIAAD/9gYBAkAEzSRgYhL//dAwjQCPAAAN4AAANIAAD/9gYBAkAFDS.";
+
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const { toast } = useToast();
   const [goalReached, setGoalReached] = useState(false);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // This logic now runs only on the client, after hydration.
+    setAudio(new Audio(cashRegisterSound));
+  }, []);
+
 
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
@@ -23,6 +33,9 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
     // This logic now runs only on the client, after hydration.
     if (isComplete && !goalReached) {
       setGoalReached(true);
+      if (audio) {
+        audio.play();
+      }
       toast({
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Meta Atingida!</span></div>,
         description: "Você conseguiu! Continue acelerando para o próximo objetivo!",
@@ -31,7 +44,7 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
       // Reset if the goal is no longer met (e.g., data changes)
       setGoalReached(false);
     }
-  }, [isComplete, goalReached, toast]);
+  }, [isComplete, goalReached, toast, audio]);
   
   const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const remaining = target - current;
