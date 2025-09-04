@@ -2,8 +2,6 @@ import { Settings } from 'lucide-react';
 import { getSettings } from '@/services/settings.service';
 import { SettingsForm } from '@/components/configuracoes/settings-form';
 
-export const dynamic = 'force-dynamic';
-
 export default async function ConfiguracoesPage() {
   const settings = await getSettings();
 
