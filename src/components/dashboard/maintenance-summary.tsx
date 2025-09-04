@@ -14,7 +14,7 @@ interface MaintenanceSummaryProps {
 }
 
 const StatItem = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="flex flex-col items-center justify-center text-center p-2 rounded-lg bg-secondary/50 flex-1 min-w-[100px]">
+    <div className="flex flex-col items-center justify-center text-center p-2 rounded-lg bg-secondary flex-1 min-w-[100px]">
         <p className="text-2xl font-bold text-foreground">{value}</p>
         <p className="text-sm text-muted-foreground">{label}</p>
     </div>
@@ -26,7 +26,7 @@ export function MaintenanceSummary({ data }: MaintenanceSummaryProps) {
   const averageCost = data.servicesPerformed > 0 ? data.totalSpent / data.servicesPerformed : 0;
 
   return (
-    <Card className="bg-card border-border">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
             <CardTitle className="font-headline text-lg flex items-center gap-2">

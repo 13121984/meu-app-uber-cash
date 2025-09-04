@@ -23,7 +23,7 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
     : "—";
 
   return (
-    <Card className="bg-card border-border p-4">
+    <Card className="p-4">
       <CardContent className="flex items-center gap-4 p-0">
         <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center", iconBg)}>
           <Icon className={cn("h-6 w-6", iconColor)} />

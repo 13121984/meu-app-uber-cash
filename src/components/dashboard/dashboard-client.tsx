@@ -119,7 +119,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       </Card>
 
 
-      <Card className="bg-card border-border">
+      <Card>
           <CardHeader>
               <CardTitle className="font-headline text-lg">Meta de Lucro ({periodMap[period]})</CardTitle>
           </CardHeader>
@@ -131,7 +131,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
       <MaintenanceSummary data={data.maintenance} />
 
-      <Card className="bg-card border-border">
+      <Card>
           <CardHeader>
               <CardTitle className="font-headline text-lg flex items-center gap-2">
                 <BarChart3 className="w-6 h-6 text-primary" />

@@ -36,7 +36,7 @@ import { useRouter } from 'next/navigation';
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const SummaryCard = ({ title, value, description, icon: Icon, iconClassName }: { title: string; value: string; description: string; icon: React.ElementType, iconClassName?: string }) => (
-    <Card className="bg-secondary/30">
+    <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
             <Icon className={`h-4 w-4 text-muted-foreground ${iconClassName}`} />
@@ -161,7 +161,7 @@ export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceCl
                 ) : (
                 <div className="space-y-4">
                     {filteredRecords.map(record => (
-                    <Card key={record.id} className="bg-secondary/50">
+                    <Card key={record.id}>
                         <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div className="flex-1 space-y-1">
                                 <p className="font-bold">{record.description}</p>

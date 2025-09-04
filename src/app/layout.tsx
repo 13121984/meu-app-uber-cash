@@ -51,7 +51,7 @@ export default async function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
-      <body className="font-body antialiased h-full bg-secondary/50">
+      <body className="font-body antialiased h-full">
         <div className="relative flex min-h-screen w-full flex-col">
             <TopBar />
             <main className="flex-1 p-4 sm:p-6 lg:p-8 pt-20">
