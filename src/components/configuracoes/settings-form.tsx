@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -237,30 +237,8 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                     </div>
                 </CardContent>
             </Card>
-        </div>
-        
-        <div className="space-y-6">
-            {/* Prévia do Visual */}
-            <div style={previewStyle} className={cn(watchedFields.theme)}>
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 font-headline"><Eye className="h-6 w-6 text-primary" />Prévia do Visual</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 rounded-lg bg-card">
-                        <div className="p-4 rounded-lg border bg-card text-card-foreground">
-                            <h4 className="font-bold">Exemplo de Card</h4>
-                            <p className="text-sm text-muted-foreground">Este é um exemplo de como o texto aparecerá com as configurações atuais.</p>
-                            <Button size="sm" className="mt-2">Botão Principal</Button>
-                        </div>
-                        <div className="p-4 rounded-lg bg-primary text-primary-foreground">
-                            <h4 className="font-bold">Elemento com Cor Primária</h4>
-                            <p className="text-sm ">Ajuste a cor para melhor legibilidade.</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
 
-            {/* Backup */}
+             {/* Backup */}
             <Card>
                 <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline"><Database className="h-6 w-6 text-primary" />Backup</CardTitle>
@@ -317,6 +295,28 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                     </div>
                 </CardContent>
             </Card>
+        </div>
+        
+        <div className="space-y-6">
+            {/* Prévia do Visual */}
+            <div style={previewStyle} className={cn(watchedFields.theme)}>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 font-headline"><Eye className="h-6 w-6 text-primary" />Prévia do Visual</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 rounded-lg bg-card">
+                        <div className="p-4 rounded-lg border bg-card text-card-foreground">
+                            <h4 className="font-bold">Exemplo de Card</h4>
+                            <p className="text-sm text-muted-foreground">Este é um exemplo de como o texto aparecerá com as configurações atuais.</p>
+                            <Button size="sm" className="mt-2">Botão Principal</Button>
+                        </div>
+                        <div className="p-4 rounded-lg bg-primary text-primary-foreground">
+                            <h4 className="font-bold">Elemento com Cor Primária</h4>
+                            <p className="text-sm ">Ajuste a cor para melhor legibilidade.</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
       </div>
     </form>
