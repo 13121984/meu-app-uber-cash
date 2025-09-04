@@ -3,7 +3,7 @@
 
 import { collection, addDoc, Timestamp, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isToday } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
@@ -186,22 +186,12 @@ export async function getDashboardData() {
     const goals = await getGoals();
     const now = new Date();
 
-    const todayWorkDays = allWorkDays.filter(day => {
-        const dayDate = new Date(day.date);
-        return dayDate.getUTCDate() === now.getUTCDate() &&
-               dayDate.getUTCMonth() === now.getUTCMonth() &&
-               dayDate.getUTCFullYear() === now.getUTCFullYear();
-    });
+    const todayWorkDays = allWorkDays.filter(day => isToday(day.date));
 
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
 
-    const todayMaintenance = allMaintenance.filter(m => {
-        const maintenanceDate = new Date(m.date);
-        return maintenanceDate.getUTCDate() === now.getUTCDate() &&
-               maintenanceDate.getUTCMonth() === now.getUTCMonth() &&
-               maintenanceDate.getUTCFullYear() === now.getUTCFullYear();
-    });
+    const todayMaintenance = allMaintenance.filter(m => isToday(m.date));
 
     const thisWeekMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfMonth(now), end: endOfMonth(now) }));
@@ -361,3 +351,5 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     rawWorkDays: filteredDays,
   };
 }
+
+    
