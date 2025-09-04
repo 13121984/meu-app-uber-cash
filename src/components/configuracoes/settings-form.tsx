@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -68,12 +69,12 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm<Settings>({
+  const { control, handleSubmit, watch, formState: { errors } } = useForm<Settings>({
     resolver: zodResolver(settingsSchema),
     defaultValues: initialData,
   });
 
-  const watchAllFields = form.watch();
+  const watchAllFields = watch();
 
   const onSubmit = async (data: Settings) => {
     setIsSubmitting(true);
@@ -126,7 +127,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <Label>Tema do Aplicativo</Label>
                         <Controller
                             name="theme"
-                            control={form.control}
+                            control={control}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger>
@@ -150,7 +151,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <Label>Cor do Texto</Label>
                         <Controller
                             name="textColor"
-                            control={form.control}
+                            control={control}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger>
@@ -188,7 +189,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <Label>Cor Principal</Label>
                          <Controller
                             name="primaryColor"
-                            control={form.control}
+                            control={control}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
@@ -210,7 +211,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <Label>Cor de Fundo ({watchAllFields.theme === 'dark' ? 'Escuro' : 'Claro'})</Label>
                          <Controller
                             name="backgroundColor"
-                            control={form.control}
+                            control={control}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
@@ -279,16 +280,16 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <div className="space-y-0.5">
                             <Label>Backup Automático Semanal</Label>
                         </div>
-                        <Controller name="weeklyBackup" control={form.control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                        <Controller name="weeklyBackup" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="backupEmail">Email para Backup (Google Drive)</Label>
                         <Controller
                             name="backupEmail"
-                            control={form.control}
+                            control={control}
                             render={({ field }) => <Input id="backupEmail" placeholder="seu-email@gmail.com" {...field} />}
                         />
-                        {form.formState.errors.backupEmail && <p className="text-sm text-destructive">{form.formState.errors.backupEmail.message}</p>}
+                        {errors.backupEmail && <p className="text-sm text-destructive">{errors.backupEmail.message}</p>}
                     </div>
                 </CardContent>
             </Card>
@@ -303,13 +304,13 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <div className="space-y-0.5">
                             <Label>Habilitar Notificações de Manutenção</Label>
                         </div>
-                        <Controller name="maintenanceNotifications" control={form.control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
+                        <Controller name="maintenanceNotifications" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
                     </div>
                     <div className="space-y-2">
                         <Label>Tipo de Combustível Padrão</Label>
                          <Controller
                             name="defaultFuelType"
-                            control={form.control}
+                            control={control}
                             render={({ field }) => (
                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger>
