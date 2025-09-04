@@ -93,22 +93,35 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg flex items-center gap-2">
-                        <PieChartIcon className="w-5 h-5 text-primary" />
-                        Composição dos Ganhos
-                    </CardTitle>
-                     <CardDescription>
-                        Visualização da distribuição do seu faturamento bruto.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="h-[350px]">
-                        <EarningsPieChart data={reportData.profitComposition} />
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-lg flex items-center gap-2">
+                          <PieChartIcon className="w-5 h-5 text-primary" />
+                          Composição dos Ganhos
+                      </CardTitle>
+                      <CardDescription>
+                          Distribuição do seu faturamento bruto.
+                      </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <div className="h-[350px]">
+                          <EarningsPieChart data={reportData.profitComposition} />
+                      </div>
+                  </CardContent>
+              </Card>
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-lg">Gastos com Combustível</CardTitle>
+                      <CardDescription>
+                          Total gasto por tipo de combustível.
+                      </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <FuelBarChart data={reportData.fuelExpenses} />
+                  </CardContent>
+              </Card>
+            </div>
             
             <Card>
                 <CardHeader>
@@ -122,32 +135,25 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <EarningsBarChart data={reportData.earningsByCategory} />
-                </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <EarningsBarChart data={reportData.earningsByCategory} />
+                  </CardContent>
+              </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Viagens por Categoria</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <TripsBarChart data={reportData.tripsByCategory} />
-                </CardContent>
-            </Card>
-            
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Gastos com Combustível</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <FuelBarChart data={reportData.fuelExpenses} />
-                </CardContent>
-            </Card>
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-lg">Viagens por Categoria</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <TripsBarChart data={reportData.tripsByCategory} />
+                  </CardContent>
+              </Card>
+            </div>
 
             <Card>
                 <CardHeader>
