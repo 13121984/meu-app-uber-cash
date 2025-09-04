@@ -28,12 +28,12 @@ const StatCard = ({ title, value, icon: Icon, color, isCurrency = false, unit = 
 
     return (
         <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50">
-            <div className={`p-2 rounded-lg ${color}`}>
+            <div className={`p-1 rounded-lg ${color}`}>
                 <Icon className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">{formattedValue}</p>
-                <p className="text-muted-foreground text-xs">{title}</p>
+                <p className="text-xs font-bold text-foreground">{formattedValue}</p>
+                <p className="text-muted-foreground text-[10px]">{title}</p>
             </div>
         </div>
     );
@@ -81,17 +81,17 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
             <p className="text-muted-foreground">Não há registros para o período selecionado. Tente ajustar os filtros.</p>
         </Card>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-4">
 
             {/* Resumo do Período */}
             <Card>
-                <CardHeader>
+                <CardHeader className="p-3">
                     <CardTitle className="font-headline text-lg">Resumo do Período</CardTitle>
                     <CardDescription>
                         {reportData.diasTrabalhados} {reportData.diasTrabalhados === 1 ? 'dia trabalhado' : 'dias trabalhados'} no período selecionado.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-2">
+                <CardContent className="p-3 pt-0 grid grid-cols-2 gap-2">
                    <StatCard title="Lucro Líquido" value={reportData.totalLucro} icon={DollarSign} color="bg-green-500/80" isCurrency />
                    <StatCard title="Ganhos (Bruto)" value={reportData.totalGanho} icon={DollarSign} color="bg-green-500/80" isCurrency />
                    <StatCard title="Gastos Totais" value={reportData.totalGastos} icon={DollarSign} color="bg-red-500/80" isCurrency />
@@ -106,7 +106,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
             </Card>
 
             <Card>
-                <CardHeader>
+                <CardHeader className="p-3">
                     <CardTitle className="font-headline text-lg flex items-center gap-2">
                         <PieChartIcon className="w-5 h-5 text-primary" />
                         Composição dos Ganhos
@@ -115,7 +115,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                         Visualização da distribuição do seu faturamento bruto.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 pt-0">
                     <div className="h-[350px]">
                         <EarningsPieChart data={reportData.profitComposition} />
                     </div>
@@ -123,49 +123,49 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
             </Card>
             
             <Card>
-                <CardHeader>
+                <CardHeader className="p-3">
                     <CardTitle className="font-headline text-lg">Evolução do Lucro no Período</CardTitle>
                      <CardDescription>
                         Desempenho do lucro líquido dia a dia.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 pt-0">
                     <ProfitEvolutionChart data={reportData.profitEvolution} />
                 </CardContent>
             </Card>
 
             <Card>
-                <CardHeader>
+                <CardHeader className="p-3">
                     <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 pt-0">
                     <EarningsBarChart data={reportData.earningsByCategory} />
                 </CardContent>
             </Card>
 
             <Card>
-                <CardHeader>
+                <CardHeader className="p-3">
                     <CardTitle className="font-headline text-lg">Viagens por Categoria</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 pt-0">
                     <TripsBarChart data={reportData.tripsByCategory} />
                 </CardContent>
             </Card>
             
             <Card>
-                <CardHeader>
+                <CardHeader className="p-3">
                     <CardTitle className="font-headline text-lg">Gastos com Combustível</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 pt-0">
                     <FuelBarChart data={reportData.fuelExpenses} />
                 </CardContent>
             </Card>
 
             <Card>
-                <CardHeader>
+                <CardHeader className="p-3">
                     <CardTitle className="font-headline text-lg">Total de Viagens por Dia</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 pt-0">
                     <DailyTripsChart data={reportData.dailyTrips} />
                 </CardContent>
             </Card>
