@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap } from 'lucide-react';
-import { ReportsFilter, type ReportFilterValues } from './reports-filter';
+import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench } from 'lucide-react';
+import { ReportsFilter } from './reports-filter';
 import { WorkDay, getReportData, ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { EarningsPieChart } from '@/components/dashboard/earnings-chart';
@@ -12,6 +12,7 @@ import { TripsBarChart } from '@/components/dashboard/trips-bar-chart';
 import { FuelBarChart } from './fuel-bar-chart';
 import { ProfitEvolutionChart } from './profit-evolution-chart';
 import { DailyTripsChart } from './daily-trips-chart';
+import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions';
 
 
 interface ReportsClientProps {
@@ -63,7 +64,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
         </h1>
       </div>
 
-      <ReportsFilter onFilterChange={setFilters} allWorkDays={initialData} />
+      <ReportsFilter onFilterChange={setFilters} initialFilters={filters} />
       
       {isLoading ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed bg-card border-border">
@@ -91,6 +92,8 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                 <CardContent className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                    <StatCard title="Lucro Líquido" value={reportData.totalLucro} icon={DollarSign} color="bg-green-500/80" isCurrency />
                    <StatCard title="Ganhos (Bruto)" value={reportData.totalGanho} icon={DollarSign} color="bg-green-500/80" isCurrency />
+                   <StatCard title="Gastos Totais" value={reportData.totalGastos} icon={DollarSign} color="bg-red-500/80" isCurrency />
+                   <StatCard title="Manutenção" value={reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0} icon={Wrench} color="bg-orange-500/80" isCurrency />
                    <StatCard title="Viagens" value={reportData.totalViagens} icon={Car} color="bg-blue-500/80" />
                    <StatCard title="KM Rodados" value={reportData.totalKm} icon={Map} color="bg-purple-500/80" unit="km" />
                    <StatCard title="Horas" value={reportData.totalHoras} icon={Clock} color="bg-orange-500/80" unit="h" precision={1} />
@@ -104,8 +107,11 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                 <CardHeader>
                     <CardTitle className="font-headline text-lg flex items-center gap-2">
                         <PieChartIcon className="w-5 h-5 text-primary" />
-                        Composição do Lucro
+                        Composição dos Ganhos
                     </CardTitle>
+                     <CardDescription>
+                        Visualização da distribuição do seu faturamento bruto.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <EarningsPieChart data={reportData.profitComposition} />
@@ -115,6 +121,9 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline text-lg">Evolução do Lucro no Período</CardTitle>
+                     <CardDescription>
+                        Desempenho do lucro líquido dia a dia.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ProfitEvolutionChart data={reportData.profitEvolution} />

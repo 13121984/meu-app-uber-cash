@@ -12,14 +12,12 @@ import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { WorkDay } from '@/services/work-day.service';
-// Import only the action function and its type
-import { exportReportAction, type ReportFilterValues } from '@/app/relatorios/actions';
+import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions';
 
 
 interface ReportsFilterProps {
   onFilterChange: (filters: ReportFilterValues) => void;
-  allWorkDays: WorkDay[]; // Recebe todos os dados para poder filtrar e exportar
+  initialFilters: ReportFilterValues;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -28,11 +26,11 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
 }));
 
-export function ReportsFilter({ onFilterChange, allWorkDays }: ReportsFilterProps) {
-  const [filterType, setFilterType] = useState<ReportFilterValues['type']>('thisMonth');
-  const [year, setYear] = useState<number>(getYear(new Date()));
-  const [month, setMonth] = useState<number>(new Date().getMonth());
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterProps) {
+  const [filterType, setFilterType] = useState<ReportFilterValues['type']>(initialFilters.type);
+  const [year, setYear] = useState<number>(initialFilters.year || getYear(new Date()));
+  const [month, setMonth] = useState<number>(initialFilters.month || new Date().getMonth());
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(initialFilters.dateRange);
   const [isPending, startTransition] = useTransition();
   
   useEffect(() => {

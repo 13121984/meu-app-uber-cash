@@ -20,22 +20,31 @@ const chartConfig = {
   },
   combustivel: {
     label: "Combustível",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(var(--chart-5))",
   },
+  manutencao: {
+    label: "Manutenção",
+    color: "hsl(var(--chart-3))",
+  }
 } satisfies ChartConfig
 
 export function EarningsPieChart({ data }: EarningsPieChartProps) {
   const totalGanho = data[0]?.totalGanho || 0;
   
-  // O gráfico agora é baseado no Ganho Bruto, não na soma das partes
   const chartData = data.map(item => ({
     ...item,
-    // O valor de cada fatia continua o mesmo, mas o percentual será calculado sobre o totalGanho
   }));
+
+  // Create a dynamic chart config based on the data
+  const dynamicChartConfig = data.reduce((acc, item) => {
+    const key = item.name.toLowerCase().replace(/ /g, '');
+    acc[key] = { label: item.name, color: item.fill };
+    return acc;
+  }, {} as ChartConfig);
 
 
   return (
-    <ChartContainer config={chartConfig} className="h-[350px] w-full">
+    <ChartContainer config={dynamicChartConfig} className="h-[350px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Tooltip
@@ -83,7 +92,7 @@ export function EarningsPieChart({ data }: EarningsPieChartProps) {
               <Cell key={`cell-${entry.name}`} fill={entry.fill} />
             ))}
           </Pie>
-          <Legend />
+          <Legend content={<ChartTooltipContent hideIndicator />} />
         </PieChart>
       </ResponsiveContainer>
     </ChartContainer>

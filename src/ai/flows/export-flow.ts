@@ -34,30 +34,40 @@ export const exportToSheetFlow = ai.defineFlow(
       throw new Error("Nenhum dado para exportar com os filtros selecionados.");
     }
     
-    // 1. Get authenticated Sheets API client from Genkit's context
+    // 1. Get authenticated Sheets API client
+    const auth = new google.auth.GoogleAuth({
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+    const authClient = await auth.getClient();
+    google.options({ auth: authClient });
+    
     const sheets = google.sheets('v4');
 
     // 2. Prepare data for the spreadsheet
     const header = [
         "Data", "KM Rodados", "Horas", 
-        "Lucro do Dia", "Ganhos (Bruto)", "Gastos (Combustível)",
+        "Lucro do Dia", "Ganhos (Bruto)", "Gastos (Combustível)", "Gastos (Manutenção)",
         "Ganhos - Categoria", "Ganhos - Viagens", "Ganhos - Valor",
         "Abastecimento - Tipo", "Abastecimento - Valor Pago", "Abastecimento - Preço/Unid.",
         "Manutenção - Descrição", "Manutenção - Valor"
     ];
     
     const rows = filteredWorkDays.flatMap(day => {
-        // As datas podem vir como strings, então garantimos que são objetos Date
         const dayDate = typeof day.date === 'string' || typeof day.date === 'number' ? new Date(day.date) : day.date;
-        const profit = day.earnings.reduce((sum, e) => sum + e.amount, 0) - day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+        const earnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
+        const fuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+        const maintenanceCost = day.maintenance?.amount || 0;
+        const profit = earnings - fuel - maintenanceCost;
+
 
         const baseRow = [
             dayDate.toLocaleDateString('pt-BR'),
             day.km,
             day.hours,
             profit,
-            day.earnings.reduce((sum, e) => sum + e.amount, 0),
-            day.fuelEntries.reduce((sum, f) => sum + f.paid, 0),
+            earnings,
+            fuel,
+            maintenanceCost
         ];
 
         const maxRows = Math.max(day.earnings.length, day.fuelEntries.length, 1);
@@ -65,8 +75,8 @@ export const exportToSheetFlow = ai.defineFlow(
 
         for (let i = 0; i < maxRows; i++) {
             const earning = day.earnings[i] || {};
-            const fuel = day.fuelEntries[i] || {};
-            // A manutenção só aparece na primeira linha do dia
+            const fuelEntry = day.fuelEntries[i] || {};
+            // A manutenção do dia só aparece na primeira linha do dia
             const maintenance = i === 0 ? day.maintenance : {};
 
             dayRows.push([
@@ -74,9 +84,9 @@ export const exportToSheetFlow = ai.defineFlow(
                 earning.category || '',
                 earning.trips || '',
                 earning.amount || '',
-                fuel.type || '',
-                fuel.paid || '',
-                fuel.price || '',
+                fuelEntry.type || '',
+                fuelEntry.paid || '',
+                fuelEntry.price || '',
                 maintenance?.description || '',
                 maintenance?.amount || ''
             ]);
