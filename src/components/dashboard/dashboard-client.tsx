@@ -106,7 +106,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         </div>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {stats.map((stat) => (
             <StatsCard key={stat.title} {...stat} />
           ))}
@@ -135,15 +135,15 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               </CardDescription>
           </CardHeader>
           <CardContent className="grid md:grid-cols-2 gap-8">
-             <div>
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
+             <div className="space-y-2">
+                <h3 className="font-semibold flex items-center gap-2">
                   <GripVertical className="w-5 h-5 text-muted-foreground" />
                   Ganhos por Categoria
                 </h3>
                 <EarningsBarChart key={`earnings-${period}`} data={data.earningsByCategory} />
             </div>
-             <div>
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
+             <div className="space-y-2">
+                <h3 className="font-semibold flex items-center gap-2">
                   <GripVertical className="w-5 h-5 text-muted-foreground" />
                   Viagens por Categoria
                 </h3>

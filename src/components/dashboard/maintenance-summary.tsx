@@ -14,8 +14,8 @@ interface MaintenanceSummaryProps {
 }
 
 const StatItem = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="flex flex-col items-center text-center">
-        <p className="text-3xl font-bold text-foreground">{value}</p>
+    <div className="flex flex-col items-center justify-center text-center p-2 rounded-lg bg-secondary/50 flex-1">
+        <p className="text-2xl font-bold text-foreground">{value}</p>
         <p className="text-sm text-muted-foreground">{label}</p>
     </div>
 );
@@ -27,7 +27,7 @@ export function MaintenanceSummary({ data }: MaintenanceSummaryProps) {
 
   return (
     <Card className="bg-card border-border">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
             <CardTitle className="font-headline text-lg flex items-center gap-2">
                 <Wrench className="w-6 h-6 text-primary" />
@@ -38,15 +38,15 @@ export function MaintenanceSummary({ data }: MaintenanceSummaryProps) {
             </CardDescription>
         </div>
         <Link href="/manutencao" passHref>
-          <Button variant="outline">
+          <Button variant="outline" size="sm">
               Ver Detalhes
           </Button>
         </Link>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
+      <CardContent className="flex flex-col sm:flex-row items-center gap-4">
         <StatItem label="Total Gasto" value={formatCurrency(data.totalSpent)} />
-        <StatItem label="Serviços Realizados" value={data.servicesPerformed} />
-        <StatItem label="Média por Serviço" value={formatCurrency(averageCost)} />
+        <StatItem label="Serviços" value={data.servicesPerformed} />
+        <StatItem label="Média/Serviço" value={formatCurrency(averageCost)} />
       </CardContent>
     </Card>
   );
