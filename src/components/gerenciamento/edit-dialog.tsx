@@ -25,7 +25,7 @@ export function EditWorkDayDialog({ isOpen, onOpenChange, workDay }: EditWorkDay
             Modifique os dados do dia de trabalho selecionado.
           </DialogDescription>
         </DialogHeader>
-        {workDay && (
+        {workDay && isOpen && (
              <RegistrationWizard 
                 initialData={workDay}
                 isEditing={true}
