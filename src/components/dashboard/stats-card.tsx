@@ -25,7 +25,7 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
           <Icon className={cn("h-6 w-6", iconColor)} />
         </div>
         <div className="flex flex-col">
-          <p className="text-2xl font-bold">{formattedValue}</p>
+          <p className="text-xl font-bold">{formattedValue}</p>
           <p className="text-sm text-muted-foreground">{title}</p>
         </div>
       </CardContent>
