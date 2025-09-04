@@ -116,7 +116,9 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <EarningsPieChart data={reportData.profitComposition} />
+                    <div className="h-[350px]">
+                        <EarningsPieChart data={reportData.profitComposition} />
+                    </div>
                 </CardContent>
             </Card>
             
@@ -177,5 +179,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
     </div>
   );
 }
+
+    
 
     
