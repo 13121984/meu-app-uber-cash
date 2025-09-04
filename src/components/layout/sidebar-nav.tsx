@@ -12,8 +12,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  useSidebar
 } from "@/components/ui/sidebar"
 import { Car } from 'lucide-react';
+import { Button } from "../ui/button"
 
 const menuItems = [
   { href: "/", label: "Painel de Controle", icon: LayoutDashboard },
@@ -27,6 +29,8 @@ const menuItems = [
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
 
   return (
     <>
@@ -41,14 +45,16 @@ export function SidebarNav() {
           </div>
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-2">
+      <SidebarContent className="p-2">
         <SidebarMenu>
           {menuItems.map((item) => (
              <SidebarMenuItem key={item.href}>
-              <Link href={item.href} passHref>
+              <Link href={item.href} passHref legacyBehavior>
                 <SidebarMenuButton
+                  as="a"
                   isActive={pathname === item.href}
                   tooltip={item.label}
+                  onClick={() => setOpenMobile(false)}
                   className={cn(
                     "data-[active=true]:bg-primary data-[active=true]:text-primary-foreground hover:bg-primary/10 hover:text-foreground",
                     "justify-start"
