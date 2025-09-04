@@ -7,12 +7,12 @@ import { getAuth, Auth } from "firebase/auth";
 // Colocar a configuração diretamente aqui garante que o Firebase seja inicializado
 // com as chaves corretas, tanto no cliente quanto no servidor.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAG6jM0NodJIF_eS2s2KIK1dvjqFhNdEiI",
+  authDomain: "rota-certa-lkbvr.firebaseapp.com",
+  projectId: "rota-certa-lkbvr",
+  storageBucket: "rota-certa-lkbvr.firebasestorage.app",
+  messagingSenderId: "824212803664",
+  appId: "1:824212803664:web:32ee7ae1c6c9f796e30155"
 };
 
 
