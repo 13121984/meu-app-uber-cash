@@ -1,5 +1,24 @@
 [
   {
+    "date": "2025-09-04T15:20:46.876Z",
+    "km": 0,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1756999301443,
+        "category": "Uber X",
+        "trips": 20,
+        "amount": 350
+      }
+    ],
+    "fuelEntries": [],
+    "maintenance": {
+      "description": "",
+      "amount": 0
+    },
+    "id": "1756999318957"
+  },
+  {
     "date": "2025-09-04T15:18:02.067Z",
     "km": 0,
     "hours": 0,

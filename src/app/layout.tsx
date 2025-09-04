@@ -45,13 +45,13 @@ if (typeof window === "undefined") {
 function MobileHeader() {
   const { setOpenMobile } = useSidebar();
   return (
-     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:hidden">
+     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:hidden">
         <Button 
           variant="ghost" 
-          className="sm:hidden"
+          className="md:hidden"
           onClick={() => setOpenMobile(true)}
         >
-          <Car className="h-7 w-7 text-primary mr-2" />
+          <Car className="h-8 w-8 text-primary mr-2" />
           <span className="font-semibold text-lg">Menu</span>
         </Button>
       </header>
