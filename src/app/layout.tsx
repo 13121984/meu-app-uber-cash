@@ -4,10 +4,10 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
-import { SidebarProvider, Sidebar, useSidebar } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
-import { Car } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MobileHeader } from '@/components/layout/mobile-header';
+
 
 const APP_NAME = "Rota Certa";
 const APP_DEFAULT_TITLE = "Rota Certa";
@@ -32,47 +32,6 @@ export const metadata: Metadata = {
   },
 };
 
-function MobileHeader() {
-  "use client"
-  const { setOpenMobile } = useSidebar();
-  return (
-     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:hidden">
-        <Button 
-          variant="ghost" 
-          className="md:hidden"
-          onClick={() => setOpenMobile(true)}
-        >
-          <Car className="h-12 w-12 text-primary mr-2" />
-          <span className="font-semibold">Menu</span>
-        </Button>
-      </header>
-  );
-}
-
-function AppBody({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  "use client";
-  return (
-      <body className="font-body antialiased h-full bg-background">
-        <div className="flex min-h-screen w-full flex-col bg-muted/40">
-          <Sidebar>
-            <SidebarNav />
-          </Sidebar>
-          <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-              <MobileHeader />
-            <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-                {children}
-            </main>
-          </div>
-        </div>
-        <Toaster />
-      </body>
-  );
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -94,9 +53,22 @@ export default async function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
-      <SidebarProvider>
-        <AppBody>{children}</AppBody>
-      </SidebarProvider>
+      <body className="font-body antialiased h-full bg-background">
+        <SidebarProvider>
+          <div className="flex min-h-screen w-full flex-col bg-muted/40">
+            <Sidebar>
+              <SidebarNav />
+            </Sidebar>
+            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+                <MobileHeader />
+              <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+                  {children}
+              </main>
+            </div>
+          </div>
+          <Toaster />
+        </SidebarProvider>
+      </body>
     </html>
   );
 }
