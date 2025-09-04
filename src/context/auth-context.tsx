@@ -3,17 +3,14 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, login as loginService, signup as signupService, logout as logoutService, sendPasswordReset as sendPasswordResetService, signInWithGoogle as signInWithGoogleService } from '@/services/auth.service';
+import { auth, signInWithGoogle as signInWithGoogleService, logout as logoutService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: typeof loginService;
-  signup: typeof signupService;
-  logout: () => void;
-  sendPasswordReset: typeof sendPasswordResetService;
   signInWithGoogle: typeof signInWithGoogleService;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,14 +40,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/login');
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     loading,
-    login: loginService,
-    signup: signupService,
-    logout,
-    sendPasswordReset: sendPasswordResetService,
     signInWithGoogle: signInWithGoogleService,
+    logout,
   };
 
   return (
