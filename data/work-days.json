@@ -1,5 +1,24 @@
 [
   {
+    "date": "2025-09-04T15:26:59.660Z",
+    "km": 0,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1756999846579,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 100
+      }
+    ],
+    "fuelEntries": [],
+    "maintenance": {
+      "description": "",
+      "amount": 0
+    },
+    "id": "1756999863197"
+  },
+  {
     "date": "2025-09-04T15:20:46.876Z",
     "km": 0,
     "hours": 0,

@@ -51,7 +51,7 @@ function MobileHeader() {
           className="md:hidden"
           onClick={() => setOpenMobile(true)}
         >
-          <Car className="h-8 w-8 text-primary mr-2" />
+          <Car className="h-12 w-12 text-primary mr-2" />
           <span className="font-semibold text-lg">Menu</span>
         </Button>
       </header>
