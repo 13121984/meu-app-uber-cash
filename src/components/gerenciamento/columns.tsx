@@ -19,12 +19,22 @@ import { EditWorkDayDialog } from "./edit-dialog"
 import { deleteWorkDayAction } from "./actions"
 import { toast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 
-export const ColumnsComponent = () => {
+export const useWorkDayColumns = () => {
   const router = useRouter();
   const [editingWorkDay, setEditingWorkDay] = useState<WorkDay | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -144,17 +154,14 @@ export const ColumnsComponent = () => {
     },
   ]
 
-  return {
-    columns,
-    dialog: (
+  const Dialogs = (
+    <>
       <EditWorkDayDialog
         isOpen={!!editingWorkDay}
         onOpenChange={(isOpen) => !isOpen && setEditingWorkDay(null)}
         workDay={editingWorkDay}
       />
-    ),
-    alertDialog: (
-       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
@@ -170,19 +177,8 @@ export const ColumnsComponent = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    )
-  };
+    </>
+  )
+
+  return { columns, Dialogs };
 }
-
-// Importar AlertDialog e seus componentes para uso no componente
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-
