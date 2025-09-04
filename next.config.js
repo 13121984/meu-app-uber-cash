@@ -14,6 +14,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 
 const nextConfig = {
   /* config options here */
+  output: 'export', // Adicionado para exportação estática
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -21,6 +22,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true, // Adicionado para exportação estática
     remotePatterns: [
       {
         protocol: 'https',
