@@ -16,6 +16,7 @@ import { saveSettings } from '@/services/settings.service';
 import { useRouter } from 'next/navigation';
 import { Paintbrush, Database, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun } from 'lucide-react';
 import type { Settings, AppTheme } from '@/types/settings';
+import { ImportCard } from './import-card';
 
 const settingsSchema = z.object({
     theme: z.enum(['light', 'dark']),
@@ -67,111 +68,114 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   };
   
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-                {/* Aparência */}
-                <Card>
-                    <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline"><Paintbrush className="h-6 w-6 text-primary" />Aparência</CardTitle>
-                    <CardDescription>Personalize o visual do aplicativo.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Tema do Aplicativo</Label>
-                            <Controller
-                                name="theme"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecione um tema..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {themes.map(theme => (
-                                                <SelectItem key={theme.value} value={theme.value}>
-                                                    <div className="flex items-center gap-2">
-                                                        <theme.icon className="h-4 w-4" />
-                                                        {theme.label}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Backup */}
-                <Card>
-                    <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline"><Database className="h-6 w-6 text-primary" />Backup</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <Label>Backup Automático Semanal</Label>
-                            </div>
-                            <Controller name="weeklyBackup" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="backupEmail">Email para Backup (Google Drive)</Label>
-                            <Controller
-                                name="backupEmail"
-                                control={control}
-                                render={({ field }) => <Input id="backupEmail" placeholder="seu-email@gmail.com" {...field} />}
-                            />
-                            {errors.backupEmail && <p className="text-sm text-destructive">{errors.backupEmail.message}</p>}
-                        </div>
-                    </CardContent>
-                </Card>
+    <div className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <div className="flex justify-end">
+                <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+                </Button>
             </div>
-            
-            <div className="space-y-6">
-                {/* Notificações e Padrões */}
-                <Card>
-                    <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline"><Bell className="h-6 w-6 text-primary" />Notificações e Padrões</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <Label>Habilitar Notificações de Manutenção</Label>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                    {/* Aparência */}
+                    <Card>
+                        <CardHeader>
+                        <CardTitle className="flex items-center gap-2 font-headline"><Paintbrush className="h-6 w-6 text-primary" />Aparência</CardTitle>
+                        <CardDescription>Personalize o visual do aplicativo.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Tema do Aplicativo</Label>
+                                <Controller
+                                    name="theme"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecione um tema..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {themes.map(theme => (
+                                                    <SelectItem key={theme.value} value={theme.value}>
+                                                        <div className="flex items-center gap-2">
+                                                            <theme.icon className="h-4 w-4" />
+                                                            {theme.label}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
                             </div>
-                            <Controller name="maintenanceNotifications" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Tipo de Combustível Padrão</Label>
-                            <Controller
-                                name="defaultFuelType"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecione um tipo..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {fuelTypes.map(type => (
-                                                <SelectItem key={type} value={type}>{type}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+
+                    {/* Backup */}
+                    <Card>
+                        <CardHeader>
+                        <CardTitle className="flex items-center gap-2 font-headline"><Database className="h-6 w-6 text-primary" />Backup</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                    <Label>Backup Automático Semanal</Label>
+                                </div>
+                                <Controller name="weeklyBackup" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="backupEmail">Email para Backup (Google Drive)</Label>
+                                <Controller
+                                    name="backupEmail"
+                                    control={control}
+                                    render={({ field }) => <Input id="backupEmail" placeholder="seu-email@gmail.com" {...field} />}
+                                />
+                                {errors.backupEmail && <p className="text-sm text-destructive">{errors.backupEmail.message}</p>}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                
+                <div className="space-y-6">
+                    {/* Notificações e Padrões */}
+                    <Card>
+                        <CardHeader>
+                        <CardTitle className="flex items-center gap-2 font-headline"><Bell className="h-6 w-6 text-primary" />Notificações e Padrões</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                    <Label>Habilitar Notificações de Manutenção</Label>
+                                </div>
+                                <Controller name="maintenanceNotifications" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Tipo de Combustível Padrão</Label>
+                                <Controller
+                                    name="defaultFuelType"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecione um tipo..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {fuelTypes.map(type => (
+                                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
-        </div>
-    </form>
+        </form>
+        <ImportCard />
+    </div>
   );
 }

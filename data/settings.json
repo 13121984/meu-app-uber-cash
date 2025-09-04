@@ -1,7 +1,7 @@
 {
-  "theme": "light",
+  "theme": "dark",
   "weeklyBackup": false,
   "backupEmail": "",
   "maintenanceNotifications": true,
-  "defaultFuelType": "Gasolina Aditivada"
+  "defaultFuelType": "GNV"
 }

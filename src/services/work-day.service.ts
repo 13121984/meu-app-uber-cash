@@ -27,6 +27,20 @@ export interface WorkDay {
   };
 }
 
+export interface ImportedWorkDay {
+    date: string;
+    km: string;
+    hours: string;
+    earnings_category: string;
+    earnings_trips: string;
+    earnings_amount: string;
+    fuel_type: string;
+    fuel_paid: string;
+    fuel_price: string;
+    maintenance_description: string;
+    maintenance_amount: string;
+}
+
 export interface FuelExpense {
     type: string;
     total: number;
@@ -89,7 +103,9 @@ async function readWorkDays(force = false): Promise<WorkDay[]> {
 
 async function writeWorkDays(data: WorkDay[]): Promise<void> {
     await fs.mkdir(path.dirname(workDaysFilePath), { recursive: true });
-    await fs.writeFile(workDaysFilePath, JSON.stringify(data, null, 2), 'utf8');
+    // Sort by date descending before writing
+    const sortedData = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    await fs.writeFile(workDaysFilePath, JSON.stringify(sortedData, null, 2), 'utf8');
     workDaysCache = null; // Invalidate cache
 }
 
@@ -112,6 +128,86 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
     const errorMessage = e instanceof Error ? e.message : "Failed to save work day.";
     return { success: false, error: errorMessage };
   }
+}
+
+export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
+    try {
+        const allWorkDays = await readWorkDays(true);
+        const workDaysMap = new Map<string, WorkDay>();
+
+        // Pré-popula o mapa com os dias de trabalho existentes
+        allWorkDays.forEach(day => {
+            const dateKey = format(new Date(day.date), 'yyyy-MM-dd');
+            workDaysMap.set(dateKey, day);
+        });
+
+        // Processa os dados importados
+        importedData.forEach(row => {
+            if (!row.date) return;
+            const dateKey = format(parseISO(row.date), 'yyyy-MM-dd');
+            let day = workDaysMap.get(dateKey);
+
+            if (!day) {
+                day = {
+                    id: Date.now().toString() + Math.random(),
+                    date: parseISO(row.date),
+                    km: 0,
+                    hours: 0,
+                    earnings: [],
+                    fuelEntries: [],
+                    maintenance: { description: '', amount: 0 }
+                };
+            }
+
+            // Adiciona km e horas (apenas se for maior que o existente, para não zerar)
+            day.km = Math.max(day.km, parseFloat(row.km) || 0);
+            day.hours = Math.max(day.hours, parseFloat(row.hours) || 0);
+
+            // Adiciona ganhos
+            if (row.earnings_category && row.earnings_amount) {
+                day.earnings.push({
+                    id: Date.now() + Math.random(),
+                    category: row.earnings_category,
+                    trips: parseInt(row.earnings_trips) || 0,
+                    amount: parseFloat(row.earnings_amount) || 0
+                });
+            }
+
+            // Adiciona abastecimento
+            if (row.fuel_type && row.fuel_paid) {
+                day.fuelEntries.push({
+                    id: Date.now() + Math.random(),
+                    type: row.fuel_type,
+                    paid: parseFloat(row.fuel_paid) || 0,
+                    price: parseFloat(row.fuel_price) || 0
+                });
+            }
+
+            // Adiciona manutenção (apenas um por dia, sobrescreve se houver múltiplos)
+            if (row.maintenance_description && row.maintenance_amount) {
+                day.maintenance = {
+                    description: row.maintenance_description,
+                    amount: parseFloat(row.maintenance_amount) || 0
+                };
+            }
+            
+            workDaysMap.set(dateKey, day);
+        });
+
+        const updatedWorkDays = Array.from(workDaysMap.values());
+        await writeWorkDays(updatedWorkDays);
+        
+        revalidatePath('/');
+        revalidatePath('/gerenciamento');
+        revalidatePath('/relatorios');
+
+        return { success: true, count: workDaysMap.size };
+
+    } catch(e) {
+        console.error("Error adding multiple work days: ", e);
+        const errorMessage = e instanceof Error ? e.message : "Failed to import work days.";
+        return { success: false, error: errorMessage };
+    }
 }
 
 export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id'>): Promise<{ success: boolean; error?: string }> {
