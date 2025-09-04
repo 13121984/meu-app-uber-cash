@@ -91,7 +91,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                         {reportData.diasTrabalhados} {reportData.diasTrabalhados === 1 ? 'dia trabalhado' : 'dias trabalhados'} no período selecionado.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                    <StatCard title="Lucro Líquido" value={reportData.totalLucro} icon={DollarSign} color="bg-green-500/80" isCurrency />
                    <StatCard title="Ganhos (Bruto)" value={reportData.totalGanho} icon={DollarSign} color="bg-green-500/80" isCurrency />
                    <StatCard title="Gastos Totais" value={reportData.totalGastos} icon={DollarSign} color="bg-red-500/80" isCurrency />
