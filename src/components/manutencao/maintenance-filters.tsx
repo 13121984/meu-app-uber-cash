@@ -1,44 +1,69 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Search, FilterX } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar as CalendarIcon, Search, FilterX, Loader2 } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
 
-export interface FilterValues {
-    query: string;
-    dateRange?: DateRange;
-}
 
-interface MaintenanceFiltersProps {
-  onFilterChange: (filters: FilterValues) => void;
-}
+export function MaintenanceFilters() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-export function MaintenanceFilters({ onFilterChange }: MaintenanceFiltersProps) {
-  const [query, setQuery] = useState('');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [query, setQuery] = useState(searchParams.get('query') || '');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
+    if (from) {
+      return { from: parseISO(from), to: to ? parseISO(to) : undefined };
+    }
+    return undefined;
+  });
   
   useEffect(() => {
-    onFilterChange({ query, dateRange });
-  }, [query, dateRange, onFilterChange]);
+    const params = new URLSearchParams(searchParams);
+    if (query) {
+      params.set('query', query);
+    } else {
+      params.delete('query');
+    }
+    if (dateRange?.from) {
+      params.set('from', format(dateRange.from, 'yyyy-MM-dd'));
+      if (dateRange.to) {
+        params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
+      } else {
+        params.delete('to');
+      }
+    } else {
+      params.delete('from');
+      params.delete('to');
+    }
+
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`);
+    });
+
+  }, [query, dateRange, pathname, router, searchParams]);
 
   const handleClearFilters = () => {
     setQuery('');
     setDateRange(undefined);
   }
 
-  const hasActiveFilters = query !== '' || dateRange !== undefined;
-
+  const hasActiveFilters = !!(query || dateRange);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card">
+    <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card items-center">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -87,8 +112,10 @@ export function MaintenanceFilters({ onFilterChange }: MaintenanceFiltersProps) 
         </PopoverContent>
       </Popover>
       
+      {isPending && <Loader2 className="h-5 w-5 animate-spin" />}
+      
       {hasActiveFilters && (
-        <Button variant="ghost" onClick={handleClearFilters}>
+        <Button variant="ghost" onClick={handleClearFilters} disabled={isPending}>
             <FilterX className="mr-2 h-4 w-4" />
             Limpar
         </Button>
