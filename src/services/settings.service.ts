@@ -15,14 +15,19 @@ export async function getSettings(): Promise<Settings> {
   try {
     const docSnap = await getDoc(settingsDocRef);
     if (docSnap.exists()) {
-      return docSnap.data() as Settings;
+      const data = docSnap.data();
+      // Garante que apenas as chaves esperadas sejam retornadas
+      return {
+        theme: data.theme || 'dark',
+        weeklyBackup: data.weeklyBackup || false,
+        backupEmail: data.backupEmail || '',
+        maintenanceNotifications: data.maintenanceNotifications !== undefined ? data.maintenanceNotifications : true,
+        defaultFuelType: data.defaultFuelType || 'Gasolina Aditivada',
+      };
     }
     // Retorna o valor padrão se o documento não existir
     return {
         theme: 'dark',
-        primaryColor: '250 80% 65%',
-        backgroundColor: '224 25% 10%',
-        textColor: 'white',
         weeklyBackup: false,
         backupEmail: '',
         maintenanceNotifications: true,
@@ -33,9 +38,6 @@ export async function getSettings(): Promise<Settings> {
     // Em caso de erro, retorna o padrão para não quebrar a aplicação.
     return {
         theme: 'dark',
-        primaryColor: '250 80% 65%',
-        backgroundColor: '224 25% 10%',
-        textColor: 'white',
         weeklyBackup: false,
         backupEmail: '',
         maintenanceNotifications: true,
