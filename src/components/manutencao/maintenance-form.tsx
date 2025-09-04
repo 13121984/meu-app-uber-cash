@@ -50,7 +50,8 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
     setIsSubmitting(true);
     try {
       let result;
-      const dataToSend = { ...data, id: undefined }; // Garante que o ID não vá no payload
+      // Para edição, não precisamos do ID no payload principal, mas para adição, não deve existir
+      const dataToSend = { date: data.date, description: data.description, amount: data.amount };
 
       if (initialData?.id) {
         // Editando
@@ -111,6 +112,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
                         type="number" 
                         placeholder="150,00" 
                         {...field}
+                        value={field.value === 0 ? '' : field.value}
                         onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                      />
                 </FormControl>
