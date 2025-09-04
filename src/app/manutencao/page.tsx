@@ -3,11 +3,11 @@ import { Wrench } from 'lucide-react';
 import { getMaintenanceRecords } from '@/services/maintenance.service';
 import { MaintenanceClient } from '@/components/manutencao/maintenance-client';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ManutencaoPage() {
   const maintenanceRecords = await getMaintenanceRecords();
   
-  const dynamic = 'force-dynamic';
-
   return (
     <div className="space-y-6">
       <div>
