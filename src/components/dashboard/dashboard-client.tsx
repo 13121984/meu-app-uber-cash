@@ -13,6 +13,7 @@ import dynamic from 'next/dynamic';
 
 const EarningsBarChart = dynamic(() => import('./earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const TripsBarChart = dynamic(() => import('./trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const EarningsPieChart = dynamic(() => import('./earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
 
 export interface EarningsByCategory {
@@ -46,6 +47,7 @@ export interface PeriodData {
   tripsByCategory: TripsByCategory[];
   maintenance: MaintenanceData;
   meta: { target: number; period: string };
+  profitComposition: { name: string; value: number; fill: string; totalGanho: number; }[];
 }
 
 export interface DashboardData {
@@ -150,6 +152,18 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                 <TripsBarChart key={`trips-${period}`} data={data.tripsByCategory} />
             </div>
           </CardContent>
+        </Card>
+        
+         <Card>
+            <CardHeader>
+                <CardTitle className="font-headline text-lg">Composição dos Ganhos</CardTitle>
+                 <CardDescription>
+                    Distribuição do seu faturamento bruto no período.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <EarningsPieChart key={`pie-${period}`} data={data.profitComposition} />
+            </CardContent>
         </Card>
     </div>
   )

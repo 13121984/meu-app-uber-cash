@@ -237,6 +237,18 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
 
     const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
     const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
+    
+    const totalGanho = data.totalGanho;
+    const totalLucroFinal = data.totalLucro;
+    const totalCombustivelFinal = data.totalCombustivel;
+    const totalManutencaoFinal = maintenanceData.totalSpent;
+    
+    const profitComposition = [
+        { name: 'Lucro Líquido', value: totalLucroFinal, fill: 'hsl(var(--chart-1))', totalGanho },
+        { name: 'Combustível', value: totalCombustivelFinal, fill: 'hsl(var(--chart-2))', totalGanho },
+        { name: 'Manutenção', value: totalManutencaoFinal, fill: 'hsl(var(--chart-3))', totalGanho },
+      ].filter(item => item.value !== 0);
+
 
     let targetGoal = 0;
     if (period === 'diária') targetGoal = goals.daily;
@@ -252,6 +264,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         tripsByCategory,
         maintenance: maintenanceData,
         meta: { target: targetGoal, period: period },
+        profitComposition: profitComposition
     };
 }
 
