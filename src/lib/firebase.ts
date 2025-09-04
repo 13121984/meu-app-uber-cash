@@ -12,19 +12,19 @@ const firebaseConfig = {
   "messagingSenderId": "1072979261835"
 };
 
-// Initialize Firebase
+// Singleton pattern para inicialização do Firebase
 let app: FirebaseApp;
-let db: Firestore;
 let auth: Auth;
+let db: Firestore;
 
-if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-} else {
+if (getApps().length) {
     app = getApp();
+} else {
+    app = initializeApp(firebaseConfig);
 }
 
-db = getFirestore(app);
 auth = getAuth(app);
+db = getFirestore(app);
 
 
 export { app, db, auth };
