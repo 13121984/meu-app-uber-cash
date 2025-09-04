@@ -39,7 +39,8 @@ export const columns: ColumnDef<WorkDay>[] = [
     },
     cell: ({ row }) => {
       const date = row.getValue("date") as Date;
-      return <div className="font-medium">{format(date, "dd/MM/yyyy")}</div>
+      // A formatação agora é feita no componente que renderiza a data
+      return <div className="font-medium">{date.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
     }
   },
   {

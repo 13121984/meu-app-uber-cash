@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Edit, DollarSign, TrendingUp, Fuel, Filter } from 'lucide-react';
 import { HistoryFilters, FilterValues } from './history-filters';
 
+interface HistoryClientProps {
+    data: WorkDay[];
+}
+
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const getCategories = (day: WorkDay) => {
@@ -35,12 +39,20 @@ const SummaryCard = ({ title, value, description, icon: Icon }: { title: string;
 );
 
 
-export function HistoryClient({ data }: HistoryClientProps) {
+export function HistoryClient({ data: initialData }: HistoryClientProps) {
   const [filters, setFilters] = useState<FilterValues>({
     query: '',
     category: 'all',
     dateRange: undefined
   });
+
+  const data = useMemo(() => {
+    // Garante que todas as datas sejam objetos Date
+    return initialData.map(day => ({
+        ...day,
+        date: new Date(day.date)
+    }));
+  }, [initialData]);
   
   const allCategories = useMemo(() => {
     const categories = new Set<string>();
@@ -195,7 +207,7 @@ export function HistoryClient({ data }: HistoryClientProps) {
                         <Card key={day.id} className="bg-secondary/50 hover:bg-secondary/70 transition-colors">
                             <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex-1 space-y-2">
-                                    <p className="font-bold text-lg">{format(day.date, "dd/MM/yyyy", { locale: ptBR })}</p>
+                                    <p className="font-bold text-lg">{format(day.date, "PPP", { locale: ptBR })}</p>
                                     <div className="flex flex-wrap items-center gap-2">
                                         {getCategories(day).map(cat => (
                                             <Badge key={cat} variant="outline" className="text-xs">{cat}</Badge>
