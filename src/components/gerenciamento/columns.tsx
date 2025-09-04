@@ -73,7 +73,8 @@ export const useWorkDayColumns = () => {
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <ArrowUpDown className="h-4 w-4" />
+            Data
+            <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         )
       },
@@ -113,13 +114,13 @@ export const useWorkDayColumns = () => {
     },
     {
       accessorKey: "km",
-      header: () => <div className="text-right">KM</div>,
-      cell: ({ row }) => <div className="text-right">{`${row.getValue("km")}`}</div>
+      header: () => <div className="text-right hidden md:table-cell">KM</div>,
+      cell: ({ row }) => <div className="text-right hidden md:table-cell">{`${row.getValue("km")}`}</div>
     },
     {
       accessorKey: "hours",
-      header: () => <div className="text-right">Horas</div>,
-       cell: ({ row }) => <div className="text-right">{`${row.getValue("hours")}`}</div>
+      header: () => <div className="text-right hidden md:table-cell">Horas</div>,
+       cell: ({ row }) => <div className="text-right hidden md:table-cell">{`${row.getValue("hours")}`}</div>
     },
     {
       id: "actions",
