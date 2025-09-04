@@ -80,7 +80,7 @@ export const useWorkDayColumns = () => {
       },
       cell: ({ row }) => {
         const date = row.getValue("date") as Date;
-        return <div className="font-medium">{new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
+        return <div className="font-medium whitespace-nowrap">{new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
       }
     },
     {
@@ -91,7 +91,7 @@ export const useWorkDayColumns = () => {
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const maintenance = row.original.maintenance?.amount || 0;
         const profit = earnings - fuel - maintenance;
-        return <div className="text-green-600 font-semibold">{formatCurrency(profit)}</div>
+        return <div className="text-green-600 font-semibold whitespace-nowrap">{formatCurrency(profit)}</div>
       }
     },
     {
@@ -99,28 +99,28 @@ export const useWorkDayColumns = () => {
       header: "Ganhos (Bruto)",
       cell: ({ row }) => {
          const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
-         return <div>{formatCurrency(earnings)}</div>
+         return <div className="whitespace-nowrap">{formatCurrency(earnings)}</div>
       }
     },
      {
       accessorKey: "totalGastos",
-      header: "Gastos (Comb. + Manut.)",
+      header: () => <div className="whitespace-nowrap">Gastos</div>,
       cell: ({ row }) => {
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const maintenance = row.original.maintenance?.amount || 0;
         const total = fuel + maintenance;
-        return <div className="text-red-600">{formatCurrency(total)}</div>
+        return <div className="text-red-600 whitespace-nowrap">{formatCurrency(total)}</div>
       }
     },
     {
       accessorKey: "km",
-      header: "KM Rodados",
-      cell: ({ row }) => `${row.getValue("km")} km`
+      header: () => <div className="hidden md:table-cell">KM Rodados</div>,
+      cell: ({ row }) => <div className="hidden md:table-cell">{`${row.getValue("km")} km`}</div>
     },
     {
       accessorKey: "hours",
-      header: "Horas",
-       cell: ({ row }) => `${row.getValue("hours")} h`
+      header: () => <div className="hidden md:table-cell">Horas</div>,
+       cell: ({ row }) => <div className="hidden md:table-cell">{`${row.getValue("hours")} h`}</div>
     },
     {
       id: "actions",
