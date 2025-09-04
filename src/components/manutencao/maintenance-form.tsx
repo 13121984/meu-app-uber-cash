@@ -38,7 +38,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
   
   const form = useForm<MaintenanceFormData>({
     resolver: zodResolver(maintenanceSchema),
-    defaultValues: initialData || {
+    defaultValues: initialData ? { ...initialData, date: new Date(initialData.date) } : {
       date: new Date(),
       description: '',
       amount: 0,
@@ -57,17 +57,17 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
         result = await addMaintenance(dataToSend);
       }
 
-      if (result.success) {
+      if (result.success && result.id) {
         toast({
           title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><span>Sucesso!</span></div>,
           description: `Registro ${initialData ? 'atualizado' : 'adicionado'}.`,
         });
         
-        const returnedRecord = { ...data, id: initialData?.id ?? result.id };
+        const returnedRecord = { ...data, id: result.id };
         onSuccess(returnedRecord as MaintenanceType);
 
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || "Ocorreu um erro desconhecido.");
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Não foi possível salvar o registro.";

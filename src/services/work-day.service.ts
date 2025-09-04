@@ -5,13 +5,15 @@ import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth,
 import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import { getMaintenanceRecords } from './maintenance.service';
+import { getMaintenanceRecords, Maintenance } from './maintenance.service';
+import fs from 'fs/promises';
+import path from 'path';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id:number; type: string; paid: number; price: number };
 
 export interface WorkDay {
-  id?: string;
+  id: string; // ID is now mandatory
   date: Date;
   km: number;
   hours: number;
@@ -38,7 +40,6 @@ export interface DailyTripsData {
     viagens: number;
 }
 
-
 export interface ReportData {
   totalGanho: number;
   totalLucro: number;
@@ -59,31 +60,50 @@ export interface ReportData {
   rawWorkDays: WorkDay[]; // Adicionado para exportação
 }
 
-// In-memory storage for work days
-let workDays: WorkDay[] = [];
-let nextId = 1;
+const dataFilePath = path.join(process.cwd(), 'data', 'work-days.json');
+
+async function readWorkDays(): Promise<WorkDay[]> {
+  try {
+    await fs.access(dataFilePath);
+    const fileContent = await fs.readFile(dataFilePath, 'utf8');
+    return (JSON.parse(fileContent) as any[]).map(day => ({
+        ...day,
+        date: new Date(day.date), // Re-hydrate date objects
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function writeWorkDays(data: WorkDay[]): Promise<void> {
+    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
+    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+}
 
 
 export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
   try {
+    const allWorkDays = await readWorkDays();
     const newWorkDay: WorkDay = {
         ...data,
-        id: (nextId++).toString(),
+        id: Date.now().toString(),
         date: new Date(data.date),
     };
-    workDays.unshift(newWorkDay); // Add to the beginning of the array
+    allWorkDays.unshift(newWorkDay); // Add to the beginning of the array
+    await writeWorkDays(allWorkDays);
     return { success: true, id: newWorkDay.id };
   } catch (e) {
-    console.error("Error adding document: ", e);
-    return { success: false, error: "Failed to save work day." };
+    console.error("Error adding work day: ", e);
+    const errorMessage = e instanceof Error ? e.message : "Failed to save work day.";
+    return { success: false, error: errorMessage };
   }
 }
 
 export async function getWorkDays(): Promise<WorkDay[]> {
-    return Promise.resolve(workDays.map(day => ({...day, date: new Date(day.date)})));
+    return await readWorkDays();
 }
 
-function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: any[]): PeriodData {
+function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
 

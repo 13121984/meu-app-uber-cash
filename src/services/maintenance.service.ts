@@ -2,33 +2,55 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import fs from 'fs/promises';
+import path from 'path';
 
 export interface Maintenance {
-  id?: string;
+  id: string; // ID is now mandatory
   date: Date;
   description: string;
   amount: number;
 }
 
-// In-memory storage for maintenance records
-let maintenanceRecords: Maintenance[] = [];
-let nextId = 1;
+const dataFilePath = path.join(process.cwd(), 'data', 'maintenance.json');
+
+async function readMaintenanceData(): Promise<Maintenance[]> {
+  try {
+    await fs.access(dataFilePath);
+    const fileContent = await fs.readFile(dataFilePath, 'utf8');
+    // Important: Re-hydrate dates, as they are stored as strings in JSON
+    return (JSON.parse(fileContent) as any[]).map(record => ({
+      ...record,
+      date: new Date(record.date),
+    }));
+  } catch {
+    // If the file doesn't exist, return an empty array
+    return [];
+  }
+}
+
+async function writeMaintenanceData(data: Maintenance[]): Promise<void> {
+    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
+    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+}
 
 
 // --- Funções CRUD ---
 
 /**
- * Adiciona um novo registro de manutenção na memória.
+ * Adiciona um novo registro de manutenção no arquivo.
  * Retorna o ID do novo documento.
  */
 export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
+    const allRecords = await readMaintenanceData();
     const newRecord: Maintenance = {
         ...data,
-        id: (nextId++).toString(),
+        id: Date.now().toString(), // Simple unique ID
         date: new Date(data.date),
     };
-    maintenanceRecords.unshift(newRecord); // Add to the beginning
+    allRecords.unshift(newRecord); // Add to the beginning
+    await writeMaintenanceData(allRecords);
 
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
@@ -40,22 +62,24 @@ export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ s
 }
 
 /**
- * Busca todos os registros de manutenção da memória.
+ * Busca todos os registros de manutenção do arquivo.
  */
 export async function getMaintenanceRecords(): Promise<Maintenance[]> {
-    return Promise.resolve(maintenanceRecords);
+    return await readMaintenanceData();
 }
 
 /**
- * Atualiza um registro de manutenção existente na memória.
+ * Atualiza um registro de manutenção existente no arquivo.
  */
 export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; error?: string }> {
   try {
-    const index = maintenanceRecords.findIndex(r => r.id === id);
+    const allRecords = await readMaintenanceData();
+    const index = allRecords.findIndex(r => r.id === id);
     if (index === -1) {
         return { success: false, error: "Registro não encontrado." };
     }
-    maintenanceRecords[index] = { ...data, id, date: new Date(data.date) };
+    allRecords[index] = { ...data, id, date: new Date(data.date) };
+    await writeMaintenanceData(allRecords);
     
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
@@ -67,34 +91,38 @@ export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'
 }
 
 /**
- * Apaga um registro de manutenção da memória.
+ * Apaga um registro de manutenção do arquivo.
  */
 export async function deleteMaintenance(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const initialLength = maintenanceRecords.length;
-    maintenanceRecords = maintenanceRecords.filter(r => r.id !== id);
-    if(maintenanceRecords.length === initialLength){
+    let allRecords = await readMaintenanceData();
+    const initialLength = allRecords.length;
+    allRecords = allRecords.filter(r => r.id !== id);
+    if(allRecords.length === initialLength){
         return { success: false, error: "Registro não encontrado."};
     }
+    await writeMaintenanceData(allRecords);
     
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
-    return { success: false, error: "Falha ao apagar registro." };
+    const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registro.";
+    return { success: false, error: errorMessage };
   }
 }
 
 /**
- * Apaga todos os registros de manutenção da memória.
+ * Apaga todos os registros de manutenção do arquivo.
  */
 export async function deleteAllMaintenance(): Promise<{ success: boolean; error?: string }> {
   try {
-    maintenanceRecords = [];
+    await writeMaintenanceData([]); // Write an empty array
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
-    return { success: false, error: "Falha ao apagar todos os registros." };
+    const errorMessage = error instanceof Error ? error.message : "Falha ao apagar todos os registros.";
+    return { success: false, error: errorMessage };
   }
 }

@@ -3,8 +3,6 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { MoreHorizontal, ArrowUpDown } from "lucide-react"
-import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -40,7 +38,7 @@ export const columns: ColumnDef<WorkDay>[] = [
     cell: ({ row }) => {
       const date = row.getValue("date") as Date;
       // A formatação agora é feita no componente que renderiza a data
-      return <div className="font-medium">{date.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
+      return <div className="font-medium">{new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
     }
   },
   {
