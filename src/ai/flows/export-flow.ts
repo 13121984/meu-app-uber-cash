@@ -34,12 +34,8 @@ export const exportToSheetFlow = ai.defineFlow(
       throw new Error("Nenhum dado para exportar com os filtros selecionados.");
     }
     
-    // 1. Authenticate with Google Sheets API
-    const auth = new google.auth.GoogleAuth({
-      // Ensure GOOGLE_APPLICATION_CREDENTIALS is set in your environment
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-    const sheets = google.sheets({ version: 'v4', auth });
+    // 1. Get authenticated Sheets API client from Genkit's context
+    const sheets = google.sheets('v4');
 
     // 2. Prepare data for the spreadsheet
     const header = [
