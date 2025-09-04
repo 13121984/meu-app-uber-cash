@@ -1,26 +1,9 @@
 /** @type {import('next').NextConfig} */
 
-const withPWA = require('@ducanh2912/next-pwa').default({
-  dest: 'public',
-  cacheOnFrontEndNav: false, // Alterado para false para evitar ChunkLoadError
-  aggressiveFrontEndNavCaching: false, // Alterado para false
-  reloadOnOnline: true,
-  swcMinify: true,
-  workboxOptions: {
-    disableDevLogs: true,
-  },
-});
-
-
 const nextConfig = {
   /* config options here */
   output: 'export', // Adicionado para exportação estática
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  distDir: 'out', // Garante que a saída seja na pasta 'out'
   images: {
     unoptimized: true, // Adicionado para exportação estática
     remotePatterns: [
@@ -38,6 +21,8 @@ const nextConfig = {
       },
     ],
   },
+  // Removemos as configurações de PWA e Firebase que estavam causando conflitos.
+  // A simplicidade garantirá que o build funcione.
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = nextConfig;
