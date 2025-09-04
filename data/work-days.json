@@ -1,107 +1,13 @@
 [
   {
-    "date": "2025-09-04T15:26:59.660Z",
-    "km": 0,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1756999846579,
-        "category": "Ganhos Extras",
-        "trips": 0,
-        "amount": 100
-      }
-    ],
-    "fuelEntries": [],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    },
-    "id": "1756999863197"
-  },
-  {
-    "date": "2025-09-04T15:20:46.876Z",
-    "km": 0,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1756999301443,
-        "category": "Uber X",
-        "trips": 20,
-        "amount": 350
-      }
-    ],
-    "fuelEntries": [],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    },
-    "id": "1756999318957"
-  },
-  {
-    "date": "2025-09-04T15:18:02.067Z",
-    "km": 0,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1756999094274,
-        "category": "99 Pop",
-        "trips": 10,
-        "amount": 150
-      }
-    ],
-    "fuelEntries": [],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    },
-    "id": "1756999111599"
-  },
-  {
-    "date": "2025-08-21T03:00:00.000Z",
+    "id": "1756990521883",
+    "date": "2025-08-08T03:00:00.000Z",
     "km": 100,
-    "hours": 8,
-    "earnings": [
-      {
-        "id": 1756998740905,
-        "category": "Uber X",
-        "trips": 10,
-        "amount": 200
-      },
-      {
-        "id": 1756998749707,
-        "category": "99 Pop",
-        "trips": 15,
-        "amount": 150
-      }
-    ],
-    "fuelEntries": [
-      {
-        "id": 1756998770784,
-        "type": "GNV",
-        "paid": 35,
-        "price": 5
-      },
-      {
-        "id": 1756998813211,
-        "type": "Etanol",
-        "paid": 15,
-        "price": 5
-      }
-    ],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    },
-    "id": "1756998901097"
-  },
-  {
-    "date": "2025-09-03T03:00:00.000Z",
-    "km": 100,
-    "hours": 10,
+    "hours": 10.8,
     "earnings": [
       {
         "id": 1756990443952,
-        "category": "Uber X",
+        "category": "99 Pop",
         "trips": 10,
         "amount": 200
       }
@@ -117,97 +23,14 @@
     "maintenance": {
       "description": "",
       "amount": 0
-    },
-    "id": "1756990521883"
-  },
-  {
-    "id": "1756989514959",
-    "date": "2025-09-01T03:00:00.000Z",
-    "km": 100,
-    "hours": 8,
-    "earnings": [
-      {
-        "id": 1756989410161,
-        "category": "Uber X",
-        "trips": 5,
-        "amount": 100
-      },
-      {
-        "id": 1756989421047,
-        "category": "99 Pop",
-        "trips": 7,
-        "amount": 125
-      },
-      {
-        "id": 1756989484738,
-        "category": "Particular",
-        "trips": 5,
-        "amount": 155
-      }
-    ],
-    "fuelEntries": [
-      {
-        "id": 1756989440260,
-        "type": "GNV",
-        "paid": 25,
-        "price": 5
-      },
-      {
-        "id": 1756989463366,
-        "type": "Etanol",
-        "paid": 10,
-        "price": 5
-      }
-    ],
-    "maintenance": {
-      "description": "",
-      "amount": 0
     }
   },
   {
-    "date": "2025-09-04T11:47:36.545Z",
-    "km": 150,
-    "hours": 8.5,
-    "earnings": [
-      {
-        "id": 1756986476326,
-        "category": "Uber X",
-        "trips": 10,
-        "amount": 150
-      },
-      {
-        "id": 1756986487047,
-        "category": "99 Pop",
-        "trips": 10,
-        "amount": 150
-      }
-    ],
-    "fuelEntries": [
-      {
-        "id": 1756986510771,
-        "type": "GNV",
-        "paid": 40,
-        "price": 5
-      }
-    ],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    },
-    "id": "1756986524861"
-  },
-  {
     "id": "1756980282170",
-    "date": "2025-09-02T03:00:00.000Z",
+    "date": "2025-08-07T03:00:00.000Z",
     "km": 150,
-    "hours": 10,
+    "hours": 10.7,
     "earnings": [
-      {
-        "id": 1756980231249,
-        "category": "99 Pop",
-        "trips": 10,
-        "amount": 150
-      },
       {
         "id": 1756980236839,
         "category": "Uber X",
@@ -233,6 +56,167 @@
         "type": "Etanol",
         "paid": 20,
         "price": 0
+      }
+    ],
+    "maintenance": {
+      "description": "",
+      "amount": 0
+    }
+  },
+  {
+    "id": "1756989514959",
+    "date": "2025-08-06T03:00:00.000Z",
+    "km": 100.25,
+    "hours": 8.6,
+    "earnings": [
+      {
+        "id": 1756989410161,
+        "category": "Uber X",
+        "trips": 5,
+        "amount": 100
+      },
+      {
+        "id": 1756989421047,
+        "category": "99 Pop",
+        "trips": 7,
+        "amount": 125
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1756989440260,
+        "type": "GNV",
+        "paid": 25,
+        "price": 5
+      },
+      {
+        "id": 1756989463366,
+        "type": "Etanol",
+        "paid": 10,
+        "price": 5
+      }
+    ],
+    "maintenance": {
+      "description": "",
+      "amount": 0
+    }
+  },
+  {
+    "id": "1756998901097",
+    "date": "2025-08-05T03:00:00.000Z",
+    "km": 100,
+    "hours": 8.5,
+    "earnings": [
+      {
+        "id": 1756998749707,
+        "category": "99 Pop",
+        "trips": 15,
+        "amount": 150.12
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1756998770784,
+        "type": "GNV",
+        "paid": 35.75,
+        "price": 5.09
+      }
+    ],
+    "maintenance": {
+      "description": "corrente",
+      "amount": 200.02
+    }
+  },
+  {
+    "id": "1756986524861",
+    "date": "2025-08-04T03:00:00.000Z",
+    "km": 150.25,
+    "hours": 8.4,
+    "earnings": [
+      {
+        "id": 1756986476326,
+        "category": "Uber Cash",
+        "trips": 10,
+        "amount": 150.17
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1756986510771,
+        "type": "GNV",
+        "paid": 40.17,
+        "price": 5.05
+      }
+    ],
+    "maintenance": {
+      "description": "pneus",
+      "amount": 250.02
+    }
+  },
+  {
+    "id": "1756999863197",
+    "date": "2025-08-03T03:00:00.000Z",
+    "km": 117.53,
+    "hours": 8.1,
+    "earnings": [
+      {
+        "id": 1756999846579,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 100.52
+      }
+    ],
+    "fuelEntries": [],
+    "maintenance": {
+      "description": "",
+      "amount": 0
+    }
+  },
+  {
+    "id": "1756999111599",
+    "date": "2025-08-02T03:00:00.000Z",
+    "km": 125.32,
+    "hours": 8.3,
+    "earnings": [
+      {
+        "id": 1756999094274,
+        "category": "99 Pop",
+        "trips": 10,
+        "amount": 150.24
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757024518664,
+        "type": "",
+        "paid": 50.21,
+        "price": 5.09
+      }
+    ],
+    "maintenance": {
+      "description": "troca de oleo",
+      "amount": 120
+    }
+  },
+  {
+    "id": "1756999318957",
+    "date": "2025-08-01T03:00:00.000Z",
+    "km": 150.25,
+    "hours": 8.2,
+    "earnings": [
+      {
+        "id": 1756999301443,
+        "category": "99 Pop",
+        "trips": 20,
+        "amount": 350.17
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757024431705,
+        "type": "GNV",
+        "paid": 45.32,
+        "price": 4.99
       }
     ],
     "maintenance": {
