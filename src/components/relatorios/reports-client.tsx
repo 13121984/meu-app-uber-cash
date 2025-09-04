@@ -29,10 +29,10 @@ const StatCard = ({ title, value, icon: Icon, color, isCurrency = false, unit = 
     return (
         <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50">
             <div className={`p-2 rounded-lg ${color}`}>
-                <Icon className="h-4 w-4 text-white" />
+                <Icon className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1">
-                <p className="text-base font-bold text-foreground">{formattedValue}</p>
+                <p className="text-sm font-bold text-foreground">{formattedValue}</p>
                 <p className="text-muted-foreground text-xs">{title}</p>
             </div>
         </div>
@@ -179,7 +179,3 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
     </div>
   );
 }
-
-    
-
-    
