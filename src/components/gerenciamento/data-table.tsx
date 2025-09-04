@@ -35,7 +35,10 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([
+      // Ordenação inicial por data descendente
+      { id: 'date', desc: true }
+  ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 
   const table = useReactTable({
@@ -55,7 +58,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="rounded-md border">
-      <ScrollArea className="w-full whitespace-nowrap">
+      <ScrollArea className="w-full">
         <Table>
             <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

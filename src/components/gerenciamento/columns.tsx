@@ -29,6 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { format, parseISO } from "date-fns"
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -53,7 +54,7 @@ export const useWorkDayColumns = () => {
     try {
       await deleteWorkDayAction(dayToDelete.id);
       toast({ title: "Sucesso!", description: "Registro apagado." });
-      router.refresh();
+      // A revalidação agora acontece no GerenciamentoClient para atualizar o estado local
     } catch (error) {
       toast({ title: "Erro!", description: "Não foi possível apagar o registro.", variant: "destructive" });
     } finally {
@@ -79,9 +80,11 @@ export const useWorkDayColumns = () => {
         )
       },
       cell: ({ row }) => {
+        // A data já vem como objeto Date do serviço
         const date = row.getValue("date") as Date;
-        return <div className="font-medium">{new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
-      }
+        return <div className="font-medium whitespace-nowrap">{format(date, 'dd/MM/yy')}</div>
+      },
+      sortingFn: 'datetime',
     },
     {
       accessorKey: "lucro",
@@ -96,31 +99,31 @@ export const useWorkDayColumns = () => {
     },
     {
       accessorKey: "totalGanhos",
-      header: () => <div className="text-right">Ganhos</div>,
+      header: () => <div className="text-right hidden sm:table-cell">Ganhos</div>,
       cell: ({ row }) => {
          const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
-         return <div className="text-right">{formatCurrency(earnings)}</div>
+         return <div className="text-right hidden sm:table-cell">{formatCurrency(earnings)}</div>
       }
     },
      {
       accessorKey: "totalGastos",
-      header: () => <div className="text-right">Gastos</div>,
+      header: () => <div className="text-right hidden sm:table-cell">Gastos</div>,
       cell: ({ row }) => {
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const maintenance = row.original.maintenance?.amount || 0;
         const total = fuel + maintenance;
-        return <div className="text-red-600 text-right">{formatCurrency(total)}</div>
+        return <div className="text-red-600 text-right hidden sm:table-cell">{formatCurrency(total)}</div>
       }
     },
     {
       accessorKey: "km",
-      header: () => <div className="text-right hidden md:table-cell">KM</div>,
-      cell: ({ row }) => <div className="text-right hidden md:table-cell">{`${row.getValue("km")}`}</div>
+      header: () => <div className="text-right hidden lg:table-cell">KM</div>,
+      cell: ({ row }) => <div className="text-right hidden lg:table-cell">{`${row.getValue("km")}`}</div>
     },
     {
       accessorKey: "hours",
-      header: () => <div className="text-right hidden md:table-cell">Horas</div>,
-       cell: ({ row }) => <div className="text-right hidden md:table-cell">{`${row.getValue("hours")}`}</div>
+      header: () => <div className="text-right hidden lg:table-cell">Horas</div>,
+       cell: ({ row }) => <div className="text-right hidden lg:table-cell">{`${row.getValue("hours")}`}</div>
     },
     {
       id: "actions",
@@ -142,7 +145,7 @@ export const useWorkDayColumns = () => {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                className="text-destructive"
+                className="text-destructive focus:bg-destructive/30"
                 onClick={() => handleDeleteClick(workDay)}
               >
                 Apagar
@@ -171,9 +174,13 @@ export const useWorkDayColumns = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+            <AlertDialogAction 
+              onClick={handleConfirmDelete} 
+              disabled={isDeleting} 
+              className="bg-destructive hover:bg-destructive/90"
+            >
               {isDeleting ? "Apagando..." : "Apagar"}
-              </AlertDialogAction>
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect, useTransition } from "react";
 import { useWorkDayColumns } from "./columns";
 import { DataTable } from "./data-table";
 import type { WorkDay } from "@/services/work-day.service";
@@ -11,23 +11,75 @@ import { Loader2, Trash2 } from "lucide-react";
 import { deleteFilteredWorkDaysAction } from "./actions";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { isWithinInterval } from "date-fns";
+import type { DateRange } from "react-day-picker";
 
-export function GerenciamentoClient({ data }: { data: WorkDay[] }) {
-  const { columns, Dialogs } = useWorkDayColumns();
+interface GerenciamentoClientProps {
+  allWorkDays: WorkDay[];
+}
+
+export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { columns, Dialogs } = useWorkDayColumns();
+
   const [isDeletingFiltered, setIsDeletingFiltered] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const query = searchParams.get('query') || '';
+  const from = searchParams.get('from');
+  const to = searchParams.get('to');
+  
+  const filteredData = useMemo(() => {
+    let dateRange: DateRange | undefined;
+    if (from) {
+      dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
+    }
+
+    return allWorkDays
+      .filter(day => {
+        const dayDate = new Date(day.date);
+        dayDate.setHours(0, 0, 0, 0);
+
+        if (dateRange?.from) {
+          const fromDate = new Date(dateRange.from);
+          fromDate.setHours(0, 0, 0, 0);
+          let toDate = dateRange.to ? new Date(dateRange.to) : fromDate;
+          toDate.setHours(23, 59, 59, 999);
+          
+          if (!isWithinInterval(dayDate, { start: fromDate, end: toDate })) {
+            return false;
+          }
+        }
+        
+        if (query) {
+          const dateString = new Date(day.date).toLocaleDateString('pt-BR');
+          const searchString = JSON.stringify(day).toLowerCase();
+          const queryLower = query.toLowerCase();
+
+          return dateString.includes(queryLower) || searchString.includes(queryLower);
+        }
+
+        return true;
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [allWorkDays, query, from, to]);
 
   const hasFilters = searchParams.has('query') || searchParams.has('from');
 
   const handleDeleteFiltered = async () => {
     setIsDeletingFiltered(true);
     try {
-        const result = await deleteFilteredWorkDaysAction(data);
+        const result = await deleteFilteredWorkDaysAction(filteredData);
         if (result.success) {
-            toast({ title: "Sucesso!", description: `${data.length} registros apagados.` });
-            // A revalidação no server action vai atualizar a UI
+            toast({ title: "Sucesso!", description: `${filteredData.length} registros apagados.` });
+            // Força o Next.js a recarregar a página e seus Server Components
+            startTransition(() => {
+              router.refresh();
+            });
         } else {
             toast({ title: "Erro!", description: result.error, variant: "destructive" });
         }
@@ -41,22 +93,33 @@ export function GerenciamentoClient({ data }: { data: WorkDay[] }) {
 
   return (
     <div className="space-y-4">
-      <HistoryFilters />
-
-       {hasFilters && data.length > 0 && (
-         <div className="flex justify-end">
-            <Button
+      <Card>
+        <CardHeader>
+          <CardTitle>Seus Registros</CardTitle>
+          <CardDescription>
+            Filtre e gerencie todos os seus dias de trabalho registrados.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <HistoryFilters isPending={isPending} />
+          {hasFilters && filteredData.length > 0 && (
+            <div className="flex justify-end pt-4">
+              <Button
                 variant="destructive"
                 onClick={() => setIsAlertOpen(true)}
-                disabled={isDeletingFiltered}
-            >
+                disabled={isDeletingFiltered || isPending}
+              >
                 {isDeletingFiltered ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                Apagar {data.length} {data.length === 1 ? 'Registro Filtrado' : 'Registros Filtrados'}
-            </Button>
-         </div>
-       )}
+                Apagar {filteredData.length} {filteredData.length === 1 ? 'Registro Filtrado' : 'Registros Filtrados'}
+              </Button>
+            </div>
+          )}
+          <div className="mt-4">
+            <DataTable columns={columns} data={filteredData} />
+          </div>
+        </CardContent>
+      </Card>
 
-      <DataTable columns={columns} data={data} />
       {Dialogs}
 
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
@@ -64,7 +127,7 @@ export function GerenciamentoClient({ data }: { data: WorkDay[] }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso irá apagar permanentemente os <b>{data.length}</b> registros de trabalho que correspondem aos filtros atuais.
+              Esta ação não pode ser desfeita. Isso irá apagar permanentemente os <b>{filteredData.length}</b> registros de trabalho que correspondem aos filtros atuais.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
