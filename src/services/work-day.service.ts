@@ -46,6 +46,7 @@ export interface ReportData {
   totalGanho: number;
   totalLucro: number;
   totalGastos: number;
+  totalCombustivel: number;
   diasTrabalhados: number;
   profitComposition: { name: string; value: number; fill: string; totalGanho: number; }[];
   earningsByCategory: EarningsByCategory[];
@@ -337,7 +338,8 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
 
     day.fuelEntries.forEach(fuel => {
         if(fuel.price > 0) totalLitros += fuel.paid / fuel.price;
-        fuelExpensesMap.set(fuel.type, (fuelExpensesMap.get(fuel.type) || 0) + fuel.paid);
+        const type = fuel.type || 'Não especificado';
+        fuelExpensesMap.set(type, (fuelExpensesMap.get(type) || 0) + fuel.paid);
     });
 
     day.earnings.forEach(earning => {
@@ -379,7 +381,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
 
   const profitComposition = [
     { name: 'Lucro Líquido', value: totalLucro, fill: 'hsl(var(--chart-1))', totalGanho },
-    { name: 'Combustível', value: totalCombustivel, fill: 'hsl(var(--chart-5))', totalGanho },
+    { name: 'Combustível', value: totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho },
     { name: 'Manutenção', value: totalManutencaoFromWorkdays, fill: 'hsl(var(--chart-3))', totalGanho },
   ].filter(item => item.value !== 0);
   
@@ -387,6 +389,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     totalGanho,
     totalLucro,
     totalGastos,
+    totalCombustivel,
     diasTrabalhados: new Set(filteredDays.map(d => new Date(d.date).toDateString())).size,
     profitComposition,
     earningsByCategory,
