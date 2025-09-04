@@ -4,12 +4,12 @@ import { getFirestore, Firestore } from "firebase/firestore";
 import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
-  "projectId": "uber-cash-360",
-  "appId": "1:621989417934:web:e41f17e3f202a0a256914a",
-  "storageBucket": "uber-cash-360.appspot.com",
-  "apiKey": "AIzaSyBlE9gAFJbCW_L4P_e3grnleAIyACp4Mhc",
-  "authDomain": "uber-cash-360.firebaseapp.com",
-  "messagingSenderId": "621989417934"
+  "projectId": "app-pro-01-430113",
+  "appId": "1:1072979261835:web:869b5e52c2221b6b57d81b",
+  "storageBucket": "app-pro-01-430113.appspot.com",
+  "apiKey": "AIzaSyChG4qOPpSyY55iZ2nprX7hFcyiW1_gdAY",
+  "authDomain": "app-pro-01-430113.firebaseapp.com",
+  "messagingSenderId": "1072979261835"
 };
 
 // Initialize Firebase
