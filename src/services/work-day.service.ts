@@ -186,12 +186,17 @@ export async function getDashboardData() {
     const goals = await getGoals();
     const now = new Date();
 
-    const todayWorkDays = allWorkDays.filter(day => isToday(day.date));
+    const todayDateString = now.toDateString();
+
+    const todayWorkDays = allWorkDays.filter(day => {
+        const dayDate = new Date(day.date);
+        return dayDate.toDateString() === todayDateString;
+    });
 
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
 
-    const todayMaintenance = allMaintenance.filter(m => isToday(m.date));
+    const todayMaintenance = allMaintenance.filter(m => new Date(m.date).toDateString() === todayDateString);
 
     const thisWeekMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfMonth(now), end: endOfMonth(now) }));
