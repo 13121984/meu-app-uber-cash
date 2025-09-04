@@ -1,5 +1,5 @@
 
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
@@ -8,10 +8,34 @@ import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/compon
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+const APP_NAME = "Uber Cash";
+const APP_DEFAULT_TITLE = "Uber Cash";
+const APP_TITLE_TEMPLATE = "%s - Uber Cash";
+const APP_DESCRIPTION = "Seu app para gestão de ganhos como motorista de aplicativo.";
+
 export const metadata: Metadata = {
-  title: 'Uber Cash',
-  description: 'Seu app para gestão de ganhos como motorista de aplicativo.',
+  applicationName: APP_NAME,
+  title: {
+    default: APP_DEFAULT_TITLE,
+    template: APP_TITLE_TEMPLATE,
+  },
+  description: APP_DESCRIPTION,
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: APP_DEFAULT_TITLE,
+    // startUpImage: [],
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
+
+export const viewport: Viewport = {
+  themeColor: "#FFFFFF",
+};
+
 
 export default async function RootLayout({
   children,
@@ -24,6 +48,7 @@ export default async function RootLayout({
     <html 
       lang="pt-BR" 
       className={cn("h-full", settings.theme)}
+      suppressHydrationWarning
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
