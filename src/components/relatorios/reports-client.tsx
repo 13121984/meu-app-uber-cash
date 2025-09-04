@@ -6,13 +6,15 @@ import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, 
 import { ReportsFilter } from './reports-filter';
 import { WorkDay, getReportData, ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { EarningsPieChart } from '@/components/dashboard/earnings-chart';
-import { EarningsBarChart } from '@/components/dashboard/earnings-bar-chart';
-import { TripsBarChart } from '@/components/dashboard/trips-bar-chart';
-import { FuelBarChart } from './fuel-bar-chart';
-import { ProfitEvolutionChart } from './profit-evolution-chart';
-import { DailyTripsChart } from './daily-trips-chart';
 import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions';
+import dynamic from 'next/dynamic';
+
+const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false });
+const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false });
+const TripsBarChart = dynamic(() => import('@/components/dashboard/trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false });
+const FuelBarChart = dynamic(() => import('./fuel-bar-chart').then(mod => mod.FuelBarChart), { ssr: false });
+const ProfitEvolutionChart = dynamic(() => import('./profit-evolution-chart').then(mod => mod.ProfitEvolutionChart), { ssr: false });
+const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false });
 
 
 interface ReportsClientProps {

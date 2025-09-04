@@ -8,9 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { StatsCard } from "./stats-card"
 import { GoalProgress } from "./goal-progress"
 import { cn } from "@/lib/utils"
-import { EarningsBarChart } from "./earnings-bar-chart"
-import { TripsBarChart } from "./trips-bar-chart"
 import { MaintenanceSummary } from "./maintenance-summary"
+import dynamic from 'next/dynamic';
+
+const EarningsBarChart = dynamic(() => import('./earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false });
+const TripsBarChart = dynamic(() => import('./trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false });
+
 
 export interface EarningsByCategory {
     name: string;
