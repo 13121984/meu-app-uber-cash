@@ -22,19 +22,16 @@ type GoalProgressProps = {
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const [showPopup, setShowPopup] = useState(false);
-  const [goalCompleted, setGoalCompleted] = useState(false);
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
 
   useEffect(() => {
-    if (isComplete && !goalCompleted) {
+    // This logic now runs only on the client, after hydration.
+    if (isComplete) {
       setShowPopup(true);
-      setGoalCompleted(true);
     }
-    if (!isComplete && goalCompleted) {
-      setGoalCompleted(false);
-    }
-  }, [isComplete, goalCompleted]);
+  }, [isComplete]);
+
 
   const handleClose = () => {
     setShowPopup(false);
