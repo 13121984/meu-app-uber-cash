@@ -3,13 +3,16 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, signInWithGoogle as signInWithGoogleService, logout as logoutService } from '@/services/auth.service';
+import { auth, logout as logoutService, login as loginService, signup as signupService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
+import type { AuthFormData } from '@/components/auth/auth-form';
+
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInWithGoogle: typeof signInWithGoogleService;
+  login: typeof loginService;
+  signup: typeof signupService;
   logout: () => void;
 }
 
@@ -24,26 +27,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-      if (user) {
-        // Se o usuário está logado e na página de login, redireciona para o dashboard
-        if (window.location.pathname === '/login') {
-            router.push('/');
-        }
-      }
     });
-
     return () => unsubscribe();
-  }, [router]);
+  }, []);
   
   const logout = async () => {
     await logoutService();
-    router.push('/login');
+    // O redirecionamento será tratado pelo ProtectedRoute
   };
 
   const value: AuthContextType = {
     user,
     loading,
-    signInWithGoogle: signInWithGoogleService,
+    login: loginService,
+    signup: signupService,
     logout,
   };
 

@@ -2,54 +2,80 @@
 "use client";
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/context/auth-context';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Mail, Lock } from 'lucide-react';
 import { FirebaseError } from 'firebase/app';
+import { useAuth } from '@/context/auth-context';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { sendPasswordReset } from '@/services/auth.service';
 
-const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px" {...props}>
-        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
-        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
-        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.61-3.317-11.28-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
-        <path fill="#1976D2" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C39.712,35.241,44,29.84,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
-    </svg>
-);
 
+const authSchema = z.object({
+    email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
+    password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
+});
+
+export type AuthFormData = z.infer<typeof authSchema>;
+
+type AuthMode = "login" | "signup";
 
 export function AuthForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signInWithGoogle } = useAuth();
+  const [resetEmail, setResetEmail] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
   
-  const handleGoogleSignIn = async () => {
+  const { login, signup } = useAuth();
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<AuthFormData>({
+    resolver: zodResolver(authSchema),
+  });
+
+  const getFirebaseErrorMessage = (error: FirebaseError) => {
+    switch (error.code) {
+      case 'auth/invalid-email': return "O formato do e-mail é inválido.";
+      case 'auth/user-disabled': return "Este usuário foi desabilitado.";
+      case 'auth/user-not-found': return "Nenhuma conta encontrada com este e-mail.";
+      case 'auth/wrong-password': return "Senha incorreta. Tente novamente.";
+      case 'auth/email-already-in-use': return "Este e-mail já está em uso por outra conta.";
+      case 'auth/weak-password': return "A senha é muito fraca.";
+      case 'auth/invalid-credential': return "Credenciais inválidas. Verifique seu e-mail e senha.";
+      default: return `Ocorreu um erro inesperado: ${error.message}`;
+    }
+  }
+
+  const handleAuth = async (data: AuthFormData, mode: AuthMode) => {
     setIsSubmitting(true);
     try {
-        await signInWithGoogle();
-        // O redirecionamento será tratado pelo AuthProvider
-    } catch (error) {
-        let description = "Não foi possível fazer login com o Google. Tente novamente.";
-
-        if (error instanceof FirebaseError) {
-          switch (error.code) {
-            case 'auth/popup-closed-by-user':
-              description = "A janela de login foi fechada. Tente novamente.";
-              break;
-            case 'auth/popup-blocked':
-              description = "O pop-up de login foi bloqueado pelo seu navegador.";
-              break;
-            case 'auth/cancelled-popup-request':
-              description = "A solicitação de login foi cancelada.";
-              break;
-            default:
-              description = `Ocorreu um erro inesperado: ${error.message}`;
-              break;
-          }
+        if (mode === 'login') {
+            await login(data);
+        } else {
+            await signup(data);
         }
-        
+        // O redirecionamento é tratado pelo AuthProvider/ProtectedRoute
+    } catch (error) {
+        let description = "Não foi possível completar a ação. Tente novamente.";
+        if (error instanceof FirebaseError) {
+          description = getFirebaseErrorMessage(error);
+        }
         toast({
-            title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro com o Google</span></div>,
+            title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro de Autenticação</span></div>,
             description: description,
             variant: "destructive",
         });
@@ -58,16 +84,100 @@ export function AuthForm() {
     }
   }
 
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="space-y-4">
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-5 w-5" />}
-                Entrar com o Google
-            </Button>
+  const handlePasswordReset = async () => {
+    if(!resetEmail) {
+        toast({ title: "Erro", description: "Por favor, digite seu e-mail.", variant: "destructive" });
+        return;
+    }
+    setIsResetting(true);
+    try {
+        await sendPasswordReset(resetEmail);
+        toast({
+            title: "Verifique seu E-mail",
+            description: "Se uma conta existir, um link para redefinir a senha será enviado.",
+        });
+    } catch (error) {
+        // Não mostrar erro detalhado por segurança
+         toast({
+            title: "Verifique seu E-mail",
+            description: "Se uma conta existir, um link para redefinir a senha será enviado.",
+        });
+    } finally {
+        setIsResetting(false);
+    }
+  }
+
+  const renderFormContent = (mode: AuthMode) => (
+     <form onSubmit={handleSubmit(data => handleAuth(data, mode))} className="space-y-4">
+        <div className="space-y-2">
+            <Label htmlFor={`${mode}-email`}>E-mail</Label>
+            <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id={`${mode}-email`} type="email" placeholder="seu-email@exemplo.com" {...register('email')} className="pl-10" />
+            </div>
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
         </div>
-      </CardContent>
-    </Card>
+        <div className="space-y-2">
+            <Label htmlFor={`${mode}-password`}>Senha</Label>
+             <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input id={`${mode}-password`} type="password" placeholder="••••••••" {...register('password')} className="pl-10"/>
+            </div>
+            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+        </div>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {mode === 'login' ? 'Entrar' : 'Criar Conta'}
+        </Button>
+    </form>
+  )
+
+  return (
+    <>
+        <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Entrar</TabsTrigger>
+                <TabsTrigger value="signup">Criar Conta</TabsTrigger>
+            </TabsList>
+            <TabsContent value="login" className="p-1">
+                {renderFormContent('login')}
+            </TabsContent>
+            <TabsContent value="signup" className="p-1">
+                 {renderFormContent('signup')}
+            </TabsContent>
+        </Tabs>
+        <div className="text-center mt-4">
+             <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="link" className="text-sm text-muted-foreground">Esqueceu a senha?</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Redefinir Senha</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Digite seu e-mail abaixo. Se houver uma conta associada, enviaremos um link para você criar uma nova senha.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                       <div className="space-y-2">
+                        <Label htmlFor="reset-email">E-mail de Recuperação</Label>
+                        <Input 
+                            id="reset-email"
+                            type="email"
+                            placeholder="seu-email@exemplo.com"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                        />
+                       </div>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handlePasswordReset} disabled={isResetting}>
+                         {isResetting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Enviar Link
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div>
+    </>
   );
 }
