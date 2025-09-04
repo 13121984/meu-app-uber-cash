@@ -15,7 +15,7 @@ export function EarningsBarChart({ data }: EarningsBarChartProps) {
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
       <ResponsiveContainer>
-        <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+        <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }} barCategoryGap="20%">
           <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={10} />
           <YAxis 
             tickFormatter={(value) => `R$${value}`}
