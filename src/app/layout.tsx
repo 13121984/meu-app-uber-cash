@@ -4,7 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
-import { FloatingMenu } from '@/components/layout/floating-menu';
+import { TopBar } from '@/components/layout/top-bar';
 
 
 const APP_NAME = "Rota Certa";
@@ -51,12 +51,12 @@ export default async function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
-      <body className="font-body antialiased h-full bg-background">
+      <body className="font-body antialiased h-full bg-secondary/50">
         <div className="relative flex min-h-screen w-full flex-col">
-            <main className="flex-1 p-4 sm:pl-20 sm:py-6 md:p-8 md:pl-24">
+            <TopBar />
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 pt-20">
                 {children}
             </main>
-            <FloatingMenu />
         </div>
         <Toaster />
       </body>
