@@ -18,6 +18,7 @@ import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions
 interface ReportsFilterProps {
   onFilterChange: (filters: ReportFilterValues) => void;
   initialFilters: ReportFilterValues;
+  isPending: boolean;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -26,12 +27,12 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
 }));
 
-export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterProps) {
+export function ReportsFilter({ onFilterChange, initialFilters, isPending }: ReportsFilterProps) {
   const [filterType, setFilterType] = useState<ReportFilterValues['type']>(initialFilters.type);
   const [year, setYear] = useState<number>(initialFilters.year || getYear(new Date()));
   const [month, setMonth] = useState<number>(initialFilters.month || new Date().getMonth());
   const [dateRange, setDateRange] = useState<DateRange | undefined>(initialFilters.dateRange);
-  const [isPending, startTransition] = useTransition();
+  const [isExporting, startExportTransition] = useTransition();
   
   useEffect(() => {
     const filters: ReportFilterValues = { type: filterType };
@@ -47,18 +48,16 @@ export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterP
   }, [filterType, year, month, dateRange, onFilterChange]);
   
   const handleDownload = () => {
-      startTransition(async () => {
+      startExportTransition(async () => {
         try {
-            // Como a autenticação foi removida, a funcionalidade de exportação não funcionará.
-            // Exibimos um toast informativo ao usuário.
             toast({
                 title: (
                     <div className="flex items-center gap-2">
                         <Info className="h-5 w-5 text-blue-500" />
-                        <span className="font-bold">Funcionalidade Desativada</span>
+                        <span className="font-bold">Funcionalidade Indisponível</span>
                     </div>
                 ),
-                description: "A exportação para o Google Sheets requer configuração de login, que foi removida.",
+                description: "A exportação para Google Sheets foi desativada.",
             });
         } catch (error) {
             console.error(error);
@@ -79,7 +78,7 @@ export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterP
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card items-center">
-      <Select value={filterType} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])}>
+      <Select value={filterType} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])} disabled={isPending}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Tipo de Período" />
         </SelectTrigger>
@@ -96,7 +95,7 @@ export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterP
       
       {filterType === 'specificMonth' && (
         <>
-            <Select value={month.toString()} onValueChange={(val) => setMonth(parseInt(val))}>
+            <Select value={month.toString()} onValueChange={(val) => setMonth(parseInt(val))} disabled={isPending}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Mês" />
                 </SelectTrigger>
@@ -104,7 +103,7 @@ export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterP
                 {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
                 </SelectContent>
             </Select>
-            <Select value={year.toString()} onValueChange={(val) => setYear(parseInt(val))}>
+            <Select value={year.toString()} onValueChange={(val) => setYear(parseInt(val))} disabled={isPending}>
                 <SelectTrigger className="w-full sm:w-[120px]">
                 <SelectValue placeholder="Ano" />
                 </SelectTrigger>
@@ -116,7 +115,7 @@ export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterP
       )}
 
       {filterType === 'specificYear' && (
-        <Select value={year.toString()} onValueChange={(val) => setYear(parseInt(val))}>
+        <Select value={year.toString()} onValueChange={(val) => setYear(parseInt(val))} disabled={isPending}>
             <SelectTrigger className="w-full sm:w-[120px]">
             <SelectValue placeholder="Ano" />
             </SelectTrigger>
@@ -132,6 +131,7 @@ export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterP
             <Button
                 id="date"
                 variant={"outline"}
+                disabled={isPending}
                 className={cn(
                 "w-full sm:w-[300px] justify-start text-left font-normal",
                 !dateRange && "text-muted-foreground"
@@ -168,9 +168,9 @@ export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterP
 
       <div className="flex-grow"></div>
       
-      <Button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto" disabled={isPending}>
-          {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-          {isPending ? 'Exportando...' : 'Baixar'}
+      <Button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto" disabled={isExporting || isPending}>
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          {isExporting ? 'Exportando...' : 'Baixar'}
       </Button>
 
     </div>

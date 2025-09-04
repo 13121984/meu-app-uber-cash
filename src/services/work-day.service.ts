@@ -60,36 +60,45 @@ export interface ReportData {
   rawWorkDays: WorkDay[]; // Adicionado para exportação
 }
 
-const dataFilePath = path.join(process.cwd(), 'data', 'work-days.json');
+const workDaysFilePath = path.join(process.cwd(), 'data', 'work-days.json');
+let workDaysCache: WorkDay[] | null = null;
 
-async function readWorkDays(): Promise<WorkDay[]> {
+async function readWorkDays(force = false): Promise<WorkDay[]> {
+  if (workDaysCache && !force) {
+    return workDaysCache;
+  }
   try {
-    await fs.access(dataFilePath);
-    const fileContent = await fs.readFile(dataFilePath, 'utf8');
-    return (JSON.parse(fileContent) as any[]).map(day => ({
+    const fileContent = await fs.readFile(workDaysFilePath, 'utf8');
+    workDaysCache = (JSON.parse(fileContent) as any[]).map(day => ({
         ...day,
-        date: new Date(day.date), // Re-hydrate date objects
+        date: new Date(day.date),
     }));
-  } catch {
-    return [];
+    return workDaysCache as WorkDay[];
+  } catch (error) {
+    // If file doesn't exist or is empty
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return [];
+    }
+    throw error;
   }
 }
 
 async function writeWorkDays(data: WorkDay[]): Promise<void> {
-    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+    await fs.mkdir(path.dirname(workDaysFilePath), { recursive: true });
+    await fs.writeFile(workDaysFilePath, JSON.stringify(data, null, 2), 'utf8');
+    workDaysCache = null; // Invalidate cache
 }
 
 
 export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
   try {
-    const allWorkDays = await readWorkDays();
+    const allWorkDays = await readWorkDays(true);
     const newWorkDay: WorkDay = {
         ...data,
         id: Date.now().toString(),
         date: new Date(data.date),
     };
-    allWorkDays.unshift(newWorkDay); // Add to the beginning of the array
+    allWorkDays.unshift(newWorkDay);
     await writeWorkDays(allWorkDays);
     return { success: true, id: newWorkDay.id };
   } catch (e) {
@@ -98,6 +107,33 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
     return { success: false, error: errorMessage };
   }
 }
+
+export async function deleteWorkDay(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    let allWorkDays = await readWorkDays(true);
+    const initialLength = allWorkDays.length;
+    allWorkDays = allWorkDays.filter(r => r.id !== id);
+    if(allWorkDays.length === initialLength){
+        return { success: false, error: "Registro não encontrado."};
+    }
+    await writeWorkDays(allWorkDays);
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registro.";
+    return { success: false, error: errorMessage };
+  }
+}
+
+export async function deleteAllWorkDays(): Promise<{ success: boolean; error?: string }> {
+  try {
+    await writeWorkDays([]); // Write an empty array
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Falha ao apagar todos os registros.";
+    return { success: false, error: errorMessage };
+  }
+}
+
 
 export async function getWorkDays(): Promise<WorkDay[]> {
     return await readWorkDays();
@@ -153,7 +189,6 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         });
     });
     
-    // O lucro total do período deve subtrair a manutenção do período
     data.totalLucro -= maintenanceData.totalSpent;
 
 
@@ -206,8 +241,6 @@ export async function getDashboardData() {
     return { hoje, semana, mes };
 }
 
-
-// Nova função para a página de Relatórios
 export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilterValues): Promise<ReportData> {
   const now = new Date();
   let filteredDays: WorkDay[] = [];
@@ -251,7 +284,6 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   if (interval) {
     filteredDays = sourceDays.filter(d => isWithinInterval(new Date(d.date), interval!));
   } else {
-    // Caso especial para 'all' quando não há dados iniciais
     filteredDays = sourceDays;
   }
   
@@ -260,8 +292,6 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     ? allMaintenance.filter(m => isWithinInterval(new Date(m.date), interval!))
     : allMaintenance;
 
-
-  // --- Cálculos ---
   const earningsByCategoryMap = new Map<string, number>();
   const tripsByCategoryMap = new Map<string, number>();
   const fuelExpensesMap = new Map<string, number>();
@@ -269,7 +299,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
 
   let totalGanho = 0, totalCombustivel = 0, totalKm = 0, totalHoras = 0, totalViagens = 0, totalLitros = 0;
   
-  const totalManutencao = filteredMaintenance.reduce((sum, m) => sum + m.amount, 0);
+  const totalManutencaoFromWorkdays = filteredDays.reduce((sum, d) => sum + (d.maintenance?.amount || 0), 0);
 
   filteredDays.forEach(day => {
     const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
@@ -306,20 +336,17 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
       eachDayOfInterval(interval).forEach(date => {
           const dateKey = format(date, 'yyyy-MM-dd');
           const data = dailyDataMap.get(dateKey);
-          // Manutenção já está inclusa no cálculo diário do lucro
           profitEvolution.push({ date: format(date, 'dd/MM'), lucro: (data?.lucro ?? 0) });
           dailyTrips.push({ date: format(date, 'dd/MM'), viagens: data?.viagens ?? 0 });
       })
   } else if (dailyDataMap.size > 0) {
       [...dailyDataMap.entries()].sort().forEach(([dateKey, data]) => {
-          // Manutenção já está inclusa no cálculo diário do lucro
           profitEvolution.push({ date: format(parseISO(dateKey), 'dd/MM'), lucro: data.lucro });
           dailyTrips.push({ date: format(parseISO(dateKey), 'dd/MM'), viagens: data.viagens });
       })
   }
-
-  const totalMaintenanceFromWorkDays = filteredDays.reduce((sum, d) => sum + (d.maintenance?.amount || 0), 0);
-  const totalGastos = totalCombustivel + totalMaintenanceFromWorkDays;
+  
+  const totalGastos = totalCombustivel + totalManutencaoFromWorkdays;
   const totalLucro = totalGanho - totalGastos; 
   const ganhoPorHora = totalHoras > 0 ? totalGanho / totalHoras : 0;
   const ganhoPorKm = totalKm > 0 ? totalGanho / totalKm : 0;
@@ -331,7 +358,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   const profitComposition = [
     { name: 'Lucro Líquido', value: totalLucro, fill: 'hsl(var(--chart-1))', totalGanho },
     { name: 'Combustível', value: totalCombustivel, fill: 'hsl(var(--chart-5))', totalGanho },
-    { name: 'Manutenção', value: totalMaintenanceFromWorkDays, fill: 'hsl(var(--chart-3))', totalGanho },
+    { name: 'Manutenção', value: totalManutencaoFromWorkdays, fill: 'hsl(var(--chart-3))', totalGanho },
   ].filter(item => item.value !== 0);
   
   return {

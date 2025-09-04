@@ -1,20 +1,20 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
-import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench } from 'lucide-react';
+import { useState, useMemo, useEffect, useTransition } from 'react';
+import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench, Loader2 } from 'lucide-react';
 import { ReportsFilter } from './reports-filter';
 import { WorkDay, getReportData, ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions';
+import { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
 
-const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false });
-const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false });
-const TripsBarChart = dynamic(() => import('@/components/dashboard/trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false });
-const FuelBarChart = dynamic(() => import('./fuel-bar-chart').then(mod => mod.FuelBarChart), { ssr: false });
-const ProfitEvolutionChart = dynamic(() => import('./profit-evolution-chart').then(mod => mod.ProfitEvolutionChart), { ssr: false });
-const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false });
+const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const TripsBarChart = dynamic(() => import('@/components/dashboard/trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const FuelBarChart = dynamic(() => import('./fuel-bar-chart').then(mod => mod.FuelBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const ProfitEvolutionChart = dynamic(() => import('./profit-evolution-chart').then(mod => mod.ProfitEvolutionChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
 
 interface ReportsClientProps {
@@ -43,19 +43,15 @@ const StatCard = ({ title, value, icon: Icon, color, isCurrency = false, unit = 
 export function ReportsClient({ initialData }: ReportsClientProps) {
   const [filters, setFilters] = useState<ReportFilterValues>({ type: 'thisMonth' });
   const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
+  const [isPending, startTransition] = useTransition();
+  const isLoading = isPending || !reportData;
+
   useEffect(() => {
-    async function fetchData() {
-        setIsLoading(true);
+    startTransition(async () => {
         const data = await getReportData(initialData, filters);
         setReportData(data);
-        setIsLoading(false);
-    }
-    fetchData();
+    });
   }, [initialData, filters]);
-
-  const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
     <div className="space-y-6">
@@ -66,11 +62,15 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
         </h1>
       </div>
 
-      <ReportsFilter onFilterChange={setFilters} initialFilters={filters} />
+      <ReportsFilter 
+        onFilterChange={setFilters} 
+        initialFilters={filters}
+        isPending={isPending}
+      />
       
       {isLoading ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed bg-card border-border">
-            <BarChart className="w-16 h-16 text-muted-foreground mb-4 animate-pulse" />
+            <Loader2 className="w-16 h-16 text-muted-foreground mb-4 animate-spin" />
             <h2 className="text-xl font-semibold">Carregando dados...</h2>
             <p className="text-muted-foreground">Aguarde enquanto processamos as informações.</p>
         </Card>
