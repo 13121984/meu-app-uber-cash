@@ -79,47 +79,47 @@ export const useWorkDayColumns = () => {
       },
       cell: ({ row }) => {
         const date = row.getValue("date") as Date;
-        return <div className="font-medium">{new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
+        return <div className="font-medium">{new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
       }
     },
     {
       accessorKey: "lucro",
-      header: "Lucro",
+      header: () => <div className="text-right">Lucro</div>,
       cell: ({ row }) => {
         const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const maintenance = row.original.maintenance?.amount || 0;
         const profit = earnings - fuel - maintenance;
-        return <div className="text-green-600 font-semibold">{formatCurrency(profit)}</div>
+        return <div className="text-green-600 font-semibold text-right">{formatCurrency(profit)}</div>
       }
     },
     {
       accessorKey: "totalGanhos",
-      header: "Ganhos",
+      header: () => <div className="text-right">Ganhos</div>,
       cell: ({ row }) => {
          const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
-         return <div>{formatCurrency(earnings)}</div>
+         return <div className="text-right">{formatCurrency(earnings)}</div>
       }
     },
      {
       accessorKey: "totalGastos",
-      header: "Gastos",
+      header: () => <div className="text-right">Gastos</div>,
       cell: ({ row }) => {
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const maintenance = row.original.maintenance?.amount || 0;
         const total = fuel + maintenance;
-        return <div className="text-red-600">{formatCurrency(total)}</div>
+        return <div className="text-red-600 text-right">{formatCurrency(total)}</div>
       }
     },
     {
       accessorKey: "km",
-      header: () => <div className="hidden md:table-cell">KM Rodados</div>,
-      cell: ({ row }) => <div className="hidden md:table-cell">{`${row.getValue("km")} km`}</div>
+      header: () => <div className="text-right">KM</div>,
+      cell: ({ row }) => <div className="text-right">{`${row.getValue("km")}`}</div>
     },
     {
       accessorKey: "hours",
-      header: () => <div className="hidden md:table-cell">Horas</div>,
-       cell: ({ row }) => <div className="hidden md:table-cell">{`${row.getValue("hours")} h`}</div>
+      header: () => <div className="text-right">Horas</div>,
+       cell: ({ row }) => <div className="text-right">{`${row.getValue("hours")}`}</div>
     },
     {
       id: "actions",
