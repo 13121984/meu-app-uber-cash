@@ -5,9 +5,9 @@ import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
   "projectId": "app-pro-01-430113",
-  "appId": "1:1072979261835:web:8c518b769f3ab15357d81b",
+  "appId": "1:1072979261835:web:2533c39958184f4f57d81b",
   "storageBucket": "app-pro-01-430113.appspot.com",
-  "apiKey": "AIzaSyCge_L02hYgD40x-S2d2c12lIqZDmzLdDA",
+  "apiKey": "AIzaSyDFf3N5A_A4eL6DqGCEiE-r0jBIlSvaGS4",
   "authDomain": "app-pro-01-430113.firebaseapp.com",
   "messagingSenderId": "1072979261835"
 };
