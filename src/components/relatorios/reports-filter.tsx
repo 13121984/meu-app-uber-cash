@@ -13,8 +13,8 @@ import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { WorkDay } from '@/services/work-day.service';
-// Import the schema and type from the actions file
-import { exportReportAction, ReportFilterValues, ReportFilterValuesSchema } from '@/app/relatorios/actions';
+// Import only the action function and its type
+import { exportReportAction, type ReportFilterValues } from '@/app/relatorios/actions';
 
 
 interface ReportsFilterProps {

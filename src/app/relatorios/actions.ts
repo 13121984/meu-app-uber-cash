@@ -6,8 +6,8 @@ import { getReportData } from '@/services/work-day.service';
 import { z } from 'zod';
 import type { DateRange } from "react-day-picker";
 
-// Define the schema and type here in the server file.
-export const ReportFilterValuesSchema = z.object({
+// Define the schema and type here in the server file, but do not export them.
+const ReportFilterValuesSchema = z.object({
     type: z.enum(['all', 'today', 'thisWeek', 'thisMonth', 'specificMonth', 'specificYear', 'custom']),
     year: z.number().optional(),
     month: z.number().optional(),
