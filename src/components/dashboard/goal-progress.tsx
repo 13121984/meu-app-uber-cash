@@ -2,16 +2,8 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Car, Flag } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog";
+import { Car, Flag, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast"
 import { Confetti } from "./confetti";
 
 type GoalProgressProps = {
@@ -21,27 +13,32 @@ type GoalProgressProps = {
 };
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
-  const [showPopup, setShowPopup] = useState(false);
+  const { toast } = useToast();
+  const [goalReached, setGoalReached] = useState(false);
+
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
 
   useEffect(() => {
     // This logic now runs only on the client, after hydration.
-    if (isComplete) {
-      setShowPopup(true);
+    if (isComplete && !goalReached) {
+      setGoalReached(true);
+      toast({
+        title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Meta Atingida!</span></div>,
+        description: "Você conseguiu! Continue acelerando para o próximo objetivo!",
+      });
+    } else if (!isComplete && goalReached) {
+      // Reset if the goal is no longer met (e.g., data changes)
+      setGoalReached(false);
     }
-  }, [isComplete]);
-
-
-  const handleClose = () => {
-    setShowPopup(false);
-  };
+  }, [isComplete, goalReached, toast]);
   
   const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const remaining = target - current;
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4">
+    <div className="relative flex flex-col items-center justify-center space-y-4 overflow-hidden">
+      {isComplete && <Confetti />}
       {/* Progress Bar */}
       <div className="w-full px-1">
         <div className="relative h-2 w-full rounded-full bg-gray-700 dark:bg-gray-800">
@@ -80,21 +77,6 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
           <p className="text-xs text-yellow-400 mt-2">Faltam {formatCurrency(remaining)} para sua meta</p>
         )}
       </div>
-
-      <AlertDialog open={showPopup} onOpenChange={setShowPopup}>
-        {showPopup && <Confetti />}
-        <AlertDialogContent className="bg-card border-border">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-3xl font-headline text-center text-primary">Meta Atingida!</AlertDialogTitle>
-            <AlertDialogDescription className="text-center pt-2 text-muted-foreground">
-              Você conseguiu! Continue acelerando para o próximo objetivo!
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleClose} className="bg-primary hover:bg-primary/90">Fechar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
