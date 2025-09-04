@@ -4,7 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
-import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarTrigger } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 
 const APP_NAME = "Uber Cash";
@@ -56,16 +56,18 @@ export default async function RootLayout({
       </head>
       <body className="font-body antialiased h-full bg-background">
         <SidebarProvider>
-            <Sidebar>
-              <SidebarNav />
-            </Sidebar>
-            <div className="flex flex-col flex-1">
-              <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:hidden">
-                <SidebarTrigger />
-              </header>
-              <main className="flex-1 p-4 md:p-6 lg:p-8">
-                  {children}
-              </main>
+            <div className="md:flex">
+              <Sidebar>
+                <SidebarNav />
+              </Sidebar>
+              <div className="flex flex-col flex-1">
+                <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:hidden">
+                  <SidebarTrigger />
+                </header>
+                <main className="flex-1 p-4 md:p-6 lg:p-8">
+                    {children}
+                </main>
+              </div>
             </div>
         </SidebarProvider>
         <Toaster />
