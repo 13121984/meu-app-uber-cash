@@ -9,6 +9,7 @@ export async function updateWorkDayAction(workDay: WorkDay) {
     const result = await updateWorkDay(workDay.id, workDay);
     if (result.success) {
         revalidatePath("/gerenciamento");
+        revalidatePath("/"); // Adicionado para revalidar a dashboard
     }
     return result;
 }
@@ -17,6 +18,7 @@ export async function deleteWorkDayAction(workDayId: string) {
     const result = await deleteWorkDay(workDayId);
     if (result.success) {
         revalidatePath("/gerenciamento");
+        revalidatePath("/"); // Adicionado para revalidar a dashboard
     }
     return result;
 }

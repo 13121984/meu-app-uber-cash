@@ -9,6 +9,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords, Maintenance } from './maintenance.service';
 import fs from 'fs/promises';
 import path from 'path';
+import { revalidatePath } from 'next/cache';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id:number; type: string; paid: number; price: number };
@@ -102,6 +103,8 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
     };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(allWorkDays);
+    revalidatePath('/');
+    revalidatePath('/gerenciamento');
     return { success: true, id: newWorkDay.id };
   } catch (e) {
     console.error("Error adding work day: ", e);
@@ -112,7 +115,7 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
 
 export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id'>): Promise<{ success: boolean; error?: string }> {
   try {
-    const allWorkDays = await readWorkDays();
+    const allWorkDays = await readWorkDays(true);
     const index = allWorkDays.findIndex(r => r.id === id);
     if (index === -1) {
         return { success: false, error: "Registro não encontrado." };
