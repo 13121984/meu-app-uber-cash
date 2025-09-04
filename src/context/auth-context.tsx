@@ -3,7 +3,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, logout as logoutService, login as loginService, signup as signupService } from '@/services/auth.service';
+import { auth } from '@/lib/firebase'; // Import from the central firebase config
+import { logout as logoutService, login as loginService, signup as signupService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import type { AuthFormData } from '@/components/auth/auth-form';
 
