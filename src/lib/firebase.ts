@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAG6jM0NodJIF_eS2s2KIK1dvjqFhNdEiI",
   authDomain: "rota-certa-lkbvr.firebaseapp.com",
   projectId: "rota-certa-lkbvr",
-  storageBucket: "rota-certa-lkbvr.appspot.com",
+  storageBucket: "rota-certa-lkbvr.firebasestorage.app",
   messagingSenderId: "824212803664",
   appId: "1:824212803664:web:32ee7ae1c6c9f796e30155"
 };
