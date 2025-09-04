@@ -31,14 +31,22 @@ const CSV_HEADERS = [
 
 
 function escapeCsvValue(value: any): string {
-    if (value === null || value === undefined) {
+    if (value === null || value === undefined || value === '') {
         return '';
     }
-    const stringValue = String(value);
+    
+    let stringValue = String(value);
+    
+    // Replace comma with dot for decimal values, as Sheets/Excel might use it
+    if (typeof value === 'number') {
+        stringValue = stringValue.replace(',', '.');
+    }
+
     // If the value contains a comma, quote, or newline, enclose it in double quotes
     if (/[",\r\n]/.test(stringValue)) {
         return `"${stringValue.replace(/"/g, '""')}"`;
     }
+
     return stringValue;
 }
 
