@@ -65,7 +65,7 @@ export function LivePreview({ data }: LivePreviewProps) {
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg text-center">
-            <p className="text-sm text-green-700 dark:text-green-400 font-semibold">Lucro Líquido</p>
+            <p className="text-sm font-semibold text-green-700 dark:text-green-300">Lucro Líquido</p>
             <p className="text-3xl font-bold text-green-600 dark:text-green-500">{formatCurrency(calculations.lucroLiquido)}</p>
         </div>
 
