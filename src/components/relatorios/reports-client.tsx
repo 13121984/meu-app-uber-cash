@@ -29,7 +29,7 @@ const StatCard = ({ title, value, icon: Icon, color, isCurrency = false, unit = 
     return (
         <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50">
             <div className={`p-2 rounded-lg ${color}`}>
-                <Icon className="h-5 w-5 text-white" />
+                <Icon className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1">
                 <p className="text-sm font-bold text-foreground">{formattedValue}</p>
@@ -91,7 +91,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                         {reportData.diasTrabalhados} {reportData.diasTrabalhados === 1 ? 'dia trabalhado' : 'dias trabalhados'} no período selecionado.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                <CardContent className="grid grid-cols-2 gap-2">
                    <StatCard title="Lucro Líquido" value={reportData.totalLucro} icon={DollarSign} color="bg-green-500/80" isCurrency />
                    <StatCard title="Ganhos (Bruto)" value={reportData.totalGanho} icon={DollarSign} color="bg-green-500/80" isCurrency />
                    <StatCard title="Gastos Totais" value={reportData.totalGastos} icon={DollarSign} color="bg-red-500/80" isCurrency />
@@ -134,45 +134,41 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                 </CardContent>
             </Card>
 
-             <div className="grid lg:grid-cols-2 gap-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <EarningsBarChart data={reportData.earningsByCategory} />
-                    </CardContent>
-                </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <EarningsBarChart data={reportData.earningsByCategory} />
+                </CardContent>
+            </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline text-lg">Viagens por Categoria</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <TripsBarChart data={reportData.tripsByCategory} />
-                    </CardContent>
-                </Card>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Viagens por Categoria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <TripsBarChart data={reportData.tripsByCategory} />
+                </CardContent>
+            </Card>
             
-             <div className="grid lg:grid-cols-2 gap-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline text-lg">Gastos com Combustível</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <FuelBarChart data={reportData.fuelExpenses} />
-                    </CardContent>
-                </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Gastos com Combustível</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <FuelBarChart data={reportData.fuelExpenses} />
+                </CardContent>
+            </Card>
 
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline text-lg">Total de Viagens por Dia</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <DailyTripsChart data={reportData.dailyTrips} />
-                    </CardContent>
-                </Card>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Total de Viagens por Dia</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <DailyTripsChart data={reportData.dailyTrips} />
+                </CardContent>
+            </Card>
         </div>
       )}
 
