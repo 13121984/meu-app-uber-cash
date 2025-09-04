@@ -31,10 +31,10 @@ export function MaintenanceSummary({ data }: MaintenanceSummaryProps) {
         <div>
             <CardTitle className="font-headline text-lg flex items-center gap-2">
                 <Wrench className="w-6 h-6 text-primary" />
-                Resumo de Manutenção (Mês)
+                Resumo de Manutenção
             </CardTitle>
             <CardDescription>
-                Acompanhe seus gastos com manutenção neste mês.
+                Acompanhe seus gastos com manutenção no período.
             </CardDescription>
         </div>
         <Link href="/manutencao" passHref>

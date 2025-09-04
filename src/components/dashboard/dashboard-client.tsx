@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { DollarSign, Fuel, Map, Hourglass, TrendingUp, Clock, Car, Settings, Wrench, Zap, BarChart3, GripVertical } from "lucide-react"
+import { DollarSign, Fuel, Map, Hourglass, TrendingUp, Clock, Car, Settings, Wrench, Zap, BarChart3, GripVertical, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatsCard } from "./stats-card"
@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils"
 import { MaintenanceSummary } from "./maintenance-summary"
 import dynamic from 'next/dynamic';
 
-const EarningsBarChart = dynamic(() => import('./earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false });
-const TripsBarChart = dynamic(() => import('./trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false });
+const EarningsBarChart = dynamic(() => import('./earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const TripsBarChart = dynamic(() => import('./trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
 
 export interface EarningsByCategory {
@@ -122,16 +122,16 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       </Card>
 
 
-      <MaintenanceSummary data={initialData.mes.maintenance} />
+      <MaintenanceSummary data={data.maintenance} />
 
       <Card className="bg-card border-border">
           <CardHeader>
               <CardTitle className="font-headline text-lg flex items-center gap-2">
                 <BarChart3 className="w-6 h-6 text-primary" />
-                Análise do Mês
+                Análise por Categoria ({periodMap[period]})
               </CardTitle>
               <CardDescription>
-                Detalhes sobre o desempenho das suas corridas durante este mês.
+                Detalhes sobre o desempenho das suas corridas por categoria.
               </CardDescription>
           </CardHeader>
           <CardContent className="grid md:grid-cols-2 gap-8">
@@ -140,14 +140,14 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                   <GripVertical className="w-5 h-5 text-muted-foreground" />
                   Ganhos por Categoria
                 </h3>
-                <EarningsBarChart data={initialData.mes.earningsByCategory} />
+                <EarningsBarChart key={`earnings-${period}`} data={data.earningsByCategory} />
             </div>
              <div>
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
                   <GripVertical className="w-5 h-5 text-muted-foreground" />
                   Viagens por Categoria
                 </h3>
-                <TripsBarChart data={initialData.mes.tripsByCategory} />
+                <TripsBarChart key={`trips-${period}`} data={data.tripsByCategory} />
             </div>
           </CardContent>
         </Card>
