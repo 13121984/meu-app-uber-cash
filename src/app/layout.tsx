@@ -1,7 +1,6 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
-import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
@@ -18,11 +17,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // getSettings pode ser chamado aqui, mas a aplicação do tema será no cliente
+  // para evitar problemas de cache e garantir que o usuário veja a UI correta
+  // mesmo antes de uma revalidação completa.
   const settings = await getSettings();
 
   return (
     <html 
       lang="pt-BR" 
+      // A classe do tema será gerenciada pelo ProtectedRoute/AuthProvider no cliente
       className={cn("h-full", settings.theme)}
     >
       <head>
@@ -30,22 +33,10 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased h-full">
+      <body className="font-body antialiased h-full bg-background">
         <AuthProvider>
           <ProtectedRoute>
-            <SidebarProvider>
-              <Sidebar>
-                <SidebarNav />
-              </Sidebar>
-              <SidebarInset>
-                  <main className="p-4 md:p-6 lg:p-8">
-                    <div className="md:hidden mb-4">
-                      <SidebarTrigger />
-                    </div>
-                    {children}
-                  </main>
-              </SidebarInset>
-            </SidebarProvider>
+            {children}
           </ProtectedRoute>
         </AuthProvider>
         <Toaster />
