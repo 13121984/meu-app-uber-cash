@@ -44,7 +44,8 @@ export const useWorkDayColumns = () => {
   const [dayToDelete, setDayToDelete] = useState<WorkDay | null>(null);
 
 
-  const handleDeleteClick = (workDay: WorkDay) => {
+  const handleDeleteClick = (e: React.MouseEvent, workDay: WorkDay) => {
+    e.stopPropagation(); // Impede que o clique dispare o evento da linha
     setDayToDelete(workDay);
     setIsAlertOpen(true);
   }
@@ -116,16 +117,6 @@ export const useWorkDayColumns = () => {
       }
     },
     {
-      accessorKey: "km",
-      header: () => <div className="text-right hidden lg:table-cell">KM</div>,
-      cell: ({ row }) => <div className="text-right hidden lg:table-cell">{`${row.getValue("km")}`}</div>
-    },
-    {
-      accessorKey: "hours",
-      header: () => <div className="text-right hidden lg:table-cell">Horas</div>,
-       cell: ({ row }) => <div className="text-right hidden lg:table-cell">{`${row.getValue("hours")}`}</div>
-    },
-    {
       id: "actions",
       cell: ({ row }) => {
         const workDay = row.original
@@ -134,12 +125,12 @@ export const useWorkDayColumns = () => {
           <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+                <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
                   <span className="sr-only">Open menu</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuLabel>Ações</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => setEditingWorkDay(workDay)}>
                   Editar
@@ -147,7 +138,7 @@ export const useWorkDayColumns = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="text-destructive focus:bg-destructive/30"
-                  onClick={() => handleDeleteClick(workDay)}
+                  onClick={(e) => handleDeleteClick(e, workDay)}
                 >
                   Apagar
                 </DropdownMenuItem>
@@ -189,5 +180,5 @@ export const useWorkDayColumns = () => {
     </>
   )
 
-  return { columns, Dialogs };
+  return { columns, Dialogs, setEditingWorkDay };
 }

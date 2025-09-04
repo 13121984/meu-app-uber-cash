@@ -5,6 +5,7 @@ import * as React from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
+  Row,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -29,11 +30,13 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  onRowClick: (row: Row<TData>) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([
       // Ordenação inicial por data descendente
@@ -84,6 +87,8 @@ export function DataTable<TData, TValue>({
                 <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    onClick={() => onRowClick(row)}
+                    className="cursor-pointer"
                 >
                     {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

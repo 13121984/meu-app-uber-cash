@@ -23,7 +23,7 @@ interface GerenciamentoClientProps {
 export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { columns, Dialogs } = useWorkDayColumns();
+  const { columns, Dialogs, setEditingWorkDay } = useWorkDayColumns();
 
   const [isDeletingFiltered, setIsDeletingFiltered] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -98,7 +98,7 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
         <CardHeader>
           <CardTitle>Seus Registros</CardTitle>
           <CardDescription>
-            Filtre e gerencie todos os seus dias de trabalho registrados.
+            Clique em um registro para editar. Filtre e gerencie todos os seus dias de trabalho.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -116,7 +116,11 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
             </div>
           )}
           <div className="mt-4">
-            <DataTable columns={columns} data={filteredData} />
+            <DataTable 
+              columns={columns} 
+              data={filteredData}
+              onRowClick={(row) => setEditingWorkDay(row.original)} 
+            />
           </div>
         </CardContent>
       </Card>
