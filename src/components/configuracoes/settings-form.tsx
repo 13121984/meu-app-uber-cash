@@ -266,7 +266,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
             <Card>
                 <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline"><Bell className="h-6 w-6 text-primary" />Notificações e Padrões</CardTitle>
-                </Header>
+                </CardHeader>
                 <CardContent className="space-y-4">
                      <div className="flex items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
@@ -304,7 +304,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 font-headline"><Eye className="h-6 w-6 text-primary" />Prévia do Visual</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 rounded-lg bg-card">
+                    <CardContent className="space-y-4 rounded-lg bg-card text-card-foreground">
                         <div className="p-4 rounded-lg border bg-card text-card-foreground">
                             <h4 className="font-bold">Exemplo de Card</h4>
                             <p className="text-sm text-muted-foreground">Este é um exemplo de como o texto aparecerá com as configurações atuais.</p>
@@ -320,9 +320,5 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
         </div>
       </div>
     </form>
-  );
-}
-
-    
 
     
