@@ -53,7 +53,7 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
                   !data.date && 'text-muted-foreground'
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
                 {data.date ? format(data.date, 'PPP', { locale: ptBR }) : <span>Escolha uma data</span>}
               </Button>
             </PopoverTrigger>

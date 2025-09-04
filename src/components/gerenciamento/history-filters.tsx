@@ -78,7 +78,7 @@ export function HistoryFilters({ categories, onFilterChange }: HistoryFiltersPro
               !dateRange && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
