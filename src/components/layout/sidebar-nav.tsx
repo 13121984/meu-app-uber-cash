@@ -56,7 +56,7 @@ export function SidebarNav() {
                   tooltip={item.label}
                   onClick={() => setOpenMobile(false)}
                   className={cn(
-                    "data-[active=true]:bg-primary data-[active=true]:text-primary-foreground hover:bg-primary/10 hover:text-foreground",
+                    "text-foreground data-[active=true]:bg-primary data-[active=true]:text-primary-foreground hover:bg-primary/10 hover:text-foreground",
                     "justify-start"
                   )}
                 >
