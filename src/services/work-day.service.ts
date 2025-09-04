@@ -1,8 +1,6 @@
 
 "use server";
 
-import { collection, addDoc, Timestamp, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isToday } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
@@ -61,15 +59,20 @@ export interface ReportData {
   rawWorkDays: WorkDay[]; // Adicionado para exportação
 }
 
+// In-memory storage for work days
+let workDays: WorkDay[] = [];
+let nextId = 1;
+
+
 export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
   try {
-    const docRef = await addDoc(collection(db, "workdays"), {
-      ...data,
-      date: Timestamp.fromDate(data.date),
-      createdAt: Timestamp.now(),
-    });
-    console.log("Document written with ID: ", docRef.id);
-    return { success: true, id: docRef.id };
+    const newWorkDay: WorkDay = {
+        ...data,
+        id: (nextId++).toString(),
+        date: new Date(data.date),
+    };
+    workDays.unshift(newWorkDay); // Add to the beginning of the array
+    return { success: true, id: newWorkDay.id };
   } catch (e) {
     console.error("Error adding document: ", e);
     return { success: false, error: "Failed to save work day." };
@@ -77,32 +80,7 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
 }
 
 export async function getWorkDays(): Promise<WorkDay[]> {
-    try {
-        const workdaysCollection = collection(db, "workdays");
-        const q = query(workdaysCollection, orderBy("date", "desc"));
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-            return [];
-        }
-
-        const workDays: WorkDay[] = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const workDayData = {
-                id: doc.id,
-                ...data,
-                date: (data.date as Timestamp).toDate(),
-            };
-            delete (workDayData as any).createdAt;
-            
-            workDays.push(workDayData as WorkDay);
-        });
-        return workDays;
-    } catch (error) {
-        console.error("Error getting documents: ", error);
-        return [];
-    }
+    return Promise.resolve(workDays.map(day => ({...day, date: new Date(day.date)})));
 }
 
 function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: any[]): PeriodData {
@@ -193,13 +171,13 @@ export async function getDashboardData() {
         return dayDate.toDateString() === todayDateString;
     });
 
-    const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
-    const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
+    const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(new Date(day.date), { start: startOfWeek(now), end: endOfWeek(now) }));
+    const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(new Date(day.date), { start: startOfMonth(now), end: endOfMonth(now) }));
 
     const todayMaintenance = allMaintenance.filter(m => new Date(m.date).toDateString() === todayDateString);
 
-    const thisWeekMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfWeek(now), end: endOfWeek(now) }));
-    const thisMonthMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfMonth(now), end: endOfMonth(now) }));
+    const thisWeekMaintenance = allMaintenance.filter(m => isWithinInterval(new Date(m.date), { start: startOfWeek(now), end: endOfWeek(now) }));
+    const thisMonthMaintenance = allMaintenance.filter(m => isWithinInterval(new Date(m.date), { start: startOfMonth(now), end: endOfMonth(now) }));
 
     const hoje = calculatePeriodData(todayWorkDays, "diária", goals, todayMaintenance);
     const semana = calculatePeriodData(thisWeekWorkDays, "semanal", goals, thisWeekMaintenance);
@@ -356,5 +334,3 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     rawWorkDays: filteredDays,
   };
 }
-
-    

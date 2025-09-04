@@ -1,8 +1,6 @@
 
 "use server";
 
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
 
 export interface Goals {
@@ -11,49 +9,28 @@ export interface Goals {
   monthly: number;
 }
 
-/**
- * Retorna a referência do documento de metas para o usuário anônimo.
- */
-const getGoalsDocRef = () => {
-  // Usamos um caminho fixo para o modo offline/sem login.
-  return doc(db, "local", "user", "settings", "goals");
-}
-
+// In-memory storage for goals
+let memoryGoals: Goals = {
+  daily: 200,
+  weekly: 1000,
+  monthly: 4000,
+};
 
 /**
- * Busca as metas salvas no Firestore local.
- * Se não existir, retorna metas zeradas.
+ * Busca as metas da memória local.
  */
 export async function getGoals(): Promise<Goals> {
-  const settingsDocRef = getGoalsDocRef();
-
-  try {
-    const docSnap = await getDoc(settingsDocRef);
-    if (docSnap.exists()) {
-      return docSnap.data() as Goals;
-    }
-    return { daily: 0, weekly: 0, monthly: 0 };
-  } catch (error) {
-    console.error("Error fetching goals: ", error);
-    return { daily: 0, weekly: 0, monthly: 0 };
-  }
+  return Promise.resolve(memoryGoals);
 }
 
 /**
- * Salva ou atualiza as metas no Firestore local.
+ * Salva ou atualiza as metas na memória local.
  */
 export async function saveGoals(goals: Goals): Promise<{ success: boolean, error?: string }> {
-  const settingsDocRef = getGoalsDocRef();
+  memoryGoals = goals;
+  
+  revalidatePath('/dashboard');
+  revalidatePath('/metas');
 
-  try {
-    await setDoc(settingsDocRef, goals, { merge: true });
-    
-    revalidatePath('/dashboard');
-    revalidatePath('/metas');
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error saving goals: ", error);
-    return { success: false, error: "Failed to save goals." };
-  }
+  return Promise.resolve({ success: true });
 }
