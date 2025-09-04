@@ -60,31 +60,32 @@ export const exportToCsvFlow = ai.defineFlow(
     // Flatten the work day data into a structure suitable for CSV
     filteredWorkDays.forEach(day => {
         const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
-        let isFirstRowForDay = true;
-
-        // Combine all earnings, fuel entries, and maintenance into a single loop
-        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, (day.maintenance && day.maintenance.amount > 0) ? 1 : 0);
-
-        if (maxEntries === 0) {
-            // Handle days with no entries, just basic info
+        
+        // Handle days with no entries, just basic info
+        if (day.earnings.length === 0 && day.fuelEntries.length === 0 && (!day.maintenance || day.maintenance.amount === 0)) {
              rows.push([
                 dateStr,
                 escapeCsvValue(day.km),
                 escapeCsvValue(day.hours),
-                '', '', '', '', '', '', '', '', ''
+                '', '', '', '', '', '', '', ''
             ]);
             return;
         }
 
+        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, (day.maintenance && day.maintenance.amount > 0) ? 1 : 0);
+
         for (let i = 0; i < maxEntries; i++) {
             const earning = day.earnings[i];
             const fuel = day.fuelEntries[i];
+            // Maintenance should only be on the first row for a given day
             const maintenance = (i === 0 && day.maintenance && day.maintenance.amount > 0) ? day.maintenance : null;
+            // Basic info (date, km, hours) should only be on the first row for a given day
+            const isFirstRowOfDay = (i === 0);
 
             rows.push([
-                dateStr,
-                isFirstRowForDay ? escapeCsvValue(day.km) : '',
-                isFirstRowForDay ? escapeCsvValue(day.hours) : '',
+                isFirstRowOfDay ? dateStr : '',
+                isFirstRowOfDay ? escapeCsvValue(day.km) : '',
+                isFirstRowOfDay ? escapeCsvValue(day.hours) : '',
                 earning ? escapeCsvValue(earning.category) : '',
                 earning ? escapeCsvValue(earning.trips) : '',
                 earning ? escapeCsvValue(earning.amount) : '',
@@ -94,7 +95,6 @@ export const exportToCsvFlow = ai.defineFlow(
                 maintenance ? escapeCsvValue(maintenance.description) : '',
                 maintenance ? escapeCsvValue(maintenance.amount) : ''
             ]);
-            isFirstRowForDay = false;
         }
     });
 
