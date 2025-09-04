@@ -6,9 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Upload, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen } from 'lucide-react';
 import { addMultipleWorkDays, type ImportedWorkDay } from '@/services/work-day.service';
 import { useRouter } from 'next/navigation';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+
 
 const CSV_HEADERS = [
     'date', 'km', 'hours', 
@@ -107,7 +114,7 @@ export function ImportCard() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <Upload className="h-6 w-6 text-primary" />
-                    Importar Dados de Planilha
+                    Importar e Exportar Dados
                 </CardTitle>
                 <CardDescription>
                     Faça o upload de um arquivo CSV com seu histórico para adicioná-lo ao aplicativo.
@@ -131,6 +138,36 @@ export function ImportCard() {
                                    hover:file:bg-primary/20"
                     />
                 </div>
+                 <Accordion type="single" collapsible>
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                        <div className="flex items-center gap-2">
+                            <BookOpen className="h-4 w-4" />
+                            <span>Ver detalhes da estrutura do arquivo</span>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-md">
+                      <ul className="space-y-2 list-disc pl-5">
+                          <li>O arquivo deve estar no formato <strong>CSV</strong> (valores separados por vírgula).</li>
+                          <li>A primeira linha do arquivo deve ser o <strong>cabeçalho</strong>.</li>
+                           <li>As colunas devem seguir a seguinte <strong>ordem e nome</strong>:
+                            <code className="block bg-muted text-foreground p-2 rounded-md my-2 text-xs">
+                                date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount
+                            </code>
+                          </li>
+                          <li>
+                            <strong>Agrupamento por Data:</strong> O sistema agrupa múltiplas linhas com a mesma data (`AAAA-MM-DD`) em um único registro de dia de trabalho.
+                          </li>
+                          <li>
+                            Campos como `km` e `hours` só precisam ser preenchidos uma vez por dia (o sistema usará o maior valor).
+                          </li>
+                          <li>
+                            Você pode ter múltiplas linhas para o mesmo dia para registrar diferentes ganhos ou abastecimentos.
+                          </li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
                 <Button onClick={handleFileImport} disabled={isImporting || !fileName} className="w-full">
                     {isImporting ? (
                         <>
