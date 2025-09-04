@@ -3,7 +3,7 @@
 
 import { collection, addDoc, Timestamp, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
@@ -130,7 +130,6 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
         const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         
-        const dailyMaintenance = day.maintenance?.amount || 0;
         const dailyProfit = dailyEarnings - dailyFuel;
 
         data.totalGanho += dailyEarnings;
@@ -187,11 +186,23 @@ export async function getDashboardData() {
     const goals = await getGoals();
     const now = new Date();
 
-    const todayWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfDay(now), end: endOfDay(now) }));
+    const todayWorkDays = allWorkDays.filter(day => {
+        const dayDate = new Date(day.date);
+        return dayDate.getUTCDate() === now.getUTCDate() &&
+               dayDate.getUTCMonth() === now.getUTCMonth() &&
+               dayDate.getUTCFullYear() === now.getUTCFullYear();
+    });
+
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
 
-    const todayMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfDay(now), end: endOfDay(now) }));
+    const todayMaintenance = allMaintenance.filter(m => {
+        const maintenanceDate = new Date(m.date);
+        return maintenanceDate.getUTCDate() === now.getUTCDate() &&
+               maintenanceDate.getUTCMonth() === now.getUTCMonth() &&
+               maintenanceDate.getUTCFullYear() === now.getUTCFullYear();
+    });
+
     const thisWeekMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfMonth(now), end: endOfMonth(now) }));
 
@@ -212,7 +223,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   switch (filters.type) {
     case 'all':
       if (allWorkDays.length > 0) {
-        const dates = allWorkDays.map(d => d.date);
+        const dates = allWorkDays.map(d => new Date(d.date));
         interval = { start: new Date(Math.min(...dates.map(d => d.getTime()))), end: new Date(Math.max(...dates.map(d => d.getTime()))) };
       }
       filteredDays = allWorkDays;
@@ -245,7 +256,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   
   const sourceDays = allWorkDays.length > 0 ? allWorkDays : await getWorkDays();
   if (interval) {
-    filteredDays = sourceDays.filter(d => isWithinInterval(d.date, interval!));
+    filteredDays = sourceDays.filter(d => isWithinInterval(new Date(d.date), interval!));
   } else {
     // Caso especial para 'all' quando não há dados iniciais
     filteredDays = sourceDays;
@@ -253,7 +264,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   
   const allMaintenance = await getMaintenanceRecords();
   const filteredMaintenance = interval 
-    ? allMaintenance.filter(m => isWithinInterval(m.date, interval!))
+    ? allMaintenance.filter(m => isWithinInterval(new Date(m.date), interval!))
     : allMaintenance;
 
 
@@ -289,7 +300,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
         tripsByCategoryMap.set(earning.category, (tripsByCategoryMap.get(earning.category) || 0) + earning.trips);
     });
 
-    const dateKey = format(day.date, 'yyyy-MM-dd');
+    const dateKey = format(new Date(day.date), 'yyyy-MM-dd');
     const currentDaily = dailyDataMap.get(dateKey) || { lucro: 0, viagens: 0 };
     currentDaily.lucro += dailyEarnings - dailyFuel - dailyMaintenance;
     currentDaily.viagens += dailyTrips;
@@ -309,8 +320,8 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   } else if (dailyDataMap.size > 0) {
       [...dailyDataMap.entries()].sort().forEach(([dateKey, data]) => {
           // Manutenção já está inclusa no cálculo diário do lucro
-          profitEvolution.push({ date: format(new Date(dateKey), 'dd/MM'), lucro: data.lucro });
-          dailyTrips.push({ date: format(new Date(dateKey), 'dd/MM'), viagens: data.viagens });
+          profitEvolution.push({ date: format(parseISO(dateKey), 'dd/MM'), lucro: data.lucro });
+          dailyTrips.push({ date: format(parseISO(dateKey), 'dd/MM'), viagens: data.viagens });
       })
   }
 
@@ -334,7 +345,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     totalGanho,
     totalLucro,
     totalGastos,
-    diasTrabalhados: new Set(filteredDays.map(d => d.date.toDateString())).size,
+    diasTrabalhados: new Set(filteredDays.map(d => new Date(d.date).toDateString())).size,
     profitComposition,
     earningsByCategory,
     tripsByCategory,
