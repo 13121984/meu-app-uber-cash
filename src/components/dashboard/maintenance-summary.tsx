@@ -14,7 +14,7 @@ interface MaintenanceSummaryProps {
 }
 
 const StatItem = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="flex flex-col items-center justify-center text-center p-2 rounded-lg bg-secondary/50 flex-1">
+    <div className="flex flex-col items-center justify-center text-center p-2 rounded-lg bg-secondary/50 flex-1 min-w-[100px]">
         <p className="text-2xl font-bold text-foreground">{value}</p>
         <p className="text-sm text-muted-foreground">{label}</p>
     </div>
@@ -43,7 +43,7 @@ export function MaintenanceSummary({ data }: MaintenanceSummaryProps) {
           </Button>
         </Link>
       </CardHeader>
-      <CardContent className="flex flex-col sm:flex-row items-center gap-4">
+      <CardContent className="flex flex-wrap items-center gap-4">
         <StatItem label="Total Gasto" value={formatCurrency(data.totalSpent)} />
         <StatItem label="Serviços" value={data.servicesPerformed} />
         <StatItem label="Média/Serviço" value={formatCurrency(averageCost)} />

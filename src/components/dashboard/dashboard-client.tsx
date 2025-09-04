@@ -106,7 +106,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {stats.map((stat) => (
             <StatsCard key={stat.title} {...stat} />
           ))}
@@ -134,7 +134,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                 Detalhes sobre o desempenho das suas corridas por categoria.
               </CardDescription>
           </CardHeader>
-          <CardContent className="grid md:grid-cols-2 gap-8">
+          <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8">
              <div className="space-y-2">
                 <h3 className="font-semibold flex items-center gap-2">
                   <GripVertical className="w-5 h-5 text-muted-foreground" />
