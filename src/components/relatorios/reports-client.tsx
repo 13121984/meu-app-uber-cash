@@ -27,15 +27,15 @@ const StatCard = ({ title, value, icon: Icon, color, isCurrency = false, unit = 
         : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
 
     return (
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-            <div className={`p-2 rounded-lg ${color}`}>
-                <Icon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-                <p className="text-xl font-bold text-foreground">{formattedValue}</p>
-                <p className="text-muted-foreground text-sm">{title}</p>
-            </div>
-        </div>
+        <Card className="bg-secondary/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <Icon className={`h-4 w-4 text-muted-foreground ${color}`} />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{formattedValue}</div>
+            </CardContent>
+        </Card>
     );
 };
 
@@ -91,17 +91,17 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                         {reportData.diasTrabalhados} {reportData.diasTrabalhados === 1 ? 'dia trabalhado' : 'dias trabalhados'} no período selecionado.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                   <StatCard title="Lucro Líquido" value={reportData.totalLucro} icon={DollarSign} color="bg-green-500/80" isCurrency />
-                   <StatCard title="Ganhos (Bruto)" value={reportData.totalGanho} icon={DollarSign} color="bg-green-500/80" isCurrency />
-                   <StatCard title="Gastos Totais" value={reportData.totalGastos} icon={DollarSign} color="bg-red-500/80" isCurrency />
-                   <StatCard title="Manutenção" value={reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0} icon={Wrench} color="bg-orange-500/80" isCurrency />
-                   <StatCard title="Viagens" value={reportData.totalViagens} icon={Car} color="bg-blue-500/80" />
-                   <StatCard title="KM Rodados" value={reportData.totalKm} icon={Map} color="bg-purple-500/80" unit="km" />
-                   <StatCard title="Horas" value={reportData.totalHoras} icon={Clock} color="bg-orange-500/80" unit="h" precision={1} />
-                   <StatCard title="Ganho/Hora" value={reportData.ganhoPorHora} icon={TrendingUp} color="bg-green-500/80" isCurrency precision={2} />
-                   <StatCard title="Ganho/KM" value={reportData.ganhoPorKm} icon={TrendingUp} color="bg-blue-500/80" isCurrency precision={2} />
-                   <StatCard title="Eficiência Média" value={reportData.eficiencia} icon={Zap} color="bg-yellow-500/80" unit="km/L" precision={2} />
+                <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                   <StatCard title="Lucro Líquido" value={reportData.totalLucro} icon={DollarSign} color="text-green-500" isCurrency />
+                   <StatCard title="Ganhos (Bruto)" value={reportData.totalGanho} icon={DollarSign} color="text-green-500" isCurrency />
+                   <StatCard title="Gastos Totais" value={reportData.totalGastos} icon={DollarSign} color="text-red-500" isCurrency />
+                   <StatCard title="Manutenção" value={reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0} icon={Wrench} color="text-orange-500" isCurrency />
+                   <StatCard title="Viagens" value={reportData.totalViagens} icon={Car} color="text-blue-500" />
+                   <StatCard title="KM Rodados" value={reportData.totalKm} icon={Map} color="text-purple-500" unit="km" />
+                   <StatCard title="Horas" value={reportData.totalHoras} icon={Clock} color="text-orange-500" unit="h" precision={1} />
+                   <StatCard title="Ganho/Hora" value={reportData.ganhoPorHora} icon={TrendingUp} color="text-green-500" isCurrency precision={2} />
+                   <StatCard title="Ganho/KM" value={reportData.ganhoPorKm} icon={TrendingUp} color="text-blue-500" isCurrency precision={2} />
+                   <StatCard title="Eficiência Média" value={reportData.eficiencia} icon={Zap} color="text-yellow-500" unit="km/L" precision={2} />
                 </CardContent>
             </Card>
 
