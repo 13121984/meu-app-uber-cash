@@ -320,5 +320,5 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
         </div>
       </div>
     </form>
-
-    
+  );
+}
