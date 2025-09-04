@@ -25,40 +25,95 @@ import {
 
 import { Maintenance, deleteMaintenance, deleteAllMaintenance, getMaintenanceRecords } from "@/services/maintenance.service";
 import { MaintenanceForm } from "./maintenance-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MaintenanceFilters, FilterValues } from './maintenance-filters';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Wrench, Trash2, Edit, Loader2 } from 'lucide-react';
+import { PlusCircle, Wrench, Trash2, Edit, Loader2, DollarSign, Filter } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+const SummaryCard = ({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: React.ElementType }) => (
+    <Card className="bg-secondary/30">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <Icon className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+            <div className="text-2xl font-bold">{value}</div>
+            <p className="text-xs text-muted-foreground">{description}</p>
+        </CardContent>
+    </Card>
+);
+
 export function MaintenanceClient() {
-  const [records, setRecords] = useState<Maintenance[]>([]);
+  const [allRecords, setAllRecords] = useState<Maintenance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<Maintenance | null>(null);
-  
+  const [filters, setFilters] = useState<FilterValues>({ query: '', dateRange: undefined });
+
   useEffect(() => {
     const fetchRecords = async () => {
       setIsLoading(true);
       const initialRecords = await getMaintenanceRecords();
-      setRecords(initialRecords);
+      setAllRecords(initialRecords);
       setIsLoading(false);
     }
     fetchRecords();
   }, []);
 
+  const filteredRecords = useMemo(() => {
+    return allRecords.filter(record => {
+      // Filtro por Data
+      if (filters.dateRange?.from) {
+        const fromDate = new Date(filters.dateRange.from);
+        fromDate.setHours(0, 0, 0, 0);
+
+        let toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : new Date(filters.dateRange.from);
+        toDate.setHours(23, 59, 59, 999);
+
+        const recordDate = new Date(record.date);
+        
+        if (recordDate < fromDate || recordDate > toDate) {
+          return false;
+        }
+      }
+      
+      // Filtro por Query de Texto
+      if (filters.query) {
+          const queryLower = filters.query.toLowerCase();
+          if (!record.description.toLowerCase().includes(queryLower)) {
+              return false;
+          }
+      }
+      
+      return true;
+    });
+  }, [allRecords, filters]);
+
+  const filteredTotal = useMemo(() => {
+    return filteredRecords.reduce((sum, record) => sum + record.amount, 0);
+  }, [filteredRecords]);
+
+  const monthlyAverage = useMemo(() => {
+    if (allRecords.length === 0) return 0;
+    const totalSpent = allRecords.reduce((sum, record) => sum + record.amount, 0);
+    const months = new Set(allRecords.map(r => format(r.date, 'yyyy-MM')));
+    return totalSpent / months.size;
+  }, [allRecords]);
+
   // Atualiza os registros localmente quando o formulário é submetido com sucesso
   const handleSuccess = (newRecord: Maintenance) => {
       if (selectedRecord) {
         // Editando
-        setRecords(records.map(r => r.id === newRecord.id ? newRecord : r));
+        setAllRecords(allRecords.map(r => r.id === newRecord.id ? newRecord : r));
       } else {
         // Adicionando
-        setRecords([newRecord, ...records].sort((a, b) => b.date.getTime() - a.date.getTime()));
+        setAllRecords([newRecord, ...allRecords].sort((a, b) => b.date.getTime() - a.date.getTime()));
       }
       setIsFormOpen(false);
       setSelectedRecord(null);
@@ -72,7 +127,7 @@ export function MaintenanceClient() {
   const handleDelete = async (id: string) => {
     const result = await deleteMaintenance(id);
     if(result.success) {
-      setRecords(records.filter(r => r.id !== id));
+      setAllRecords(allRecords.filter(r => r.id !== id));
       toast({ title: "Sucesso!", description: "Registro apagado." });
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
@@ -82,7 +137,7 @@ export function MaintenanceClient() {
   const handleDeleteAll = async () => {
     const result = await deleteAllMaintenance();
      if(result.success) {
-      setRecords([]);
+      setAllRecords([]);
       toast({ title: "Sucesso!", description: "Todos os registros foram apagados." });
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
@@ -90,49 +145,64 @@ export function MaintenanceClient() {
     setIsAlertOpen(false);
   }
 
-  const monthlyAverage = useMemo(() => {
-    if (records.length === 0) return 0;
-    const totalSpent = records.reduce((sum, record) => sum + record.amount, 0);
-    const months = new Set(records.map(r => format(r.date, 'yyyy-MM')));
-    return totalSpent / months.size;
-  }, [records]);
 
   return (
     <Dialog open={isFormOpen} onOpenChange={(open) => {
         setIsFormOpen(open);
         if(!open) setSelectedRecord(null);
     }}>
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+             <SummaryCard 
+                title="Total Gasto (Filtrado)"
+                value={formatCurrency(filteredTotal)}
+                description={`${filteredRecords.length} ${filteredRecords.length === 1 ? 'registro' : 'registros'} no período`}
+                icon={DollarSign}
+            />
+             <SummaryCard 
+                title="Média Mensal (Geral)"
+                value={formatCurrency(monthlyAverage)}
+                description={`Baseado em todos os ${allRecords.length} registros`}
+                icon={Wrench}
+            />
+        </div>
+
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="font-headline text-lg">Histórico de Manutenção</CardTitle>
-                <div className="flex items-center gap-4">
-                    <p className="text-sm text-muted-foreground">
-                        Média Mensal: <span className="font-bold text-foreground">{formatCurrency(monthlyAverage)}</span>
-                    </p>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Adicionar Registro
-                        </Button>
-                    </DialogTrigger>
-                </div>
+              <div>
+                <CardTitle className="font-headline text-lg flex items-center gap-2">
+                  <Filter className="w-5 h-5 text-primary" />
+                  Histórico de Manutenção
+                </CardTitle>
+                 <CardDescription>
+                    Filtre e gerencie seus registros de manutenção.
+                </CardDescription>
+              </div>
+                <DialogTrigger asChild>
+                    <Button>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Adicionar Registro
+                    </Button>
+                </DialogTrigger>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+                <MaintenanceFilters onFilterChange={setFilters} />
+
                 {isLoading ? (
                   <div className="space-y-4">
                       <Skeleton className="h-20 w-full" />
                       <Skeleton className="h-20 w-full" />
                       <Skeleton className="h-20 w-full" />
                   </div>
-                ) : records.length === 0 ? (
+                ) : filteredRecords.length === 0 ? (
                 <div className="text-center py-20 text-muted-foreground">
                     <Wrench className="mx-auto h-12 w-12" />
-                    <p className="mt-4 font-semibold">Nenhum registro de manutenção ainda</p>
-                    <p className="text-sm">Clique em "Adicionar Registro" para começar.</p>
+                    <p className="mt-4 font-semibold">Nenhum registro de manutenção encontrado</p>
+                    <p className="text-sm">Tente ajustar os filtros ou adicione um novo registro.</p>
                 </div>
                 ) : (
                 <div className="space-y-4">
-                    {records.map(record => (
+                    {filteredRecords.map(record => (
                     <Card key={record.id} className="bg-secondary/50">
                         <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div className="flex-1 space-y-1">
@@ -153,11 +223,11 @@ export function MaintenanceClient() {
                         </CardContent>
                     </Card>
                     ))}
-                    {records.length > 0 && (
+                    {allRecords.length > 0 && (
                       <div className="pt-4 flex justify-end">
                         <Button variant="destructive" onClick={() => setIsAlertOpen(true)}>
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Apagar Tudo
+                          Apagar Tudo ({allRecords.length})
                         </Button>
                       </div>
                     )}
@@ -165,6 +235,7 @@ export function MaintenanceClient() {
                 )}
             </CardContent>
         </Card>
+        </div>
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>{selectedRecord ? 'Editar' : 'Adicionar'} Registro de Manutenção</DialogTitle>
