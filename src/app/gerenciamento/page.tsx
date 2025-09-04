@@ -1,27 +1,17 @@
 
+
 import { History } from 'lucide-react';
 import { getWorkDays } from '@/services/work-day.service';
-import { columns } from '@/components/gerenciamento/columns';
+import { ColumnsComponent } from '@/components/gerenciamento/columns';
 import { DataTable } from '@/components/gerenciamento/data-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default async function GerenciamentoPage() {
   const workDays = await getWorkDays();
 
-  // Adicionamos cálculos de lucro diretamente aqui para passar para a coluna
-  const dataForTable = workDays.map(day => {
-    const totalGanhos = day.earnings.reduce((sum, e) => sum + e.amount, 0);
-    const totalCombustivel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-    const totalManutencao = day.maintenance.amount || 0;
-    const lucro = totalGanhos - totalCombustivel - totalManutencao;
-
-    return {
-      ...day,
-      lucro,
-      totalGanhos,
-      totalGastos: totalCombustivel + totalManutencao,
-    };
-  }).sort((a, b) => b.date.getTime() - a.date.getTime());
+  // Os cálculos agora são feitos diretamente nas células da coluna
+  // para garantir que estejam sempre sincronizados.
+  const dataForTable = workDays.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 
   return (
@@ -41,9 +31,23 @@ export default async function GerenciamentoPage() {
             </CardDescription>
         </CardHeader>
         <CardContent>
-            <DataTable columns={columns} data={dataForTable} />
+            {/* O DataTable agora renderiza as colunas e os diálogos de edição/alerta */}
+            <DataTableClient data={dataForTable} />
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+
+// Componente cliente para encapsular a lógica da tabela e seus diálogos
+function DataTableClient({ data }: { data: any[] }) {
+  const { columns, dialog, alertDialog } = ColumnsComponent();
+  return (
+    <>
+      <DataTable columns={columns} data={data} />
+      {dialog}
+      {alertDialog}
+    </>
   );
 }

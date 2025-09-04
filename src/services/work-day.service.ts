@@ -1,4 +1,5 @@
 
+
 "use server";
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isToday } from 'date-fns';
@@ -68,6 +69,7 @@ async function readWorkDays(force = false): Promise<WorkDay[]> {
     return workDaysCache;
   }
   try {
+    await fs.access(workDaysFilePath);
     const fileContent = await fs.readFile(workDaysFilePath, 'utf8');
     workDaysCache = (JSON.parse(fileContent) as any[]).map(day => ({
         ...day,
@@ -104,6 +106,23 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
   } catch (e) {
     console.error("Error adding work day: ", e);
     const errorMessage = e instanceof Error ? e.message : "Failed to save work day.";
+    return { success: false, error: errorMessage };
+  }
+}
+
+export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id'>): Promise<{ success: boolean; error?: string }> {
+  try {
+    const allWorkDays = await readWorkDays();
+    const index = allWorkDays.findIndex(r => r.id === id);
+    if (index === -1) {
+        return { success: false, error: "Registro não encontrado." };
+    }
+    allWorkDays[index] = { ...data, id, date: new Date(data.date) };
+    await writeWorkDays(allWorkDays);
+    
+    return { success: true };
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : "Falha ao atualizar registro.";
     return { success: false, error: errorMessage };
   }
 }

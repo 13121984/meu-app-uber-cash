@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import { Check, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,11 +12,13 @@ import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { addWorkDay } from '@/services/work-day.service';
+import { updateWorkDayAction } from '../gerenciamento/actions';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
 
-type State = {
+export type State = {
+  id?: string;
   date: Date;
   km: number;
   hours: number;
@@ -25,6 +28,7 @@ type State = {
 };
 
 type Action =
+  | { type: 'SET_STATE'; payload: State }
   | { type: 'SET_BASIC_INFO'; payload: { date: Date; km: number; hours: number } }
   | { type: 'SET_EARNINGS'; payload: Earning[] }
   | { type: 'SET_FUEL'; payload: FuelEntry[] }
@@ -32,22 +36,24 @@ type Action =
   | { type: 'RESET_STATE' };
 
 
-const initialState: State = {
-  date: new Date(),
-  km: 0,
-  hours: 0,
-  earnings: [],
-  fuelEntries: [],
-  maintenance: { description: '', amount: 0 },
-};
+const getInitialState = (initialData?: Partial<State>): State => ({
+  id: initialData?.id || undefined,
+  date: initialData?.date ? new Date(initialData.date) : new Date(),
+  km: initialData?.km || 0,
+  hours: initialData?.hours || 0,
+  earnings: initialData?.earnings || [],
+  fuelEntries: initialData?.fuelEntries || [],
+  maintenance: initialData?.maintenance || { description: '', amount: 0 },
+});
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case 'SET_STATE': return action.payload;
     case 'SET_BASIC_INFO': return { ...state, ...action.payload };
     case 'SET_EARNINGS': return { ...state, earnings: action.payload };
     case 'SET_FUEL': return { ...state, fuelEntries: action.payload };
     case 'SET_MAINTENANCE': return { ...state, maintenance: action.payload };
-    case 'RESET_STATE': return initialState;
+    case 'RESET_STATE': return getInitialState();
     default: return state;
   }
 }
@@ -59,11 +65,24 @@ const steps = [
   { id: 4, title: 'Despesas Extras' },
 ];
 
-export function RegistrationWizard() {
+interface RegistrationWizardProps {
+    initialData?: Partial<State>;
+    isEditing?: boolean;
+    onSuccess?: () => void;
+}
+
+
+export function RegistrationWizard({ initialData, isEditing = false, onSuccess }: RegistrationWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
+
+  useEffect(() => {
+      // Quando o initialData mudar (no modo de edição), reseta o estado do formulário
+      dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) })
+  }, [initialData])
+
 
   const resetWizard = () => {
     dispatch({ type: 'RESET_STATE' });
@@ -99,8 +118,13 @@ export function RegistrationWizard() {
     }
     
     try {
-      const result = await addWorkDay(state);
-
+      let result;
+      if (isEditing && state.id) {
+        result = await updateWorkDayAction(state as State & { id: string });
+      } else {
+        result = await addWorkDay(state);
+      }
+      
       if (result.success) {
         toast({
             title: (
@@ -109,16 +133,20 @@ export function RegistrationWizard() {
                 <span className="font-bold">Sucesso!</span>
               </div>
             ),
-            description: "Seu dia de trabalho foi registrado.",
+            description: `Seu dia de trabalho foi ${isEditing ? 'atualizado' : 'registrado'}.`,
             variant: "default",
         });
-        resetWizard();
+        if (onSuccess) {
+            onSuccess();
+        } else {
+            resetWizard();
+        }
       } else {
         throw new Error(result.error);
       }
     } catch (error) {
       console.error(error);
-      const errorMessage = error instanceof Error ? error.message : "Não foi possível registrar seu dia de trabalho.";
+      const errorMessage = error instanceof Error ? error.message : `Não foi possível ${isEditing ? 'atualizar' : 'registrar'} seu dia de trabalho.`;
       toast({
           title: (
             <div className="flex items-center gap-2">
@@ -147,8 +175,8 @@ export function RegistrationWizard() {
   const isLastStep = currentStep === steps.length;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 space-y-6">
+    <div className={`grid grid-cols-1 ${isEditing ? '' : 'lg:grid-cols-3'} gap-8`}>
+      <div className={isEditing ? '' : 'lg:col-span-2 space-y-6'}>
         {/* Stepper */}
         <div className="flex items-center justify-between p-4 border rounded-lg">
           {steps.map((step, index) => (
@@ -200,9 +228,11 @@ export function RegistrationWizard() {
       </div>
 
       {/* Live Preview */}
-      <div className="lg:col-span-1">
-        <LivePreview data={state} />
-      </div>
+       {!isEditing && (
+         <div className="lg:col-span-1">
+            <LivePreview data={state} />
+         </div>
+       )}
     </div>
   );
 }
