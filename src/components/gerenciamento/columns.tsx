@@ -85,7 +85,7 @@ export const useWorkDayColumns = () => {
     },
     {
       accessorKey: "lucro",
-      header: "Lucro Líquido",
+      header: "Lucro",
       cell: ({ row }) => {
         const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
@@ -96,20 +96,20 @@ export const useWorkDayColumns = () => {
     },
     {
       accessorKey: "totalGanhos",
-      header: () => <div className="text-center">Ganhos (Bruto)</div>,
+      header: "Ganhos",
       cell: ({ row }) => {
          const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
-         return <div className="text-center">{formatCurrency(earnings)}</div>
+         return <div>{formatCurrency(earnings)}</div>
       }
     },
      {
       accessorKey: "totalGastos",
-      header: () => <div className="text-right">Gastos</div>,
+      header: "Gastos",
       cell: ({ row }) => {
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const maintenance = row.original.maintenance?.amount || 0;
         const total = fuel + maintenance;
-        return <div className="text-red-600 text-right">{formatCurrency(total)}</div>
+        return <div className="text-red-600">{formatCurrency(total)}</div>
       }
     },
     {
