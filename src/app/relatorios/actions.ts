@@ -3,7 +3,18 @@
 
 import { exportToSheetFlow, ExportToSheetOutput } from '@/ai/flows/export-flow';
 import { getReportData } from '@/services/work-day.service';
-import { ReportFilterValues, ReportFilterValuesSchema } from '@/components/relatorios/reports-filter';
+import { z } from 'zod';
+import type { DateRange } from "react-day-picker";
+
+// Define the schema and type here in the server file.
+export const ReportFilterValuesSchema = z.object({
+    type: z.enum(['all', 'today', 'thisWeek', 'thisMonth', 'specificMonth', 'specificYear', 'custom']),
+    year: z.number().optional(),
+    month: z.number().optional(),
+    dateRange: z.custom<DateRange>().optional(),
+});
+export type ReportFilterValues = z.infer<typeof ReportFilterValuesSchema>;
+
 
 /**
  * A Server Action to securely call the Genkit flow for exporting reports.

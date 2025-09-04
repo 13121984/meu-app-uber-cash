@@ -11,21 +11,11 @@ import { format, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
-import { z } from 'zod';
 import { toast } from '@/hooks/use-toast';
 import { WorkDay } from '@/services/work-day.service';
-import { exportReportAction } from '@/app/relatorios/actions';
+// Import the schema and type from the actions file
+import { exportReportAction, ReportFilterValues, ReportFilterValuesSchema } from '@/app/relatorios/actions';
 
-
-export const ReportFilterValuesSchema = z.object({
-    type: z.enum(['all', 'today', 'thisWeek', 'thisMonth', 'specificMonth', 'specificYear', 'custom']),
-    year: z.number().optional(),
-    month: z.number().optional(),
-    dateRange: z.custom<DateRange>().optional(),
-});
-
-
-export type ReportFilterValues = z.infer<typeof ReportFilterValuesSchema>;
 
 interface ReportsFilterProps {
   onFilterChange: (filters: ReportFilterValues) => void;
