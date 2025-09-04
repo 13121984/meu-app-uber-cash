@@ -19,8 +19,6 @@ import { toast } from '@/hooks/use-toast';
 import { addMaintenance, updateMaintenance } from '@/services/maintenance.service';
 import type { Maintenance as MaintenanceType } from '@/services/maintenance.service';
 
-
-// Define o schema e o tipo aqui, no componente do cliente
 export const maintenanceSchema = z.object({
   id: z.string().optional(),
   date: z.date({ required_error: "A data é obrigatória." }),
@@ -28,15 +26,11 @@ export const maintenanceSchema = z.object({
   amount: z.number().min(0.01, "O valor deve ser maior que zero."),
 });
 
-// Remove o userId do tipo Zod, pois ele vem do servidor
 export type MaintenanceFormData = z.infer<typeof maintenanceSchema>;
 
-// O tipo para o formulário e onSuccess precisa do ID opcional, mas não do userId
-type FormAndSuccessType = Omit<MaintenanceType, 'userId'>
-
 interface MaintenanceFormProps {
-  initialData: FormAndSuccessType | null;
-  onSuccess: (record: FormAndSuccessType) => void;
+  initialData: MaintenanceType | null;
+  onSuccess: (record: MaintenanceType) => void;
 }
 
 export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps) {
@@ -55,14 +49,11 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
     setIsSubmitting(true);
     try {
       let result;
-      // Dados a serem enviados para o backend (sem id)
       const dataToSend = { date: data.date, description: data.description, amount: data.amount };
 
       if (initialData?.id) {
-        // Editando
         result = await updateMaintenance(initialData.id, dataToSend);
       } else {
-        // Adicionando
         result = await addMaintenance(dataToSend);
       }
 
@@ -72,9 +63,8 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
           description: `Registro ${initialData ? 'atualizado' : 'adicionado'}.`,
         });
         
-        // O onSuccess espera um objeto com id, mas sem userId
         const returnedRecord = { ...data, id: initialData?.id ?? result.id };
-        onSuccess(returnedRecord);
+        onSuccess(returnedRecord as MaintenanceType);
 
       } else {
         throw new Error(result.error);

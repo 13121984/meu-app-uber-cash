@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Download, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Calendar as CalendarIcon, Download, Loader2, AlertTriangle, Info } from 'lucide-react';
 import { format, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
@@ -49,42 +49,25 @@ export function ReportsFilter({ onFilterChange, initialFilters }: ReportsFilterP
   const handleDownload = () => {
       startTransition(async () => {
         try {
-            const filters: ReportFilterValues = { type: filterType };
-            if (filterType === 'specificMonth') {
-                filters.year = year;
-                filters.month = month;
-            } else if (filterType === 'specificYear') {
-                filters.year = year;
-            } else if (filterType === 'custom') {
-                filters.dateRange = dateRange;
-            }
-            
-            const result = await exportReportAction(filters);
-
+            // Como a autenticação foi removida, a funcionalidade de exportação não funcionará.
+            // Exibimos um toast informativo ao usuário.
             toast({
                 title: (
                     <div className="flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                        <span className="font-bold">Planilha Criada!</span>
+                        <Info className="h-5 w-5 text-blue-500" />
+                        <span className="font-bold">Funcionalidade Desativada</span>
                     </div>
                 ),
-                description: "Sua planilha está pronta para ser visualizada.",
-                action: (
-                    <Button variant="outline" size="sm" asChild>
-                        <a href={result.spreadsheetUrl} target="_blank" rel="noopener noreferrer">
-                            Abrir
-                        </a>
-                    </Button>
-                ),
+                description: "A exportação para o Google Sheets requer configuração de login, que foi removida.",
             });
         } catch (error) {
             console.error(error);
-            const errorMessage = error instanceof Error ? error.message : "Não foi possível criar a planilha.";
+            const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro inesperado.";
             toast({
                 title: (
                     <div className="flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-destructive" />
-                        <span className="font-bold">Erro ao Exportar</span>
+                        <span className="font-bold">Erro</span>
                     </div>
                 ),
                 description: errorMessage,

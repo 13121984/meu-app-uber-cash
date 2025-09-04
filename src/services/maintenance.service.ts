@@ -1,15 +1,12 @@
 
 "use server";
 
-import { collection, addDoc, Timestamp, getDocs, query, orderBy, doc, updateDoc, deleteDoc, writeBatch, where } from "firebase/firestore";
+import { collection, addDoc, Timestamp, getDocs, query, orderBy, doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "./user.service";
 
-// O tipo agora é definido no formulário (cliente), mas a estrutura é a mesma.
 export interface Maintenance {
   id?: string;
-  userId: string; // Adicionado para segurança
   date: Date;
   description: string;
   amount: number;
@@ -22,21 +19,16 @@ export interface Maintenance {
  * Adiciona um novo registro de manutenção no Firestore.
  * Retorna o ID do novo documento.
  */
-export async function addMaintenance(data: Omit<Maintenance, 'id' | 'userId'>): Promise<{ success: boolean; id?: string; error?: string }> {
-  const user: any = await getCurrentUser();
-  if (!user) return { success: false, error: "Usuário não autenticado." };
-  
+export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    // A validação Zod agora acontece no lado do cliente, antes de chamar esta função.
     const docRef = await addDoc(collection(db, "maintenance"), {
       ...data,
-      userId: user.uid,
       date: Timestamp.fromDate(data.date),
       createdAt: Timestamp.now(),
     });
 
     revalidatePath('/manutencao');
-    revalidatePath('/dashboard'); // Revalida dashboard também
+    revalidatePath('/dashboard');
     return { success: true, id: docRef.id };
   } catch (e) {
     console.error("Error adding maintenance document: ", e);
@@ -46,15 +38,12 @@ export async function addMaintenance(data: Omit<Maintenance, 'id' | 'userId'>): 
 }
 
 /**
- * Busca todos os registros de manutenção do usuário logado.
+ * Busca todos os registros de manutenção.
  */
-export async function getMaintenanceRecords(): Promise<Omit<Maintenance, 'userId'>[]> {
-    const user: any = await getCurrentUser();
-    if (!user) return [];
-
+export async function getMaintenanceRecords(): Promise<Maintenance[]> {
     try {
         const maintenanceCollection = collection(db, "maintenance");
-        const q = query(maintenanceCollection, where("userId", "==", user.uid), orderBy("date", "desc"));
+        const q = query(maintenanceCollection, orderBy("date", "desc"));
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
@@ -79,13 +68,9 @@ export async function getMaintenanceRecords(): Promise<Omit<Maintenance, 'userId
 /**
  * Atualiza um registro de manutenção existente.
  */
-export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id' | 'userId'>): Promise<{ success: boolean; error?: string }> {
-  const user: any = await getCurrentUser();
-  if (!user) return { success: false, error: "Usuário não autenticado." };
-
+export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; error?: string }> {
   try {
     const docRef = doc(db, "maintenance", id);
-    // Adicionar verificação de posse do documento aqui seria ideal em um cenário real.
     await updateDoc(docRef, {
         ...data,
         date: Timestamp.fromDate(data.date)
@@ -105,12 +90,8 @@ export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'
  * Apaga um registro de manutenção.
  */
 export async function deleteMaintenance(id: string): Promise<{ success: boolean; error?: string }> {
-  const user: any = await getCurrentUser();
-  if (!user) return { success: false, error: "Usuário não autenticado." };
-
   try {
     const docRef = doc(db, "maintenance", id);
-    // Adicionar verificação de posse do documento aqui seria ideal.
     await deleteDoc(docRef);
     
     revalidatePath('/manutencao');
@@ -123,15 +104,12 @@ export async function deleteMaintenance(id: string): Promise<{ success: boolean;
 }
 
 /**
- * Apaga todos os registros de manutenção do usuário logado.
+ * Apaga todos os registros de manutenção.
  */
 export async function deleteAllMaintenance(): Promise<{ success: boolean; error?: string }> {
-  const user: any = await getCurrentUser();
-  if (!user) return { success: false, error: "Usuário não autenticado." };
-  
   try {
     const maintenanceCollection = collection(db, "maintenance");
-    const q = query(maintenanceCollection, where("userId", "==", user.uid));
+    const q = query(maintenanceCollection);
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {

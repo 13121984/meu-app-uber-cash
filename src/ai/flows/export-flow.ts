@@ -10,7 +10,6 @@
 
 import { ai } from '@/ai/genkit';
 import { WorkDay } from '@/services/work-day.service';
-import { google } from 'googleapis';
 import { z } from 'zod';
 
 const ExportToSheetInputSchema = z.array(z.custom<WorkDay>());
@@ -21,7 +20,9 @@ const ExportToSheetOutputSchema = z.object({
 });
 export type ExportToSheetOutput = z.infer<typeof ExportToSheetOutputSchema>;
 
-// This is the Genkit flow definition. It is not exported directly to the client.
+// Esta função de flow agora é mais genérica e não lida com autenticação do Google Sheets,
+// pois o escopo foi removido do projeto. Ela apenas prepara os dados.
+// Para uma implementação completa, seria necessário re-introduzir a autenticação.
 export const exportToSheetFlow = ai.defineFlow(
   {
     name: 'exportToSheetFlow',
@@ -34,98 +35,23 @@ export const exportToSheetFlow = ai.defineFlow(
       throw new Error("Nenhum dado para exportar com os filtros selecionados.");
     }
     
-    // 1. Get authenticated Sheets API client
-    const auth = new google.auth.GoogleAuth({
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-    const authClient = await auth.getClient();
-    google.options({ auth: authClient });
+    // A lógica de autenticação e criação de planilha foi removida.
+    // Em um cenário real, você precisaria de uma forma de se autenticar com a API do Google.
+    // Por enquanto, vamos simular a criação e retornar um URL de placeholder.
     
-    const sheets = google.sheets('v4');
+    console.log("Simulando a exportação de dados para o Google Sheets...");
+    console.log("Dados recebidos:", filteredWorkDays);
 
-    // 2. Prepare data for the spreadsheet
-    const header = [
-        "Data", "KM Rodados", "Horas", 
-        "Lucro do Dia", "Ganhos (Bruto)", "Gastos (Combustível)", "Gastos (Manutenção)",
-        "Ganhos - Categoria", "Ganhos - Viagens", "Ganhos - Valor",
-        "Abastecimento - Tipo", "Abastecimento - Valor Pago", "Abastecimento - Preço/Unid.",
-        "Manutenção - Descrição", "Manutenção - Valor"
-    ];
-    
-    const rows = filteredWorkDays.flatMap(day => {
-        const dayDate = typeof day.date === 'string' || typeof day.date === 'number' ? new Date(day.date) : day.date;
-        const earnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
-        const fuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-        const maintenanceCost = day.maintenance?.amount || 0;
-        const profit = earnings - fuel - maintenanceCost;
+    const placeholderUrl = "https://docs.google.com/spreadsheets/d/placeholder";
 
+    // Simula um atraso para a operação de API
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const baseRow = [
-            dayDate.toLocaleDateString('pt-BR'),
-            day.km,
-            day.hours,
-            profit,
-            earnings,
-            fuel,
-            maintenanceCost
-        ];
-
-        const maxRows = Math.max(day.earnings.length, day.fuelEntries.length, 1);
-        const dayRows = [];
-
-        for (let i = 0; i < maxRows; i++) {
-            const earning = day.earnings[i] || {};
-            const fuelEntry = day.fuelEntries[i] || {};
-            // A manutenção do dia só aparece na primeira linha do dia
-            const maintenance = i === 0 ? day.maintenance : {};
-
-            dayRows.push([
-                ...(i === 0 ? baseRow : Array(baseRow.length).fill('')),
-                earning.category || '',
-                earning.trips || '',
-                earning.amount || '',
-                fuelEntry.type || '',
-                fuelEntry.paid || '',
-                fuelEntry.price || '',
-                maintenance?.description || '',
-                maintenance?.amount || ''
-            ]);
-        }
-        return dayRows;
-    });
-
-    const values = [header, ...rows];
-
-    // 3. Create the spreadsheet
-    const spreadsheet = await sheets.spreadsheets.create({
-      requestBody: {
-        properties: {
-          title: `Relatório Rota Certa - ${new Date().toLocaleString('pt-BR')}`,
-        },
-        sheets: [{
-          properties: { title: 'Dados' },
-        }],
-      },
-    });
-
-    const spreadsheetId = spreadsheet.data.spreadsheetId;
-    if (!spreadsheetId) {
-      throw new Error("Falha ao criar a planilha.");
-    }
-    
-    // 4. Add data to the sheet
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: 'Dados!A1',
-      valueInputOption: 'USER_ENTERED',
-      requestBody: {
-        values: values,
-      },
-    });
-
-    // 5. Return the URL
+    // Apenas para fins de demonstração, o fluxo agora retorna uma URL de placeholder.
+    // O ideal seria informar ao usuário que a funcionalidade de exportação
+    // requer configuração adicional.
     return {
-      spreadsheetUrl: spreadsheet.data.spreadsheetUrl!,
+      spreadsheetUrl: placeholderUrl,
     };
   }
 );

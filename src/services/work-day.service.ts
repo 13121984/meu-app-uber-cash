@@ -1,24 +1,19 @@
 
 "use server";
 
-import { collection, addDoc, Timestamp, getDocs, query, orderBy, where } from "firebase/firestore";
+import { collection, addDoc, Timestamp, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords } from './maintenance.service';
-import { getAuth } from "firebase/auth";
-import { app } from "@/lib/firebase";
-import { getCurrentUser } from "./user.service";
-
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id:number; type: string; paid: number; price: number };
 
 export interface WorkDay {
   id?: string;
-  userId: string; // Adicionado para segurança
   date: Date;
   km: number;
   hours: number;
@@ -66,14 +61,10 @@ export interface ReportData {
   rawWorkDays: WorkDay[]; // Adicionado para exportação
 }
 
-export async function addWorkDay(data: Omit<WorkDay, 'id' | 'userId'>) {
-  const user: any = await getCurrentUser();
-  if (!user) return { success: false, error: "Usuário não autenticado." };
-
+export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
   try {
     const docRef = await addDoc(collection(db, "workdays"), {
       ...data,
-      userId: user.uid,
       date: Timestamp.fromDate(data.date),
       createdAt: Timestamp.now(),
     });
@@ -86,12 +77,9 @@ export async function addWorkDay(data: Omit<WorkDay, 'id' | 'userId'>) {
 }
 
 export async function getWorkDays(): Promise<WorkDay[]> {
-    const user: any = await getCurrentUser();
-    if (!user) return [];
-
     try {
         const workdaysCollection = collection(db, "workdays");
-        const q = query(workdaysCollection, where("userId", "==", user.uid), orderBy("date", "desc"));
+        const q = query(workdaysCollection, orderBy("date", "desc"));
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
@@ -142,7 +130,6 @@ function calculatePeriodData(workDays: WorkDay[], period: string, goals: Goals, 
         const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
         const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         
-        // Lucro agora considera a manutenção do dia também
         const dailyMaintenance = day.maintenance?.amount || 0;
         const dailyProfit = dailyEarnings - dailyFuel - dailyMaintenance;
 
@@ -252,7 +239,6 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
       break;
   }
   
-  // Se allWorkDays estiver vazio, busca todos os dias (já filtrado pelo usuário)
   const sourceDays = allWorkDays.length > 0 ? allWorkDays : await getWorkDays();
   if (interval) {
     filteredDays = sourceDays.filter(d => isWithinInterval(d.date, interval!));
@@ -300,7 +286,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
 
     const dateKey = format(day.date, 'yyyy-MM-dd');
     const currentDaily = dailyDataMap.get(dateKey) || { lucro: 0, viagens: 0 };
-    currentDaily.lucro += dailyEarnings - dailyFuel; // Lucro diário não considera manutenção global
+    currentDaily.lucro += dailyEarnings - dailyFuel;
     currentDaily.viagens += dailyTrips;
     dailyDataMap.set(dateKey, currentDaily);
   });
@@ -311,13 +297,11 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
       eachDayOfInterval(interval).forEach(date => {
           const dateKey = format(date, 'yyyy-MM-dd');
           const data = dailyDataMap.get(dateKey);
-          // Adiciona as despesas de manutenção do dia ao cálculo do lucro
           const maintenanceOnDay = filteredMaintenance.filter(m => format(m.date, 'yyyy-MM-dd') === dateKey).reduce((sum, m) => sum + m.amount, 0);
           profitEvolution.push({ date: format(date, 'dd/MM'), lucro: (data?.lucro ?? 0) - maintenanceOnDay });
           dailyTrips.push({ date: format(date, 'dd/MM'), viagens: data?.viagens ?? 0 });
       })
   } else if (dailyDataMap.size > 0) {
-      // Fallback for 'all' when interval is not set initially
       [...dailyDataMap.entries()].sort().forEach(([dateKey, data]) => {
           const maintenanceOnDay = filteredMaintenance.filter(m => format(m.date, 'yyyy-MM-dd') === dateKey).reduce((sum, m) => sum + m.amount, 0);
           profitEvolution.push({ date: format(new Date(dateKey), 'dd/MM'), lucro: data.lucro - maintenanceOnDay });
