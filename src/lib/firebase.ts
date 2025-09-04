@@ -3,7 +3,6 @@ import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { getAuth, Auth } from "firebase/auth";
 
-// As credenciais agora são lidas das variáveis de ambiente com o prefixo NEXT_PUBLIC_
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -13,12 +12,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Validação para garantir que as variáveis de ambiente estão definidas
+// Isso ajuda a depurar problemas de configuração rapidamente.
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  throw new Error("As variáveis de ambiente do Firebase não estão configuradas corretamente. Verifique seu arquivo .env e o prefixo NEXT_PUBLIC_.");
+}
+
+
 // Singleton pattern para inicialização do Firebase
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 
-if (!getApps().length) {
+if (getApps().length === 0) {
     app = initializeApp(firebaseConfig);
 } else {
     app = getApp();
