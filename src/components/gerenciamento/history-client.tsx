@@ -4,17 +4,12 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import type { DateRange } from "react-day-picker";
 import { WorkDay } from "@/services/work-day.service";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, Edit, DollarSign, TrendingUp, Fuel, Filter } from 'lucide-react';
 import { HistoryFilters, FilterValues } from './history-filters';
-
-interface HistoryClientProps {
-  data: WorkDay[];
-}
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -25,6 +20,19 @@ const getCategories = (day: WorkDay) => {
     }
     return [...new Set(categories)];
 };
+
+const SummaryCard = ({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: React.ElementType }) => (
+    <Card className="bg-secondary/30">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <Icon className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+            <div className="text-2xl font-bold">{value}</div>
+            <p className="text-xs text-muted-foreground">{description}</p>
+        </CardContent>
+    </Card>
+);
 
 
 export function HistoryClient({ data }: HistoryClientProps) {
@@ -85,8 +93,24 @@ export function HistoryClient({ data }: HistoryClientProps) {
       }
       
       return true;
-    });
+    }).sort((a, b) => b.date.getTime() - a.date.getTime());
   }, [data, filters]);
+
+  const summaryData = useMemo(() => {
+    let totalProfit = 0;
+    let totalEarnings = 0;
+    let totalFuel = 0;
+
+    filteredWorkDays.forEach(day => {
+        const earnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
+        const fuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+        totalEarnings += earnings;
+        totalFuel += fuel;
+        totalProfit += (earnings - fuel);
+    });
+
+    return { totalProfit, totalEarnings, totalFuel };
+  }, [filteredWorkDays]);
 
 
   const calculateProfit = (day: WorkDay) => {
@@ -114,13 +138,43 @@ export function HistoryClient({ data }: HistoryClientProps) {
 
   return (
     <Card>
-        <CardContent className="p-6 space-y-6">
+        <CardHeader>
+            <CardTitle className="font-headline text-lg flex items-center gap-2">
+                <Filter className="w-5 h-5 text-primary" />
+                Filtros e Resumo
+            </CardTitle>
+            <CardDescription>
+                Filtre os registros e veja o resumo do período selecionado.
+            </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
             <HistoryFilters 
                 categories={allCategories}
                 onFilterChange={setFilters}
             />
 
-             <div className="flex justify-between items-center">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <SummaryCard 
+                    title="Lucro Líquido (Filtrado)"
+                    value={formatCurrency(summaryData.totalProfit)}
+                    description={`${filteredWorkDays.length} ${filteredWorkDays.length === 1 ? 'dia registrado' : 'dias registrados'}`}
+                    icon={DollarSign}
+                />
+                 <SummaryCard 
+                    title="Ganhos Brutos (Filtrado)"
+                    value={formatCurrency(summaryData.totalEarnings)}
+                    description="Total recebido das plataformas"
+                    icon={TrendingUp}
+                />
+                 <SummaryCard 
+                    title="Gastos (Combustível)"
+                    value={formatCurrency(summaryData.totalFuel)}
+                    description="Total gasto em abastecimentos"
+                    icon={Fuel}
+                />
+            </div>
+
+             <div className="flex justify-between items-center pt-4 border-t">
                 <h2 className="text-xl font-bold font-headline">Registros ({filteredWorkDays.length})</h2>
                 {data.length > 0 && (
                     <Button variant="destructive" size="sm" onClick={handleDeleteAll}>
@@ -130,41 +184,41 @@ export function HistoryClient({ data }: HistoryClientProps) {
                 )}
             </div>
             
-            {filteredWorkDays.length === 0 && (
+            {filteredWorkDays.length === 0 ? (
                 <div className="text-center py-10">
                     <p className="font-semibold">Nenhum registro encontrado</p>
                     <p className="text-sm text-muted-foreground">Tente ajustar os filtros ou adicione um novo registro.</p>
                 </div>
-            )}
-
-            <div className="space-y-4">
-                {filteredWorkDays.map(day => (
-                    <Card key={day.id} className="bg-secondary/50 hover:bg-secondary/70 transition-colors">
-                        <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div className="flex-1 space-y-2">
-                                <p className="font-bold text-lg">{format(day.date, "dd/MM/yyyy", { locale: ptBR })}</p>
-                                <div className="flex flex-wrap items-center gap-2">
-                                    {getCategories(day).map(cat => (
-                                        <Badge key={cat} variant="outline" className="text-xs">{cat}</Badge>
-                                    ))}
+            ) : (
+                <div className="space-y-4">
+                    {filteredWorkDays.map(day => (
+                        <Card key={day.id} className="bg-secondary/50 hover:bg-secondary/70 transition-colors">
+                            <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div className="flex-1 space-y-2">
+                                    <p className="font-bold text-lg">{format(day.date, "dd/MM/yyyy", { locale: ptBR })}</p>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {getCategories(day).map(cat => (
+                                            <Badge key={cat} variant="outline" className="text-xs">{cat}</Badge>
+                                        ))}
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        {getTotalTrips(day)} viagens • {day.km} km • {day.hours}h
+                                    </p>
                                 </div>
-                                <p className="text-sm text-muted-foreground">
-                                    {getTotalTrips(day)} viagens • {day.km} km • {day.hours}h
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                               <p className="text-lg font-semibold text-green-500">{formatCurrency(calculateProfit(day))}</p>
-                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(day.id)}>
-                                   <Edit className="h-4 w-4" />
-                               </Button>
-                               <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(day.id)}>
-                                   <Trash2 className="h-4 w-4" />
-                               </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+                                <div className="flex items-center gap-4">
+                                <p className="text-lg font-semibold text-green-500">{formatCurrency(calculateProfit(day))}</p>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(day.id)}>
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(day.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
         </CardContent>
     </Card>
   );
