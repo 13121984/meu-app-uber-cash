@@ -55,6 +55,7 @@ export function ProfitEvolutionChart({ data }: ProfitEvolutionChartProps) {
             dataKey="lucro" 
             fill="var(--color-lucro)" 
             radius={[4, 4, 0, 0]}
+            barSize={16}
             />
         </BarChart>
       </ResponsiveContainer>
