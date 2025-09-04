@@ -13,6 +13,7 @@ import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { addWorkDay } from '@/services/work-day.service';
 import { updateWorkDayAction } from '../gerenciamento/actions';
+import { ScrollArea } from '../ui/scroll-area';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -197,7 +198,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
 
   return (
     <div className={`grid grid-cols-1 ${isEditing ? '' : 'lg:grid-cols-3'} gap-8`}>
-      <div className={`space-y-6 ${isEditing ? '' : 'lg:col-span-2'}`}>
+      <div className={`flex flex-col space-y-6 ${isEditing ? '' : 'lg:col-span-2'}`}>
         {/* Stepper */}
         <div className="hidden sm:flex items-center justify-between p-4 border rounded-lg">
           {steps.map((step, index) => (
@@ -224,10 +225,12 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
         </div>
 
         {/* Step Content */}
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            {renderStep()}
-          </CardContent>
+        <Card className="flex-1 flex flex-col">
+           <ScrollArea className="h-[50vh]">
+              <CardContent className="p-4 sm:p-6">
+                {renderStep()}
+              </CardContent>
+            </ScrollArea>
         </Card>
         
         {/* Navigation */}

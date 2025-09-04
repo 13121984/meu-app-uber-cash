@@ -18,20 +18,22 @@ export function EditWorkDayDialog({ isOpen, onOpenChange, workDay }: EditWorkDay
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Editar Registro de Trabalho</DialogTitle>
           <DialogDescription>
             Modifique os dados do dia de trabalho selecionado.
           </DialogDescription>
         </DialogHeader>
-        {workDay && isOpen && (
-             <RegistrationWizard 
-                initialData={workDay}
-                isEditing={true}
-                onSuccess={() => onOpenChange(false)}
-            />
-        )}
+        <div className="flex-1 min-h-0">
+          {workDay && isOpen && (
+              <RegistrationWizard 
+                  initialData={workDay}
+                  isEditing={true}
+                  onSuccess={() => onOpenChange(false)}
+              />
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
