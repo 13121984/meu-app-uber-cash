@@ -8,6 +8,7 @@ import { WorkDay, getReportData, ReportData } from '@/services/work-day.service'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
+import { StatsCard } from '@/components/dashboard/stats-card';
 
 const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -21,25 +22,6 @@ interface ReportsClientProps {
   initialData: WorkDay[];
 }
 
-const StatCard = ({ title, value, icon: Icon, color, isCurrency = false, unit = '', precision = 0 }: { title: string, value: number, icon: React.ElementType, color: string, isCurrency?: boolean, unit?: string, precision?: number }) => {
-    const formattedValue = isCurrency
-        ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
-        : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
-
-    return (
-        <Card className="bg-secondary/30">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon className={`h-4 w-4 text-muted-foreground ${color}`} />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{formattedValue}</div>
-            </CardContent>
-        </Card>
-    );
-};
-
-
 export function ReportsClient({ initialData }: ReportsClientProps) {
   const [filters, setFilters] = useState<ReportFilterValues>({ type: 'thisMonth' });
   const [reportData, setReportData] = useState<ReportData | null>(null);
@@ -52,6 +34,20 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
         setReportData(data);
     });
   }, [initialData, filters]);
+
+  const stats = reportData ? [
+    { title: "Lucro Líquido", value: reportData.totalLucro, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
+    { title: "Viagens", value: reportData.totalViagens, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
+    { title: "KM Rodados", value: reportData.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
+    { title: "Horas", value: reportData.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
+    { title: "Ganho/Hora", value: reportData.ganhoPorHora, icon: TrendingUp, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
+    { title: "Ganho/KM", value: reportData.ganhoPorKm, icon: TrendingUp, isCurrency: true, iconBg: "bg-blue-500/20", iconColor: "text-blue-400", precision: 2 },
+    { title: "Eficiência Média", value: reportData.eficiencia, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
+    { title: "Combustível", value: reportData.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
+    { title: "Manutenção", value: reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0, icon: Wrench, isCurrency: true, iconBg: "bg-orange-500/20", iconColor: "text-orange-400" },
+
+  ] : [];
+
 
   return (
     <div className="space-y-6">
@@ -92,16 +88,9 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                   <StatCard title="Lucro Líquido" value={reportData.totalLucro} icon={DollarSign} color="text-green-500" isCurrency />
-                   <StatCard title="Ganhos (Bruto)" value={reportData.totalGanho} icon={DollarSign} color="text-green-500" isCurrency />
-                   <StatCard title="Gastos Totais" value={reportData.totalGastos} icon={DollarSign} color="text-red-500" isCurrency />
-                   <StatCard title="Manutenção" value={reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0} icon={Wrench} color="text-orange-500" isCurrency />
-                   <StatCard title="Viagens" value={reportData.totalViagens} icon={Car} color="text-blue-500" />
-                   <StatCard title="KM Rodados" value={reportData.totalKm} icon={Map} color="text-purple-500" unit="km" />
-                   <StatCard title="Horas" value={reportData.totalHoras} icon={Clock} color="text-orange-500" unit="h" precision={1} />
-                   <StatCard title="Ganho/Hora" value={reportData.ganhoPorHora} icon={TrendingUp} color="text-green-500" isCurrency precision={2} />
-                   <StatCard title="Ganho/KM" value={reportData.ganhoPorKm} icon={TrendingUp} color="text-blue-500" isCurrency precision={2} />
-                   <StatCard title="Eficiência Média" value={reportData.eficiencia} icon={Zap} color="text-yellow-500" unit="km/L" precision={2} />
+                   {stats.map((stat) => (
+                      <StatsCard key={stat.title} {...stat} />
+                   ))}
                 </CardContent>
             </Card>
 
