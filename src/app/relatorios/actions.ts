@@ -1,7 +1,7 @@
 
 'use server';
 
-import { exportToSheetFlow, ExportToSheetOutput } from '@/ai/flows/export-flow';
+import { exportToCsvFlow, ExportToCsvOutput } from '@/ai/flows/export-flow';
 import { getReportData } from '@/services/work-day.service';
 import { z } from 'zod';
 import type { DateRange } from "react-day-picker";
@@ -20,7 +20,7 @@ export type ReportFilterValues = z.infer<typeof ReportFilterValuesSchema>;
  * A Server Action to securely call the Genkit flow for exporting reports.
  * This function is called from the client-side component.
  */
-export async function exportReportAction(filters: ReportFilterValues): Promise<ExportToSheetOutput> {
+export async function exportReportAction(filters: ReportFilterValues): Promise<ExportToCsvOutput> {
   // Validate the filters to ensure they are in the expected format.
   const validatedFilters = ReportFilterValuesSchema.parse(filters);
 
@@ -38,9 +38,7 @@ export async function exportReportAction(filters: ReportFilterValues): Promise<E
   }));
 
   // Call the Genkit flow with the filtered and serialized data.
-  // The custom Zod schema in the flow will handle the conversion back if needed,
-  // though for this specific flow, we just need to display it.
-  const result = await exportToSheetFlow(serializableWorkDays as any);
+  const result = await exportToCsvFlow(serializableWorkDays as any);
 
   return result;
 }

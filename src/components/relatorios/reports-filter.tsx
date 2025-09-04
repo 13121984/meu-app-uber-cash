@@ -33,6 +33,7 @@ export function ReportsFilter({ onFilterChange, initialFilters, isPending }: Rep
   const [month, setMonth] = useState<number>(initialFilters.month || new Date().getMonth());
   const [dateRange, setDateRange] = useState<DateRange | undefined>(initialFilters.dateRange);
   const [isExporting, startExportTransition] = useTransition();
+  const [currentFilters, setCurrentFilters] = useState<ReportFilterValues>(initialFilters);
   
   useEffect(() => {
     const filters: ReportFilterValues = { type: filterType };
@@ -45,20 +46,37 @@ export function ReportsFilter({ onFilterChange, initialFilters, isPending }: Rep
         filters.dateRange = dateRange;
     }
     onFilterChange(filters);
+    setCurrentFilters(filters);
   }, [filterType, year, month, dateRange, onFilterChange]);
   
   const handleDownload = () => {
       startExportTransition(async () => {
         try {
-            toast({
-                title: (
-                    <div className="flex items-center gap-2">
-                        <Info className="h-5 w-5 text-blue-500" />
-                        <span className="font-bold">Funcionalidade Indisponível</span>
-                    </div>
-                ),
-                description: "A exportação para Google Sheets foi desativada.",
-            });
+            const result = await exportReportAction(currentFilters);
+
+            if (result.csvContent) {
+                 // Create a blob from the CSV content
+                const blob = new Blob([result.csvContent], { type: 'text/csv;charset=utf-8;' });
+                
+                // Create a link element
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                const fileName = `Relatorio_RotaCerta_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+                link.setAttribute("download", fileName);
+                
+                // Append to the document, click, and then remove
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                 toast({
+                    title: "Exportação Iniciada",
+                    description: `O arquivo ${fileName} será baixado.`,
+                });
+            } else {
+                 throw new Error("O conteúdo do CSV está vazio.");
+            }
+
         } catch (error) {
             console.error(error);
             const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro inesperado.";
@@ -66,7 +84,7 @@ export function ReportsFilter({ onFilterChange, initialFilters, isPending }: Rep
                 title: (
                     <div className="flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-destructive" />
-                        <span className="font-bold">Erro</span>
+                        <span className="font-bold">Erro na Exportação</span>
                     </div>
                 ),
                 description: errorMessage,
@@ -170,7 +188,7 @@ export function ReportsFilter({ onFilterChange, initialFilters, isPending }: Rep
       
       <Button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto" disabled={isExporting || isPending}>
           {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-          {isExporting ? 'Exportando...' : 'Baixar'}
+          {isExporting ? 'Exportando...' : 'Baixar CSV'}
       </Button>
 
     </div>

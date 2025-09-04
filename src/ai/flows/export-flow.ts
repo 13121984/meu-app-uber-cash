@@ -1,57 +1,111 @@
 
 'use server';
 /**
- * @fileOverview A flow for exporting report data to Google Sheets.
+ * @fileOverview A flow for exporting report data to a CSV file.
  *
- * - exportToSheetFlow - A Genkit flow that handles the export process.
- * - ExportToSheetInput - The input type for the exportToSheet function.
- * - ExportToSheetOutput - The return type for the exportToSheet function.
+ * - exportToCsvFlow - A Genkit flow that handles the CSV generation.
+ * - ExportToCsvInput - The input type for the exportToCsv function.
+ * - ExportToCsvOutput - The return type for the exportToCsv function.
  */
 
 import { ai } from '@/ai/genkit';
 import { WorkDay } from '@/services/work-day.service';
 import { z } from 'zod';
+import { format } from 'date-fns';
 
-const ExportToSheetInputSchema = z.array(z.custom<WorkDay>());
-export type ExportToSheetInput = z.infer<typeof ExportToSheetInputSchema>;
+const ExportToCsvInputSchema = z.array(z.custom<WorkDay>());
+export type ExportToCsvInput = z.infer<typeof ExportToCsvInputSchema>;
 
-const ExportToSheetOutputSchema = z.object({
-  spreadsheetUrl: z.string().url(),
+const ExportToCsvOutputSchema = z.object({
+  csvContent: z.string(),
 });
-export type ExportToSheetOutput = z.infer<typeof ExportToSheetOutputSchema>;
+export type ExportToCsvOutput = z.infer<typeof ExportToCsvOutputSchema>;
 
-// Esta função de flow agora é mais genérica e não lida com autenticação do Google Sheets,
-// pois o escopo foi removido do projeto. Ela apenas prepara os dados.
-// Para uma implementação completa, seria necessário re-introduzir a autenticação.
-export const exportToSheetFlow = ai.defineFlow(
+// Headers for the CSV file, matching the import structure
+const CSV_HEADERS = [
+    'date', 'km', 'hours',
+    'earnings_category', 'earnings_trips', 'earnings_amount',
+    'fuel_type', 'fuel_paid', 'fuel_price',
+    'maintenance_description', 'maintenance_amount'
+];
+
+
+function escapeCsvValue(value: any): string {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    const stringValue = String(value);
+    // If the value contains a comma, quote, or newline, enclose it in double quotes
+    if (/[",\r\n]/.test(stringValue)) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+    return stringValue;
+}
+
+
+export const exportToCsvFlow = ai.defineFlow(
   {
-    name: 'exportToSheetFlow',
-    inputSchema: ExportToSheetInputSchema,
-    outputSchema: ExportToSheetOutputSchema,
+    name: 'exportToCsvFlow',
+    inputSchema: ExportToCsvInputSchema,
+    outputSchema: ExportToCsvOutputSchema,
   },
   async (filteredWorkDays) => {
     
     if (!filteredWorkDays || filteredWorkDays.length === 0) {
       throw new Error("Nenhum dado para exportar com os filtros selecionados.");
     }
-    
-    // A lógica de autenticação e criação de planilha foi removida.
-    // Em um cenário real, você precisaria de uma forma de se autenticar com a API do Google.
-    // Por enquanto, vamos simular a criação e retornar um URL de placeholder.
-    
-    console.log("Simulando a exportação de dados para o Google Sheets...");
-    console.log("Dados recebidos:", filteredWorkDays);
 
-    const placeholderUrl = "https://docs.google.com/spreadsheets/d/placeholder";
+    const rows: string[][] = [];
 
-    // Simula um atraso para a operação de API
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Flatten the work day data into a structure suitable for CSV
+    filteredWorkDays.forEach(day => {
+        const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
+        let isFirstRowForDay = true;
 
-    // Apenas para fins de demonstração, o fluxo agora retorna uma URL de placeholder.
-    // O ideal seria informar ao usuário que a funcionalidade de exportação
-    // requer configuração adicional.
+        // Combine all earnings, fuel entries, and maintenance into a single loop
+        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, (day.maintenance && day.maintenance.amount > 0) ? 1 : 0);
+
+        if (maxEntries === 0) {
+            // Handle days with no entries, just basic info
+             rows.push([
+                dateStr,
+                escapeCsvValue(day.km),
+                escapeCsvValue(day.hours),
+                '', '', '', '', '', '', '', '', ''
+            ]);
+            return;
+        }
+
+        for (let i = 0; i < maxEntries; i++) {
+            const earning = day.earnings[i];
+            const fuel = day.fuelEntries[i];
+            const maintenance = (i === 0 && day.maintenance && day.maintenance.amount > 0) ? day.maintenance : null;
+
+            rows.push([
+                dateStr,
+                isFirstRowForDay ? escapeCsvValue(day.km) : '',
+                isFirstRowForDay ? escapeCsvValue(day.hours) : '',
+                earning ? escapeCsvValue(earning.category) : '',
+                earning ? escapeCsvValue(earning.trips) : '',
+                earning ? escapeCsvValue(earning.amount) : '',
+                fuel ? escapeCsvValue(fuel.type) : '',
+                fuel ? escapeCsvValue(fuel.paid) : '',
+                fuel ? escapeCsvValue(fuel.price) : '',
+                maintenance ? escapeCsvValue(maintenance.description) : '',
+                maintenance ? escapeCsvValue(maintenance.amount) : ''
+            ]);
+            isFirstRowForDay = false;
+        }
+    });
+
+    // Convert rows to CSV string
+    const csvContent = [
+        CSV_HEADERS.join(','),
+        ...rows.map(row => row.join(','))
+    ].join('\n');
+
     return {
-      spreadsheetUrl: placeholderUrl,
+      csvContent,
     };
   }
 );
