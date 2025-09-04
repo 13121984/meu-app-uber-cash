@@ -18,7 +18,7 @@ interface Step2EarningsProps {
   dispatch: Dispatch<Action>;
 }
 
-const categories = ['Uber X', '99 Pop', 'Particular', 'Ganhos Extras'];
+const categories = ['Uber Cash', '99 Pop', 'Particular', 'Ganhos Extras'];
 
 export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
   const handleAddEarning = () => {

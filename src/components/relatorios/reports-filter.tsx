@@ -62,7 +62,7 @@ export function ReportsFilter({ onFilterChange, initialFilters, isPending }: Rep
                 const link = document.createElement("a");
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
-                const fileName = `Relatorio_RotaCerta_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+                const fileName = `Relatorio_UberCash_${format(new Date(), 'yyyy-MM-dd')}.csv`;
                 link.setAttribute("download", fileName);
                 
                 // Append to the document, click, and then remove

@@ -20,7 +20,7 @@ export function FuelBarChart({ data }: FuelBarChartProps) {
           <YAxis 
             tickFormatter={(value) => `R$${value}`}
             tickLine={false} 
-            axisLine={false} Uber Cash
+            axisLine={false} 
             tickMargin={10}
             width={80}
           />
