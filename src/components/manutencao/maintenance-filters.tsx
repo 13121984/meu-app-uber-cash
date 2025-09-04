@@ -59,7 +59,7 @@ export function MaintenanceFilters({ onFilterChange }: MaintenanceFiltersProps) 
               !dateRange && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
             {dateRange?.from ? (
               dateRange.to ? (
                 <>

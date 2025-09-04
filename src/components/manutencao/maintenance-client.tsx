@@ -35,11 +35,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-const SummaryCard = ({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: React.ElementType }) => (
+const SummaryCard = ({ title, value, description, icon: Icon, iconClassName }: { title: string; value: string; description: string; icon: React.ElementType, iconClassName?: string }) => (
     <Card className="bg-secondary/30">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
+            <Icon className={`h-4 w-4 text-muted-foreground ${iconClassName}`} />
         </CardHeader>
         <CardContent>
             <div className="text-2xl font-bold">{value}</div>
@@ -92,7 +92,7 @@ export function MaintenanceClient() {
       }
       
       return true;
-    });
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [allRecords, filters]);
 
   const filteredTotal = useMemo(() => {
@@ -102,7 +102,7 @@ export function MaintenanceClient() {
   const monthlyAverage = useMemo(() => {
     if (allRecords.length === 0) return 0;
     const totalSpent = allRecords.reduce((sum, record) => sum + record.amount, 0);
-    const months = new Set(allRecords.map(r => format(r.date, 'yyyy-MM')));
+    const months = new Set(allRecords.map(r => format(new Date(r.date), 'yyyy-MM')));
     return totalSpent / months.size;
   }, [allRecords]);
 
@@ -113,7 +113,7 @@ export function MaintenanceClient() {
         setAllRecords(allRecords.map(r => r.id === newRecord.id ? newRecord : r));
       } else {
         // Adicionando
-        setAllRecords([newRecord, ...allRecords].sort((a, b) => b.date.getTime() - a.date.getTime()));
+        setAllRecords([newRecord, ...allRecords]);
       }
       setIsFormOpen(false);
       setSelectedRecord(null);
@@ -158,12 +158,14 @@ export function MaintenanceClient() {
                 value={formatCurrency(filteredTotal)}
                 description={`${filteredRecords.length} ${filteredRecords.length === 1 ? 'registro' : 'registros'} no período`}
                 icon={DollarSign}
+                iconClassName="text-red-500"
             />
              <SummaryCard 
                 title="Média Mensal (Geral)"
                 value={formatCurrency(monthlyAverage)}
                 description={`Baseado em todos os ${allRecords.length} registros`}
                 icon={Wrench}
+                iconClassName="text-orange-500"
             />
         </div>
 
@@ -208,7 +210,7 @@ export function MaintenanceClient() {
                             <div className="flex-1 space-y-1">
                                 <p className="font-bold">{record.description}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    {format(record.date, "dd/MM/yyyy", { locale: ptBR })}
+                                    {format(new Date(record.date), "dd/MM/yyyy", { locale: ptBR })}
                                 </p>
                             </div>
                             <div className="flex items-center gap-4">
