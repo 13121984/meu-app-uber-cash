@@ -2,20 +2,37 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
+import { getSettings } from '@/services/settings.service';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Uber Cash',
   description: 'Seu app para gestão de ganhos como motorista de aplicativo.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getSettings();
+
+  const themeStyle = {
+    '--theme-primary': settings.primaryColor || '250 80% 65%',
+    '--theme-primary-foreground': settings.primaryColor ? '220 15% 95%' : '220 15% 95%',
+    '--theme-accent': settings.primaryColor || '250 80% 65%',
+    '--theme-accent-foreground': settings.primaryColor ? '220 15% 95%' : '220 15% 95%',
+    '--theme-ring': settings.primaryColor || '250 80% 70%',
+    '--theme-background': settings.backgroundColor,
+  } as React.CSSProperties;
+
   return (
-    <html lang="pt-BR" className="h-full dark">
+    <html 
+      lang="pt-BR" 
+      className={cn("h-full", settings.theme)}
+      style={themeStyle}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

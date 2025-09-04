@@ -20,6 +20,8 @@ export async function getSettings(): Promise<Settings> {
     // Retorna o valor padrão se o documento não existir
     return {
         theme: 'dark',
+        primaryColor: '250 80% 65%',
+        backgroundColor: '224 25% 10%',
         textColor: 'white',
         weeklyBackup: false,
         backupEmail: '',
@@ -31,6 +33,8 @@ export async function getSettings(): Promise<Settings> {
     // Em caso de erro, retorna o padrão para não quebrar a aplicação.
     return {
         theme: 'dark',
+        primaryColor: '250 80% 65%',
+        backgroundColor: '224 25% 10%',
         textColor: 'white',
         weeklyBackup: false,
         backupEmail: '',
@@ -50,6 +54,7 @@ export async function saveSettings(settings: Settings): Promise<{ success: boole
     
     // Revalida o caminho para que o Next.js busque os dados atualizados.
     revalidatePath('/configuracoes');
+    revalidatePath('/'); // Revalida a raiz para o layout pegar o novo tema
 
     return { success: true };
   } catch (error) {

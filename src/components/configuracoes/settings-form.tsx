@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,13 +13,15 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from "@/hooks/use-toast";
 import { saveSettings } from '@/services/settings.service';
 import { useRouter } from 'next/navigation';
-import { Paintbrush, Database, Bell, Eye, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun } from 'lucide-react';
+import { Paintbrush, Database, Bell, Eye, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun, Palette } from 'lucide-react';
 import type { Settings, TextColor, AppTheme } from '@/types/settings';
 import { cn } from '@/lib/utils';
 
 
 const settingsSchema = z.object({
     theme: z.enum(['light', 'dark']),
+    primaryColor: z.string().optional(),
+    backgroundColor: z.string().optional(),
     textColor: z.enum(['white', 'gray', 'purple']),
     weeklyBackup: z.boolean(),
     backupEmail: z.string().email({ message: "Por favor, insira um e-mail válido." }).or(z.literal('')),
@@ -42,19 +44,36 @@ const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
     { value: 'light', label: 'Claro', icon: Sun },
 ];
 
+const colorOptions: { name: string; value: string }[] = [
+    { name: 'Roxo (Padrão)', value: '250 80% 65%' },
+    { name: 'Azul Vibrante', value: '210 90% 60%' },
+    { name: 'Verde Esmeralda', value: '160 70% 45%' },
+    { name: 'Laranja Quente', value: '30 90% 55%' },
+    { name: 'Rosa Moderno', value: '330 90% 65%' },
+];
+
+const backgroundOptions: { name: string; value: string, theme: 'dark' | 'light' }[] = [
+    { name: 'Azul Escuro (Padrão)', value: '224 25% 10%', theme: 'dark' },
+    { name: 'Cinza Grafite', value: '220 15% 15%', theme: 'dark' },
+    { name: 'Preto Meia-noite', value: '240 10% 5%', theme: 'dark' },
+    { name: 'Branco (Padrão)', value: '0 0% 100%', theme: 'light'},
+    { name: 'Cinza Claro', value: '220 15% 96%', theme: 'light' },
+    { name: 'Branco Neve', value: '210 20% 98%', theme: 'light' },
+];
+
+
 const fuelTypes = ['Etanol', 'Gasolina Aditivada', 'GNV'];
 
 export function SettingsForm({ initialData }: SettingsFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewTextColor, setPreviewTextColor] = useState(initialData.textColor || 'white');
-
-  const { control, handleSubmit, watch, formState: { errors } } = useForm<Settings>({
+  
+  const form = useForm<Settings>({
     resolver: zodResolver(settingsSchema),
     defaultValues: initialData,
   });
 
-  const watchTextColor = watch('textColor', initialData.textColor);
+  const watchAllFields = form.watch();
 
   const onSubmit = async (data: Settings) => {
     setIsSubmitting(true);
@@ -62,8 +81,9 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       await saveSettings(data);
       toast({
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Configurações Salvas!</span></div>,
-        description: "Suas preferências foram atualizadas.",
+        description: "Suas preferências foram atualizadas. A página será recarregada.",
       });
+      // Recarrega a página para que o layout aplique as novas variáveis de tema
       router.refresh();
     } catch (error) {
       toast({
@@ -75,6 +95,14 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       setIsSubmitting(false);
     }
   };
+  
+  const filteredBackgroundOptions = backgroundOptions.filter(opt => opt.theme === watchAllFields.theme);
+  
+  const previewStyle = {
+    '--theme-primary': watchAllFields.primaryColor,
+    '--theme-background': watchAllFields.backgroundColor,
+  } as React.CSSProperties;
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -98,7 +126,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <Label>Tema do Aplicativo</Label>
                         <Controller
                             name="theme"
-                            control={control}
+                            control={form.control}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger>
@@ -122,12 +150,9 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <Label>Cor do Texto</Label>
                         <Controller
                             name="textColor"
-                            control={control}
+                            control={form.control}
                             render={({ field }) => (
-                                <Select onValueChange={(value) => {
-                                    field.onChange(value);
-                                    setPreviewTextColor(value as TextColor);
-                                }} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecione uma cor..." />
                                     </SelectTrigger>
@@ -153,6 +178,97 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                 </CardContent>
             </Card>
 
+            {/* Cores do App */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-headline"><Palette className="h-6 w-6 text-primary" />Cores do Aplicativo</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Cor Principal</Label>
+                         <Controller
+                            name="primaryColor"
+                            control={form.control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                    <SelectContent>
+                                        {colorOptions.map(color => (
+                                            <SelectItem key={color.value} value={color.value}>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: `hsl(${color.value})` }} />
+                                                    {color.name}
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                    </div>
+                     <div className="space-y-2">
+                        <Label>Cor de Fundo ({watchAllFields.theme === 'dark' ? 'Escuro' : 'Claro'})</Label>
+                         <Controller
+                            name="backgroundColor"
+                            control={form.control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                    <SelectContent>
+                                        {filteredBackgroundOptions.map(color => (
+                                            <SelectItem key={color.value} value={color.value}>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: `hsl(${color.value})` }} />
+                                                    {color.name}
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+        
+        <div className="space-y-6">
+            {/* Prévia do Visual */}
+            <Card style={previewStyle}>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-headline"><Eye className="h-6 w-6" style={{color: 'hsl(var(--theme-primary))'}} />Prévia do Visual</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 rounded-lg bg-card" style={{backgroundColor: `hsl(var(--theme-background, 224 25% 15%))`}}>
+                    <div className={cn("p-4 rounded-lg border", {
+                         'text-white': watchAllFields.textColor === 'white',
+                         'text-gray-300': watchAllFields.textColor === 'gray',
+                         'text-purple-400': watchAllFields.textColor === 'purple',
+                    })} 
+                    style={{
+                        backgroundColor: 'hsl(var(--theme-card, 224 25% 20%))',
+                        borderColor: 'hsl(var(--theme-border, 224 25% 25%))'
+                    }}
+                    >
+                        <h4 className="font-bold">Exemplo de Card</h4>
+                        <p className="text-sm">Este é um exemplo de como o texto aparecerá com as configurações atuais.</p>
+                        <Button size="sm" className="mt-2" style={{backgroundColor: `hsl(var(--theme-primary))`, color: `hsl(var(--theme-primary-foreground))`}}>Botão Principal</Button>
+                    </div>
+                     <div className={cn("p-4 rounded-lg", {
+                         'text-white': watchAllFields.textColor === 'white',
+                         'text-gray-300': watchAllFields.textColor === 'gray',
+                         'text-purple-400': watchAllFields.textColor === 'purple',
+                    })}
+                     style={{
+                        backgroundColor: `hsl(var(--theme-primary))`,
+                        color: `hsl(var(--theme-primary-foreground))`
+                    }}
+                    >
+                        <h4 className="font-bold">Elemento com Cor Primária</h4>
+                        <p className="text-sm ">Ajuste a cor para melhor legibilidade.</p>
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* Backup */}
             <Card>
                 <CardHeader>
@@ -163,23 +279,21 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <div className="space-y-0.5">
                             <Label>Backup Automático Semanal</Label>
                         </div>
-                        <Controller name="weeklyBackup" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                        <Controller name="weeklyBackup" control={form.control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="backupEmail">Email para Backup (Google Drive)</Label>
                         <Controller
                             name="backupEmail"
-                            control={control}
+                            control={form.control}
                             render={({ field }) => <Input id="backupEmail" placeholder="seu-email@gmail.com" {...field} />}
                         />
-                        {errors.backupEmail && <p className="text-sm text-destructive">{errors.backupEmail.message}</p>}
+                        {form.formState.errors.backupEmail && <p className="text-sm text-destructive">{form.formState.errors.backupEmail.message}</p>}
                     </div>
                 </CardContent>
             </Card>
-        </div>
-        
-        <div className="space-y-6">
-            {/* Notificações e Padrões */}
+
+             {/* Notificações e Padrões */}
             <Card>
                 <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline"><Bell className="h-6 w-6 text-primary" />Notificações e Padrões</CardTitle>
@@ -189,13 +303,13 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         <div className="space-y-0.5">
                             <Label>Habilitar Notificações de Manutenção</Label>
                         </div>
-                        <Controller name="maintenanceNotifications" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
+                        <Controller name="maintenanceNotifications" control={form.control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
                     </div>
                     <div className="space-y-2">
                         <Label>Tipo de Combustível Padrão</Label>
                          <Controller
                             name="defaultFuelType"
-                            control={control}
+                            control={form.control}
                             render={({ field }) => (
                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger>
@@ -209,31 +323,6 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                                 </Select>
                             )}
                         />
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Prévia do Visual */}
-            <Card>
-                <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-headline"><Eye className="h-6 w-6 text-primary" />Prévia do Visual</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className={cn("p-4 rounded-lg bg-card border", {
-                         'text-white': watchTextColor === 'white',
-                         'text-gray-300': watchTextColor === 'gray',
-                         'text-purple-400': watchTextColor === 'purple',
-                    })}>
-                        <h4 className="font-bold">Exemplo de Card</h4>
-                        <p className="text-sm">Este é um exemplo de como o texto aparecerá com as configurações atuais.</p>
-                    </div>
-                     <div className={cn("p-4 rounded-lg bg-green-800/50 border border-green-700", {
-                         'text-white': watchTextColor === 'white',
-                         'text-gray-300': watchTextColor === 'gray',
-                         'text-purple-400': watchTextColor === 'purple',
-                    })}>
-                        <h4 className="font-bold">Outro Exemplo</h4>
-                        <p className="text-sm ">Ajuste a cor do texto para melhor legibilidade em diferentes temas.</p>
                     </div>
                 </CardContent>
             </Card>
