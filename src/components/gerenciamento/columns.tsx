@@ -29,7 +29,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { format, parseISO } from "date-fns"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -80,7 +81,6 @@ export const useWorkDayColumns = () => {
         )
       },
       cell: ({ row }) => {
-        // A data já vem como objeto Date do serviço
         const date = row.getValue("date") as Date;
         return <div className="font-medium whitespace-nowrap">{format(date, 'dd/MM/yy')}</div>
       },
@@ -107,12 +107,12 @@ export const useWorkDayColumns = () => {
     },
      {
       accessorKey: "totalGastos",
-      header: () => <div className="text-right hidden sm:table-cell">Gastos</div>,
+      header: () => <div className="text-right hidden md:table-cell">Gastos</div>,
       cell: ({ row }) => {
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const maintenance = row.original.maintenance?.amount || 0;
         const total = fuel + maintenance;
-        return <div className="text-red-600 text-right hidden sm:table-cell">{formatCurrency(total)}</div>
+        return <div className={cn("text-right hidden md:table-cell", total > 0 ? "text-red-600" : "text-muted-foreground")}>{formatCurrency(total)}</div>
       }
     },
     {
@@ -131,27 +131,29 @@ export const useWorkDayColumns = () => {
         const workDay = row.original
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Ações</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setEditingWorkDay(workDay)}>
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="text-destructive focus:bg-destructive/30"
-                onClick={() => handleDeleteClick(workDay)}
-              >
-                Apagar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setEditingWorkDay(workDay)}>
+                  Editar
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="text-destructive focus:bg-destructive/30"
+                  onClick={() => handleDeleteClick(workDay)}
+                >
+                  Apagar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )
       },
     },

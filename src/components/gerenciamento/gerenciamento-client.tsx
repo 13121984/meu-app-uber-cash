@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect, useTransition } from "react";
+import { useState, useMemo, useTransition } from "react";
 import { useWorkDayColumns } from "./columns";
 import { DataTable } from "./data-table";
 import type { WorkDay } from "@/services/work-day.service";
@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { isWithinInterval } from "date-fns";
+import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
 interface GerenciamentoClientProps {
@@ -36,19 +36,20 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
   const filteredData = useMemo(() => {
     let dateRange: DateRange | undefined;
     if (from) {
-      dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
+      // Use UTC dates to avoid timezone issues
+      const fromDate = new Date(from + 'T00:00:00Z');
+      const toDate = to ? new Date(to + 'T00:00:00Z') : undefined;
+      dateRange = { from: fromDate, to: toDate };
     }
 
     return allWorkDays
       .filter(day => {
-        const dayDate = new Date(day.date);
-        dayDate.setHours(0, 0, 0, 0);
-
+        // Use UTC for comparison
+        const dayDate = new Date(day.date.toISOString().split('T')[0] + 'T00:00:00Z');
+        
         if (dateRange?.from) {
-          const fromDate = new Date(dateRange.from);
-          fromDate.setHours(0, 0, 0, 0);
-          let toDate = dateRange.to ? new Date(dateRange.to) : fromDate;
-          toDate.setHours(23, 59, 59, 999);
+          const fromDate = startOfDay(dateRange.from);
+          let toDate = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
           
           if (!isWithinInterval(dayDate, { start: fromDate, end: toDate })) {
             return false;
