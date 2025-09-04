@@ -1,12 +1,10 @@
 
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
-import { SidebarProvider, Sidebar } from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/layout/sidebar-nav';
-import { MobileHeader } from '@/components/layout/mobile-header';
+import { FloatingMenu } from '@/components/layout/floating-menu';
 
 
 const APP_NAME = "Rota Certa";
@@ -54,20 +52,13 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
       <body className="font-body antialiased h-full bg-background">
-        <SidebarProvider>
-          <div className="flex min-h-screen w-full flex-col bg-muted/40">
-            <Sidebar>
-              <SidebarNav />
-            </Sidebar>
-            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-                <MobileHeader />
-              <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-                  {children}
-              </main>
-            </div>
-          </div>
-          <Toaster />
-        </SidebarProvider>
+        <div className="relative flex min-h-screen w-full flex-col">
+            <main className="flex-1 p-4 sm:p-6 md:p-8">
+                {children}
+            </main>
+            <FloatingMenu />
+        </div>
+        <Toaster />
       </body>
     </html>
   );
