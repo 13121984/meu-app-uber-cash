@@ -3,7 +3,7 @@
 /**
  * @fileOverview A flow for exporting report data to Google Sheets.
  *
- * - exportToSheet - A function that handles the export process.
+ * - exportToSheetFlow - A Genkit flow that handles the export process.
  * - ExportToSheetInput - The input type for the exportToSheet function.
  * - ExportToSheetOutput - The return type for the exportToSheet function.
  */
@@ -21,13 +21,8 @@ const ExportToSheetOutputSchema = z.object({
 });
 export type ExportToSheetOutput = z.infer<typeof ExportToSheetOutputSchema>;
 
-// Wrapper function to be called from the client
-export async function exportToSheet(input: ExportToSheetInput): Promise<ExportToSheetOutput> {
-  const result = await exportToSheetFlow(input);
-  return result;
-}
-
-const exportToSheetFlow = ai.defineFlow(
+// This is the Genkit flow definition. It is not exported directly to the client.
+export const exportToSheetFlow = ai.defineFlow(
   {
     name: 'exportToSheetFlow',
     inputSchema: ExportToSheetInputSchema,
@@ -57,7 +52,7 @@ const exportToSheetFlow = ai.defineFlow(
     
     const rows = filteredWorkDays.flatMap(day => {
         // As datas podem vir como strings, então garantimos que são objetos Date
-        const dayDate = typeof day.date === 'string' || day.date instanceof Number ? new Date(day.date) : day.date;
+        const dayDate = typeof day.date === 'string' || typeof day.date === 'number' ? new Date(day.date) : day.date;
         const profit = day.earnings.reduce((sum, e) => sum + e.amount, 0) - day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
 
         const baseRow = [
@@ -75,6 +70,7 @@ const exportToSheetFlow = ai.defineFlow(
         for (let i = 0; i < maxRows; i++) {
             const earning = day.earnings[i] || {};
             const fuel = day.fuelEntries[i] || {};
+            // A manutenção só aparece na primeira linha do dia
             const maintenance = i === 0 ? day.maintenance : {};
 
             dayRows.push([

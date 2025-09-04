@@ -12,9 +12,9 @@ import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
-import { exportToSheet } from '@/ai/flows/export-flow';
 import { toast } from '@/hooks/use-toast';
-import { getReportData, WorkDay } from '@/services/work-day.service';
+import { WorkDay } from '@/services/work-day.service';
+import { exportReportAction } from '@/app/relatorios/actions';
 
 
 export const ReportFilterValuesSchema = z.object({
@@ -71,10 +71,7 @@ export function ReportsFilter({ onFilterChange, allWorkDays }: ReportsFilterProp
                 filters.dateRange = dateRange;
             }
             
-            // Filtra os dados brutos aqui antes de enviar para o flow
-            const { rawWorkDays } = await getReportData(allWorkDays, filters);
-
-            const result = await exportToSheet(rawWorkDays);
+            const result = await exportReportAction(filters);
 
             toast({
                 title: (
@@ -94,6 +91,7 @@ export function ReportsFilter({ onFilterChange, allWorkDays }: ReportsFilterProp
             });
         } catch (error) {
             console.error(error);
+            const errorMessage = error instanceof Error ? error.message : "Não foi possível criar a planilha.";
             toast({
                 title: (
                     <div className="flex items-center gap-2">
@@ -101,7 +99,7 @@ export function ReportsFilter({ onFilterChange, allWorkDays }: ReportsFilterProp
                         <span className="font-bold">Erro ao Exportar</span>
                     </div>
                 ),
-                description: "Não foi possível criar a planilha. Verifique as configurações e tente novamente.",
+                description: errorMessage,
                 variant: "destructive",
             });
         }
