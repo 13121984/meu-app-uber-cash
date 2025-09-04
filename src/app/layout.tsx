@@ -19,12 +19,9 @@ export default async function RootLayout({
   const settings = await getSettings();
 
   const themeStyle = {
-    '--theme-primary': settings.primaryColor || '250 80% 65%',
-    '--theme-primary-foreground': settings.primaryColor ? '220 15% 95%' : '220 15% 95%',
-    '--theme-accent': settings.primaryColor || '250 80% 65%',
-    '--theme-accent-foreground': settings.primaryColor ? '220 15% 95%' : '220 15% 95%',
-    '--theme-ring': settings.primaryColor || '250 80% 70%',
+    '--theme-primary': settings.primaryColor,
     '--theme-background': settings.backgroundColor,
+    // Você pode adicionar mais variáveis aqui conforme necessário
   } as React.CSSProperties;
 
   return (
