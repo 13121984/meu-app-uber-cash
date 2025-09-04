@@ -17,6 +17,8 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { addMaintenance, updateMaintenance } from '@/services/maintenance.service';
+import type { Maintenance as MaintenanceType } from '@/services/maintenance.service';
+
 
 // Define o schema e o tipo aqui, no componente do cliente
 export const maintenanceSchema = z.object({
@@ -26,18 +28,21 @@ export const maintenanceSchema = z.object({
   amount: z.number().min(0.01, "O valor deve ser maior que zero."),
 });
 
-export type Maintenance = z.infer<typeof maintenanceSchema>;
+// Remove o userId do tipo Zod, pois ele vem do servidor
+export type MaintenanceFormData = z.infer<typeof maintenanceSchema>;
 
+// O tipo para o formulário e onSuccess precisa do ID opcional, mas não do userId
+type FormAndSuccessType = Omit<MaintenanceType, 'userId'>
 
 interface MaintenanceFormProps {
-  initialData: Maintenance | null;
-  onSuccess: (record: Maintenance) => void;
+  initialData: FormAndSuccessType | null;
+  onSuccess: (record: FormAndSuccessType) => void;
 }
 
 export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm<Maintenance>({
+  const form = useForm<MaintenanceFormData>({
     resolver: zodResolver(maintenanceSchema),
     defaultValues: initialData || {
       date: new Date(),
@@ -46,11 +51,11 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
     },
   });
 
-  const onSubmit = async (data: Maintenance) => {
+  const onSubmit = async (data: MaintenanceFormData) => {
     setIsSubmitting(true);
     try {
       let result;
-      // Para edição, não precisamos do ID no payload principal, mas para adição, não deve existir
+      // Dados a serem enviados para o backend (sem id)
       const dataToSend = { date: data.date, description: data.description, amount: data.amount };
 
       if (initialData?.id) {
@@ -67,6 +72,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
           description: `Registro ${initialData ? 'atualizado' : 'adicionado'}.`,
         });
         
+        // O onSuccess espera um objeto com id, mas sem userId
         const returnedRecord = { ...data, id: initialData?.id ?? result.id };
         onSuccess(returnedRecord);
 
@@ -74,9 +80,10 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
         throw new Error(result.error);
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Não foi possível salvar o registro.";
       toast({
         title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro!</span></div>,
-        description: error instanceof Error ? error.message : "Não foi possível salvar o registro.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

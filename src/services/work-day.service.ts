@@ -8,6 +8,9 @@ import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/da
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords } from './maintenance.service';
+import { getAuth } from "firebase/auth";
+import { app } from "@/lib/firebase";
+import { getCurrentUser } from "./user.service";
 
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
@@ -15,6 +18,7 @@ export type FuelEntry = { id:number; type: string; paid: number; price: number }
 
 export interface WorkDay {
   id?: string;
+  userId: string; // Adicionado para segurança
   date: Date;
   km: number;
   hours: number;
@@ -62,10 +66,14 @@ export interface ReportData {
   rawWorkDays: WorkDay[]; // Adicionado para exportação
 }
 
-export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
+export async function addWorkDay(data: Omit<WorkDay, 'id' | 'userId'>) {
+  const user: any = await getCurrentUser();
+  if (!user) return { success: false, error: "Usuário não autenticado." };
+
   try {
     const docRef = await addDoc(collection(db, "workdays"), {
       ...data,
+      userId: user.uid,
       date: Timestamp.fromDate(data.date),
       createdAt: Timestamp.now(),
     });
@@ -78,13 +86,15 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
 }
 
 export async function getWorkDays(): Promise<WorkDay[]> {
+    const user: any = await getCurrentUser();
+    if (!user) return [];
+
     try {
         const workdaysCollection = collection(db, "workdays");
-        const q = query(workdaysCollection, orderBy("date", "desc"));
+        const q = query(workdaysCollection, where("userId", "==", user.uid), orderBy("date", "desc"));
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-            console.log("No documents found in workdays collection.");
             return [];
         }
 
@@ -242,7 +252,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
       break;
   }
   
-  // Se allWorkDays estiver vazio, busca todos os dias
+  // Se allWorkDays estiver vazio, busca todos os dias (já filtrado pelo usuário)
   const sourceDays = allWorkDays.length > 0 ? allWorkDays : await getWorkDays();
   if (interval) {
     filteredDays = sourceDays.filter(d => isWithinInterval(d.date, interval!));

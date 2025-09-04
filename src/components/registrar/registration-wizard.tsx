@@ -28,7 +28,9 @@ type Action =
   | { type: 'SET_BASIC_INFO'; payload: { date: Date; km: number; hours: number } }
   | { type: 'SET_EARNINGS'; payload: Earning[] }
   | { type: 'SET_FUEL'; payload: FuelEntry[] }
-  | { type: 'SET_MAINTENANCE'; payload: { description: string; amount: number } };
+  | { type: 'SET_MAINTENANCE'; payload: { description: string; amount: number } }
+  | { type: 'RESET_STATE' };
+
 
 const initialState: State = {
   date: new Date(),
@@ -45,6 +47,7 @@ function reducer(state: State, action: Action): State {
     case 'SET_EARNINGS': return { ...state, earnings: action.payload };
     case 'SET_FUEL': return { ...state, fuelEntries: action.payload };
     case 'SET_MAINTENANCE': return { ...state, maintenance: action.payload };
+    case 'RESET_STATE': return initialState;
     default: return state;
   }
 }
@@ -61,6 +64,12 @@ export function RegistrationWizard() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  const resetWizard = () => {
+    dispatch({ type: 'RESET_STATE' });
+    setCurrentStep(1);
+    setCompletedSteps([]);
+  };
 
   const handleNext = () => {
     if (!completedSteps.includes(currentStep)) {
@@ -103,12 +112,13 @@ export function RegistrationWizard() {
             description: "Seu dia de trabalho foi registrado.",
             variant: "default",
         });
-        // You can reset the form or redirect the user here
+        resetWizard();
       } else {
         throw new Error(result.error);
       }
     } catch (error) {
       console.error(error);
+      const errorMessage = error instanceof Error ? error.message : "Não foi possível registrar seu dia de trabalho.";
       toast({
           title: (
             <div className="flex items-center gap-2">
@@ -116,7 +126,7 @@ export function RegistrationWizard() {
               <span className="font-bold">Erro ao Salvar!</span>
             </div>
           ),
-          description: "Não foi possível registrar seu dia de trabalho. Tente novamente.",
+          description: errorMessage,
           variant: "destructive",
       });
     } finally {

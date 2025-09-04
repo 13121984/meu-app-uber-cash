@@ -1,22 +1,51 @@
+
 "use server";
 
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
 import type { Settings } from "@/types/settings";
+import { getCurrentUser } from "./user.service";
 
-const settingsDocRef = doc(db, "settings", "userSettings");
+/**
+ * Retorna a referência do documento de configurações para o usuário logado.
+ */
+const getSettingsDocRef = async () => {
+    const user: any = await getCurrentUser();
+    if (!user) {
+        // Retorna uma referência "fantasma" para um usuário anônimo.
+        // As operações de escrita falharão, e a leitura retornará o padrão.
+        return doc(db, "users", "anonymous", "settings", "userSettings");
+    }
+    // Cria um caminho único para as configurações de cada usuário.
+    return doc(db, "users", user.uid, "settings", "userSettings");
+};
+
 
 /**
  * Busca as configurações salvas no Firestore.
  * Se não existir, retorna as configurações padrão.
  */
 export async function getSettings(): Promise<Settings> {
+  const user: any = await getCurrentUser();
+  // Se não houver usuário (ex: durante o build ou em rotas não protegidas),
+  // retorna o tema padrão para evitar erros.
+  if (!user) {
+      return {
+          theme: 'dark',
+          weeklyBackup: false,
+          backupEmail: '',
+          maintenanceNotifications: true,
+          defaultFuelType: 'Gasolina Aditivada',
+      };
+  }
+  
+  const settingsDocRef = await getSettingsDocRef();
+
   try {
     const docSnap = await getDoc(settingsDocRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      // Garante que apenas as chaves esperadas sejam retornadas
       return {
         theme: data.theme || 'dark',
         weeklyBackup: data.weeklyBackup || false,
@@ -25,7 +54,7 @@ export async function getSettings(): Promise<Settings> {
         defaultFuelType: data.defaultFuelType || 'Gasolina Aditivada',
       };
     }
-    // Retorna o valor padrão se o documento não existir
+    // Retorna o valor padrão se o documento não existir para o usuário
     return {
         theme: 'dark',
         weeklyBackup: false,
@@ -35,7 +64,6 @@ export async function getSettings(): Promise<Settings> {
     };
   } catch (error) {
     console.error("Error fetching settings: ", error);
-    // Em caso de erro, retorna o padrão para não quebrar a aplicação.
     return {
         theme: 'dark',
         weeklyBackup: false,
@@ -50,13 +78,16 @@ export async function getSettings(): Promise<Settings> {
  * Salva ou atualiza as configurações no Firestore.
  */
 export async function saveSettings(settings: Settings): Promise<{ success: boolean, error?: string }> {
+  const user: any = await getCurrentUser();
+  if (!user) return { success: false, error: "Usuário não autenticado." };
+
+  const settingsDocRef = await getSettingsDocRef();
+
   try {
-    // setDoc com merge:true cria o documento se não existir ou atualiza os campos se existir.
     await setDoc(settingsDocRef, settings, { merge: true });
     
-    // Revalida o caminho para que o Next.js busque os dados atualizados.
     revalidatePath('/configuracoes');
-    revalidatePath('/'); // Revalida a raiz para o layout pegar o novo tema
+    revalidatePath('/'); 
 
     return { success: true };
   } catch (error) {

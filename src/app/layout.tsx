@@ -5,6 +5,8 @@ import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
+import { AuthProvider } from '@/context/auth-context';
+import { ProtectedRoute } from '@/components/auth/protected-route';
 
 export const metadata: Metadata = {
   title: 'Uber Cash',
@@ -25,23 +27,27 @@ export default async function RootLayout({
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased h-full">
-        <SidebarProvider>
-          <Sidebar>
-            <SidebarNav />
-          </Sidebar>
-          <SidebarInset>
-              <main className="p-4 md:p-6 lg:p-8">
-                <div className="md:hidden mb-4">
-                  <SidebarTrigger />
-                </div>
-                {children}
-              </main>
-          </SidebarInset>
-        </SidebarProvider>
+        <AuthProvider>
+          <ProtectedRoute>
+            <SidebarProvider>
+              <Sidebar>
+                <SidebarNav />
+              </Sidebar>
+              <SidebarInset>
+                  <main className="p-4 md:p-6 lg:p-8">
+                    <div className="md:hidden mb-4">
+                      <SidebarTrigger />
+                    </div>
+                    {children}
+                  </main>
+              </SidebarInset>
+            </SidebarProvider>
+          </ProtectedRoute>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

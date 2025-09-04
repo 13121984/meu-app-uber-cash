@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, PlusCircle, BarChart, Settings, Wrench, History, Target, Presentation, TrendingUp } from "lucide-react"
+import { LayoutDashboard, PlusCircle, BarChart, Settings, Wrench, History, Target, Presentation, TrendingUp, LogOut } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import {
@@ -12,8 +12,12 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarFooter,
+  SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Car } from 'lucide-react';
+import { useAuth } from "@/context/auth-context"
+import { Button } from "../ui/button"
 
 
 const menuItems = [
@@ -27,7 +31,9 @@ const menuItems = [
 ]
 
 export function SidebarNav() {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const { logout, user } = useAuth();
+
 
   return (
     <>
@@ -38,7 +44,7 @@ export function SidebarNav() {
           </div>
           <div className="flex flex-col">
             <h1 className="text-lg font-headline font-semibold text-foreground">Uber Cash</h1>
-            <p className="text-xs text-muted-foreground">Controle</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
           </div>
         </div>
       </SidebarHeader>
@@ -64,6 +70,13 @@ export function SidebarNav() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter>
+          <SidebarSeparator />
+          <Button onClick={logout} variant="ghost" className="w-full justify-start">
+            <LogOut className="mr-2 h-4 w-4" />
+            Sair
+          </Button>
+      </SidebarFooter>
     </>
   )
 }
