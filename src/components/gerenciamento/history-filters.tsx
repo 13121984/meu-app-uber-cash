@@ -1,72 +1,82 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Search, FilterX } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar as CalendarIcon, Search, FilterX, Loader2 } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
 
-export interface FilterValues {
-    query: string;
-    category: string;
-    dateRange?: DateRange;
-}
+export function HistoryFilters() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-interface HistoryFiltersProps {
-  categories: string[];
-  onFilterChange: (filters: FilterValues) => void;
-}
+  // Initialize state from URL params
+  const [query, setQuery] = useState(searchParams.get('query') || '');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
+    if (from) {
+      return { from: parseISO(from), to: to ? parseISO(to) : undefined };
+    }
+    return undefined;
+  });
 
-export function HistoryFilters({ categories, onFilterChange }: HistoryFiltersProps) {
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('all');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  
+  // Effect to update URL when filters change
   useEffect(() => {
-    onFilterChange({ query, category, dateRange });
-  }, [query, category, dateRange, onFilterChange]);
+    const params = new URLSearchParams(window.location.search);
+    if (query) {
+      params.set('query', query);
+    } else {
+      params.delete('query');
+    }
+
+    if (dateRange?.from) {
+      params.set('from', format(dateRange.from, 'yyyy-MM-dd'));
+      if (dateRange.to) {
+        params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
+      } else {
+        // If only 'from' is selected, remove 'to'
+        params.delete('to');
+      }
+    } else {
+      params.delete('from');
+      params.delete('to');
+    }
+
+    startTransition(() => {
+      // Using router.replace to avoid adding to browser history
+      router.replace(`${pathname}?${params.toString()}`);
+    });
+  }, [query, dateRange, pathname, router]);
+
 
   const handleClearFilters = () => {
     setQuery('');
-    setCategory('all');
     setDateRange(undefined);
-  }
+  };
 
-  const hasActiveFilters = query !== '' || category !== 'all' || dateRange !== undefined;
-
+  const hasActiveFilters = !!(query || dateRange);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card">
-      <div className="relative flex-1">
+    <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card items-center">
+      <div className="relative flex-1 w-full">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Pesquisar por data ou categoria..."
+          placeholder="Pesquisar..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-10"
         />
       </div>
-
-      <Select value={category} onValueChange={setCategory}>
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="Categoria" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todas as Categorias</SelectItem>
-          {categories.map((cat) => (
-            <SelectItem key={cat} value={cat}>
-              {cat}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       
       <Popover>
         <PopoverTrigger asChild>
@@ -82,14 +92,14 @@ export function HistoryFilters({ categories, onFilterChange }: HistoryFiltersPro
             {dateRange?.from ? (
               dateRange.to ? (
                 <>
-                  {format(dateRange.from, "LLL dd, y", { locale: ptBR })} -{" "}
-                  {format(dateRange.to, "LLL dd, y", { locale: ptBR })}
+                  {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
+                  {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
                 </>
               ) : (
-                format(dateRange.from, "LLL dd, y", { locale: ptBR })
+                format(dateRange.from, "PPP", { locale: ptBR })
               )
             ) : (
-              <span>Selecione um período</span>
+              <span>Filtrar por período</span>
             )}
           </Button>
         </PopoverTrigger>
@@ -100,13 +110,15 @@ export function HistoryFilters({ categories, onFilterChange }: HistoryFiltersPro
             defaultMonth={dateRange?.from}
             selected={dateRange}
             onSelect={setDateRange}
-            numberOfMonths={2}
+            numberOfMonths={1}
             locale={ptBR}
           />
         </PopoverContent>
       </Popover>
       
-      {hasActiveFilters && (
+      {isPending && <Loader2 className="h-5 w-5 animate-spin" />}
+      
+      {hasActiveFilters && !isPending && (
         <Button variant="ghost" onClick={handleClearFilters}>
             <FilterX className="mr-2 h-4 w-4" />
             Limpar
