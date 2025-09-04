@@ -147,6 +147,26 @@ export async function deleteWorkDay(id: string): Promise<{ success: boolean; err
   }
 }
 
+export async function deleteWorkDays(idsToDelete: string[]): Promise<{ success: boolean; error?: string }> {
+    try {
+        let allWorkDays = await readWorkDays(true);
+        const initialLength = allWorkDays.length;
+        const idsSet = new Set(idsToDelete);
+        allWorkDays = allWorkDays.filter(day => !idsSet.has(day.id));
+        
+        if (allWorkDays.length === initialLength) {
+             return { success: true }; // No records were found to delete, which is not an error.
+        }
+        
+        await writeWorkDays(allWorkDays);
+        return { success: true };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registros em massa.";
+        return { success: false, error: errorMessage };
+    }
+}
+
+
 export async function deleteAllWorkDays(): Promise<{ success: boolean; error?: string }> {
   try {
     await writeWorkDays([]); // Write an empty array
