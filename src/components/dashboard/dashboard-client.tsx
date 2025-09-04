@@ -91,8 +91,20 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           <h1 className="text-3xl font-bold font-headline">Painel de Controle</h1>
           <p className="text-muted-foreground">Resumo de {periodMap[period]}</p>
         </div>
-         <div className="flex items-center gap-2">
-            {(["hoje", "semana", "mes"] as Period[]).map(p => (
+      </div>
+      
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((stat) => (
+            <StatsCard key={stat.title} {...stat} />
+          ))}
+      </div>
+
+       <Card>
+          <CardHeader>
+              <CardTitle className="font-headline text-lg">Filtrar Período</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center gap-2">
+             {(["hoje", "semana", "mes"] as Period[]).map(p => (
                  <Button 
                     key={p} 
                     variant={period === p ? "default" : "secondary"}
@@ -105,14 +117,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                     {periodMap[p]}
                 </Button>
             ))}
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat) => (
-            <StatsCard key={stat.title} {...stat} />
-          ))}
-      </div>
+          </CardContent>
+      </Card>
+
 
       <Card className="bg-card border-border">
           <CardHeader>
