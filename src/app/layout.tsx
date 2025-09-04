@@ -53,7 +53,7 @@ export default async function RootLayout({
       </head>
       <body className="font-body antialiased h-full bg-background">
         <div className="relative flex min-h-screen w-full flex-col">
-            <main className="flex-1 p-4 sm:p-6 md:p-8">
+            <main className="flex-1 p-4 sm:pl-20 sm:py-6 md:p-8 md:pl-24">
                 {children}
             </main>
             <FloatingMenu />

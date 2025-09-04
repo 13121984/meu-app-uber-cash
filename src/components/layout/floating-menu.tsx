@@ -3,9 +3,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, PlusCircle, BarChart, Settings, Wrench, History, Target } from "lucide-react"
+import { LayoutDashboard, PlusCircle, BarChart, Settings, Wrench, History, Target, Car } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Separator } from "@/components/ui/separator"
 
 const menuItems = [
   { href: "/", label: "Painel", icon: LayoutDashboard },
@@ -22,8 +23,12 @@ export function FloatingMenu() {
 
   return (
     <TooltipProvider>
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0 z-50">
-        <div className="flex items-center gap-2 rounded-full border bg-background/70 p-2 shadow-lg backdrop-blur-md">
+      <div className="fixed top-1/2 -translate-y-1/2 left-4 z-50">
+        <div className="flex flex-col items-center gap-4 rounded-full border bg-background/70 p-2 shadow-lg backdrop-blur-md">
+          <div className="p-2">
+            <Car className="h-8 w-8 text-primary" />
+          </div>
+          <Separator />
           {menuItems.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -42,7 +47,7 @@ export function FloatingMenu() {
                     </button>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="top" align="center">
+                <TooltipContent side="right" align="center">
                   <p>{item.label}</p>
                 </TooltipContent>
               </Tooltip>
