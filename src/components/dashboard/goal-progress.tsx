@@ -22,7 +22,12 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
 
   useEffect(() => {
     // This logic now runs only on the client, after hydration.
-    setAudio(new Audio(cashRegisterSound));
+    // This ensures window.Audio is available.
+    if (typeof window !== 'undefined') {
+        const audioInstance = new Audio(cashRegisterSound);
+        audioInstance.preload = 'auto';
+        setAudio(audioInstance);
+    }
   }, []);
 
 
@@ -34,7 +39,7 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
     if (isComplete && !goalReached) {
       setGoalReached(true);
       if (audio) {
-        audio.play();
+        audio.play().catch(console.error); // Play sound and log any errors
       }
       toast({
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Meta Atingida!</span></div>,

@@ -84,7 +84,12 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
 
   useEffect(() => {
     // This logic now runs only on the client, after hydration.
-    setAudio(new Audio(cashRegisterSound));
+    // This ensures window.Audio is available.
+    if (typeof window !== 'undefined') {
+      const audioInstance = new Audio(cashRegisterSound);
+      audioInstance.preload = 'auto';
+      setAudio(audioInstance);
+    }
   }, []);
 
   useEffect(() => {
@@ -141,7 +146,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
       
       if (result.success) {
         if (!isEditing && audio) {
-          audio.play();
+          audio.play().catch(console.error); // Play sound and log any errors
         }
         toast({
             title: (
