@@ -2,16 +2,13 @@
 "use client";
 
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   signOut,
 } from "firebase/auth";
-import { app } from "@/lib/firebase";
+import { auth } from "@/lib/firebase"; // Importa a instância centralizada
 import type { AuthFormData } from "@/components/auth/auth-form";
-
-export const auth = getAuth(app);
 
 export const signup = (data: AuthFormData) => {
   return createUserWithEmailAndPassword(auth, data.email, data.password);
