@@ -1,15 +1,15 @@
+
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
-  "projectId": "rota-certa-lkbvr",
-  "appId": "1:824212803664:web:32ee7ae1c6c9f796e30155",
-  "storageBucket": "rota-certa-lkbvr.firebasestorage.app",
-  "apiKey": "AIzaSyAG6jM0NodJIF_eS2s2KIK1dvjqFhNdEiI",
-  "authDomain": "rota-certa-lkbvr.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "824212803664"
+  "projectId": "uber-cash-360",
+  "appId": "1:621989417934:web:e41f17e3f202a0a256914a",
+  "storageBucket": "uber-cash-360.appspot.com",
+  "apiKey": "AIzaSyBlE9gAFJbCW_L4P_e3grnleAIyACp4Mhc",
+  "authDomain": "uber-cash-360.firebaseapp.com",
+  "messagingSenderId": "621989417934"
 };
 
 // Initialize Firebase
