@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { Paintbrush, Database, Bell, Eye, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun, Palette } from 'lucide-react';
 import type { Settings, TextColor, AppTheme } from '@/types/settings';
 import { cn } from '@/lib/utils';
+import { getTextColorValue } from '@/lib/color-map';
 
 
 const settingsSchema = z.object({
@@ -74,7 +75,18 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     defaultValues: initialData,
   });
 
-  const watchAllFields = watch();
+  const watchedFields = watch();
+  
+  const previewStyle = {
+      '--theme-primary': watchedFields.primaryColor,
+      '--theme-background': watchedFields.backgroundColor,
+      '--theme-foreground': getTextColorValue(watchedFields.textColor, watchedFields.theme).foreground,
+      '--theme-card-foreground': getTextColorValue(watchedFields.textColor, watchedFields.theme).cardForeground,
+      '--theme-muted-foreground': getTextColorValue(watchedFields.textColor, watchedFields.theme).mutedForeground,
+      '--theme-primary-foreground': getTextColorValue(watchedFields.textColor, watchedFields.theme).primaryForeground,
+      '--theme-accent': watchedFields.primaryColor,
+  } as React.CSSProperties;
+
 
   const onSubmit = async (data: Settings) => {
     setIsSubmitting(true);
@@ -97,13 +109,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     }
   };
   
-  const filteredBackgroundOptions = backgroundOptions.filter(opt => opt.theme === watchAllFields.theme);
-  
-  const previewStyle = {
-    '--theme-primary': watchAllFields.primaryColor,
-    '--theme-background': watchAllFields.backgroundColor,
-  } as React.CSSProperties;
-
+  const filteredBackgroundOptions = backgroundOptions.filter(opt => opt.theme === watchedFields.theme);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -161,10 +167,10 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                                          {textColors.map(color => (
                                             <SelectItem key={color.value} value={color.value}>
                                                 <div className="flex items-center gap-2">
-                                                    <div className={cn("w-4 h-4 rounded-full", {
+                                                    <div className={cn("w-4 h-4 rounded-full border", {
                                                         'bg-white': color.value === 'white',
                                                         'bg-gray-400': color.value === 'gray',
-                                                        'bg-purple-500': color.value === 'purple'
+                                                        'bg-purple-400': color.value === 'purple'
                                                     })} />
                                                     {color.label}
                                                 </div>
@@ -208,7 +214,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                         />
                     </div>
                      <div className="space-y-2">
-                        <Label>Cor de Fundo ({watchAllFields.theme === 'dark' ? 'Escuro' : 'Claro'})</Label>
+                        <Label>Cor de Fundo ({watchedFields.theme === 'dark' ? 'Escuro' : 'Claro'})</Label>
                          <Controller
                             name="backgroundColor"
                             control={control}
@@ -235,40 +241,24 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
         
         <div className="space-y-6">
             {/* Prévia do Visual */}
-            <Card style={previewStyle}>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline"><Eye className="h-6 w-6" style={{color: 'hsl(var(--theme-primary))'}} />Prévia do Visual</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 rounded-lg bg-card" style={{backgroundColor: `hsl(var(--theme-background, 224 25% 15%))`}}>
-                    <div className={cn("p-4 rounded-lg border", {
-                         'text-white': watchAllFields.textColor === 'white',
-                         'text-gray-300': watchAllFields.textColor === 'gray',
-                         'text-purple-400': watchAllFields.textColor === 'purple',
-                    })} 
-                    style={{
-                        backgroundColor: 'hsl(var(--theme-card, 224 25% 20%))',
-                        borderColor: 'hsl(var(--theme-border, 224 25% 25%))'
-                    }}
-                    >
-                        <h4 className="font-bold">Exemplo de Card</h4>
-                        <p className="text-sm">Este é um exemplo de como o texto aparecerá com as configurações atuais.</p>
-                        <Button size="sm" className="mt-2" style={{backgroundColor: `hsl(var(--theme-primary))`, color: `hsl(var(--theme-primary-foreground))`}}>Botão Principal</Button>
-                    </div>
-                     <div className={cn("p-4 rounded-lg", {
-                         'text-white': watchAllFields.textColor === 'white',
-                         'text-gray-300': watchAllFields.textColor === 'gray',
-                         'text-purple-400': watchAllFields.textColor === 'purple',
-                    })}
-                     style={{
-                        backgroundColor: `hsl(var(--theme-primary))`,
-                        color: `hsl(var(--theme-primary-foreground))`
-                    }}
-                    >
-                        <h4 className="font-bold">Elemento com Cor Primária</h4>
-                        <p className="text-sm ">Ajuste a cor para melhor legibilidade.</p>
-                    </div>
-                </CardContent>
-            </Card>
+            <div style={previewStyle} className={cn(watchedFields.theme)}>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 font-headline"><Eye className="h-6 w-6 text-primary" />Prévia do Visual</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 rounded-lg bg-card">
+                        <div className="p-4 rounded-lg border bg-card text-card-foreground">
+                            <h4 className="font-bold">Exemplo de Card</h4>
+                            <p className="text-sm text-muted-foreground">Este é um exemplo de como o texto aparecerá com as configurações atuais.</p>
+                            <Button size="sm" className="mt-2">Botão Principal</Button>
+                        </div>
+                        <div className="p-4 rounded-lg bg-primary text-primary-foreground">
+                            <h4 className="font-bold">Elemento com Cor Primária</h4>
+                            <p className="text-sm ">Ajuste a cor para melhor legibilidade.</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Backup */}
             <Card>
@@ -298,7 +288,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
             <Card>
                 <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline"><Bell className="h-6 w-6 text-primary" />Notificações e Padrões</CardTitle>
-                </CardHeader>
+                </Header>
                 <CardContent className="space-y-4">
                      <div className="flex items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">

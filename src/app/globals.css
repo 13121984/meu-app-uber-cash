@@ -63,12 +63,17 @@ body {
     --theme-card-foreground: 220 15% 95%;
     --theme-popover: 224 25% 15%;
     --theme-popover-foreground: 220 15% 95%;
+    --theme-primary: 250 80% 60%;
+    --theme-primary-foreground: 220 15% 95%;
     --theme-secondary: 224 25% 20%;
     --theme-secondary-foreground: 220 15% 95%;
     --theme-muted: 224 25% 20%;
     --theme-muted-foreground: 220 15% 65%;
+    --theme-accent: 250 80% 60%;
+    --theme-accent-foreground: 220 15% 95%;
     --theme-border: 224 25% 25%;
     --theme-input: 224 25% 25%;
+    --theme-ring: 250 80% 65%;
     
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;

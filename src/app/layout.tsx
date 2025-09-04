@@ -5,6 +5,7 @@ import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
+import { getTextColorValue } from '@/lib/color-map';
 
 export const metadata: Metadata = {
   title: 'Uber Cash',
@@ -17,11 +18,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getSettings();
+  const textColorValue = getTextColorValue(settings.textColor, settings.theme);
 
   const themeStyle = {
     '--theme-primary': settings.primaryColor,
     '--theme-background': settings.backgroundColor,
-    // Você pode adicionar mais variáveis aqui conforme necessário
+    '--theme-foreground': textColorValue.foreground,
+    '--theme-card-foreground': textColorValue.cardForeground,
+    '--theme-muted-foreground': textColorValue.mutedForeground,
+    '--theme-primary-foreground': textColorValue.primaryForeground,
+    '--theme-accent': settings.primaryColor, // Accent usa a mesma cor primária
   } as React.CSSProperties;
 
   return (
