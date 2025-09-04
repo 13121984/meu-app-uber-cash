@@ -5,7 +5,7 @@ import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
-import { getTextColorValue } from '@/lib/color-map';
+import { getTextColorValue, getThemeColorValues } from '@/lib/color-map';
 
 export const metadata: Metadata = {
   title: 'Uber Cash',
@@ -18,16 +18,43 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getSettings();
-  const textColorValue = getTextColorValue(settings.textColor, settings.theme);
+  const textColorValues = getTextColorValue(settings.textColor, settings.theme);
+  const themeColorValues = getThemeColorValues(settings.backgroundColor, settings.theme);
 
   const themeStyle = {
+    // Cores Base
+    '--theme-background': themeColorValues.background,
+    '--theme-foreground': textColorValues.foreground,
+    
+    // Cards
+    '--theme-card': themeColorValues.card,
+    '--theme-card-foreground': textColorValues.cardForeground,
+    
+    // Popovers
+    '--theme-popover': themeColorValues.popover,
+    '--theme-popover-foreground': textColorValues.popoverForeground,
+    
+    // Primária (Botões, links, etc)
     '--theme-primary': settings.primaryColor,
-    '--theme-background': settings.backgroundColor,
-    '--theme-foreground': textColorValue.foreground,
-    '--theme-card-foreground': textColorValue.cardForeground,
-    '--theme-muted-foreground': textColorValue.mutedForeground,
-    '--theme-primary-foreground': textColorValue.primaryForeground,
-    '--theme-accent': settings.primaryColor, // Accent usa a mesma cor primária
+    '--theme-primary-foreground': textColorValues.primaryForeground,
+    
+    // Secundária (fundos sutis)
+    '--theme-secondary': themeColorValues.secondary,
+    '--theme-secondary-foreground': textColorValues.secondaryForeground,
+    
+    // Muted (textos e elementos de baixa prioridade)
+    '--theme-muted': themeColorValues.muted,
+    '--theme-muted-foreground': textColorValues.mutedForeground,
+    
+    // Accent (cores de destaque, hover)
+    '--theme-accent': settings.primaryColor, 
+    '--theme-accent-foreground': textColorValues.accentForeground,
+
+    // Bordas e Inputs
+    '--theme-border': themeColorValues.border,
+    '--theme-input': themeColorValues.input,
+    '--theme-ring': settings.primaryColor,
+
   } as React.CSSProperties;
 
   return (
