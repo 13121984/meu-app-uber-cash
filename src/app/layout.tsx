@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils';
 import { SidebarProvider, Sidebar, SidebarTrigger } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 
-const APP_NAME = "Uber Cash";
-const APP_DEFAULT_TITLE = "Uber Cash";
-const APP_TITLE_TEMPLATE = "%s - Uber Cash";
+const APP_NAME = "Rota Certa";
+const APP_DEFAULT_TITLE = "Rota Certa";
+const APP_TITLE_TEMPLATE = "%s - Rota Certa";
 const APP_DESCRIPTION = "Seu app para gestão de ganhos como motorista de aplicativo.";
 
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#09090b",
 };
 
 
