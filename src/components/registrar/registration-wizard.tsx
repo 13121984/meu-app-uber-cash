@@ -11,11 +11,11 @@ import { Step3Fuel } from './step3-fuel';
 import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
-import { addOrUpdateWorkDay, findWorkDayByDate } from '@/services/work-day.service';
+import { addOrUpdateWorkDay } from '@/services/work-day.service';
 import { addMaintenance } from '@/services/maintenance.service';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
-import { parseISO, format } from 'date-fns';
+import { parseISO } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
@@ -85,7 +85,7 @@ const steps = [
 ];
 
 interface RegistrationWizardProps {
-    initialData?: Partial<WorkDay>;
+    initialData: Partial<WorkDay> | null;
     isEditing?: boolean;
     onSuccess?: () => void;
     registrationType: 'today' | 'other-day';
@@ -110,30 +110,18 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData));
+  const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData || undefined));
   
-   // Effect to load existing data for a selected date when registering 'other-day'
+   // Este useEffect agora SÓ atualiza o estado do formulário se os dados iniciais externos (props) mudarem.
+   // Ele não busca mais dados por conta própria.
    useEffect(() => {
-    // Don't run this for 'today' registrations or when editing from the start
-    if (registrationType === 'today' || isEditing) return;
-
-    const handler = setTimeout(async () => {
-      const dateStr = format(state.date, 'yyyy-MM-dd');
-      const existingDay = await findWorkDayByDate(dateStr);
-      
-      if (existingDay) {
-          dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
-          // If data exists, mark all steps as complete for full editing
-          setCompletedSteps([1,2,3,4]);
-      } else {
-          // If no data exists for the selected date, reset fields but keep the selected date
-          dispatch({ type: 'SET_STATE', payload: getInitialState({ date: state.date, id: registrationType }) });
-          setCompletedSteps([]);
-      }
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [state.date, isEditing, registrationType]);
+    dispatch({ type: 'SET_STATE', payload: getInitialState(propsInitialData || undefined) });
+    if (isEditing) {
+        setCompletedSteps([1,2,3,4]);
+    } else {
+        setCompletedSteps([]);
+    }
+   }, [propsInitialData, isEditing]);
 
 
   const handleNext = () => {
