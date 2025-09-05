@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,28 +24,35 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
   const searchParams = useSearchParams();
 
   // Initialize state with default values, not derived from searchParams directly
-  const [query, setQuery] = useState(searchParams.get('query') || '');
+  const [query, setQuery] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
 
   const [debouncedQuery] = useDebounce(query, 500);
 
   // This effect runs only on the client, after hydration
+  // It populates the filter state from the URL once.
   useEffect(() => {
     setIsClient(true);
-    const from = searchParams.get('from');
-    const to = searchParams.get('to');
-    if (from) {
+    const fromParam = searchParams.get('from');
+    const toParam = searchParams.get('to');
+    const queryParam = searchParams.get('query');
+
+    setQuery(queryParam || '');
+
+    if (fromParam) {
       try {
-        const fromDate = parseISO(from);
-        const toDate = to ? parseISO(to) : undefined;
+        const fromDate = parseISO(fromParam);
+        const toDate = toParam ? parseISO(toParam) : undefined;
         // Set the date range from URL params only on the client-side
         setDateRange({ from: fromDate, to: toDate });
       } catch (e) {
         // Invalid date in URL, do nothing
       }
+    } else {
+        setDateRange(undefined);
     }
-  }, [searchParams]);
+  }, []); // Empty dependency array ensures this runs only once on mount.
 
   const updateURL = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -73,12 +80,12 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
   }, [debouncedQuery, dateRange, pathname, router, searchParams]);
 
   // This effect will run whenever the debounced query or date range changes
+  // It only runs on the client after the initial state has been set.
   useEffect(() => {
-    // Only run the updateURL logic on the client
     if (isClient) {
       updateURL();
     }
-  }, [updateURL, isClient]);
+  }, [isClient, debouncedQuery, dateRange, updateURL]);
 
   const handleClearFilters = () => {
     setQuery('');
@@ -86,6 +93,12 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
   };
 
   const hasActiveFilters = !!(query || dateRange?.from);
+
+  // Don't render the component content until it's mounted on the client
+  // to avoid hydration mismatch with filters applied from URL
+  if (!isClient) {
+    return null; // or a loading skeleton
+  }
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-center">
