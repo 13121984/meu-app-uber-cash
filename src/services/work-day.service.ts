@@ -647,4 +647,3 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     rawWorkDays: filteredDays,
   };
 }
-

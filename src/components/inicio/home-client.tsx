@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { PlusCircle, BarChart, Wrench, Target, Settings, History, Calendar, Clock, BarChart3, LineChart } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { DailySummaryCard } from "./daily-summary-card";
+import type { PeriodData } from "../dashboard/dashboard-client";
 
 
 const mainActions = [
@@ -27,12 +29,16 @@ const ActionButton = ({ href, label, icon: Icon, bgColor }: typeof mainActions[0
     </Link>
 )
 
+interface HomeClientProps {
+    todayData: PeriodData;
+}
 
-export function HomeClient() {
+
+export function HomeClient({ todayData }: HomeClientProps) {
   return (
     <div className="space-y-8 animate-fade-in">
         <div className="space-y-2">
-            <h1 className="text-5xl font-bold font-headline text-primary">Uber Cash</h1>
+            <h1 className="text-5xl font-bold font-headline text-foreground">Uber Cash</h1>
             <p className="text-muted-foreground text-lg">Bem-vindo ao seu painel diário.</p>
         </div>
 
@@ -44,7 +50,21 @@ export function HomeClient() {
                 ))}
             </div>
         </div>
+
+        <div className="space-y-4">
+             <h2 className="text-2xl font-semibold font-headline">Resumo do Dia</h2>
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1">
+                    <DailySummaryCard data={todayData} />
+                </div>
+                <div className="lg:col-span-2">
+                    {/* Placeholder for future charts */}
+                    <Card className="h-full min-h-[400px] flex items-center justify-center">
+                        <p className="text-muted-foreground">Gráficos em breve...</p>
+                    </Card>
+                </div>
+             </div>
+        </div>
     </div>
   );
 }
-
