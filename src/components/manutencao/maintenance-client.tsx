@@ -140,7 +140,7 @@ export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceCl
                 </CardTitle>
                  <CardDescription>
                     Filtre e gerencie seus registros de manutenção.
-                </CardDescription>
+                 </CardDescription>
               </div>
                 <DialogTrigger asChild>
                     <Button>
