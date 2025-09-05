@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { format, isValid, parse, set } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ScrollArea } from '../ui/scroll-area';
 
 export type TimeEntry = {
     id: number;
@@ -96,7 +97,7 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
             payload: { ...data, hours: numValue },
         });
     }
-  }, [data.timeEntries, manualHours]);
+  }, [data.timeEntries, manualHours, dispatch, data]);
 
 
   const updateMainDate = (newDate: Date) => {
@@ -180,15 +181,19 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
         <div className="space-y-2">
           <Label>Horas Trabalhadas</Label>
           <div className="space-y-4 rounded-md border p-4">
-            {data.timeEntries.map(entry => (
-                <div key={entry.id} className="flex flex-col sm:flex-row items-center gap-2">
-                    <Input type="time" value={entry.start} onChange={e => handleTimeEntryChange(entry.id, 'start', e.target.value)} aria-label="Hora de início"/>
-                    <span className="text-muted-foreground">-</span>
-                    <Input type="time" value={entry.end} onChange={e => handleTimeEntryChange(entry.id, 'end', e.target.value)} aria-label="Hora de término"/>
-                    <span className="text-sm font-medium p-2 bg-muted rounded-md w-full sm:w-auto text-center">{getTurno(entry.start)}</span>
-                    <Button variant="ghost" size="icon" onClick={() => removeTimeEntry(entry.id)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+            <ScrollArea className="max-h-[250px] w-full pr-4">
+                <div className="space-y-4">
+                    {data.timeEntries.map(entry => (
+                        <div key={entry.id} className="flex flex-col sm:flex-row items-center gap-2">
+                            <Input type="time" value={entry.start} onChange={e => handleTimeEntryChange(entry.id, 'start', e.target.value)} aria-label="Hora de início"/>
+                            <span className="text-muted-foreground">-</span>
+                            <Input type="time" value={entry.end} onChange={e => handleTimeEntryChange(entry.id, 'end', e.target.value)} aria-label="Hora de término"/>
+                            <span className="text-sm font-medium p-2 bg-muted rounded-md w-full sm:w-auto text-center">{getTurno(entry.start)}</span>
+                            <Button variant="ghost" size="icon" onClick={() => removeTimeEntry(entry.id)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            </ScrollArea>
              <Button type="button" variant="outline" size="sm" onClick={addTimeEntry} className="w-full">
                 <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Período
             </Button>
@@ -206,3 +211,5 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
     </div>
   );
 }
+
+    
