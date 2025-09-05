@@ -13,7 +13,7 @@ import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { addOrUpdateWorkDay, findWorkDayByDate } from '@/services/work-day.service';
 import { addMaintenance } from '@/services/maintenance.service';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
 import { parseISO, format } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
@@ -49,7 +49,11 @@ const getInitialState = (initialData?: Partial<WorkDay>): State => {
     if(initialData?.date) {
         // Ensure date is a Date object, not a string
         date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
+    } else if (initialData?.id === 'today') {
+        // Special case for new 'today' registrations
+        date = new Date();
     }
+
 
     return {
         id: initialData?.id || undefined,
@@ -88,7 +92,7 @@ interface RegistrationWizardProps {
     initialData?: Partial<WorkDay>;
     isEditing?: boolean;
     onSuccess?: () => void;
-    registrationType?: 'today' | 'other-day';
+    registrationType: 'today' | 'other-day';
 }
 
 const cashRegisterSound = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAABoR2tGYWFFAAAAAPcAAAN3AAAAAAAAAFl+ZWW3s1sLdGAAAAAAAAAIjbQBAAAAAAEAAAIiUKgZn3oAAAGPBAEABAAgAAEABpVoaWdodG9uZQAAAAAAbHVrYXNhbG1lbnRpbmVsbG9nYW5kZXZAAAAAAP/7QMQAAAAAAAAAAAAAAAAAAAAAAARsYXZjNTguOTEuMTAwBICAgAgAgIAHAAACAET/wkAAASIgaJkAMgAABwAAAnQCkQhEAEQwBIDS8AAAAAAD/8A/wD4AAAAA//pAQHwAAAAEwADAnQAAAD/8A/wDwAAAAAABYhEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGolEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wD4AAAAAAIAAAAAAAAggAB/AAD//dAwAAMAAAN4AAANIAAD/9gYBAkAAjSRgYhL//dAwLAAKAAAN4AAANIAAD/9gYBAkAEDSRgYhL//dAwqQAnAAAN4AAANIAAD/9gYBAkAEzSRgYhL//dAwjQCPAAAN4AAANIAAD/9gYBAkAFDS.";
@@ -103,40 +107,37 @@ const playSuccessSound = () => {
 }
 
 
-export function RegistrationWizard({ initialData, isEditing = false, onSuccess, registrationType = 'other-day' }: RegistrationWizardProps) {
+export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType }: RegistrationWizardProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
+  const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData));
   
-   // This effect now ONLY runs if we are NOT in editing mode.
-   // It fetches data for a new day if the user changes the date.
+   // Effect to load existing data for the selected date
    useEffect(() => {
+    // Only fetch for new registrations, not when editing
     if (!isEditing) {
       const handler = setTimeout(async () => {
         const dateStr = format(state.date, 'yyyy-MM-dd');
-        const existingDay = await findWorkDayByDate(dateStr);
-        if (existingDay) {
-          dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
-        } else {
-          // Reset other fields if no data exists for the new date
-          dispatch({ type: 'SET_STATE', payload: getInitialState({ date: state.date }) });
+        // Fetch if the registration is for 'today' or 'other-day'
+        if (registrationType) {
+            const existingDay = await findWorkDayByDate(dateStr);
+            if (existingDay) {
+                dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
+                setCompletedSteps([1,2,3,4]); // Mark all steps as complete if data exists
+            } else {
+                // If no data, reset fields but keep the selected date
+                dispatch({ type: 'SET_STATE', payload: getInitialState({ date: state.date, id: registrationType }) });
+                setCompletedSteps([]);
+            }
         }
-      }, 500); // Debounce to avoid fetching on every date change keystroke
+      }, 300);
 
       return () => clearTimeout(handler);
     }
-  }, [state.date, isEditing]);
+  }, [state.date, isEditing, registrationType]);
 
-
-  const resetWizard = () => {
-    dispatch({ type: 'RESET_STATE' });
-    setCurrentStep(1);
-    setCompletedSteps([]);
-  };
 
   const handleNext = () => {
     if (!completedSteps.includes(currentStep)) {
@@ -176,7 +177,10 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     
     try {
       const { maintenance, ...workDayData } = state;
-      const result = await addOrUpdateWorkDay(workDayData as Omit<WorkDay, 'maintenance'>);
+      // Ensure the ID is not 'today' or 'other-day' when saving
+      const finalWorkDayData = { ...workDayData, id: (workDayData.id === 'today' || workDayData.id === 'other-day') ? undefined : workDayData.id };
+      
+      const result = await addOrUpdateWorkDay(finalWorkDayData as Omit<WorkDay, 'maintenance'>);
       
       if (!isEditing && result.success && maintenance.amount > 0 && maintenance.description) {
           await addMaintenance({
@@ -239,8 +243,6 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     }
   };
 
-  const isStep1Or2 = currentStep === 1 || currentStep === 2;
-  const isStep3 = currentStep === 3;
   const isLastStep = currentStep === steps.length;
   const livePreviewData = state;
 
@@ -313,5 +315,3 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     </div>
   );
 }
-
-    
