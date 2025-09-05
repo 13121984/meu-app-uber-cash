@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { isWithinInterval, startOfDay, endOfDay, parseISO } from "date-fns";
+import { isWithinInterval, startOfDay, endOfDay, parseISO, format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
 interface GerenciamentoClientProps {
@@ -37,6 +37,7 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
     let dateRange: DateRange | undefined;
     if (from) {
       try {
+        // Always parse dates from params as UTC
         const fromDate = parseISO(from);
         const toDate = to ? parseISO(to) : undefined;
         dateRange = { from: fromDate, to: toDate };
@@ -47,20 +48,23 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
     }
 
     return allWorkDays
+      .map(day => ({
+        ...day,
+        // Ensure date is a Date object for consistent comparison
+        date: typeof day.date === 'string' ? parseISO(day.date) : day.date
+      }))
       .filter(day => {
-        const dayDate = new Date(day.date);
-        
         if (dateRange?.from) {
           const fromDate = startOfDay(dateRange.from);
           let toDate = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
           
-          if (!isWithinInterval(dayDate, { start: fromDate, end: toDate })) {
+          if (!isWithinInterval(day.date, { start: fromDate, end: toDate })) {
             return false;
           }
         }
         
         if (query) {
-          const dateString = dayDate.toLocaleDateString('pt-BR');
+          const dateString = format(day.date, 'dd/MM/yyyy');
           const searchString = JSON.stringify(day).toLowerCase();
           const queryLower = query.toLowerCase();
 
