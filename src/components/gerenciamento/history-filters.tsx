@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,26 +23,32 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Initialize state with default values, not derived from searchParams directly
   const [query, setQuery] = useState(searchParams.get('query') || '');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [isClient, setIsClient] = useState(false);
+
   const [debouncedQuery] = useDebounce(query, 500);
 
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+  // This effect runs only on the client, after hydration
+  useEffect(() => {
+    setIsClient(true);
     const from = searchParams.get('from');
     const to = searchParams.get('to');
     if (from) {
       try {
         const fromDate = parseISO(from);
         const toDate = to ? parseISO(to) : undefined;
-        return { from: fromDate, to: toDate };
+        // Set the date range from URL params only on the client-side
+        setDateRange({ from: fromDate, to: toDate });
       } catch (e) {
-        return undefined;
+        // Invalid date in URL, do nothing
       }
     }
-    return undefined;
-  });
+  }, [searchParams]);
 
   const updateURL = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     if (debouncedQuery) {
       params.set('query', debouncedQuery);
     } else {
@@ -54,6 +60,7 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
       if (dateRange.to) {
         params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
       } else {
+        // Ensure 'to' is removed if it's not in the range
         params.delete('to');
       }
     } else {
@@ -61,13 +68,17 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
       params.delete('to');
     }
     
-    // router.replace é mais leve que router.push, não adiciona ao histórico
+    // Use router.replace to avoid adding to history
     router.replace(`${pathname}?${params.toString()}`);
   }, [debouncedQuery, dateRange, pathname, router, searchParams]);
 
+  // This effect will run whenever the debounced query or date range changes
   useEffect(() => {
-    updateURL();
-  }, [updateURL]);
+    // Only run the updateURL logic on the client
+    if (isClient) {
+      updateURL();
+    }
+  }, [updateURL, isClient]);
 
   const handleClearFilters = () => {
     setQuery('');
