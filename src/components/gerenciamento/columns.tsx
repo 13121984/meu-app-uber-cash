@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { format } from "date-fns"
+import { ptBR } from 'date-fns/locale';
 import { cn } from "@/lib/utils"
 
 
@@ -83,7 +84,7 @@ export const useWorkDayColumns = () => {
       },
       cell: ({ row }) => {
         const date = row.getValue("date") as Date;
-        return <div className="font-medium whitespace-nowrap">{format(date, 'dd/MM/yy')}</div>
+        return <div className="font-medium whitespace-nowrap">{format(date, "dd/MM/yy (EEE)", { locale: ptBR })}</div>
       },
       sortingFn: 'datetime',
     },

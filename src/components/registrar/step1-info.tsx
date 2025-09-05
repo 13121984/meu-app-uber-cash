@@ -54,7 +54,7 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                {data.date ? format(data.date, 'PPP', { locale: ptBR }) : <span>Escolha uma data</span>}
+                {data.date ? format(data.date, "EEEE, dd 'de' MMMM", { locale: ptBR }) : <span>Escolha uma data</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">

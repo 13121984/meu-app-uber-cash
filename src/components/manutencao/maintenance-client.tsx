@@ -166,7 +166,7 @@ export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceCl
                             <div className="flex-1 space-y-1">
                                 <p className="font-bold">{record.description}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    {format(new Date(record.date), "dd/MM/yyyy", { locale: ptBR })}
+                                    {format(new Date(record.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
                                 </p>
                             </div>
                             <div className="flex items-center gap-4">
