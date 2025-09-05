@@ -176,7 +176,7 @@
   },
   {
     "id": "17570416129880.5058040835707598",
-    "date": "2024-12-18T00:00:00.000Z",
+    "date": "2024-12-18T03:00:00.000Z",
     "km": 147.8,
     "hours": 10,
     "earnings": [
@@ -185,6 +185,12 @@
         "category": "99 Pop",
         "trips": 21,
         "amount": 284.54
+      },
+      {
+        "id": 1757043399464,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 7
       }
     ],
     "fuelEntries": [
@@ -194,11 +200,7 @@
         "paid": 40.26,
         "price": 5.09
       }
-    ],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    }
+    ]
   },
   {
     "id": "17570416129880.12371981477254868",
@@ -213,30 +215,57 @@
         "amount": 167.41
       }
     ],
-    "fuelEntries": [],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    }
+    "fuelEntries": [
+      {
+        "id": 1757043171622,
+        "type": "GNV",
+        "paid": 43.2,
+        "price": 4.99
+      }
+    ]
   },
   {
-    "id": "17570416129870.037924107799283124",
-    "date": "2024-12-15T00:00:00.000Z",
+    "date": "2024-12-15T03:00:00.000Z",
     "km": 0,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757041612987.9841,
+        "id": 1757043120671,
         "category": "Ganhos Extras",
         "trips": 0,
         "amount": 61
       }
     ],
     "fuelEntries": [],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    }
+    "id": "1757043129951"
+  },
+  {
+    "id": "17570416129870.037924107799283124",
+    "date": "2024-12-15T00:00:00.000Z",
+    "km": 112,
+    "hours": 8,
+    "earnings": [
+      {
+        "id": 1757041612987.9841,
+        "category": "99 Pop",
+        "trips": 25,
+        "amount": 274.6
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757043011819,
+        "type": "GNV",
+        "paid": 71.73,
+        "price": 4.99
+      },
+      {
+        "id": 1757043032644,
+        "type": "Etanol",
+        "paid": 30,
+        "price": 5.09
+      }
+    ]
   },
   {
     "id": "17570416129870.9139639521287444",
@@ -283,6 +312,18 @@
         "category": "Particular",
         "trips": 2,
         "amount": 22
+      },
+      {
+        "id": 1757042815538,
+        "category": "Uber Cash",
+        "trips": 8,
+        "amount": 83.18
+      },
+      {
+        "id": 1757042864829,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 7
       }
     ],
     "fuelEntries": []
@@ -298,6 +339,12 @@
         "category": "99 Pop",
         "trips": 12,
         "amount": 88.79
+      },
+      {
+        "id": 1757042702317,
+        "category": "Uber Cash",
+        "trips": 3,
+        "amount": 61.63
       }
     ],
     "fuelEntries": [

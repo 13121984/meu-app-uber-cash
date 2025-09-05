@@ -21,6 +21,8 @@ interface Step1InfoProps {
 }
 
 export function Step1Info({ data, dispatch }: Step1InfoProps) {
+  // O estado do input agora reflete o que o usuário está digitando
+  // e é inicializado com a data formatada do estado principal.
   const [dateInputValue, setDateInputValue] = useState(format(data.date, "dd/MM/yyyy"));
 
   const handleChange = (field: 'km' | 'hours', value: string) => {
@@ -31,39 +33,41 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
     });
   };
 
+  // Esta função é chamada quando uma data é selecionada no calendário.
   const handleDateSelect = (date?: Date) => {
     if (date) {
       dispatch({
         type: 'SET_BASIC_INFO',
         payload: { ...data, date },
       });
+      // Atualiza o campo de input para refletir a seleção do calendário.
       setDateInputValue(format(date, "dd/MM/yyyy"));
     }
   };
 
+  // Esta função agora lida com a digitação livre no campo de data.
   const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-    // Basic auto-formatting for slashes
-    if (value.length === 2 && !value.includes('/')) {
-      value += '/';
-    }
-    if (value.length === 5 && value.match(/^\d{2}\/\d{2}$/)) {
-      value += '/';
-    }
-    setDateInputValue(value);
+    const value = e.target.value;
+    setDateInputValue(value); // Permite que o usuário digite livremente.
 
-    // Try to parse the date if it looks complete
-    if (value.length === 10) {
+    // Tenta validar e atualizar o estado principal apenas quando a data parece completa.
+    if (value.length >= 8) { // Ex: 1/1/2023 ou 01/01/2023
       try {
+        // Tenta fazer o parse da data. 'dd/MM/yyyy' é flexível o suficiente.
         const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
-        if (!isNaN(parsedDate.getTime())) {
-          handleDateSelect(parsedDate);
+        // Verifica se o parse resultou em uma data válida.
+        if (!isNaN(parsedDate.getTime()) && parsedDate.getFullYear() > 1900) {
+           dispatch({
+              type: 'SET_BASIC_INFO',
+              payload: { ...data, date: parsedDate },
+           });
         }
       } catch (error) {
-        // Ignore parsing errors while typing
+        // Ignora erros de parsing enquanto o usuário ainda está digitando.
       }
     }
   };
+
 
   return (
     <div className="space-y-6">
