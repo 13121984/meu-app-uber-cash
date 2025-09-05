@@ -107,13 +107,13 @@ async function writeWorkDays(data: WorkDay[]): Promise<void> {
 }
 
 
-export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
+export async function addWorkDay(data: Omit<WorkDay, 'id' | 'date'> & { date: Date | string }) {
   try {
     const allWorkDays = await readWorkDays();
     const newWorkDay: WorkDay = {
         ...data,
         id: Date.now().toString(),
-        date: parseISO(data.date.toISOString()),
+        date: typeof data.date === 'string' ? parseISO(data.date) : data.date,
     };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(allWorkDays);
@@ -207,14 +207,14 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     }
 }
 
-export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id'>): Promise<{ success: boolean; error?: string }> {
+export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id' | 'date'> & { date: Date | string }): Promise<{ success: boolean; error?: string }> {
   try {
     const allWorkDays = await readWorkDays();
     const index = allWorkDays.findIndex(r => r.id === id);
     if (index === -1) {
         return { success: false, error: "Registro não encontrado." };
     }
-    allWorkDays[index] = { ...data, id, date: parseISO(new Date(data.date).toISOString()) };
+    allWorkDays[index] = { ...data, id, date: typeof data.date === 'string' ? parseISO(data.date) : data.date };
     await writeWorkDays(allWorkDays);
     
     return { success: true };

@@ -15,6 +15,7 @@ import { addWorkDay } from '@/services/work-day.service';
 import { addMaintenance } from '@/services/maintenance.service';
 import { updateWorkDayAction } from '../gerenciamento/actions';
 import { ScrollArea } from '../ui/scroll-area';
+import { parseISO } from 'date-fns';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -41,7 +42,7 @@ type Action =
 const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>): State => {
     return {
         id: initialData?.id || undefined,
-        date: initialData?.date ? new Date(initialData.date) : new Date(),
+        date: initialData?.date ? (typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date) : new Date(),
         km: initialData?.km || 0,
         hours: initialData?.hours || 0,
         earnings: initialData?.earnings || [],
@@ -143,7 +144,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
       if (isEditing && state.id) {
         result = await updateWorkDayAction(workDayData as any);
       } else {
-        result = await addWorkDay(workDayData as Omit<State, 'id' | 'maintenance'>);
+        result = await addWorkDay(workDayData as any);
         if (result.success && maintenance.amount > 0 && maintenance.description) {
             await addMaintenance({
                 date: state.date,
