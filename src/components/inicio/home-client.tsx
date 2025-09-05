@@ -2,14 +2,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, BarChart, Wrench, Target, Settings, History, Loader2, PieChartIcon } from "lucide-react";
+import { PlusCircle, BarChart, Wrench, Target, Settings, History } from "lucide-react";
 import Link from "next/link";
-import { PeriodData } from "../dashboard/dashboard-client";
-import { GoalProgress } from "../dashboard/goal-progress";
-import dynamic from "next/dynamic";
-import { ShiftPerformance } from "./shift-performance";
-
 
 const mainActions = [
   { href: "/registrar/today", label: "Registrar Dia Atual", icon: PlusCircle },
@@ -23,16 +17,8 @@ const secondaryActions = [
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
-const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
-const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
-interface HomeClientProps {
-    todayData: PeriodData;
-}
-
-export function HomeClient({ todayData }: HomeClientProps) {
-  const progress = todayData.meta.target > 0 ? (todayData.totalLucro / todayData.meta.target) * 100 : 0;
-
+export function HomeClient() {
   return (
     <div className="space-y-8">
       <div className="text-center w-full">
@@ -67,72 +53,6 @@ export function HomeClient({ todayData }: HomeClientProps) {
              </Link>
         ))}
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Performance de Hoje</CardTitle>
-          <CardDescription>Resumo dos seus ganhos e metas para o dia atual.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            {todayData.diasTrabalhados > 0 ? (
-                <div className="space-y-8">
-                    <GoalProgress 
-                        progress={progress}
-                        target={todayData.meta.target}
-                        current={todayData.totalLucro}
-                    />
-                    <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        <div>
-                            <p className="font-bold text-lg text-green-500">{todayData.totalLucro.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            <p className="text-sm text-muted-foreground">Lucro Líquido</p>
-                        </div>
-                        <div>
-                            <p className="font-bold text-lg">{todayData.totalGanho.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            <p className="text-sm text-muted-foreground">Ganhos Brutos</p>
-                        </div>
-                        <div>
-                            <p className="font-bold text-lg">{todayData.totalViagens}</p>
-                            <p className="text-sm text-muted-foreground">Viagens</p>
-                        </div>
-                         <div>
-                            <p className="font-bold text-lg">{todayData.totalKm} km</p>
-                            <p className="text-sm text-muted-foreground">KM Rodados</p>
-                        </div>
-                    </div>
-                    
-                    <ShiftPerformance performance={todayData.performanceByShift} />
-
-                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-8">
-                        <Card>
-                          <CardHeader>
-                              <CardTitle className="font-headline text-lg flex items-center gap-2">
-                                  <PieChartIcon className="w-5 h-5 text-primary" />
-                                  Composição dos Ganhos
-                              </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                              <EarningsPieChart data={todayData.profitComposition} />
-                          </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <EarningsBarChart data={todayData.earningsByCategory} />
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                </div>
-            ): (
-                 <div className="text-center py-10 text-muted-foreground">
-                    <p className="font-semibold">Nenhum registro encontrado para hoje.</p>
-                    <p className="text-sm mt-2">Clique em "Registrar Dia Atual" para começar.</p>
-                </div>
-            )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
