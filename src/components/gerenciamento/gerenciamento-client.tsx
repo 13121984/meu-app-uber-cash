@@ -13,8 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { isWithinInterval, startOfDay, endOfDay, parseISO, format } from "date-fns";
-import type { DateRange } from "react-day-picker";
+import { parseISO, format } from "date-fns";
 
 interface GerenciamentoClientProps {
   allWorkDays: WorkDay[];
@@ -34,31 +33,19 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
   const to = searchParams.get('to');
   
   const filteredData = useMemo(() => {
-    let dateRange: DateRange | undefined;
-    if (from) {
-      try {
-        // Always parse dates from params as UTC
-        const fromDate = parseISO(from);
-        const toDate = to ? parseISO(to) : undefined;
-        dateRange = { from: fromDate, to: toDate };
-      } catch (e) {
-        console.error("Invalid date format in URL params", e);
-        dateRange = undefined;
-      }
-    }
-
     return allWorkDays
       .map(day => ({
         ...day,
-        // Ensure date is a Date object for consistent comparison
         date: typeof day.date === 'string' ? parseISO(day.date) : day.date
       }))
       .filter(day => {
-        if (dateRange?.from) {
-          const fromDate = startOfDay(dateRange.from);
-          let toDate = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
-          
-          if (!isWithinInterval(day.date, { start: fromDate, end: toDate })) {
+        const dayDateString = format(day.date, 'yyyy-MM-dd');
+        
+        if (from) {
+          const fromDateString = from;
+          const toDateString = to || from;
+
+          if (dayDateString < fromDateString || dayDateString > toDateString) {
             return false;
           }
         }
@@ -84,7 +71,6 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
         const result = await deleteFilteredWorkDaysAction(filteredData);
         if (result.success) {
             toast({ title: "Sucesso!", description: `${filteredData.length} registros apagados.` });
-            // Força o Next.js a recarregar a página e seus Server Components
             startTransition(() => {
               router.refresh();
             });
