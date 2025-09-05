@@ -108,7 +108,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
         payload: { ...state, date: new Date() } as { date: Date; km: number; hours: number; }
       });
     }
-  }, []); // Run only once on mount.
+  }, []); // Empty dependency array ensures this runs only once on mount.
 
 
   useEffect(() => {
