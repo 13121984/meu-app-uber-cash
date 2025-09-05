@@ -83,8 +83,7 @@ export const useWorkDayColumns = () => {
         )
       },
       cell: ({ row }) => {
-        // Use parseISO to correctly handle the UTC string from the server.
-        const date = parseISO(row.getValue("date") as string);
+        const date = row.getValue("date") as Date;
         return <div className="font-medium whitespace-nowrap">{format(date, "dd/MM/yy (EEE)", { locale: ptBR })}</div>
       },
       sortingFn: 'datetime',
