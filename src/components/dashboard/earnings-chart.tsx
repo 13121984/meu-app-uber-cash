@@ -13,20 +13,6 @@ interface EarningsPieChartProps {
   }[];
 }
 
-const chartConfig = {
-  lucro: {
-    label: "Lucro Líquido",
-    color: "hsl(var(--chart-1))",
-  },
-  combustivel: {
-    label: "Combustível",
-    color: "hsl(var(--chart-5))",
-  },
-  manutencao: {
-    label: "Manutenção",
-    color: "hsl(var(--chart-3))",
-  }
-} satisfies ChartConfig
 
 export function EarningsPieChart({ data }: EarningsPieChartProps) {
   const totalGanho = data[0]?.totalGanho || 0;

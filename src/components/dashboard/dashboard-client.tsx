@@ -89,7 +89,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   return (
     <div className="space-y-8">
       <div className="text-center w-full">
-        <h1 className="text-4xl font-bold font-headline">Painel de Controle</h1>
+        <h1 className="text-4xl font-bold font-headline">Painel de Performance</h1>
         <p className="text-muted-foreground">Resumo de {periodMap[period]}</p>
       </div>
       

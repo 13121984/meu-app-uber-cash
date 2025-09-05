@@ -10,6 +10,7 @@ import { getMaintenanceRecords, Maintenance } from './maintenance.service';
 import fs from 'fs/promises';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
+import type { TimeEntry } from '@/components/registrar/step1-info';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id:number; type: string; paid: number; price: number };
@@ -19,6 +20,7 @@ export interface WorkDay {
   date: Date;
   km: number;
   hours: number;
+  timeEntries?: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
   maintenance: {
@@ -412,6 +414,25 @@ export async function getDashboardData() {
     return { hoje, semana, mes };
 }
 
+export async function getTodayData() {
+    const allWorkDays = await getWorkDays();
+    const allMaintenance = await getMaintenanceRecords();
+    const goals = await getGoals();
+    const now = new Date();
+    const todayDateString = now.toDateString();
+
+    const todayWorkDays = allWorkDays.filter(day => {
+        const dayDate = new Date(day.date);
+        return dayDate.toDateString() === todayDateString;
+    });
+     const todayMaintenance = allMaintenance.filter(m => {
+      const mDate = new Date(m.date);
+      return mDate.toDateString() === todayDateString;
+    });
+
+    return calculatePeriodData(todayWorkDays, "diária", goals, todayMaintenance);
+}
+
 export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilterValues): Promise<ReportData> {
   const now = new Date();
   let filteredDays: WorkDay[] = [];
@@ -506,22 +527,6 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     dailyDataMap.set(dateKey, currentDaily);
   });
   
-  const profitEvolution: ProfitEvolutionData[] = [];
-  const dailyTrips: DailyTripsData[] = [];
-  if (interval) {
-      eachDayOfInterval(interval).forEach(date => {
-          const dateKey = format(date, 'yyyy-MM-dd');
-          const data = dailyDataMap.get(dateKey);
-          profitEvolution.push({ date: format(date, 'dd/MM'), lucro: (data?.lucro ?? 0) });
-          dailyTrips.push({ date: format(date, 'dd/MM'), viagens: data?.viagens ?? 0 });
-      })
-  } else if (dailyDataMap.size > 0) {
-      [...dailyDataMap.entries()].sort().forEach(([dateKey, data]) => {
-          profitEvolution.push({ date: format(parseISO(dateKey), 'dd/MM'), lucro: data.lucro });
-          dailyTrips.push({ date: format(parseISO(dateKey), 'dd/MM'), viagens: data.viagens });
-      })
-  }
-  
   const totalLucro = totalGanho - totalCombustivel - totalManutencaoFinal;
   const totalGastos = totalCombustivel + totalManutencaoFinal;
   const ganhoPorHora = totalHoras > 0 ? totalGanho / totalHoras : 0;
@@ -534,7 +539,31 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   const profitComposition = [
     { name: 'Lucro Líquido', value: totalLucro, fill: 'hsl(var(--chart-1))', totalGanho },
     { name: 'Combustível', value: totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho },
-  ].filter(item => item.value !== 0);
+    { name: 'Manutenção', value: totalManutencaoFinal, fill: 'hsl(var(--chart-3))', totalGanho },
+  ].filter(item => item.value > 0);
+  
+  const profitEvolution: ProfitEvolutionData[] = [];
+  const dailyTrips: DailyTripsData[] = [];
+  if (interval) {
+      const daysInInterval = eachDayOfInterval(interval);
+      // Limita o número de pontos no gráfico para evitar sobrecarga visual
+      const step = Math.ceil(daysInInterval.length / 31);
+      for (let i = 0; i < daysInInterval.length; i += step) {
+          const date = daysInInterval[i];
+          const dateKey = format(date, 'yyyy-MM-dd');
+          const data = dailyDataMap.get(dateKey);
+          profitEvolution.push({ date: format(date, 'dd/MM'), lucro: (data?.lucro ?? 0) });
+          dailyTrips.push({ date: format(date, 'dd/MM'), viagens: data?.viagens ?? 0 });
+      }
+  } else if (dailyDataMap.size > 0) {
+      const sortedEntries = [...dailyDataMap.entries()].sort();
+       const step = Math.ceil(sortedEntries.length / 31);
+       for (let i = 0; i < sortedEntries.length; i+= step) {
+           const [dateKey, data] = sortedEntries[i];
+           profitEvolution.push({ date: format(parseISO(dateKey), 'dd/MM'), lucro: data.lucro });
+           dailyTrips.push({ date: format(parseISO(dateKey), 'dd/MM'), viagens: data.viagens });
+       }
+  }
   
   return {
     totalGanho,

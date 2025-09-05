@@ -1,13 +1,15 @@
+
 "use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, PlusCircle, BarChart, Settings, Wrench, History, Target, Car } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, BarChart, Settings, Wrench, History, Target, Car } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const menuItems = [
-  { href: "/", label: "Painel", icon: LayoutDashboard },
+  { href: "/", label: "Início", icon: Home },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
   { href: "/registrar", label: "Registrar", icon: PlusCircle },
   { href: "/gerenciamento", label: "Gerenciar", icon: History },
   { href: "/metas", label: "Metas", icon: Target },
@@ -30,7 +32,7 @@ export function TopBar() {
             </div>
             <nav className="flex items-center gap-1">
                 {menuItems.map((item) => {
-                    const isActive = pathname === item.href
+                    const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
                     return (
                     <Tooltip key={item.href}>
                         <TooltipTrigger asChild>

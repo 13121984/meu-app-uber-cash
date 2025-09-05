@@ -1,13 +1,7 @@
-import { RegistrationWizard } from '@/components/registrar/registration-wizard';
+
+import { redirect } from 'next/navigation';
 
 export default function RegistrarPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold font-headline">Registrar Ganhos</h1>
-        <p className="text-muted-foreground">Preencha as informações do seu dia para acompanhar seu progresso.</p>
-      </div>
-      <RegistrationWizard />
-    </div>
-  );
+  // Redireciona para o registro do dia atual por padrão
+  redirect('/registrar/today');
 }

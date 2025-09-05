@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer } from 'react';
 import { Check, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import { addMaintenance } from '@/services/maintenance.service';
 import { updateWorkDayAction } from '../gerenciamento/actions';
 import { ScrollArea } from '../ui/scroll-area';
 import { parseISO } from 'date-fns';
+import type { TimeEntry } from './step1-info';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -25,6 +26,7 @@ export type State = {
   date: Date;
   km: number;
   hours: number;
+  timeEntries: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
   maintenance: { description: string; amount: number };
@@ -32,7 +34,7 @@ export type State = {
 
 type Action =
   | { type: 'SET_STATE'; payload: State }
-  | { type: 'SET_BASIC_INFO'; payload: { date: Date; km: number; hours: number } }
+  | { type: 'SET_BASIC_INFO'; payload: { date: Date; km: number; hours: number; timeEntries: TimeEntry[] } }
   | { type: 'SET_EARNINGS'; payload: Earning[] }
   | { type: 'SET_FUEL'; payload: FuelEntry[] }
   | { type: 'SET_MAINTENANCE'; payload: { description: string; amount: number } }
@@ -45,6 +47,7 @@ const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Dat
         date: initialData?.date ? (typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date) : new Date(),
         km: initialData?.km || 0,
         hours: initialData?.hours || 0,
+        timeEntries: initialData?.timeEntries || [],
         earnings: initialData?.earnings || [],
         fuelEntries: initialData?.fuelEntries || [],
         maintenance: initialData?.maintenance || { description: '', amount: 0 },
@@ -75,6 +78,7 @@ interface RegistrationWizardProps {
     initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>;
     isEditing?: boolean;
     onSuccess?: () => void;
+    registrationType: 'today' | 'other-day';
 }
 
 const cashRegisterSound = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAABoR2tGYWFFAAAAAPcAAAN3AAAAAAAAAFl+ZWW3s1sLdGAAAAAAAAAIjbQBAAAAAAEAAAIiUKgZn3oAAAGPBAEABAAgAAEABpVoaWdodG9uZQAAAAAAbHVrYXNhbG1lbnRpbmVsbG9nYW5kZXZAAAAAAP/7QMQAAAAAAAAAAAAAAAAAAAAAAARsYXZjNTguOTEuMTAwBICAgAgAgIAHAAACAET/wkAAASIgaJkAMgAABwAAAnQCkQhEAEQwBIDS8AAAAAAD/8A/wD4AAAAA//pAQHwAAAAEwADAnQAAAD/8A/wDwAAAAAABYhEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGolEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAHYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wD4AAAAAAIAAAAAAAAggAB/AAD//dAwAAMAAAN4AAANIAAD/9gYBAkAAjSRgYhL//dAwLAAKAAAN4AAANIAAD/9gYBAkAEDSRgYhL//dAwqQAnAAAN4AAANIAAD/9gYBAkAEzSRgYhL//dAwjQCPAAAN4AAANIAAD/9gYBAkAFDS.";
@@ -89,11 +93,16 @@ const playSuccessSound = () => {
 }
 
 
-export function RegistrationWizard({ initialData, isEditing = false, onSuccess }: RegistrationWizardProps) {
+export function RegistrationWizard({ initialData, isEditing = false, onSuccess, registrationType }: RegistrationWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
+  
+  const initialState = getInitialState(initialData);
+  if (registrationType === 'today') {
+    initialState.date = new Date();
+  }
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const resetWizard = () => {
     dispatch({ type: 'RESET_STATE' });
@@ -196,7 +205,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
 
   const renderStep = () => {
     switch (currentStep) {
-      case 1: return <Step1Info data={state} dispatch={dispatch} />;
+      case 1: return <Step1Info data={state} dispatch={dispatch} registrationType={registrationType} />;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
       case 3: return <Step3Fuel data={state} dispatch={dispatch} />;
       case 4: return <Step4Extras data={state} dispatch={dispatch} isDisabled={isEditing} />;
