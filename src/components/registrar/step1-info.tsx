@@ -31,6 +31,20 @@ const timeToMinutes = (time: string): number => {
     return hours * 60 + minutes;
 };
 
+// This function now only calculates and dispatches the new hours total
+const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<Action>) => {
+    let totalMinutes = 0;
+    timeEntries.forEach(entry => {
+        const startMinutes = timeToMinutes(entry.start);
+        const endMinutes = timeToMinutes(entry.end);
+        if(endMinutes > startMinutes) {
+            totalMinutes += endMinutes - startMinutes;
+        }
+    });
+    const totalHours = totalMinutes / 60;
+    dispatch({ type: 'UPDATE_FIELD', payload: { field: 'hours', value: totalHours }});
+};
+
 export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1InfoProps) {
   
   const handleFieldChange = (field: keyof State, value: any) => {
@@ -38,17 +52,10 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
   };
   
   const handleTimeEntriesChange = useCallback((newTimeEntries: TimeEntry[]) => {
-      let totalMinutes = 0;
-      newTimeEntries.forEach(entry => {
-          const startMinutes = timeToMinutes(entry.start);
-          const endMinutes = timeToMinutes(entry.end);
-          if(endMinutes > startMinutes) {
-              totalMinutes += endMinutes - startMinutes;
-          }
-      });
-      const totalHours = totalMinutes / 60;
+      // First, update the timeEntries array in the state
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'timeEntries', value: newTimeEntries }});
-      dispatch({ type: 'UPDATE_FIELD', payload: { field: 'hours', value: totalHours } });
+      // Then, calculate the new total hours based on the new array
+      calculateAndDispatchHours(newTimeEntries, dispatch);
   }, [dispatch]);
 
   const addTimeEntry = () => {
@@ -76,11 +83,18 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
         <div>
           <Label htmlFor="date">Data do Trabalho</Label>
            <div className="flex items-center gap-2">
-            <Input id="date" type="text" placeholder="DD/MM/AAAA" value={dateString} disabled readOnly />
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" disabled={isDateDisabled}>
-                  <CalendarIcon className="h-4 w-4 text-primary" />
+                <Button 
+                    variant="outline" 
+                    className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !data.date && "text-muted-foreground"
+                    )}
+                    disabled={isDateDisabled}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                  {dateString ? dateString : <span>Selecione uma data</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -104,8 +118,8 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
             <Input 
                 id="hours" 
                 type="text" 
-                placeholder="Ex: 8,5" 
-                value={data.hours ? data.hours.toString().replace('.', ',') : ''} 
+                placeholder="Ex: 8.5" 
+                value={data.hours ? data.hours.toFixed(2).replace('.', ',') : ''} 
                 onChange={(e) => handleFieldChange('hours', parseFloat(e.target.value.replace(',', '.')) || 0)} 
                 className="pl-10" 
                 disabled={hasTimeEntries}
@@ -145,4 +159,4 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
   );
 }
 
-
+    

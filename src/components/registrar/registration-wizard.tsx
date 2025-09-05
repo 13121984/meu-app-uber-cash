@@ -27,7 +27,7 @@ export type TimeEntry = {
     end: string;
 };
 
-type State = {
+export type State = {
   id?: string;
   date: Date;
   km: number;
@@ -47,18 +47,19 @@ type Action =
 const getInitialState = (initialData?: Partial<WorkDay>): State => {
     let date = new Date();
     if(initialData?.date) {
+        // Ensure date is a Date object, not a string
         date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
     }
 
     return {
         id: initialData?.id || undefined,
-        date,
+        date: date,
         km: initialData?.km || 0,
         hours: initialData?.hours || 0,
         timeEntries: (initialData as any)?.timeEntries || [],
-        earnings: initialData?.earnings || [],
-        fuelEntries: initialData?.fuelEntries || [],
-        maintenance: initialData?.maintenance || { description: '', amount: 0 },
+        earnings: initialData?.earnings?.map(e => ({...e})) || [],
+        fuelEntries: initialData?.fuelEntries?.map(f => ({...f})) || [],
+        maintenance: initialData?.maintenance ? {...initialData.maintenance} : { description: '', amount: 0 },
     };
 };
 
@@ -111,25 +112,24 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
 
   const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
   
-  useEffect(() => {
-    // When not editing, check for an existing workday for the selected date
-    if (!isEditing && state.date) {
-        const fetchExistingData = async () => {
-            const dateStr = format(state.date, 'yyyy-MM-dd');
-            const existingDay = await findWorkDayByDate(dateStr);
-            if (existingDay) {
-                // If a day is found, merge its data into the current state
-                dispatch({ 
-                    type: 'SET_STATE', 
-                    payload: getInitialState(existingDay)
-                });
-            }
-        };
-        fetchExistingData();
-    } else if (isEditing && initialData) {
-        dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) })
+   // This effect now ONLY runs if we are NOT in editing mode.
+   // It fetches data for a new day if the user changes the date.
+   useEffect(() => {
+    if (!isEditing) {
+      const handler = setTimeout(async () => {
+        const dateStr = format(state.date, 'yyyy-MM-dd');
+        const existingDay = await findWorkDayByDate(dateStr);
+        if (existingDay) {
+          dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
+        } else {
+          // Reset other fields if no data exists for the new date
+          dispatch({ type: 'SET_STATE', payload: getInitialState({ date: state.date }) });
+        }
+      }, 500); // Debounce to avoid fetching on every date change keystroke
+
+      return () => clearTimeout(handler);
     }
-  }, [state.date, isEditing, initialData]);
+  }, [state.date, isEditing]);
 
 
   const resetWizard = () => {
@@ -314,4 +314,4 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
   );
 }
 
-
+    
