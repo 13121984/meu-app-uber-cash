@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Car } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"
 import { Confetti } from "./confetti";
@@ -14,25 +14,27 @@ type GoalProgressProps = {
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const { toast } = useToast();
-  const [hasShownToast, setHasShownToast] = useState(false);
+  // Usando useRef para rastrear o estado do toast sem causar re-renderizações
+  const hasShownToast = useRef(false);
 
-  // isComplete is determined directly from props, ensuring server/client consistency.
+  // isComplete é determinado diretamente das props, garantindo consistência servidor/cliente.
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
 
   useEffect(() => {
-    // This effect handles the client-side toast notification.
-    if (isComplete && !hasShownToast) {
-      setHasShownToast(true);
+    // Este efeito lida com a notificação do lado do cliente.
+    // O uso de `useRef` evita que a atualização do estado cause um erro de hidratação.
+    if (isComplete && !hasShownToast.current) {
+      hasShownToast.current = true;
       toast({
         title: "Meta Atingida!",
         description: "Você conseguiu! Continue acelerando para o próximo objetivo!",
       });
-    } else if (!isComplete && hasShownToast) {
-      // Reset if the goal is no longer met
-      setHasShownToast(false);
+    } else if (!isComplete && hasShownToast.current) {
+      // Redefine se a meta não for mais cumprida (por exemplo, se o filtro de período mudar)
+      hasShownToast.current = false;
     }
-  }, [isComplete, hasShownToast, toast]);
+  }, [isComplete, toast]);
   
   const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const remaining = target - current;
