@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { isWithinInterval, startOfDay, endOfDay, parseISO } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
 interface GerenciamentoClientProps {
@@ -36,16 +36,19 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
   const filteredData = useMemo(() => {
     let dateRange: DateRange | undefined;
     if (from) {
-      // Use UTC dates to avoid timezone issues
-      const fromDate = new Date(from + 'T00:00:00Z');
-      const toDate = to ? new Date(to + 'T00:00:00Z') : undefined;
-      dateRange = { from: fromDate, to: toDate };
+      try {
+        const fromDate = parseISO(from);
+        const toDate = to ? parseISO(to) : undefined;
+        dateRange = { from: fromDate, to: toDate };
+      } catch (e) {
+        console.error("Invalid date format in URL params", e);
+        dateRange = undefined;
+      }
     }
 
     return allWorkDays
       .filter(day => {
-        // Use UTC for comparison
-        const dayDate = new Date(day.date.toISOString().split('T')[0] + 'T00:00:00Z');
+        const dayDate = new Date(day.date);
         
         if (dateRange?.from) {
           const fromDate = startOfDay(dateRange.from);
@@ -57,7 +60,7 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
         }
         
         if (query) {
-          const dateString = new Date(day.date).toLocaleDateString('pt-BR');
+          const dateString = dayDate.toLocaleDateString('pt-BR');
           const searchString = JSON.stringify(day).toLowerCase();
           const queryLower = query.toLowerCase();
 
