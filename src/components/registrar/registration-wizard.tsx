@@ -122,7 +122,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
            // Reset to a clean state for the new date, keeping the selected date
           const cleanState = getInitialState();
           cleanState.date = state.date;
-          dispatch({ type: 'SET_STATE', cleanState });
+          dispatch({ type: 'SET_STATE', payload: cleanState });
           setCompletedSteps([]);
         }
       };
@@ -329,5 +329,3 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     </div>
   );
 }
-
-    

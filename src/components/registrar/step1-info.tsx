@@ -197,4 +197,3 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
   );
 }
 
-    
