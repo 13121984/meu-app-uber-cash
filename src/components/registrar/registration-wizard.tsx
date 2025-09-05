@@ -208,6 +208,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
     }
   };
 
+  const isStep3 = currentStep === 3;
   const isLastStep = currentStep === steps.length;
   // Desabilita o preview da manutenção quando estiver no modo de edição
   const livePreviewData = isEditing ? { ...state, maintenance: { amount: 0, description: '' } } : state;
@@ -250,20 +251,30 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
         </Card>
         
         {/* Navigation */}
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
-            Voltar
-          </Button>
-          {!isLastStep ? (
-            <Button onClick={handleNext} disabled={isSubmitting}>
-              Próximo
+        <div className="flex justify-between items-center">
+            <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
+                Voltar
             </Button>
-          ) : (
-             <Button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {isSubmitting ? 'Salvando...' : (isEditing ? 'Salvar Alterações' : 'Salvar Registro')}
-            </Button>
-          )}
+
+            <div className="flex gap-2">
+                {isStep3 && !isEditing && (
+                    <Button onClick={handleSubmit} variant="secondary" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Pular e Salvar
+                    </Button>
+                )}
+
+                {!isLastStep ? (
+                    <Button onClick={isStep3 ? handleNext : handleNext} disabled={isSubmitting}>
+                        {isStep3 ? 'Adicionar Despesa e Continuar' : 'Próximo'}
+                    </Button>
+                ) : (
+                    <Button onClick={handleSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        {isEditing ? 'Salvar Alterações' : 'Concluir e Salvar'}
+                    </Button>
+                )}
+            </div>
         </div>
       </div>
 
