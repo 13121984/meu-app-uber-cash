@@ -69,12 +69,13 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
   const stats = [
     { title: "Lucro Líquido", value: data.totalLucro, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
+    { title: "Ganhos Brutos", value: data.totalGanho, icon: DollarSign, isCurrency: true, iconBg: "bg-primary/20", iconColor: "text-primary" },
     { title: "Viagens", value: data.totalViagens, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
     { title: "Dias Trabalhados", value: data.diasTrabalhados, icon: CalendarDays, iconBg: "bg-sky-500/20", iconColor: "text-sky-400" },
     { title: "KM Rodados", value: data.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
     { title: "Horas", value: data.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
-    { title: "Ganho/Hora", value: data.ganhoPorHora, icon: TrendingUp, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
-    { title: "Ganho/KM", value: data.ganhoPorKm, icon: TrendingUp, isCurrency: true, iconBg: "bg-blue-500/20", iconColor: "text-blue-400", precision: 2 },
+    { title: "Ganho/Hora", value: data.ganhoPorHora, isCurrency: true, icon: TrendingUp, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
+    { title: "Ganho/KM", value: data.ganhoPorKm, isCurrency: true, icon: TrendingUp, iconBg: "bg-blue-500/20", iconColor: "text-blue-400", precision: 2 },
     { title: "Eficiência Média", value: data.eficiencia, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
     { title: "Combustível", value: data.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
   ]
@@ -92,7 +93,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         <p className="text-muted-foreground">Resumo de {periodMap[period]}</p>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {stats.map((stat) => (
             <StatsCard key={stat.title} {...stat} />
           ))}
