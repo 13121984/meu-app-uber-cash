@@ -1,16 +1,17 @@
 
 "use client";
 
-import { Dispatch } from 'react';
+import { Dispatch, useCallback } from 'react';
 import { DollarSign, Wrench } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { State } from './registration-wizard';
 
-type Action = { type: 'SET_MAINTENANCE'; payload: { description: string; amount: number } };
-type State = { maintenance: { description: string; amount: number } };
+type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
+
 
 interface Step4ExtrasProps {
   data: State;
@@ -19,11 +20,14 @@ interface Step4ExtrasProps {
 }
 
 export function Step4Extras({ data, dispatch, isDisabled = false }: Step4ExtrasProps) {
+  
+  const handleMaintenanceChange = useCallback((newMaintenance: State['maintenance']) => {
+      dispatch({ type: 'UPDATE_FIELD', payload: { field: 'maintenance', value: newMaintenance } });
+  }, [dispatch]);
+  
   const handleChange = (field: 'description' | 'amount', value: string | number) => {
-    dispatch({
-      type: 'SET_MAINTENANCE',
-      payload: { ...data.maintenance, [field]: value },
-    });
+    const newValue = field === 'amount' ? (parseFloat(value.toString()) || 0) : value;
+    handleMaintenanceChange({ ...data.maintenance, [field]: newValue });
   };
 
   if (isDisabled) {
@@ -68,7 +72,7 @@ export function Step4Extras({ data, dispatch, isDisabled = false }: Step4ExtrasP
               type="number"
               placeholder="Ex: 120.00"
               value={data.maintenance.amount || ''}
-              onChange={(e) => handleChange('amount', parseFloat(e.target.value) || 0)}
+              onChange={(e) => handleChange('amount', e.target.value)}
               className="pl-10"
               disabled={isDisabled}
             />
@@ -78,3 +82,5 @@ export function Step4Extras({ data, dispatch, isDisabled = false }: Step4ExtrasP
     </div>
   );
 }
+
+    

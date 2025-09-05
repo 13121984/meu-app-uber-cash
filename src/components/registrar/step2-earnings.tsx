@@ -1,17 +1,16 @@
 
 "use client";
 
-import { Dispatch } from 'react';
+import { Dispatch, useCallback } from 'react';
 import { PlusCircle, Trash2, Car, DollarSign, CircleDollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Earning } from './registration-wizard';
+import type { Earning, State } from './registration-wizard';
 
-type Action = { type: 'SET_EARNINGS'; payload: Earning[] };
-type State = { earnings: Earning[] };
+type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
 
 interface Step2EarningsProps {
   data: State;
@@ -21,28 +20,29 @@ interface Step2EarningsProps {
 const categories = ['Uber Cash', '99 Pop', 'Particular', 'Ganhos Extras'];
 
 export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
+  
+  const handleEarningsChange = useCallback((newEarnings: Earning[]) => {
+      dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: newEarnings } });
+  }, [dispatch]);
+
   const handleAddEarning = () => {
     const newEarning: Earning = { id: Date.now(), category: '', trips: 0, amount: 0 };
-    dispatch({ type: 'SET_EARNINGS', payload: [...data.earnings, newEarning] });
+    handleEarningsChange([...data.earnings, newEarning]);
   };
 
   const handleRemoveEarning = (id: number) => {
-    dispatch({ type: 'SET_EARNINGS', payload: data.earnings.filter((e) => e.id !== id) });
+    handleEarningsChange(data.earnings.filter((e) => e.id !== id));
   };
 
   const handleEarningChange = (id: number, field: keyof Omit<Earning, 'id'>, value: string | number) => {
     const updatedEarnings = data.earnings.map((e) => {
       if (e.id === id) {
-        // For trips and amount, ensure the value is a number
-        if (field === 'trips' || field === 'amount') {
-          const numValue = typeof value === 'string' ? parseFloat(value) : value;
-          return { ...e, [field]: isNaN(numValue) ? 0 : numValue };
-        }
-        return { ...e, [field]: value };
+        const newValue = (field === 'trips' || field === 'amount') ? (parseFloat(value.toString()) || 0) : value;
+        return { ...e, [field]: newValue };
       }
       return e;
     });
-    dispatch({ type: 'SET_EARNINGS', payload: updatedEarnings });
+    handleEarningsChange(updatedEarnings);
   };
 
   return (
@@ -125,3 +125,5 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
     </div>
   );
 }
+
+    

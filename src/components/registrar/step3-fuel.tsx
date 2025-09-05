@@ -1,17 +1,17 @@
 
 "use client";
 
-import { Dispatch } from 'react';
+import { Dispatch, useCallback } from 'react';
 import { PlusCircle, Trash2, Fuel, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import type { FuelEntry } from './registration-wizard';
+import type { FuelEntry, State } from './registration-wizard';
 
-type Action = { type: 'SET_FUEL'; payload: FuelEntry[] };
-type State = { fuelEntries: FuelEntry[] };
+type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
+
 
 interface Step3FuelProps {
   data: State;
@@ -21,23 +21,29 @@ interface Step3FuelProps {
 const fuelTypes = ['Etanol', 'Gasolina Aditivada', 'GNV'];
 
 export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
+
+  const handleFuelEntriesChange = useCallback((newEntries: FuelEntry[]) => {
+      dispatch({ type: 'UPDATE_FIELD', payload: { field: 'fuelEntries', value: newEntries } });
+  }, [dispatch]);
+
   const handleAddFuelEntry = () => {
     const newEntry: FuelEntry = { id: Date.now(), type: '', paid: 0, price: 0 };
-    dispatch({ type: 'SET_FUEL', payload: [...data.fuelEntries, newEntry] });
+    handleFuelEntriesChange([...data.fuelEntries, newEntry]);
   };
 
   const handleRemoveFuelEntry = (id: number) => {
-    dispatch({ type: 'SET_FUEL', payload: data.fuelEntries.filter((f) => f.id !== id) });
+    handleFuelEntriesChange(data.fuelEntries.filter((f) => f.id !== id));
   };
 
   const handleFuelChange = (id: number, field: keyof Omit<FuelEntry, 'id'>, value: string | number) => {
     const updatedEntries = data.fuelEntries.map((f) => {
       if (f.id === id) {
-        return { ...f, [field]: value };
+        const newValue = (field === 'paid' || field === 'price') ? (parseFloat(value.toString()) || 0) : value;
+        return { ...f, [field]: newValue };
       }
       return f;
     });
-    dispatch({ type: 'SET_FUEL', payload: updatedEntries });
+    handleFuelEntriesChange(updatedEntries);
   };
 
   return (
@@ -89,7 +95,7 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                           type="number"
                           placeholder="Ex: 50.00"
                           value={entry.paid || ''}
-                          onChange={(e) => handleFuelChange(entry.id, 'paid', parseFloat(e.target.value) || 0)}
+                          onChange={(e) => handleFuelChange(entry.id, 'paid', e.target.value)}
                           className="pl-10"
                         />
                       </div>
@@ -104,7 +110,7 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                             type="number"
                             placeholder="Ex: 5.50"
                             value={entry.price || ''}
-                            onChange={(e) => handleFuelChange(entry.id, 'price', parseFloat(e.target.value) || 0)}
+                            onChange={(e) => handleFuelChange(entry.id, 'price', e.target.value)}
                             className="pl-10"
                             />
                         </div>
@@ -132,3 +138,5 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
     </div>
   );
 }
+
+    

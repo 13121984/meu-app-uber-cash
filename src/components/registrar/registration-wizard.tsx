@@ -15,7 +15,7 @@ import { addOrUpdateWorkDay, getWorkDayByDate } from '@/services/work-day.servic
 import { addMaintenance } from '@/services/maintenance.service';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
-import { parseISO, startOfDay } from 'date-fns';
+import { parseISO } from 'date-fns';
 import type { TimeEntry } from './step1-info';
 import type { WorkDay } from '@/services/work-day.service';
 
@@ -35,10 +35,7 @@ export type State = {
 
 type Action =
   | { type: 'SET_STATE'; payload: State }
-  | { type: 'SET_BASIC_INFO'; payload: { date: Date; km: number; hours: number; timeEntries: TimeEntry[] } }
-  | { type: 'SET_EARNINGS'; payload: Earning[] }
-  | { type: 'SET_FUEL'; payload: FuelEntry[] }
-  | { type: 'SET_MAINTENANCE'; payload: { description: string; amount: number } }
+  | { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } }
   | { type: 'RESET_STATE' };
 
 
@@ -59,13 +56,14 @@ const getInitialState = (initialData?: Partial<WorkDay>): State => {
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'SET_STATE': return action.payload;
-    case 'SET_BASIC_INFO': return { ...state, ...action.payload };
-    case 'SET_EARNINGS': return { ...state, earnings: action.payload };
-    case 'SET_FUEL': return { ...state, fuelEntries: action.payload };
-    case 'SET_MAINTENANCE': return { ...state, maintenance: action.payload };
-    case 'RESET_STATE': return getInitialState();
-    default: return state;
+    case 'SET_STATE': 
+        return action.payload;
+    case 'UPDATE_FIELD': 
+        return { ...state, [action.payload.field]: action.payload.value };
+    case 'RESET_STATE': 
+        return getInitialState();
+    default: 
+        return state;
   }
 }
 
@@ -101,33 +99,35 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const initialState = getInitialState(initialData);
-  if (registrationType === 'today' && !isEditing) {
-    initialState.date = new Date();
-  }
+  const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
 
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  // Effect to load existing data for the selected date
+  // This effect ensures the wizard's state is updated if the initialData prop changes
+  // (e.g., when closing and reopening the edit dialog for a different day).
   useEffect(() => {
-    // Only run when creating a new entry, not when editing an existing one from the management page.
-    if (!isEditing) {
-      const loadDataForDate = async () => {
-        const existingDay = await getWorkDayByDate(state.date);
-        if (existingDay) {
-          dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
-          // Mark all steps as complete since we are loading a full day's data
-          setCompletedSteps([1, 2, 3, 4]);
-        } else {
-           // Reset to a clean state for the new date, keeping the selected date
-          const cleanState = getInitialState();
-          cleanState.date = state.date;
-          dispatch({ type: 'SET_STATE', payload: cleanState });
-          setCompletedSteps([]);
-        }
-      };
-      loadDataForDate();
-    }
+    dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) });
+    setCompletedSteps(isEditing ? [1, 2, 3, 4] : []);
+    setCurrentStep(1);
+  }, [initialData, isEditing]);
+
+
+  // This effect specifically handles loading data for a NEW registration when the date changes.
+  // It's separate to avoid conflicting with the editing logic.
+  useEffect(() => {
+    if (isEditing) return;
+
+    const loadDataForDate = async () => {
+      const existingDay = await getWorkDayByDate(state.date);
+      if (existingDay) {
+        dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
+        setCompletedSteps([1, 2, 3, 4]); // Mark all steps as complete
+      } else {
+        // Reset only the data fields, keeping the selected date
+        const cleanState = getInitialState();
+        dispatch({ type: 'SET_STATE', payload: { ...cleanState, date: state.date } });
+        setCompletedSteps([]);
+      }
+    };
+    loadDataForDate();
   }, [state.date, isEditing]);
 
 
@@ -177,8 +177,6 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
       const { maintenance, ...workDayData } = state;
       const result = await addOrUpdateWorkDay(workDayData as Omit<WorkDay, 'maintenance'>);
       
-      // Handle maintenance as a separate record, but only if it's a new entry (not an edit)
-      // and has a value and description.
       if (!isEditing && result.success && maintenance.amount > 0 && maintenance.description) {
           await addMaintenance({
               date: state.date,
@@ -205,9 +203,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
         if (onSuccess) {
             onSuccess();
         } else {
-            // After successful submission, refresh the parent page's data
             router.refresh();
-            // If not closing a dialog, just reset the form for another entry
             resetWizard();
         }
 
@@ -245,7 +241,6 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
   const isStep1Or2 = currentStep === 1 || currentStep === 2;
   const isStep3 = currentStep === 3;
   const isLastStep = currentStep === steps.length;
-  // Desabilita o preview da manutenção quando estiver no modo de edição
   const livePreviewData = isEditing ? { ...state, maintenance: { amount: 0, description: '' } } : state;
 
   return (
@@ -329,3 +324,5 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     </div>
   );
 }
+
+    
