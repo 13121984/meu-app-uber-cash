@@ -243,7 +243,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
 
         {/* Step Content */}
         <Card className="flex-1 flex flex-col">
-           <ScrollArea className="h-[50vh]">
+           <ScrollArea className="h-[50vh] overflow-y-auto">
               <CardContent className="p-4 sm:p-6">
                 {renderStep()}
               </CardContent>
