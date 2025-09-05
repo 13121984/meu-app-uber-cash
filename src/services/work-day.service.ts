@@ -240,25 +240,46 @@ export async function deleteWorkDay(id: string): Promise<{ success: boolean; err
   }
 }
 
-export async function deleteWorkDays(idsToDelete: string[]): Promise<{ success: boolean; error?: string }> {
+export async function deleteWorkDaysByFilter(filters: { query?: string, from?: string, to?: string }): Promise<{ success: boolean; error?: string, count?: number }> {
     try {
-        let allWorkDays = await readWorkDays();
+        const allWorkDays = await readWorkDays();
         const initialLength = allWorkDays.length;
-        const idsSet = new Set(idsToDelete);
-        allWorkDays = allWorkDays.filter(day => !idsSet.has(day.id));
+
+        const workDaysToKeep = allWorkDays.filter(day => {
+            const dayDateString = format(day.date, 'yyyy-MM-dd');
+            
+            // Check date filter
+            if (filters.from) {
+                const fromDateString = filters.from;
+                const toDateString = filters.to || filters.from;
+                if (dayDateString < fromDateString || dayDateString > toDateString) {
+                    return true; // Keep this day, it's outside the date range to be deleted
+                }
+            }
+            
+            // Check query filter
+            if (filters.query) {
+                const dateString = format(day.date, 'dd/MM/yyyy');
+                const searchString = JSON.stringify(day).toLowerCase();
+                const queryLower = filters.query.toLowerCase();
+                if (!(dateString.includes(queryLower) || searchString.includes(queryLower))) {
+                   return true; // Keep this day, it doesn't match the query to be deleted
+                }
+            }
+
+            // If it matches all filters, it should be deleted, so we return false
+            return false;
+        });
+
+        const deletedCount = initialLength - workDaysToKeep.length;
         
-        if (allWorkDays.length === initialLength) {
-             return { success: true }; // No records were found to delete, which is not an error.
-        }
-        
-        await writeWorkDays(allWorkDays);
-        return { success: true };
+        await writeWorkDays(workDaysToKeep);
+        return { success: true, count: deletedCount };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registros em massa.";
         return { success: false, error: errorMessage };
     }
 }
-
 
 export async function deleteAllWorkDays(): Promise<{ success: boolean; error?: string }> {
   try {

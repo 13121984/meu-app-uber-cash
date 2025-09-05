@@ -2,8 +2,10 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
-import { deleteWorkDay, deleteWorkDays, updateWorkDay } from "@/services/work-day.service";
+import { deleteWorkDay, deleteWorkDaysByFilter, getWorkDays } from "@/services/work-day.service";
 import type { WorkDay } from "@/services/work-day.service";
+import { z } from 'zod';
+import { parseISO, format } from 'date-fns';
 
 export async function updateWorkDayAction(workDay: WorkDay) {
     const result = await updateWorkDay(workDay.id, workDay);
@@ -23,9 +25,18 @@ export async function deleteWorkDayAction(workDayId: string) {
     return result;
 }
 
-export async function deleteFilteredWorkDaysAction(filteredWorkDays: WorkDay[]) {
-    const idsToDelete = filteredWorkDays.map(day => day.id);
-    const result = await deleteWorkDays(idsToDelete);
+const FilterSchema = z.object({
+  query: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
+
+export type ActiveFilters = z.infer<typeof FilterSchema>;
+
+// Ação otimizada que recebe os filtros em vez dos dados
+export async function deleteFilteredWorkDaysAction(filters: ActiveFilters) {
+    const validatedFilters = FilterSchema.parse(filters);
+    const result = await deleteWorkDaysByFilter(validatedFilters);
     if (result.success) {
         revalidatePath("/gerenciamento");
         revalidatePath("/");

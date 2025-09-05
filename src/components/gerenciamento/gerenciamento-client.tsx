@@ -1,25 +1,25 @@
 
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useWorkDayColumns } from "./columns";
 import { DataTable } from "./data-table";
 import type { WorkDay } from "@/services/work-day.service";
 import { HistoryFilters } from "./history-filters";
 import { Button } from "../ui/button";
 import { Loader2, Trash2 } from "lucide-react";
-import { deleteFilteredWorkDaysAction } from "./actions";
+import { deleteFilteredWorkDaysAction, ActiveFilters } from "./actions";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { parseISO, format } from "date-fns";
 
 interface GerenciamentoClientProps {
-  allWorkDays: WorkDay[];
+  // O componente agora recebe apenas os dados já filtrados pelo servidor.
+  filteredWorkDays: WorkDay[];
 }
 
-export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
+export function GerenciamentoClient({ filteredWorkDays }: GerenciamentoClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { columns, Dialogs, setEditingWorkDay } = useWorkDayColumns();
@@ -28,49 +28,23 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const query = searchParams.get('query') || '';
-  const from = searchParams.get('from');
-  const to = searchParams.get('to');
-  
-  const filteredData = useMemo(() => {
-    return allWorkDays
-      .map(day => ({
-        ...day,
-        date: typeof day.date === 'string' ? parseISO(day.date) : day.date
-      }))
-      .filter(day => {
-        const dayDateString = format(day.date, 'yyyy-MM-dd');
-        
-        if (from) {
-          const fromDateString = from;
-          const toDateString = to || from;
-
-          if (dayDateString < fromDateString || dayDateString > toDateString) {
-            return false;
-          }
-        }
-        
-        if (query) {
-          const dateString = format(day.date, 'dd/MM/yyyy');
-          const searchString = JSON.stringify(day).toLowerCase();
-          const queryLower = query.toLowerCase();
-
-          return dateString.includes(queryLower) || searchString.includes(queryLower);
-        }
-
-        return true;
-      })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [allWorkDays, query, from, to]);
-
   const hasFilters = searchParams.has('query') || searchParams.has('from');
 
   const handleDeleteFiltered = async () => {
     setIsDeletingFiltered(true);
+    
+    // Constrói o objeto de filtros a partir da URL
+    const activeFilters: ActiveFilters = {
+      query: searchParams.get('query') || undefined,
+      from: searchParams.get('from') || undefined,
+      to: searchParams.get('to') || undefined,
+    };
+    
     try {
-        const result = await deleteFilteredWorkDaysAction(filteredData);
+        // Envia apenas os filtros para a server action
+        const result = await deleteFilteredWorkDaysAction(activeFilters);
         if (result.success) {
-            toast({ title: "Sucesso!", description: `${filteredData.length} registros apagados.` });
+            toast({ title: "Sucesso!", description: `${result.count || 0} registros apagados.` });
             startTransition(() => {
               router.refresh();
             });
@@ -96,7 +70,7 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
         </CardHeader>
         <CardContent>
           <HistoryFilters isPending={isPending} />
-          {hasFilters && filteredData.length > 0 && (
+          {hasFilters && filteredWorkDays.length > 0 && (
             <div className="flex justify-end pt-4">
               <Button
                 variant="destructive"
@@ -104,14 +78,14 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
                 disabled={isDeletingFiltered || isPending}
               >
                 {isDeletingFiltered ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                Apagar {filteredData.length} {filteredData.length === 1 ? 'Registro Filtrado' : 'Registros Filtrados'}
+                Apagar {filteredWorkDays.length} {filteredWorkDays.length === 1 ? 'Registro Filtrado' : 'Registros Filtrados'}
               </Button>
             </div>
           )}
           <div className="mt-4">
             <DataTable 
               columns={columns} 
-              data={filteredData}
+              data={filteredWorkDays}
               onRowClick={(row) => setEditingWorkDay(row.original)} 
             />
           </div>
@@ -125,7 +99,7 @@ export function GerenciamentoClient({ allWorkDays }: GerenciamentoClientProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso irá apagar permanentemente os <b>{filteredData.length}</b> registros de trabalho que correspondem aos filtros atuais.
+              Esta ação não pode ser desfeita. Isso irá apagar permanentemente os <b>{filteredWorkDays.length}</b> registros de trabalho que correspondem aos filtros atuais.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
