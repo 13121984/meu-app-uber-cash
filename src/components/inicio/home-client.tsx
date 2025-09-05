@@ -3,10 +3,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, BarChart, Wrench, Target, Settings, History } from "lucide-react";
+import { PlusCircle, BarChart, Wrench, Target, Settings, History, Loader2, PieChartIcon } from "lucide-react";
 import Link from "next/link";
 import { PeriodData } from "../dashboard/dashboard-client";
 import { GoalProgress } from "../dashboard/goal-progress";
+import dynamic from "next/dynamic";
+import { ShiftPerformance } from "./shift-performance";
+
 
 const mainActions = [
   { href: "/registrar/today", label: "Registrar Dia Atual", icon: PlusCircle },
@@ -19,6 +22,9 @@ const secondaryActions = [
   { href: "/metas", label: "Planejamento", icon: Target },
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ];
+
+const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
 interface HomeClientProps {
     todayData: PeriodData;
@@ -69,7 +75,7 @@ export function HomeClient({ todayData }: HomeClientProps) {
         </CardHeader>
         <CardContent>
             {todayData.diasTrabalhados > 0 ? (
-                <>
+                <div className="space-y-8">
                     <GoalProgress 
                         progress={progress}
                         target={todayData.meta.target}
@@ -93,7 +99,32 @@ export function HomeClient({ todayData }: HomeClientProps) {
                             <p className="text-sm text-muted-foreground">KM Rodados</p>
                         </div>
                     </div>
-                </>
+                    
+                    <ShiftPerformance performance={todayData.performanceByShift} />
+
+                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-8">
+                        <Card>
+                          <CardHeader>
+                              <CardTitle className="font-headline text-lg flex items-center gap-2">
+                                  <PieChartIcon className="w-5 h-5 text-primary" />
+                                  Composição dos Ganhos
+                              </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                              <EarningsPieChart data={todayData.profitComposition} />
+                          </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <EarningsBarChart data={todayData.earningsByCategory} />
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                </div>
             ): (
                  <div className="text-center py-10 text-muted-foreground">
                     <p className="font-semibold">Nenhum registro encontrado para hoje.</p>
@@ -102,7 +133,6 @@ export function HomeClient({ todayData }: HomeClientProps) {
             )}
         </CardContent>
       </Card>
-
     </div>
   );
 }
