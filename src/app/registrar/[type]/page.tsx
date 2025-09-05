@@ -13,15 +13,24 @@ export default async function RegistrarPage({ params }: { params: { type: string
 
   const isToday = registrationType === 'today';
   let initialData = null;
+  let isEditing = false;
 
-  // For both 'today' and 'other-day', we check if a record already exists
-  // to decide if we are editing or creating a new one.
-  const dateStr = format(new Date(), 'yyyy-MM-dd');
-  const existingDay = await findWorkDayByDate(dateStr);
-
-  if (existingDay) {
-      initialData = existingDay;
+  // For 'today', we check if a record already exists to decide if we are editing or creating.
+  if (isToday) {
+    const dateStr = format(new Date(), 'yyyy-MM-dd');
+    const existingDay = await findWorkDayByDate(dateStr);
+    if (existingDay) {
+        initialData = existingDay;
+        isEditing = true;
+    }
   }
+
+  // For 'other-day', we always start with a blank slate.
+  // The wizard component will handle the date selection internally.
+  if (!initialData) {
+      initialData = { id: registrationType };
+  }
+
 
   return (
     <div className="space-y-6">
@@ -33,9 +42,8 @@ export default async function RegistrarPage({ params }: { params: { type: string
       </div>
       <RegistrationWizard 
         registrationType={registrationType} 
-        // Pass existing day data to start in edit mode, or a placeholder for a new registration
-        initialData={existingDay ?? { id: registrationType }}
-        isEditing={!!existingDay}
+        initialData={initialData}
+        isEditing={isEditing}
       />
     </div>
   );

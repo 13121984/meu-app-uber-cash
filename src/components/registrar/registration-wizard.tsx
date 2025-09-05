@@ -49,8 +49,8 @@ const getInitialState = (initialData?: Partial<WorkDay>): State => {
     if(initialData?.date) {
         // Ensure date is a Date object, not a string
         date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
-    } else if (initialData?.id === 'today') {
-        // Special case for new 'today' registrations
+    } else if (initialData?.id === 'today' || initialData?.id === 'other-day') {
+        // Special case for new 'today' or 'other-day' registrations
         date = new Date();
     }
 
@@ -109,33 +109,34 @@ const playSuccessSound = () => {
 
 export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType }: RegistrationWizardProps) {
   const router = useRouter();
+  const isNewTodayRegistration = registrationType === 'today' && !isEditing;
+  
+  // Start at step 1. If it's not a new "today" registration, show all steps.
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData));
   
-   // Effect to load existing data for the selected date
+   // Effect to load existing data for a selected date when registering 'other-day' or 'today' (if not editing)
    useEffect(() => {
-    // Only fetch for new registrations, not when editing
-    if (!isEditing) {
-      const handler = setTimeout(async () => {
-        const dateStr = format(state.date, 'yyyy-MM-dd');
-        // Fetch if the registration is for 'today' or 'other-day'
-        if (registrationType) {
-            const existingDay = await findWorkDayByDate(dateStr);
-            if (existingDay) {
-                dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
-                setCompletedSteps([1,2,3,4]); // Mark all steps as complete if data exists
-            } else {
-                // If no data, reset fields but keep the selected date
-                dispatch({ type: 'SET_STATE', payload: getInitialState({ date: state.date, id: registrationType }) });
-                setCompletedSteps([]);
-            }
-        }
-      }, 300);
+    if (isEditing) return; // Don't run this if we are already in edit mode from the start
 
-      return () => clearTimeout(handler);
-    }
+    const handler = setTimeout(async () => {
+      const dateStr = format(state.date, 'yyyy-MM-dd');
+      const existingDay = await findWorkDayByDate(dateStr);
+      
+      if (existingDay) {
+          dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
+          // If data exists, mark all steps as complete for full editing
+          setCompletedSteps([1,2,3,4]);
+      } else {
+          // If no data exists for the selected date, reset fields but keep the selected date
+          dispatch({ type: 'SET_STATE', payload: getInitialState({ date: state.date, id: registrationType }) });
+          setCompletedSteps([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(handler);
   }, [state.date, isEditing, registrationType]);
 
 
@@ -155,6 +156,9 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   };
 
   const goToStep = (step: number) => {
+     // If it's a new 'today' registration, don't allow skipping steps
+    if (isNewTodayRegistration) return;
+    
     if (completedSteps.includes(step) || step < currentStep) {
       setCurrentStep(step);
     }
@@ -182,6 +186,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       
       const result = await addOrUpdateWorkDay(finalWorkDayData as Omit<WorkDay, 'maintenance'>);
       
+      // Only add maintenance if it's a new registration (not editing)
       if (!isEditing && result.success && maintenance.amount > 0 && maintenance.description) {
           await addMaintenance({
               date: state.date,
@@ -245,34 +250,37 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
 
   const isLastStep = currentStep === steps.length;
   const livePreviewData = state;
+  const showFullWizard = !isNewTodayRegistration;
 
   return (
-    <div className={`grid grid-cols-1 ${isEditing ? '' : 'lg:grid-cols-3'} gap-8`}>
-      <div className={`flex flex-col space-y-6 ${isEditing ? '' : 'lg:col-span-2'}`}>
+    <div className={`grid grid-cols-1 ${showFullWizard ? 'lg:grid-cols-3' : ''} gap-8`}>
+      <div className={`flex flex-col space-y-6 ${showFullWizard ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
         {/* Stepper */}
-        <div className="hidden sm:flex items-center justify-between p-4 border rounded-lg">
-          {steps.map((step, index) => (
-            <React.Fragment key={step.id}>
-              <div className="flex flex-col items-center text-center cursor-pointer" onClick={() => goToStep(step.id)}>
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                    currentStep === step.id
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : completedSteps.includes(step.id)
-                      ? 'bg-green-500 text-white border-green-500'
-                      : 'bg-muted border-muted-foreground'
-                  }`}
-                >
-                  {completedSteps.includes(step.id) && currentStep !== step.id ? <Check /> : step.id}
+        {showFullWizard && (
+            <div className="hidden sm:flex items-center justify-between p-4 border rounded-lg">
+            {steps.map((step, index) => (
+                <React.Fragment key={step.id}>
+                <div className="flex flex-col items-center text-center cursor-pointer" onClick={() => goToStep(step.id)}>
+                    <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                        currentStep === step.id
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : completedSteps.includes(step.id)
+                        ? 'bg-green-500 text-white border-green-500'
+                        : 'bg-muted border-muted-foreground'
+                    }`}
+                    >
+                    {completedSteps.includes(step.id) && currentStep !== step.id ? <Check /> : step.id}
+                    </div>
+                    <p className={`mt-2 text-sm ${currentStep === step.id ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>
+                    {step.title}
+                    </p>
                 </div>
-                <p className={`mt-2 text-sm ${currentStep === step.id ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>
-                  {step.title}
-                </p>
-              </div>
-              {index < steps.length - 1 && <div className="flex-1 h-0.5 bg-border" />}
-            </React.Fragment>
-          ))}
-        </div>
+                {index < steps.length - 1 && <div className="flex-1 h-0.5 bg-border" />}
+                </React.Fragment>
+            ))}
+            </div>
+        )}
 
         {/* Step Content */}
         <Card className="flex-1 flex flex-col">
@@ -296,7 +304,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
                     </Button>
                 )}
 
-                {isLastStep && (
+                {(isLastStep || !showFullWizard) && (
                      <Button onClick={handleSubmit} disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {isEditing ? 'Salvar Alterações' : 'Concluir e Salvar'}
@@ -307,7 +315,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       </div>
 
       {/* Live Preview */}
-       {!isEditing && (
+       {showFullWizard && (
          <div className="lg:col-span-1">
             <LivePreview data={livePreviewData as State} />
          </div>
