@@ -126,31 +126,40 @@ export const useWorkDayColumns = () => {
     {
       id: "actions",
       cell: ({ row }) => {
-        const workDay = row.original
+        const workDay = row.original;
 
         return (
-          <div className="flex justify-end items-center gap-2">
-              <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={(e) => handleEditClick(e, workDay)}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="h-8 w-8 p-0"
+                onClick={(e) => e.stopPropagation()}
               >
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Editar</span>
+                <span className="sr-only">Abrir menu</span>
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
-              <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                  onClick={(e) => handleDeleteClick(e, workDay)}
-                  disabled={isDeleting}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DropdownMenuLabel>Ações</DropdownMenuLabel>
+              <DropdownMenuItem onClick={(e) => handleEditClick(e, workDay)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Editar
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={(e) => handleDeleteClick(e, workDay)}
+                className="text-destructive focus:text-destructive focus:bg-destructive/10"
               >
-                   {isDeleting && dayToDelete?.id === workDay.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                  <span className="sr-only">Apagar</span>
-              </Button>
-          </div>
-        )
+                 {isDeleting && dayToDelete?.id === workDay.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                Apagar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
       },
     },
   ]
