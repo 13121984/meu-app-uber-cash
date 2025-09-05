@@ -40,8 +40,7 @@ type Action =
 
 const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>): State => ({
   id: initialData?.id || undefined,
-  // Initialize date as null on the server to prevent hydration mismatch.
-  // It will be set on the client via useEffect.
+  // If editing, use the provided date. If new, start with null to avoid hydration errors.
   date: initialData?.date ? new Date(initialData.date) : null,
   km: initialData?.km || 0,
   hours: initialData?.hours || 0,
@@ -99,7 +98,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
 
-  // Client-side effect to set the date on initial load if it's null
+  // Client-side effect to set the date on initial load if it's null (i.e., a new registration)
   // This avoids hydration mismatch.
   useEffect(() => {
     if (state.date === null) {
