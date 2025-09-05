@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Edit, Trash2, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -50,6 +50,12 @@ export const useWorkDayColumns = () => {
     setDayToDelete(workDay);
     setIsAlertOpen(true);
   }
+
+  const handleEditClick = (e: React.MouseEvent, workDay: WorkDay) => {
+    e.stopPropagation();
+    setEditingWorkDay(workDay);
+  }
+
 
   const handleConfirmDelete = async () => {
     if (!dayToDelete) return;
@@ -123,28 +129,26 @@ export const useWorkDayColumns = () => {
         const workDay = row.original
 
         return (
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setEditingWorkDay(workDay)}>
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="text-destructive focus:bg-destructive/30"
+          <div className="flex justify-end items-center gap-2">
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={(e) => handleEditClick(e, workDay)}
+              >
+                  <Edit className="h-4 w-4" />
+                  <span className="sr-only">Editar</span>
+              </Button>
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
                   onClick={(e) => handleDeleteClick(e, workDay)}
-                >
-                  Apagar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  disabled={isDeleting}
+              >
+                   {isDeleting && dayToDelete?.id === workDay.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  <span className="sr-only">Apagar</span>
+              </Button>
           </div>
         )
       },
