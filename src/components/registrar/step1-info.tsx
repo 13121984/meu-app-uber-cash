@@ -21,10 +21,12 @@ interface Step1InfoProps {
 }
 
 export function Step1Info({ data, dispatch }: Step1InfoProps) {
-  const [day, setDay] = useState(data.date ? format(data.date, 'dd') : '');
-  const [month, setMonth] = useState(data.date ? format(data.date, 'MM') : '');
-  const [year, setYearState] = useState(data.date ? format(data.date, 'yyyy') : '');
+  // Initialize as empty strings to avoid hydration mismatch
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYearState] = useState('');
 
+  // Populate fields only on the client-side after mount
   useEffect(() => {
     if (data.date && isValid(data.date)) {
       setDay(format(data.date, 'dd'));
@@ -176,5 +178,3 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
     </div>
   );
 }
-
-    
