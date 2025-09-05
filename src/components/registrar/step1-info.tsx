@@ -92,12 +92,15 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
       });
     } else {
         const numValue = parseFloat(manualHours.toString().replace(',', '.')) || 0;
-        dispatch({
-            type: 'SET_BASIC_INFO',
-            payload: { ...data, hours: numValue },
-        });
+        if (data.hours !== numValue) {
+          dispatch({
+              type: 'SET_BASIC_INFO',
+              payload: { ...data, hours: numValue },
+          });
+        }
     }
-  }, [data.timeEntries, manualHours, dispatch, data]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.timeEntries, manualHours]);
 
 
   const updateMainDate = (newDate: Date) => {
@@ -211,5 +214,3 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
     </div>
   );
 }
-
-    
