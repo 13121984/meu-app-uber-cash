@@ -1,8 +1,8 @@
 
 "use client"
 
-import React, { useEffect, useRef } from 'react';
-import { Car } from "lucide-react";
+import React, { useEffect } from 'react';
+import { Car, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"
 import { Confetti } from "./confetti";
 
@@ -14,20 +14,17 @@ type GoalProgressProps = {
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const { toast } = useToast();
-  const hasShownToast = useRef(false);
 
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
 
   useEffect(() => {
-    if (isComplete && !hasShownToast.current) {
+    if (isComplete) {
       toast({
-        title: "Meta Atingida!",
+        title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5"/><span>Meta Atingida!</span></div>,
         description: "Você conseguiu! Continue acelerando para o próximo objetivo!",
+        variant: "success",
       });
-      hasShownToast.current = true;
-    } else if (!isComplete) {
-      hasShownToast.current = false;
     }
   }, [isComplete, toast]);
   
