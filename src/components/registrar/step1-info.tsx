@@ -26,7 +26,7 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
   const [year, setYearState] = useState(data.date ? format(data.date, 'yyyy') : '');
 
   useEffect(() => {
-    if (data.date) {
+    if (data.date && isValid(data.date)) {
       setDay(format(data.date, 'dd'));
       setMonth(format(data.date, 'MM'));
       setYearState(format(data.date, 'yyyy'));
@@ -176,3 +176,5 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
     </div>
   );
 }
+
+    

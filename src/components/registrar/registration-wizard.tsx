@@ -21,7 +21,7 @@ export type FuelEntry = { id: number; type: string; paid: number; price: number 
 
 export type State = {
   id?: string;
-  date: Date | null;
+  date: Date;
   km: number;
   hours: number;
   earnings: Earning[];
@@ -40,8 +40,7 @@ type Action =
 
 const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>): State => ({
   id: initialData?.id || undefined,
-  // If editing, use the provided date. If new, start with null to avoid hydration errors.
-  date: initialData?.date ? new Date(initialData.date) : null,
+  date: initialData?.date ? new Date(initialData.date) : new Date(),
   km: initialData?.km || 0,
   hours: initialData?.hours || 0,
   earnings: initialData?.earnings || [],
@@ -56,13 +55,7 @@ function reducer(state: State, action: Action): State {
     case 'SET_EARNINGS': return { ...state, earnings: action.payload };
     case 'SET_FUEL': return { ...state, fuelEntries: action.payload };
     case 'SET_MAINTENANCE': return { ...state, maintenance: action.payload };
-    case 'RESET_STATE': 
-        const newState = getInitialState();
-        // Set date to today on client-side reset
-        if (typeof window !== 'undefined') {
-            newState.date = new Date();
-        }
-        return newState;
+    case 'RESET_STATE': return getInitialState();
     default: return state;
   }
 }
@@ -98,23 +91,14 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
 
-  // Client-side effect to set the date on initial load if it's null (i.e., a new registration)
-  // This avoids hydration mismatch.
-  useEffect(() => {
-    if (state.date === null) {
-      dispatch({ 
-        type: 'SET_BASIC_INFO', 
-        payload: { ...state, date: new Date() } as { date: Date; km: number; hours: number; }
-      });
-    }
-  }, []); // Empty dependency array ensures this runs only once on mount.
-
-
   useEffect(() => {
       dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) })
       if(isEditing) {
         setCurrentStep(1);
         setCompletedSteps([1,2,3,4]);
+      } else {
+        setCurrentStep(1);
+        setCompletedSteps([]);
       }
   }, [initialData, isEditing])
 
@@ -219,13 +203,8 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   };
 
   const renderStep = () => {
-    // Don't render Step1Info until date is initialized on the client
-    if (currentStep === 1 && !state.date) {
-        return <div className="h-48 flex justify-center items-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-    }
-
     switch (currentStep) {
-      case 1: return <Step1Info data={state as State & { date: Date }} dispatch={dispatch} />;
+      case 1: return <Step1Info data={state} dispatch={dispatch} />;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
       case 3: return <Step3Fuel data={state} dispatch={dispatch} />;
       case 4: return <Step4Extras data={state} dispatch={dispatch} isDisabled={isEditing} />;
