@@ -25,7 +25,11 @@ export function MaintenanceFilters() {
     const from = searchParams.get('from');
     const to = searchParams.get('to');
     if (from) {
-      return { from: parseISO(from), to: to ? parseISO(to) : undefined };
+      try {
+        return { from: parseISO(from), to: to ? parseISO(to) : undefined };
+      } catch (error) {
+        return undefined;
+      }
     }
     return undefined;
   });
