@@ -103,7 +103,10 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   // This avoids hydration mismatch.
   useEffect(() => {
     if (state.date === null) {
-      dispatch({ type: 'SET_BASIC_INFO', payload: { ...state, date: new Date() } as { date: Date; km: number; hours: number; }});
+      dispatch({ 
+        type: 'SET_BASIC_INFO', 
+        payload: { ...state, date: new Date() } as { date: Date; km: number; hours: number; }
+      });
     }
   }, []); // Run only once on mount.
 
@@ -310,3 +313,5 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
     </div>
   );
 }
+
+    
