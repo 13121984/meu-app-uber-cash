@@ -2,7 +2,7 @@
 
 "use server";
 
-import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isToday, parse } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
@@ -10,8 +10,6 @@ import { getMaintenanceRecords, Maintenance } from './maintenance.service';
 import fs from 'fs/promises';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
-import type { TimeEntry } from '@/components/registrar/step1-info';
-import type { PerformanceByShift } from '@/components/inicio/shift-performance';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id:number; type: string; paid: number; price: number };
@@ -21,7 +19,6 @@ export interface WorkDay {
   date: Date;
   km: number;
   hours: number;
-  timeEntries?: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
   maintenance?: { // Maintenance is now optional on the work-day itself
@@ -78,7 +75,6 @@ export interface ReportData {
   profitEvolution: ProfitEvolutionData[];
   dailyTrips: DailyTripsData[];
   rawWorkDays: WorkDay[]; // Adicionado para exportação
-  performanceByShift?: PerformanceByShift[]; // Adicionado para o novo resumo de turno
 }
 
 const workDaysFilePath = path.join(process.cwd(), 'data', 'work-days.json');
@@ -91,7 +87,6 @@ async function readWorkDays(): Promise<WorkDay[]> {
     return (JSON.parse(fileContent) as any[]).map(day => ({
         ...day,
         date: parseISO(day.date),
-        timeEntries: day.timeEntries || [] // Garante que timeEntries sempre exista
     }));
   } catch (error) {
     // If file doesn't exist or is empty
@@ -115,21 +110,13 @@ async function writeWorkDays(data: WorkDay[]): Promise<void> {
 export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
   try {
     const allWorkDays = await readWorkDays();
-    const dateToFind = startOfDay(data.date);
+    const existingDay = allWorkDays.find(d => d.id === data.id);
 
-    // Find if a workday for the given date already exists.
-    const existingDayIndex = allWorkDays.findIndex(day => startOfDay(day.date).getTime() === dateToFind.getTime());
-
-    if (existingDayIndex > -1) {
+    if (existingDay) {
       // Update existing day
-      const existingDay = allWorkDays[existingDayIndex];
-      const updatedDay: WorkDay = {
-        ...existingDay,
-        ...data,
-        id: existingDay.id, // Ensure ID is preserved
-        date: data.date, // Ensure date is updated
-      };
-      allWorkDays[existingDayIndex] = updatedDay;
+      const updatedDay: WorkDay = { ...existingDay, ...data };
+      const index = allWorkDays.findIndex(d => d.id === data.id);
+      allWorkDays[index] = updatedDay;
       await writeWorkDays(allWorkDays);
       revalidateAll();
       return { success: true, id: updatedDay.id, operation: 'updated' };
@@ -138,7 +125,6 @@ export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Pr
       const newWorkDay: WorkDay = {
         ...data,
         id: data.id || Date.now().toString(), // Use provided ID or generate a new one
-        date: data.date,
       };
       allWorkDays.unshift(newWorkDay);
       await writeWorkDays(allWorkDays);
@@ -311,78 +297,6 @@ export async function getWorkDays(): Promise<WorkDay[]> {
     return await readWorkDays();
 }
 
-export async function getWorkDayByDate(date: Date): Promise<WorkDay | null> {
-    const allWorkDays = await readWorkDays();
-    const dateToFind = startOfDay(date);
-    return allWorkDays.find(day => startOfDay(day.date).getTime() === dateToFind.getTime()) || null;
-}
-
-const getTurno = (hour: number): 'Madrugada' | 'Manhã' | 'Tarde' | 'Noite' => {
-    if (hour >= 6 && hour < 12) return 'Manhã';
-    if (hour >= 12 && hour < 18) return 'Tarde';
-    if (hour >= 18) return 'Noite';
-    return 'Madrugada'; // 00:00 to 05:59
-};
-
-const calculateHours = (entry: TimeEntry): number => {
-    if (!entry.start || !entry.end) return 0;
-    try {
-        const start = parse(entry.start, 'HH:mm', new Date());
-        const end = parse(entry.end, 'HH:mm', new Date());
-        let diff = end.getTime() - start.getTime();
-        if (diff < 0) diff += 24 * 60 * 60 * 1000;
-        return diff / (1000 * 60 * 60);
-    } catch {
-        return 0;
-    }
-};
-
-function calculatePerformanceByShift(workDay: WorkDay): PerformanceByShift[] {
-    const shiftPerformance: Record<string, { profit: number; hours: number }> = {
-        'Madrugada': { profit: 0, hours: 0 },
-        'Manhã': { profit: 0, hours: 0 },
-        'Tarde': { profit: 0, hours: 0 },
-        'Noite': { profit: 0, hours: 0 },
-    };
-
-    const totalHours = workDay.hours;
-    const totalEarnings = workDay.earnings.reduce((sum, e) => sum + e.amount, 0);
-    const totalFuel = workDay.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-    const totalProfit = totalEarnings - totalFuel;
-
-    if (!workDay.timeEntries || workDay.timeEntries.length === 0) {
-        // Se não houver entradas de tempo, distribui o lucro proporcionalmente com base nas horas totais
-        // (Isso é uma aproximação, assume-se que o motorista escolheu um turno ao registrar as horas)
-        if (totalHours > 0) {
-             // Heurística simples: se não há turnos, atribui a um turno genérico ou divide igualmente.
-             // Para simplificar, vamos assumir que não podemos determinar o turno.
-        }
-        return [];
-    }
-    
-    // Calcula o lucro por hora para o dia
-    const profitPerHour = totalHours > 0 ? totalProfit / totalHours : 0;
-
-    workDay.timeEntries.forEach(entry => {
-        const entryHours = calculateHours(entry);
-        if (entryHours > 0) {
-            const startHour = parseInt(entry.start.split(':')[0], 10);
-            const shift = getTurno(startHour);
-            shiftPerformance[shift].hours += entryHours;
-            shiftPerformance[shift].profit += entryHours * profitPerHour;
-        }
-    });
-
-    return Object.entries(shiftPerformance)
-        .map(([shift, data]) => ({
-            shift: shift as PerformanceByShift['shift'],
-            ...data,
-            profitPerHour: data.hours > 0 ? data.profit / data.hours : 0,
-        }))
-        .filter(s => s.hours > 0);
-}
-
-
 function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
@@ -397,7 +311,6 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         totalHoras: 0,
         totalViagens: 0,
         totalLitros: 0,
-        performanceByShift: [] as PerformanceByShift[],
     };
 
     const maintenanceData = {
@@ -417,10 +330,6 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         data.totalKm += day.km;
         data.totalHoras += day.hours;
         
-        if (period === 'diária' && day) {
-            data.performanceByShift = calculatePerformanceByShift(day);
-        }
-
         day.fuelEntries.forEach(fuel => {
             if (fuel.price > 0) {
                 data.totalLitros += fuel.paid / fuel.price;
@@ -502,25 +411,6 @@ export async function getDashboardData() {
     const mes = calculatePeriodData(thisMonthWorkDays, "mensal", goals, thisMonthMaintenance);
 
     return { hoje, semana, mes };
-}
-
-export async function getTodayData(): Promise<PeriodData> {
-    const allWorkDays = await getWorkDays();
-    const allMaintenance = await getMaintenanceRecords();
-    const goals = await getGoals();
-    const now = new Date();
-    const todayDateString = now.toDateString();
-
-    const todayWorkDays = allWorkDays.filter(day => {
-        const dayDate = new Date(day.date);
-        return dayDate.toDateString() === todayDateString;
-    });
-     const todayMaintenance = allMaintenance.filter(m => {
-      const mDate = new Date(m.date);
-      return mDate.toDateString() === todayDateString;
-    });
-
-    return calculatePeriodData(todayWorkDays, "diária", goals, todayMaintenance);
 }
 
 export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilterValues): Promise<ReportData> {

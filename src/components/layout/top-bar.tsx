@@ -8,8 +8,7 @@ import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home },
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
+  { href: "/", label: "Painel", icon: LayoutDashboard },
   { href: "/registrar", label: "Registrar", icon: PlusCircle },
   { href: "/gerenciamento", label: "Gerenciar", icon: History },
   { href: "/metas", label: "Metas", icon: Target },
@@ -27,7 +26,7 @@ export function TopBar() {
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex flex-col items-center gap-1 font-semibold">
                     <Car className="h-7 w-7 text-primary" />
-                    <span className="font-headline text-xs">Uber Cash</span>
+                    <span className="font-headline text-xs">Rota Certa</span>
                 </Link>
             </div>
             <nav className="flex items-center gap-1">

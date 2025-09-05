@@ -11,23 +11,21 @@ import { Step3Fuel } from './step3-fuel';
 import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
-import { addOrUpdateWorkDay, getWorkDayByDate } from '@/services/work-day.service';
+import { addOrUpdateWorkDay } from '@/services/work-day.service';
 import { addMaintenance } from '@/services/maintenance.service';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
 import { parseISO } from 'date-fns';
-import type { TimeEntry } from './step1-info';
 import type { WorkDay } from '@/services/work-day.service';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
 
-export type State = {
+type State = {
   id?: string;
   date: Date;
   km: number;
   hours: number;
-  timeEntries: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
   maintenance: { description: string; amount: number };
@@ -46,7 +44,6 @@ const getInitialState = (initialData?: Partial<WorkDay>): State => {
         date: safeInitialData.date ? (typeof safeInitialData.date === 'string' ? parseISO(safeInitialData.date) : safeInitialData.date) : new Date(),
         km: safeInitialData.km || 0,
         hours: safeInitialData.hours || 0,
-        timeEntries: safeInitialData.timeEntries || [],
         earnings: safeInitialData.earnings || [],
         fuelEntries: safeInitialData.fuelEntries || [],
         maintenance: safeInitialData.maintenance || { description: '', amount: 0 },
@@ -81,7 +78,7 @@ interface RegistrationWizardProps {
     registrationType?: 'today' | 'other-day';
 }
 
-const cashRegisterSound = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAABoR2tGYWFFAAAAAPcAAAN3AAAAAAAAAFl+ZWW3s1sLdGAAAAAAAAAIjbQBAAAAAAEAAAIiUKgZn3oAAAGPBAEABAAgAAEABpVoaWdodG9uZQAAAAAAbHVrYXNhbG1lbnRpbmVsbG9nYW5kZXZAAAAAAP/7QMQAAAAAAAAAAAAAAAAAAAAAAARsYXZjNTguOTEuMTAwBICAgAgAgIAHAAACAET/wkAAASIgaJkAMgAABwAAAnQCkQhEAEQwBIDS8AAAAAAD/8A/wD4AAAAA//pAQHwAAAAEwADAnQAAAD/8A/wDwAAAAAABYhEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGolEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAHYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wD4AAAAAAIAAAAAAAAggAB/AAD//dAwAAMAAAN4AAANIAAD/9gYBAkAAjSRgYhL//dAwLAAKAAAN4AAANIAAD/9gYBAkAEDSRgYhL//dAwqQAnAAAN4AAANIAAD/9gYBAkAEzSRgYhL//dAwjQCPAAAN4AAANIAAD/9gYBAkAFDS.";
+const cashRegisterSound = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAABoR2tGYWFFAAAAAPcAAAN3AAAAAAAAAFl+ZWW3s1sLdGAAAAAAAAAIjbQBAAAAAAEAAAIiUKgZn3oAAAGPBAEABAAgAAEABpVoaWdodG9uZQAAAAAAbHVrYXNhbG1lbnRpbmVsbG9nYW5kZXZAAAAAAP/7QMQAAAAAAAAAAAAAAAAAAAAAAARsYXZjNTguOTEuMTAwBICAgAgAgIAHAAACAET/wkAAASIgaJkAMgAABwAAAnQCkQhEAEQwBIDS8AAAAAAD/8A/wD4AAAAA//pAQHwAAAAEwADAnQAAAD/8A/wDwAAAAAABYhEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGolEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wD4AAAAAAIAAAAAAAAggAB/AAD//dAwAAMAAAN4AAANIAAD/9gYBAkAAjSRgYhL//dAwLAAKAAAN4AAANIAAD/9gYBAkAEDSRgYhL//dAwqQAnAAAN4AAANIAAD/9gYBAkAEzSRgYhL//dAwjQCPAAAN4AAANIAAD/9gYBAkAFDS.";
 
 const playSuccessSound = () => {
     if (typeof window !== 'undefined') {
@@ -108,28 +105,6 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     setCompletedSteps(isEditing ? [1, 2, 3, 4] : []);
     setCurrentStep(1);
   }, [initialData, isEditing]);
-
-
-  // This effect specifically handles loading data for a NEW registration when the date changes.
-  // It's separate to avoid conflicting with the editing logic.
-  useEffect(() => {
-    if (isEditing) return;
-
-    const loadDataForDate = async () => {
-      const existingDay = await getWorkDayByDate(state.date);
-      if (existingDay) {
-        dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
-        setCompletedSteps([1, 2, 3, 4]); // Mark all steps as complete
-      } else {
-        // Reset only the data fields, keeping the selected date
-        const cleanState = getInitialState();
-        dispatch({ type: 'SET_STATE', payload: { ...cleanState, date: state.date } });
-        setCompletedSteps([]);
-      }
-    };
-    loadDataForDate();
-  }, [state.date, isEditing]);
-
 
   const resetWizard = () => {
     dispatch({ type: 'RESET_STATE' });

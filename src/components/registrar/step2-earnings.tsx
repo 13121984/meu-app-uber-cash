@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Dispatch, useCallback } from 'react';
+import { Dispatch } from 'react';
 import { PlusCircle, Trash2, Car, DollarSign, CircleDollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,10 +20,9 @@ interface Step2EarningsProps {
 const categories = ['Uber Cash', '99 Pop', 'Particular', 'Ganhos Extras'];
 
 export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
-  
-  const handleEarningsChange = useCallback((newEarnings: Earning[]) => {
+  const handleEarningsChange = (newEarnings: Earning[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: newEarnings } });
-  }, [dispatch]);
+  };
 
   const handleAddEarning = () => {
     const newEarning: Earning = { id: Date.now(), category: '', trips: 0, amount: 0 };
