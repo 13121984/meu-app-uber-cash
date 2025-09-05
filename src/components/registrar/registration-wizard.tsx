@@ -49,11 +49,7 @@ const getInitialState = (initialData?: Partial<WorkDay>): State => {
     if(initialData?.date) {
         // Ensure date is a Date object, not a string
         date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
-    } else if (initialData?.id === 'today' || initialData?.id === 'other-day') {
-        // Special case for new 'today' or 'other-day' registrations
-        date = new Date();
     }
-
 
     return {
         id: initialData?.id || undefined,
@@ -111,15 +107,15 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const router = useRouter();
   const isNewTodayRegistration = registrationType === 'today' && !isEditing;
   
-  // Start at step 1. If it's not a new "today" registration, show all steps.
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData));
   
-   // Effect to load existing data for a selected date when registering 'other-day' or 'today' (if not editing)
+   // Effect to load existing data for a selected date when registering 'other-day'
    useEffect(() => {
-    if (isEditing) return; // Don't run this if we are already in edit mode from the start
+    // Don't run this for 'today' registrations or when editing from the start
+    if (registrationType === 'today' || isEditing) return;
 
     const handler = setTimeout(async () => {
       const dateStr = format(state.date, 'yyyy-MM-dd');
@@ -156,8 +152,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   };
 
   const goToStep = (step: number) => {
-     // If it's a new 'today' registration, don't allow skipping steps
-    if (isNewTodayRegistration) return;
+    if (isNewTodayRegistration) return; // Disallow skipping for new 'today' registration
     
     if (completedSteps.includes(step) || step < currentStep) {
       setCurrentStep(step);
@@ -186,8 +181,8 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       
       const result = await addOrUpdateWorkDay(finalWorkDayData as Omit<WorkDay, 'maintenance'>);
       
-      // Only add maintenance if it's a new registration (not editing)
-      if (!isEditing && result.success && maintenance.amount > 0 && maintenance.description) {
+      // Add maintenance only if it has a value and description
+      if (result.success && maintenance.amount > 0 && maintenance.description) {
           await addMaintenance({
               date: state.date,
               description: maintenance.description,
@@ -298,7 +293,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
             </Button>
 
             <div className="flex gap-2">
-                {!isLastStep && (
+                {!isLastStep && showFullWizard && (
                     <Button onClick={handleNext} disabled={isSubmitting}>
                         Próximo
                     </Button>

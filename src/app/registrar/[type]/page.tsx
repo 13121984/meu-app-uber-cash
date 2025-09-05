@@ -27,6 +27,7 @@ export default async function RegistrarPage({ params }: { params: { type: string
 
   // For 'other-day', we always start with a blank slate.
   // The wizard component will handle the date selection internally.
+  // We pass a minimal object to distinguish it from a null/editing state.
   if (!initialData) {
       initialData = { id: registrationType };
   }
