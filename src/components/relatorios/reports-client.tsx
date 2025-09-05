@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useTransition } from 'react';
-import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench, Loader2 } from 'lucide-react';
+import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench, Loader2, CalendarDays } from 'lucide-react';
 import { ReportsFilter } from './reports-filter';
 import { WorkDay, getReportData, ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,6 +38,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
   const stats = reportData ? [
     { title: "Lucro Líquido", value: reportData.totalLucro, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
     { title: "Viagens", value: reportData.totalViagens, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
+    { title: "Dias Trabalhados", value: reportData.diasTrabalhados, icon: CalendarDays, iconBg: "bg-sky-500/20", iconColor: "text-sky-400" },
     { title: "KM Rodados", value: reportData.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
     { title: "Horas", value: reportData.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
     { title: "Ganho/Hora", value: reportData.ganhoPorHora, icon: TrendingUp, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
@@ -86,7 +87,7 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
                         {reportData.diasTrabalhados} {reportData.diasTrabalhados === 1 ? 'dia trabalhado' : 'dias trabalhados'} no período selecionado.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                    {stats.map((stat) => (
                       <StatsCard key={stat.title} {...stat} />
                    ))}

@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { DollarSign, Fuel, Map, Hourglass, TrendingUp, Clock, Car, Settings, Wrench, Zap, BarChart3, GripVertical, Loader2 } from "lucide-react"
+import { DollarSign, Fuel, Map, Hourglass, TrendingUp, Clock, Car, Settings, Wrench, Zap, BarChart3, GripVertical, Loader2, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatsCard } from "./stats-card"
@@ -70,6 +70,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const stats = [
     { title: "Lucro Líquido", value: data.totalLucro, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
     { title: "Viagens", value: data.totalViagens, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
+    { title: "Dias Trabalhados", value: data.diasTrabalhados, icon: CalendarDays, iconBg: "bg-sky-500/20", iconColor: "text-sky-400" },
     { title: "KM Rodados", value: data.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
     { title: "Horas", value: data.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
     { title: "Ganho/Hora", value: data.ganhoPorHora, icon: TrendingUp, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
@@ -91,7 +92,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         <p className="text-muted-foreground">Resumo de {periodMap[period]}</p>
       </div>
       
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {stats.map((stat) => (
             <StatsCard key={stat.title} {...stat} />
           ))}
