@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Car } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"
 import { Confetti } from "./confetti";
@@ -14,25 +14,19 @@ type GoalProgressProps = {
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const { toast } = useToast();
-  // Usando useRef para garantir que o toast seja mostrado apenas uma vez por ciclo de "meta batida"
   const hasShownToast = useRef(false);
 
-  // isComplete é determinado diretamente das props, garantindo consistência servidor/cliente.
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
 
   useEffect(() => {
-    // Este efeito lida com a notificação do lado do cliente.
     if (isComplete && !hasShownToast.current) {
       toast({
         title: "Meta Atingida!",
         description: "Você conseguiu! Continue acelerando para o próximo objetivo!",
       });
-      // Marca que o toast foi exibido para esta "sessão" de meta batida.
       hasShownToast.current = true;
     } else if (!isComplete) {
-      // Redefine a flag se a meta não estiver mais batida (ex: mudança de filtro de período)
-      // para que o toast possa ser exibido novamente na próxima vez que a meta for alcançada.
       hasShownToast.current = false;
     }
   }, [isComplete, toast]);
