@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import { Check, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,12 +11,13 @@ import { Step3Fuel } from './step3-fuel';
 import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
-import { addWorkDay } from '@/services/work-day.service';
+import { addOrUpdateWorkDay, getWorkDayByDate } from '@/services/work-day.service';
 import { addMaintenance } from '@/services/maintenance.service';
-import { updateWorkDayAction } from '../gerenciamento/actions';
+import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
-import { parseISO } from 'date-fns';
+import { parseISO, startOfDay } from 'date-fns';
 import type { TimeEntry } from './step1-info';
+import type { WorkDay } from '@/services/work-day.service';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -41,16 +42,17 @@ type Action =
   | { type: 'RESET_STATE' };
 
 
-const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>): State => {
+const getInitialState = (initialData?: Partial<WorkDay>): State => {
+    const safeInitialData = initialData || {};
     return {
-        id: initialData?.id || undefined,
-        date: initialData?.date ? (typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date) : new Date(),
-        km: initialData?.km || 0,
-        hours: initialData?.hours || 0,
-        timeEntries: initialData?.timeEntries || [],
-        earnings: initialData?.earnings || [],
-        fuelEntries: initialData?.fuelEntries || [],
-        maintenance: initialData?.maintenance || { description: '', amount: 0 },
+        id: safeInitialData.id || undefined,
+        date: safeInitialData.date ? (typeof safeInitialData.date === 'string' ? parseISO(safeInitialData.date) : safeInitialData.date) : new Date(),
+        km: safeInitialData.km || 0,
+        hours: safeInitialData.hours || 0,
+        timeEntries: safeInitialData.timeEntries || [],
+        earnings: safeInitialData.earnings || [],
+        fuelEntries: safeInitialData.fuelEntries || [],
+        maintenance: safeInitialData.maintenance || { description: '', amount: 0 },
     };
 };
 
@@ -75,10 +77,10 @@ const steps = [
 ];
 
 interface RegistrationWizardProps {
-    initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>;
+    initialData?: Partial<WorkDay>;
     isEditing?: boolean;
     onSuccess?: () => void;
-    registrationType: 'today' | 'other-day';
+    registrationType?: 'today' | 'other-day';
 }
 
 const cashRegisterSound = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAABoR2tGYWFFAAAAAPcAAAN3AAAAAAAAAFl+ZWW3s1sLdGAAAAAAAAAIjbQBAAAAAAEAAAIiUKgZn3oAAAGPBAEABAAgAAEABpVoaWdodG9uZQAAAAAAbHVrYXNhbG1lbnRpbmVsbG9nYW5kZXZAAAAAAP/7QMQAAAAAAAAAAAAAAAAAAAAAAARsYXZjNTguOTEuMTAwBICAgAgAgIAHAAACAET/wkAAASIgaJkAMgAABwAAAnQCkQhEAEQwBIDS8AAAAAAD/8A/wD4AAAAA//pAQHwAAAAEwADAnQAAAD/8A/wDwAAAAAABYhEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGolEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAHYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wD4AAAAAAIAAAAAAAAggAB/AAD//dAwAAMAAAN4AAANIAAD/9gYBAkAAjSRgYhL//dAwLAAKAAAN4AAANIAAD/9gYBAkAEDSRgYhL//dAwqQAnAAAN4AAANIAAD/9gYBAkAEzSRgYhL//dAwjQCPAAAN4AAANIAAD/9gYBAkAFDS.";
@@ -93,16 +95,41 @@ const playSuccessSound = () => {
 }
 
 
-export function RegistrationWizard({ initialData, isEditing = false, onSuccess, registrationType }: RegistrationWizardProps) {
+export function RegistrationWizard({ initialData, isEditing = false, onSuccess, registrationType = 'other-day' }: RegistrationWizardProps) {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const initialState = getInitialState(initialData);
-  if (registrationType === 'today') {
+  if (registrationType === 'today' && !isEditing) {
     initialState.date = new Date();
   }
+
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  // Effect to load existing data for the selected date
+  useEffect(() => {
+    // Only run when creating a new entry, not when editing an existing one from the management page.
+    if (!isEditing) {
+      const loadDataForDate = async () => {
+        const existingDay = await getWorkDayByDate(state.date);
+        if (existingDay) {
+          dispatch({ type: 'SET_STATE', payload: getInitialState(existingDay) });
+          // Mark all steps as complete since we are loading a full day's data
+          setCompletedSteps([1, 2, 3, 4]);
+        } else {
+           // Reset to a clean state for the new date, keeping the selected date
+          const cleanState = getInitialState();
+          cleanState.date = state.date;
+          dispatch({ type: 'SET_STATE', cleanState });
+          setCompletedSteps([]);
+        }
+      };
+      loadDataForDate();
+    }
+  }, [state.date, isEditing]);
+
 
   const resetWizard = () => {
     dispatch({ type: 'RESET_STATE' });
@@ -147,20 +174,17 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     }
     
     try {
-      let result;
       const { maintenance, ...workDayData } = state;
-
-      if (isEditing && state.id) {
-        result = await updateWorkDayAction(workDayData as any);
-      } else {
-        result = await addWorkDay(workDayData as any);
-        if (result.success && maintenance.amount > 0 && maintenance.description) {
-            await addMaintenance({
-                date: state.date,
-                description: maintenance.description,
-                amount: maintenance.amount,
-            });
-        }
+      const result = await addOrUpdateWorkDay(workDayData as Omit<WorkDay, 'maintenance'>);
+      
+      // Handle maintenance as a separate record, but only if it's a new entry (not an edit)
+      // and has a value and description.
+      if (!isEditing && result.success && maintenance.amount > 0 && maintenance.description) {
+          await addMaintenance({
+              date: state.date,
+              description: maintenance.description,
+              amount: maintenance.amount,
+          });
       }
       
       if (result.success) {
@@ -174,14 +198,19 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
                 <span className="font-bold">Sucesso!</span>
               </div>
             ),
-            description: `Seu dia de trabalho foi ${isEditing ? 'atualizado' : 'registrado'}.`,
+            description: `Seu dia de trabalho foi ${result.operation === 'updated' ? 'atualizado' : 'registrado'}.`,
             variant: "default",
         });
+        
         if (onSuccess) {
             onSuccess();
         } else {
+            // After successful submission, refresh the parent page's data
+            router.refresh();
+            // If not closing a dialog, just reset the form for another entry
             resetWizard();
         }
+
       } else {
         throw new Error(result.error);
       }
@@ -205,7 +234,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
 
   const renderStep = () => {
     switch (currentStep) {
-      case 1: return <Step1Info data={state} dispatch={dispatch} registrationType={registrationType} />;
+      case 1: return <Step1Info data={state} dispatch={dispatch} registrationType={registrationType} isEditing={isEditing}/>;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
       case 3: return <Step3Fuel data={state} dispatch={dispatch} />;
       case 4: return <Step4Extras data={state} dispatch={dispatch} isDisabled={isEditing} />;

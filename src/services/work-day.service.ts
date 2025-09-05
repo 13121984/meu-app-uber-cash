@@ -23,7 +23,7 @@ export interface WorkDay {
   timeEntries?: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
-  maintenance: {
+  maintenance?: { // Maintenance is now optional on the work-day itself
     description: string;
     amount: number;
   };
@@ -109,23 +109,43 @@ async function writeWorkDays(data: WorkDay[]): Promise<void> {
 }
 
 
-export async function addWorkDay(data: Omit<WorkDay, 'id' | 'date'> & { date: Date | string }) {
+export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
   try {
     const allWorkDays = await readWorkDays();
-    const newWorkDay: WorkDay = {
+    const dateToFind = startOfDay(data.date);
+
+    // Find if a workday for the given date already exists.
+    const existingDayIndex = allWorkDays.findIndex(day => startOfDay(day.date).getTime() === dateToFind.getTime());
+
+    if (existingDayIndex > -1) {
+      // Update existing day
+      const existingDay = allWorkDays[existingDayIndex];
+      const updatedDay: WorkDay = {
+        ...existingDay,
         ...data,
-        id: Date.now().toString(),
-        date: typeof data.date === 'string' ? parseISO(data.date) : data.date,
-    };
-    allWorkDays.unshift(newWorkDay);
-    await writeWorkDays(allWorkDays);
-    revalidatePath('/');
-    revalidatePath('/gerenciamento');
-    return { success: true, id: newWorkDay.id };
+        id: existingDay.id, // Ensure ID is preserved
+        date: data.date, // Ensure date is updated
+      };
+      allWorkDays[existingDayIndex] = updatedDay;
+      await writeWorkDays(allWorkDays);
+      revalidateAll();
+      return { success: true, id: updatedDay.id, operation: 'updated' };
+    } else {
+      // Add new day
+      const newWorkDay: WorkDay = {
+        ...data,
+        id: data.id || Date.now().toString(), // Use provided ID or generate a new one
+        date: data.date,
+      };
+      allWorkDays.unshift(newWorkDay);
+      await writeWorkDays(allWorkDays);
+      revalidateAll();
+      return { success: true, id: newWorkDay.id, operation: 'created' };
+    }
   } catch (e) {
-    console.error("Error adding work day: ", e);
+    console.error("Error adding or updating work day: ", e);
     const errorMessage = e instanceof Error ? e.message : "Failed to save work day.";
-    return { success: false, error: errorMessage };
+    return { success: false, error: errorMessage, operation: 'created' }; // Assume created on failure
   }
 }
 
@@ -196,10 +216,7 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
         const updatedWorkDays = Array.from(workDaysMap.values());
         await writeWorkDays(updatedWorkDays);
         
-        revalidatePath('/');
-        revalidatePath('/gerenciamento');
-        revalidatePath('/relatorios');
-
+        revalidateAll();
         return { success: true, count: workDaysMap.size };
 
     } catch(e) {
@@ -207,23 +224,6 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
         const errorMessage = e instanceof Error ? e.message : "Failed to import work days.";
         return { success: false, error: errorMessage };
     }
-}
-
-export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id' | 'date'> & { date: Date | string }): Promise<{ success: boolean; error?: string }> {
-  try {
-    const allWorkDays = await readWorkDays();
-    const index = allWorkDays.findIndex(r => r.id === id);
-    if (index === -1) {
-        return { success: false, error: "Registro não encontrado." };
-    }
-    allWorkDays[index] = { ...data, id, date: typeof data.date === 'string' ? parseISO(data.date) : data.date };
-    await writeWorkDays(allWorkDays);
-    
-    return { success: true };
-  } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : "Falha ao atualizar registro.";
-    return { success: false, error: errorMessage };
-  }
 }
 
 export async function deleteWorkDay(id: string): Promise<{ success: boolean; error?: string }> {
@@ -235,6 +235,7 @@ export async function deleteWorkDay(id: string): Promise<{ success: boolean; err
         return { success: false, error: "Registro não encontrado."};
     }
     await writeWorkDays(allWorkDays);
+    revalidateAll();
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registro.";
@@ -276,6 +277,7 @@ export async function deleteWorkDaysByFilter(filters: { query?: string, from?: s
         const deletedCount = initialLength - workDaysToKeep.length;
         
         await writeWorkDays(workDaysToKeep);
+        revalidateAll();
         return { success: true, count: deletedCount };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registros em massa.";
@@ -286,6 +288,7 @@ export async function deleteWorkDaysByFilter(filters: { query?: string, from?: s
 export async function deleteAllWorkDays(): Promise<{ success: boolean; error?: string }> {
   try {
     await writeWorkDays([]); // Write an empty array
+    revalidateAll();
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar todos os registros.";
@@ -293,10 +296,24 @@ export async function deleteAllWorkDays(): Promise<{ success: boolean; error?: s
   }
 }
 
+const revalidateAll = () => {
+    revalidatePath('/');
+    revalidatePath('/dashboard');
+    revalidatePath('/gerenciamento');
+    revalidatePath('/relatorios');
+    revalidatePath('/manutencao');
+}
 
 export async function getWorkDays(): Promise<WorkDay[]> {
     return await readWorkDays();
 }
+
+export async function getWorkDayByDate(date: Date): Promise<WorkDay | null> {
+    const allWorkDays = await readWorkDays();
+    const dateToFind = startOfDay(date);
+    return allWorkDays.find(day => startOfDay(day.date).getTime() === dateToFind.getTime()) || null;
+}
+
 
 function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
     const earningsByCategoryMap = new Map<string, number>();

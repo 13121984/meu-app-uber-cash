@@ -9,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { format, isValid, parse } from 'date-fns';
+import { format, isValid, parse, set } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export type TimeEntry = {
@@ -25,6 +25,7 @@ interface Step1InfoProps {
   data: State;
   dispatch: Dispatch<Action>;
   registrationType: 'today' | 'other-day';
+  isEditing?: boolean;
 }
 
 const getTurno = (startTime: string): string => {    
@@ -56,12 +57,13 @@ const calculateTotalHours = (entries: TimeEntry[]): number => {
     }, 0);
 };
 
-export function Step1Info({ data, dispatch, registrationType }: Step1InfoProps) {
+export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1InfoProps) {
   const [day, setDay] = useState('');
   const [month, setMonth] = useState('');
   const [year, setYearState] = useState('');
-  const [manualHours, setManualHours] = useState(data.hours || '');
+  const [manualHours, setManualHours] = useState('');
 
+  // Syncs the individual date inputs (day, month, year) with the main date object from the state
   useEffect(() => {
     if (data.date && isValid(data.date)) {
       setDay(format(data.date, 'dd'));
@@ -69,7 +71,17 @@ export function Step1Info({ data, dispatch, registrationType }: Step1InfoProps) 
       setYearState(format(data.date, 'yyyy'));
     }
   }, [data.date]);
+  
+  // Syncs the manual hours input with the state, primarily for when data is loaded
+  useEffect(() => {
+    if (data.hours > 0) {
+      setManualHours(data.hours.toFixed(2));
+    } else {
+      setManualHours('');
+    }
+  }, [data.hours])
 
+  // Recalculates total hours whenever time entries change or if manual input is cleared
   useEffect(() => {
     if (data.timeEntries.length > 0) {
       const totalHours = calculateTotalHours(data.timeEntries);
@@ -77,9 +89,8 @@ export function Step1Info({ data, dispatch, registrationType }: Step1InfoProps) 
         type: 'SET_BASIC_INFO',
         payload: { ...data, hours: totalHours },
       });
-      setManualHours(totalHours.toFixed(2));
     } else {
-        const numValue = parseFloat(manualHours.toString()) || 0;
+        const numValue = parseFloat(manualHours.toString().replace(',', '.')) || 0;
         dispatch({
             type: 'SET_BASIC_INFO',
             payload: { ...data, hours: numValue },
@@ -88,54 +99,32 @@ export function Step1Info({ data, dispatch, registrationType }: Step1InfoProps) 
   }, [data.timeEntries, manualHours]);
 
 
-  const updateMainDate = (newDay: number, newMonth: number, newYear: number) => {
-    const updatedDate = new Date(newYear, newMonth - 1, newDay);
-    if (isValid(updatedDate) && updatedDate.getFullYear() === newYear && (updatedDate.getMonth() + 1) === newMonth && updatedDate.getDate() === newDay) {
-      dispatch({ type: 'SET_BASIC_INFO', payload: { ...data, date: updatedDate } });
+  const updateMainDate = (newDate: Date) => {
+    if (isValid(newDate)) {
+      dispatch({ type: 'SET_BASIC_INFO', payload: { ...data, date: newDate } });
     }
   };
 
-  const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.slice(0, 2);
-    setDay(value);
-    const dayNum = parseInt(value, 10);
-    const monthNum = parseInt(month, 10);
-    const yearNum = parseInt(year, 10);
-    if (!isNaN(dayNum) && !isNaN(monthNum) && !isNaN(yearNum)) {
-      updateMainDate(dayNum, monthNum, yearNum);
-    }
-  };
+  const handleDatePartChange = (part: 'day' | 'month' | 'year', value: string) => {
+    const currentDay = part === 'day' ? value : day;
+    const currentMonth = part === 'month' ? value : month;
+    const currentYear = part === 'year' ? value : year;
 
-  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.slice(0, 2);
-    setMonth(value);
-    const dayNum = parseInt(day, 10);
-    const monthNum = parseInt(value, 10);
-    const yearNum = parseInt(year, 10);
-     if (!isNaN(dayNum) && !isNaN(monthNum) && !isNaN(yearNum)) {
-      updateMainDate(dayNum, monthNum, yearNum);
-    }
-  };
+    if (part === 'day') setDay(value);
+    if (part === 'month') setMonth(value);
+    if (part === 'year') setYearState(value);
 
-  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.slice(0, 4);
-    setYearState(value);
-    const dayNum = parseInt(day, 10);
-    const monthNum = parseInt(month, 10);
-    const yearNum = parseInt(value, 10);
-    if (!isNaN(dayNum) && !isNaN(monthNum) && !isNaN(yearNum) && value.length === 4) {
-      updateMainDate(dayNum, monthNum, yearNum);
-    }
-  };
-  
-  const handleDateSelect = (selectedDate?: Date) => {
-    if (selectedDate && isValid(selectedDate)) {
-        dispatch({ type: 'SET_BASIC_INFO', payload: { ...data, date: selectedDate } });
+    if(currentDay.length === 2 && currentMonth.length === 2 && currentYear.length === 4) {
+        const dayNum = parseInt(currentDay, 10);
+        const monthNum = parseInt(currentMonth, 10);
+        const yearNum = parseInt(currentYear, 10);
+        const newDate = set(new Date(), { year: yearNum, month: monthNum -1, date: dayNum, hours:12 });
+        updateMainDate(newDate);
     }
   };
 
   const handleKmChange = (value: string) => {
-    const numValue = parseFloat(value) || 0;
+    const numValue = parseFloat(value.replace(',', '.')) || 0;
     dispatch({ type: 'SET_BASIC_INFO', payload: { ...data, km: numValue } });
   };
   
@@ -156,7 +145,7 @@ export function Step1Info({ data, dispatch, registrationType }: Step1InfoProps) 
       dispatch({ type: 'SET_BASIC_INFO', payload: { ...data, timeEntries: updatedEntries } });
   };
 
-  const isDateDisabled = registrationType === 'today';
+  const isDateDisabled = registrationType === 'today' && !isEditing;
 
   return (
     <div className="space-y-6">
@@ -165,9 +154,9 @@ export function Step1Info({ data, dispatch, registrationType }: Step1InfoProps) 
         <div>
           <Label htmlFor="date-day">Data do Trabalho</Label>
           <div className="flex items-center gap-2">
-            <Input id="date-day" type="number" placeholder="DD" value={day} onChange={handleDayChange} className="w-16 text-center" disabled={isDateDisabled}/>
-            <Input id="date-month" type="number" placeholder="MM" value={month} onChange={handleMonthChange} className="w-16 text-center" disabled={isDateDisabled}/>
-            <Input id="date-year" type="number" placeholder="AAAA" value={year} onChange={handleYearChange} className="w-24 text-center" disabled={isDateDisabled}/>
+            <Input id="date-day" type="number" placeholder="DD" value={day} onChange={(e) => handleDatePartChange('day', e.target.value)} className="w-16 text-center" disabled={isDateDisabled}/>
+            <Input id="date-month" type="number" placeholder="MM" value={month} onChange={(e) => handleDatePartChange('month', e.target.value)} className="w-16 text-center" disabled={isDateDisabled}/>
+            <Input id="date-year" type="number" placeholder="AAAA" value={year} onChange={(e) => handleDatePartChange('year', e.target.value)} className="w-24 text-center" disabled={isDateDisabled}/>
             <Popover>
                 <PopoverTrigger asChild>
                     <Button variant="outline" size="icon" disabled={isDateDisabled}>
@@ -175,7 +164,7 @@ export function Step1Info({ data, dispatch, registrationType }: Step1InfoProps) 
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={data.date} onSelect={handleDateSelect} initialFocus locale={ptBR} disabled={isDateDisabled}/>
+                    <Calendar mode="single" selected={data.date} onSelect={(d) => d && updateMainDate(d)} initialFocus locale={ptBR} disabled={isDateDisabled}/>
                 </PopoverContent>
             </Popover>
           </div>
@@ -210,7 +199,7 @@ export function Step1Info({ data, dispatch, registrationType }: Step1InfoProps) 
           <Label htmlFor="hours">Total de Horas (Calculado ou Manual)</Label>
            <div className="relative">
              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500" />
-            <Input id="hours" type="number" placeholder="Ex: 8.5" value={manualHours} onChange={e => setManualHours(e.target.value)} className="pl-10"/>
+            <Input id="hours" type="number" placeholder="Ex: 8.5" value={manualHours} onChange={e => setManualHours(e.target.value)} className="pl-10" disabled={data.timeEntries.length > 0}/>
           </div>
         </div>
       </div>

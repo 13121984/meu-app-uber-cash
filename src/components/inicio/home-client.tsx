@@ -30,7 +30,7 @@ export function HomeClient({ todayData }: HomeClientProps) {
   return (
     <div className="space-y-8">
       <div className="text-center w-full">
-        <h1 className="text-4xl font-bold font-headline">Bem-vindo ao Rota Certa!</h1>
+        <h1 className="text-4xl font-bold font-headline">Bem-vindo ao Uber Cash!</h1>
         <p className="text-muted-foreground">Seu assistente para maximizar seus ganhos.</p>
       </div>
 
