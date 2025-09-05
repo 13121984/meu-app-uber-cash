@@ -28,32 +28,39 @@ const playSuccessSound = () => {
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const { toast } = useToast();
-  const [goalReached, setGoalReached] = useState(false);
+  // State to track if the success notification has been shown for the current goal achievement
+  const [hasShownToast, setHasShownToast] = useState(false);
 
+  // isComplete is now determined directly from props during render on both server and client.
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
 
   useEffect(() => {
-    // This logic now runs only on the client, after hydration.
-    if (isComplete && !goalReached) {
-      setGoalReached(true);
+    // This effect handles client-side-only actions: sound and toast notifications.
+    // It runs when isComplete changes.
+    if (isComplete && !hasShownToast) {
+      // If the goal is complete and we haven't shown the toast yet, show it.
+      setHasShownToast(true);
       playSuccessSound();
       toast({
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Meta Atingida!</span></div>,
         description: "Você conseguiu! Continue acelerando para o próximo objetivo!",
       });
-    } else if (!isComplete && goalReached) {
-      // Reset if the goal is no longer met (e.g., data changes)
-      setGoalReached(false);
+    } else if (!isComplete && hasShownToast) {
+      // If the goal is no longer met (e.g., data changes), reset the toast tracker.
+      setHasShownToast(false);
     }
-  }, [isComplete, goalReached, toast]);
+  }, [isComplete, hasShownToast, toast]);
   
   const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const remaining = target - current;
 
   return (
     <div className="relative flex flex-col items-center justify-center space-y-4 overflow-hidden">
+      {/* Conditionally render Confetti directly based on isComplete. */}
+      {/* This is safe because isComplete is calculated the same way on server and client. */}
       {isComplete && <Confetti />}
+      
       {/* Progress Bar */}
       <div className="w-full px-1">
         <div className="relative h-2 w-full rounded-full bg-gray-700 dark:bg-gray-800">
@@ -88,7 +95,7 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
         <p className="text-sm text-muted-foreground">
           {formatCurrency(current)} de {formatCurrency(target)}
         </p>
-         {remaining > 0 && (
+         {remaining > 0 && !isComplete && (
           <p className="text-xs text-yellow-400 mt-2">Faltam {formatCurrency(remaining)} para sua meta</p>
         )}
       </div>
