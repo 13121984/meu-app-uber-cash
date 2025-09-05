@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,8 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  const [_, startURLTransition] = useTransition();
 
   // This effect synchronizes the URL with the component's state
   const updateURL = useCallback(() => {
@@ -68,8 +70,11 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
       params.delete('to');
     }
     
-    // Using router.replace to avoid adding unnecessary entries to browser history
-    router.replace(`${pathname}?${params.toString()}`);
+    startURLTransition(() => {
+        // Using router.replace to avoid adding unnecessary entries to browser history
+        router.replace(`${pathname}?${params.toString()}`);
+    });
+
   }, [debouncedQuery, dateRange, pathname, router, searchParams]);
 
   useEffect(() => {
@@ -85,9 +90,9 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
     setDateRange(undefined);
   };
 
-  const hasActiveFilters = !!(query || dateRange?.from);
+  const hasActiveFilters = !!(searchParams.get('query') || searchParams.get('from'));
 
-  // Prevents rendering on the server and avoids hydration mismatch
+  // Prevents rendering on the server and avoids hydration mismatch by returning null until client is mounted
   if (!isClient) {
     return null;
   }

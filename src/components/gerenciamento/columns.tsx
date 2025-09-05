@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { MoreHorizontal, ArrowUpDown, Edit, Trash2, Loader2 } from "lucide-react"
 
@@ -18,7 +18,6 @@ import { WorkDay } from "@/services/work-day.service"
 import { EditWorkDayDialog } from "./edit-dialog"
 import { deleteWorkDayAction } from "./actions"
 import { toast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,11 +37,16 @@ const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style:
 
 
 export const useWorkDayColumns = () => {
-  const router = useRouter();
   const [editingWorkDay, setEditingWorkDay] = useState<WorkDay | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [dayToDelete, setDayToDelete] = useState<WorkDay | null>(null);
+  
+  // State to ensure client-side-only logic runs after hydration
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
 
   const handleDeleteClick = (e: React.MouseEvent, workDay: WorkDay) => {
@@ -89,6 +93,9 @@ export const useWorkDayColumns = () => {
         )
       },
       cell: ({ row }) => {
+        if (!isClient) {
+            return null; // Avoid rendering on server to prevent mismatch
+        }
         // Correctly handle date formatting to avoid hydration errors
         const dateValue = row.original.date;
         const date = typeof dateValue === 'string' ? parseISO(dateValue) : dateValue;
@@ -104,7 +111,7 @@ export const useWorkDayColumns = () => {
         const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
         const maintenance = row.original.maintenance?.amount || 0;
         const profit = earnings - fuel - maintenance;
-        return <div className="text-green-600 font-semibold text-right">{formatCurrency(profit)}</div>
+        return <div className="text-green-600 dark:text-green-500 font-semibold text-right">{formatCurrency(profit)}</div>
       }
     },
     {
