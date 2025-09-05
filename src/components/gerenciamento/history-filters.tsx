@@ -1,14 +1,14 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Search, FilterX } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { Calendar as CalendarIcon, Search, FilterX, Loader2 } from 'lucide-react';
+import { format, parseISO, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
@@ -23,38 +23,26 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Initialize state with default values, not derived from searchParams directly
+  // State for the inputs
   const [query, setQuery] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [isClient, setIsClient] = useState(false);
 
+  // Debounce the query input to avoid excessive URL updates
   const [debouncedQuery] = useDebounce(query, 500);
-
-  // This effect runs only on the client, after hydration
-  // It populates the filter state from the URL once.
+  
+  // This state ensures that client-side-only logic runs after hydration
+  const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
-    const fromParam = searchParams.get('from');
-    const toParam = searchParams.get('to');
-    const queryParam = searchParams.get('query');
-
-    setQuery(queryParam || '');
-
-    if (fromParam) {
-      try {
-        const fromDate = parseISO(fromParam);
-        const toDate = toParam ? parseISO(toParam) : undefined;
-        // Set the date range from URL params only on the client-side
-        setDateRange({ from: fromDate, to: toDate });
-      } catch (e) {
-        // Invalid date in URL, do nothing
-      }
-    } else {
-        setDateRange(undefined);
+  }, []);
+  
+  // This effect synchronizes the URL with the component's state
+  useEffect(() => {
+    // Only run this logic on the client
+    if (!isClient) {
+      return;
     }
-  }, []); // Empty dependency array ensures this runs only once on mount.
-
-  const updateURL = useCallback(() => {
+    
     const params = new URLSearchParams(searchParams.toString());
     if (debouncedQuery) {
       params.set('query', debouncedQuery);
@@ -67,7 +55,6 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
       if (dateRange.to) {
         params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
       } else {
-        // Ensure 'to' is removed if it's not in the range
         params.delete('to');
       }
     } else {
@@ -75,17 +62,31 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
       params.delete('to');
     }
     
-    // Use router.replace to avoid adding to history
+    // Using router.replace to avoid adding unnecessary entries to browser history
     router.replace(`${pathname}?${params.toString()}`);
-  }, [debouncedQuery, dateRange, pathname, router, searchParams]);
 
-  // This effect will run whenever the debounced query or date range changes
-  // It only runs on the client after the initial state has been set.
+  }, [debouncedQuery, dateRange, pathname, router, searchParams, isClient]);
+
+  // This effect synchronizes the component's state with the URL on initial load
   useEffect(() => {
-    if (isClient) {
-      updateURL();
+    const queryParam = searchParams.get('query');
+    const fromParam = searchParams.get('from');
+    const toParam = searchParams.get('to');
+
+    setQuery(queryParam || '');
+    
+    if (fromParam) {
+        try {
+            const fromDate = parseISO(fromParam);
+            const toDate = toParam ? parseISO(toParam) : undefined;
+            if (isValid(fromDate)) {
+              setDateRange({ from: fromDate, to: isValid(toDate) ? toDate : undefined });
+            }
+        } catch(e) {
+            // Invalid date in URL, ignore it
+        }
     }
-  }, [isClient, debouncedQuery, dateRange, updateURL]);
+  }, [searchParams]);
 
   const handleClearFilters = () => {
     setQuery('');
@@ -94,10 +95,9 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
 
   const hasActiveFilters = !!(query || dateRange?.from);
 
-  // Don't render the component content until it's mounted on the client
-  // to avoid hydration mismatch with filters applied from URL
+  // Prevents rendering on the server and avoids hydration mismatch
   if (!isClient) {
-    return null; // or a loading skeleton
+    return null;
   }
 
   return (
@@ -154,7 +154,7 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
       
       {hasActiveFilters && (
         <Button variant="ghost" onClick={handleClearFilters} disabled={isPending}>
-            <FilterX className="mr-2 h-4 w-4" />
+            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FilterX className="mr-2 h-4 w-4" />}
             Limpar
         </Button>
       )}

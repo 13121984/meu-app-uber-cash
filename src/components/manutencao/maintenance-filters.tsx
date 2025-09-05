@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Calendar as CalendarIcon, Search, FilterX, Loader2 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
+import { useDebounce } from 'use-debounce';
 
 
 export function MaintenanceFilters() {
@@ -20,24 +21,25 @@ export function MaintenanceFilters() {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const [query, setQuery] = useState(searchParams.get('query') || '');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    const from = searchParams.get('from');
-    const to = searchParams.get('to');
-    if (from) {
-      try {
-        return { from: parseISO(from), to: to ? parseISO(to) : undefined };
-      } catch (error) {
-        return undefined;
-      }
-    }
-    return undefined;
-  });
+  // State for the inputs
+  const [query, setQuery] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   
+  const [debouncedQuery] = useDebounce(query, 500);
+
+  // This state ensures that client-side-only logic runs after hydration
+  const [isClient, setIsClient] = useState(false);
   useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-    if (query) {
-      params.set('query', query);
+    setIsClient(true);
+  }, []);
+
+  // This effect synchronizes the URL with the component's state
+  useEffect(() => {
+    if (!isClient) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (debouncedQuery) {
+      params.set('query', debouncedQuery);
     } else {
       params.delete('query');
     }
@@ -57,14 +59,41 @@ export function MaintenanceFilters() {
       router.replace(`${pathname}?${params.toString()}`);
     });
 
-  }, [query, dateRange, pathname, router, searchParams]);
+  }, [debouncedQuery, dateRange, pathname, router, searchParams, isClient]);
+
+  // This effect synchronizes the component's state with the URL on initial load
+  useEffect(() => {
+    const queryParam = searchParams.get('query');
+    const fromParam = searchParams.get('from');
+    const toParam = searchParams.get('to');
+    
+    setQuery(queryParam || '');
+
+    if (fromParam) {
+        try {
+            const fromDate = parseISO(fromParam);
+            const toDate = toParam ? parseISO(toParam) : undefined;
+             if (isValid(fromDate)) {
+              setDateRange({ from: fromDate, to: isValid(toDate) ? toDate : undefined });
+            }
+        } catch(e) {
+            // Invalid date, do nothing
+        }
+    }
+  }, [searchParams]);
+
 
   const handleClearFilters = () => {
     setQuery('');
     setDateRange(undefined);
   }
 
-  const hasActiveFilters = !!(query || dateRange);
+  const hasActiveFilters = !!(query || dateRange?.from);
+
+  // Prevents rendering on the server and avoids hydration mismatch
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card items-center">
