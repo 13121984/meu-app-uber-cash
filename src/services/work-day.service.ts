@@ -83,10 +83,10 @@ async function readWorkDays(): Promise<WorkDay[]> {
   try {
     await fs.access(workDaysFilePath);
     const fileContent = await fs.readFile(workDaysFilePath, 'utf8');
-    // Important: Re-hydrate dates, as they are stored as strings in JSON
+    // Important: Re-hydrate dates using parseISO to handle timezone correctly
     return (JSON.parse(fileContent) as any[]).map(day => ({
         ...day,
-        date: new Date(day.date),
+        date: parseISO(day.date),
     }));
   } catch (error) {
     // If file doesn't exist or is empty
@@ -113,7 +113,7 @@ export async function addWorkDay(data: Omit<WorkDay, 'id'>) {
     const newWorkDay: WorkDay = {
         ...data,
         id: Date.now().toString(),
-        date: new Date(data.date),
+        date: parseISO(data.date.toISOString()),
     };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(allWorkDays);
@@ -214,7 +214,7 @@ export async function updateWorkDay(id: string, data: Omit<WorkDay, 'id'>): Prom
     if (index === -1) {
         return { success: false, error: "Registro não encontrado." };
     }
-    allWorkDays[index] = { ...data, id, date: new Date(data.date) };
+    allWorkDays[index] = { ...data, id, date: parseISO(new Date(data.date).toISOString()) };
     await writeWorkDays(allWorkDays);
     
     return { success: true };
