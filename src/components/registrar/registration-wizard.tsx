@@ -21,7 +21,7 @@ export type FuelEntry = { id: number; type: string; paid: number; price: number 
 
 export type State = {
   id?: string;
-  date: Date | null;
+  date: Date;
   km: number;
   hours: number;
   earnings: Earning[];
@@ -31,7 +31,7 @@ export type State = {
 
 type Action =
   | { type: 'SET_STATE'; payload: State }
-  | { type: 'SET_BASIC_INFO'; payload: { date: Date | null; km: number; hours: number } }
+  | { type: 'SET_BASIC_INFO'; payload: { date: Date; km: number; hours: number } }
   | { type: 'SET_EARNINGS'; payload: Earning[] }
   | { type: 'SET_FUEL'; payload: FuelEntry[] }
   | { type: 'SET_MAINTENANCE'; payload: { description: string; amount: number } }
@@ -39,11 +39,9 @@ type Action =
 
 
 const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>): State => {
-    // If editing, use the provided date. Otherwise, start with null for server render.
-    const date = initialData?.date ? new Date(initialData.date) : null;
     return {
         id: initialData?.id || undefined,
-        date: date,
+        date: initialData?.date ? new Date(initialData.date) : new Date(),
         km: initialData?.km || 0,
         hours: initialData?.hours || 0,
         earnings: initialData?.earnings || [],
@@ -95,17 +93,6 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
-
-  // This effect runs only on the client to safely set the date to today for new entries
-  useEffect(() => {
-    // If it's a new entry (no initialData) and the date is currently null (from server render)
-    if (!initialData && state.date === null) {
-      dispatch({ 
-        type: 'SET_BASIC_INFO', 
-        payload: { ...state, date: new Date() } 
-      });
-    }
-  }, []); // Empty dependency array ensures this runs only once on mount
 
   const resetWizard = () => {
     dispatch({ type: 'RESET_STATE' });
@@ -207,13 +194,6 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   };
 
   const renderStep = () => {
-    if (state.date === null && !isEditing) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-8 h-8 animate-spin" />
-            </div>
-        );
-    }
     switch (currentStep) {
       case 1: return <Step1Info data={state} dispatch={dispatch} />;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
@@ -223,6 +203,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
     }
   };
 
+  const isStep1Or2 = currentStep === 1 || currentStep === 2;
   const isStep3 = currentStep === 3;
   const isLastStep = currentStep === steps.length;
   // Desabilita o preview da manutenção quando estiver no modo de edição
@@ -272,20 +253,28 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
             </Button>
 
             <div className="flex gap-2">
-                {!isLastStep ? (
+                {isStep1Or2 && (
                     <Button onClick={handleNext} disabled={isSubmitting}>
                         Próximo
                     </Button>
-                ) : (
-                    <Button onClick={handleSubmit} disabled={isSubmitting}>
+                )}
+
+                {isStep3 && !isEditing && (
+                    <>
+                        <Button onClick={handleNext} variant="outline" disabled={isSubmitting}>
+                            Adicionar Despesa
+                        </Button>
+                        <Button onClick={handleSubmit} disabled={isSubmitting}>
+                             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            Concluir e Salvar
+                        </Button>
+                    </>
+                )}
+                
+                {(isLastStep || (isStep3 && isEditing)) && (
+                     <Button onClick={handleSubmit} disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {isEditing ? 'Salvar Alterações' : 'Concluir e Salvar'}
-                    </Button>
-                )}
-                 
-                 {isStep3 && !isEditing && (
-                    <Button onClick={handleNext} variant="outline" disabled={isSubmitting}>
-                        Adicionar Despesa
                     </Button>
                 )}
             </div>
