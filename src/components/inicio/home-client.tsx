@@ -20,9 +20,9 @@ const mainActions = [
 
 const ActionButton = ({ href, label, icon: Icon, bgColor }: typeof mainActions[0]) => (
     <Link href={href} passHref>
-        <Card className={`w-full h-36 flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:border-primary/50 ${bgColor}`}>
-            <Icon className="h-10 w-10 text-primary" />
-            <span className="font-semibold text-center text-primary/80">{label}</span>
+        <Card className={`group w-full h-36 flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-primary ${bgColor}`}>
+            <Icon className="h-10 w-10 text-foreground/80 transition-colors group-hover:text-primary-foreground" />
+            <span className="font-semibold text-center text-foreground/80 transition-colors group-hover:text-primary-foreground">{label}</span>
         </Card>
     </Link>
 )
@@ -47,3 +47,4 @@ export function HomeClient() {
     </div>
   );
 }
+
