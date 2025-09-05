@@ -2,16 +2,10 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sun, Moon, Sunrise, Sunset, Trophy, Clock } from "lucide-react";
+import { Sun, Moon, Sunrise, Sunset, Trophy } from "lucide-react";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-
-export interface PerformanceByShift {
-    shift: 'Madrugada' | 'Manhã' | 'Tarde' | 'Noite';
-    profit: number;
-    hours: number;
-    profitPerHour: number;
-}
+import { PerformanceByShift } from "../dashboard/dashboard-client";
 
 const shiftIcons = {
     Madrugada: <Moon className="h-6 w-6 text-indigo-400" />,
@@ -33,7 +27,7 @@ export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
     }, [performance]);
 
     if (!performance || performance.length === 0) {
-        return null; // Não renderiza nada se não houver dados
+        return null; 
     }
 
     return (
@@ -43,7 +37,7 @@ export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
                 <CardDescription>Veja qual período do dia foi mais lucrativo para você hoje.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                {bestShift && (
+                {bestShift && bestShift.profit > 0 && (
                     <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
                         <Trophy className="h-8 w-8 text-green-500 mx-auto mb-2" />
                         <p className="font-bold text-green-600 dark:text-green-400">Seu turno mais lucrativo foi a {bestShift.shift.toLowerCase()}!</p>

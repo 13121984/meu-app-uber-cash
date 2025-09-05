@@ -1,9 +1,10 @@
 
-import { DashboardClient, type DashboardData } from '@/components/dashboard/dashboard-client';
-import { getDashboardData } from '@/services/work-day.service';
+import { HomeClient } from '@/components/inicio/home-client';
+import { getTodayData } from '@/services/work-day.service';
+import type { PeriodData } from '@/components/dashboard/dashboard-client';
 
-export default async function DashboardPage() {
-  const dashboardData: DashboardData = await getDashboardData();
-
-  return <DashboardClient initialData={dashboardData} />;
+export default async function InicioPage() {
+  const todayData: PeriodData = await getTodayData();
+  
+  return <HomeClient todayData={todayData} />;
 }

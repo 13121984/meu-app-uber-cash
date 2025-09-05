@@ -11,21 +11,28 @@ import { Step3Fuel } from './step3-fuel';
 import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
-import { addOrUpdateWorkDay } from '@/services/work-day.service';
+import { addOrUpdateWorkDay, findWorkDayByDate } from '@/services/work-day.service';
 import { addMaintenance } from '@/services/maintenance.service';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
-import { parseISO } from 'date-fns';
+import { parseISO, format } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
+
+export type TimeEntry = {
+    id: number;
+    start: string;
+    end: string;
+};
 
 type State = {
   id?: string;
   date: Date;
   km: number;
   hours: number;
+  timeEntries: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
   maintenance: { description: string; amount: number };
@@ -37,16 +44,25 @@ type Action =
   | { type: 'RESET_STATE' };
 
 
-const getInitialState = (initialData?: Partial<WorkDay>): State => {
-    const safeInitialData = initialData || {};
+const getInitialState = (initialData?: Partial<WorkDay>, searchDate?: string, searchHours?: string): State => {
+    let date = new Date();
+    if(initialData?.date) {
+        date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
+    } else if (searchDate) {
+        date = parseISO(searchDate);
+    }
+
+    const hours = searchHours ? parseFloat(searchHours) : (initialData?.hours || 0);
+
     return {
-        id: safeInitialData.id || undefined,
-        date: safeInitialData.date ? (typeof safeInitialData.date === 'string' ? parseISO(safeInitialData.date) : safeInitialData.date) : new Date(),
-        km: safeInitialData.km || 0,
-        hours: safeInitialData.hours || 0,
-        earnings: safeInitialData.earnings || [],
-        fuelEntries: safeInitialData.fuelEntries || [],
-        maintenance: safeInitialData.maintenance || { description: '', amount: 0 },
+        id: initialData?.id || undefined,
+        date,
+        km: initialData?.km || 0,
+        hours,
+        timeEntries: (initialData as any)?.timeEntries || [],
+        earnings: initialData?.earnings || [],
+        fuelEntries: initialData?.fuelEntries || [],
+        maintenance: initialData?.maintenance || { description: '', amount: 0 },
     };
 };
 
@@ -92,19 +108,37 @@ const playSuccessSound = () => {
 
 export function RegistrationWizard({ initialData, isEditing = false, onSuccess, registrationType = 'other-day' }: RegistrationWizardProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
 
-  // This effect ensures the wizard's state is updated if the initialData prop changes
-  // (e.g., when closing and reopening the edit dialog for a different day).
+  const [state, dispatch] = useReducer(reducer, getInitialState(initialData, searchParams.get('date') ?? undefined, searchParams.get('hours') ?? undefined));
+  
   useEffect(() => {
-    dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) });
-    setCompletedSteps(isEditing ? [1, 2, 3, 4] : []);
-    setCurrentStep(1);
-  }, [initialData, isEditing]);
+    // When not editing, check for an existing workday for the selected date
+    if (!isEditing && state.date) {
+        const fetchExistingData = async () => {
+            const dateStr = format(state.date, 'yyyy-MM-dd');
+            const existingDay = await findWorkDayByDate(dateStr);
+            if (existingDay) {
+                // If a day is found, merge its data into the current state
+                dispatch({ 
+                    type: 'SET_STATE', 
+                    payload: getInitialState(existingDay, searchParams.get('date') ?? undefined, searchParams.get('hours') ?? undefined)
+                });
+            } else {
+                 // If no day is found, reset specific fields but keep date and hours from URL
+                dispatch({ 
+                    type: 'SET_STATE', 
+                    payload: getInitialState({}, format(state.date, 'yyyy-MM-dd'), state.hours.toString())
+                });
+            }
+        };
+        fetchExistingData();
+    }
+  }, [state.date, isEditing, searchParams]);
+
 
   const resetWizard = () => {
     dispatch({ type: 'RESET_STATE' });
@@ -178,8 +212,8 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
         if (onSuccess) {
             onSuccess();
         } else {
+            router.push('/');
             router.refresh();
-            resetWizard();
         }
 
       } else {
@@ -299,5 +333,3 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     </div>
   );
 }
-
-    

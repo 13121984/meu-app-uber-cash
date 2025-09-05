@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { DollarSign, Fuel, Map, Hourglass, TrendingUp, Clock, Car, Settings, Wrench, Zap, BarChart3, GripVertical, Loader2, CalendarDays } from "lucide-react"
+import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatsCard } from "./stats-card"
@@ -10,13 +10,11 @@ import { GoalProgress } from "./goal-progress"
 import { cn } from "@/lib/utils"
 import { MaintenanceSummary } from "./maintenance-summary"
 import dynamic from 'next/dynamic';
-import type { PerformanceByShift } from "../inicio/shift-performance";
-
+import { BarChart3, GripVertical, Loader2 } from "lucide-react"
 
 const EarningsBarChart = dynamic(() => import('./earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const TripsBarChart = dynamic(() => import('./trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const EarningsPieChart = dynamic(() => import('./earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
-
 
 export interface EarningsByCategory {
     name: string;
@@ -32,6 +30,14 @@ export interface MaintenanceData {
   totalSpent: number;
   servicesPerformed: number;
 }
+
+export interface PerformanceByShift {
+    shift: 'Madrugada' | 'Manhã' | 'Tarde' | 'Noite';
+    profit: number;
+    hours: number;
+    profitPerHour: number;
+}
+
 
 export interface PeriodData {
   totalGanho: number;

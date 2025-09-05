@@ -1,9 +1,8 @@
 
-
 "use server";
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO } from 'date-fns';
-import { PeriodData, EarningsByCategory, TripsByCategory } from "@/components/dashboard/dashboard-client";
+import { PeriodData, EarningsByCategory, TripsByCategory, PerformanceByShift } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords, Maintenance } from './maintenance.service';
@@ -14,11 +13,18 @@ import { revalidatePath } from 'next/cache';
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id:number; type: string; paid: number; price: number };
 
+export type TimeEntry = {
+    id: number;
+    start: string;
+    end:string;
+}
+
 export interface WorkDay {
   id: string; // ID is now mandatory
   date: Date;
   km: number;
   hours: number;
+  timeEntries: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
   maintenance?: { // Maintenance is now optional on the work-day itself
@@ -110,13 +116,25 @@ async function writeWorkDays(data: WorkDay[]): Promise<void> {
 export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
   try {
     const allWorkDays = await readWorkDays();
-    const existingDay = allWorkDays.find(d => d.id === data.id);
+    const dateToFind = format(data.date, 'yyyy-MM-dd');
+    const existingDayIndex = allWorkDays.findIndex(d => format(d.date, 'yyyy-MM-dd') === dateToFind);
 
-    if (existingDay) {
-      // Update existing day
-      const updatedDay: WorkDay = { ...existingDay, ...data };
-      const index = allWorkDays.findIndex(d => d.id === data.id);
-      allWorkDays[index] = updatedDay;
+    if (existingDayIndex > -1) {
+      // Merge and update existing day
+      const existingDay = allWorkDays[existingDayIndex];
+      const updatedDay: WorkDay = { 
+        ...existingDay, 
+        ...data,
+        id: existingDay.id, // Keep original ID
+        // Sum values
+        km: Math.max(existingDay.km, data.km),
+        hours: Math.max(existingDay.hours, data.hours),
+        // Concatenate arrays
+        earnings: [...existingDay.earnings, ...data.earnings],
+        fuelEntries: [...existingDay.fuelEntries, ...data.fuelEntries],
+        timeEntries: [...existingDay.timeEntries, ...data.timeEntries],
+       };
+      allWorkDays[existingDayIndex] = updatedDay;
       await writeWorkDays(allWorkDays);
       revalidateAll();
       return { success: true, id: updatedDay.id, operation: 'updated' };
@@ -161,6 +179,7 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
                     date: parseISO(row.date),
                     km: 0,
                     hours: 0,
+                    timeEntries: [],
                     earnings: [],
                     fuelEntries: [],
                     maintenance: { description: '', amount: 0 }
@@ -297,9 +316,30 @@ export async function getWorkDays(): Promise<WorkDay[]> {
     return await readWorkDays();
 }
 
+
+export async function findWorkDayByDate(date: string): Promise<WorkDay | null> {
+    const allWorkDays = await readWorkDays();
+    return allWorkDays.find(day => format(day.date, 'yyyy-MM-dd') === date) || null;
+}
+
+const timeToMinutes = (time: string): number => {
+    if (!time || !time.includes(':')) return 0;
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+};
+
+const getShift = (startTime: string): PerformanceByShift['shift'] => {
+    const startMinutes = timeToMinutes(startTime);
+    if (startMinutes > timeToMinutes("06:00") && startMinutes <= timeToMinutes("12:00")) return 'Manhã';
+    if (startMinutes > timeToMinutes("12:00") && startMinutes <= timeToMinutes("18:00")) return 'Tarde';
+    if (startMinutes > timeToMinutes("18:00") || startMinutes <= timeToMinutes("00:00")) return 'Noite';
+    return 'Madrugada';
+};
+
 function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
+    const shiftPerformanceMap = new Map<PerformanceByShift['shift'], { profit: number; hours: number }>();
 
     const data = {
         totalGanho: 0,
@@ -321,7 +361,6 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
     workDays.forEach(day => {
         const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
         const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-        
         const dailyProfit = dailyEarnings - dailyFuel;
 
         data.totalGanho += dailyEarnings;
@@ -345,14 +384,43 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
             
             data.totalViagens += earning.trips;
         });
+
+        // Shift performance calculation
+        if (day.timeEntries && day.timeEntries.length > 0 && day.earnings.length > 0) {
+            const totalDayHours = day.timeEntries.reduce((sum, entry) => {
+                const startMinutes = timeToMinutes(entry.start);
+                const endMinutes = timeToMinutes(entry.end);
+                return sum + (endMinutes > startMinutes ? (endMinutes - startMinutes) / 60 : 0);
+            }, 0);
+
+            if (totalDayHours > 0) {
+                day.timeEntries.forEach(entry => {
+                    const startMinutes = timeToMinutes(entry.start);
+                    const endMinutes = timeToMinutes(entry.end);
+                    const entryHours = endMinutes > startMinutes ? (endMinutes - startMinutes) / 60 : 0;
+                    if (entryHours > 0) {
+                        const shift = getShift(entry.start);
+                        const shiftData = shiftPerformanceMap.get(shift) || { profit: 0, hours: 0 };
+                        const entryProfit = dailyProfit * (entryHours / totalDayHours);
+                        shiftData.profit += entryProfit;
+                        shiftData.hours += entryHours;
+                        shiftPerformanceMap.set(shift, shiftData);
+                    }
+                });
+            }
+        }
     });
     
     data.totalLucro -= maintenanceData.totalSpent;
 
-
     const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
     const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
-    
+    const performanceByShift: PerformanceByShift[] = Array.from(shiftPerformanceMap, ([shift, data]) => ({
+        shift,
+        ...data,
+        profitPerHour: data.hours > 0 ? data.profit / data.hours : 0
+    }));
+
     const totalGanho = data.totalGanho;
     const totalLucroFinal = data.totalLucro;
     const totalCombustivelFinal = data.totalCombustivel;
@@ -377,7 +445,8 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         tripsByCategory,
         maintenance: maintenanceData,
         meta: { target: targetGoal, period: period },
-        profitComposition: profitComposition
+        profitComposition: profitComposition,
+        performanceByShift,
     };
 }
 
@@ -411,6 +480,26 @@ export async function getDashboardData() {
     const mes = calculatePeriodData(thisMonthWorkDays, "mensal", goals, thisMonthMaintenance);
 
     return { hoje, semana, mes };
+}
+
+export async function getTodayData(): Promise<PeriodData> {
+    const allWorkDays = await getWorkDays();
+    const allMaintenance = await getMaintenanceRecords();
+    const goals = await getGoals();
+    const now = new Date();
+    const todayDateString = now.toDateString();
+
+    const todayWorkDays = allWorkDays.filter(day => {
+        const dayDate = new Date(day.date);
+        return dayDate.toDateString() === todayDateString;
+    });
+    
+    const todayMaintenance = allMaintenance.filter(m => {
+      const mDate = new Date(m.date);
+      return mDate.toDateString() === todayDateString;
+    });
+
+    return calculatePeriodData(todayWorkDays, "diária", goals, todayMaintenance);
 }
 
 export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilterValues): Promise<ReportData> {
@@ -480,7 +569,6 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
     const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
     const dailyTrips = day.earnings.reduce((sum, e) => sum + e.trips, 0);
-    // Lucro do dia de trabalho não considera mais manutenção, que agora é tratada de forma separada.
     const dailyProfit = dailyEarnings - dailyFuel;
 
     totalGanho += dailyEarnings;
@@ -526,7 +614,6 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   const dailyTrips: DailyTripsData[] = [];
   if (interval) {
       const daysInInterval = eachDayOfInterval(interval);
-      // Limita o número de pontos no gráfico para evitar sobrecarga visual
       const step = Math.ceil(daysInInterval.length / 31);
       for (let i = 0; i < daysInInterval.length; i += step) {
           const date = daysInInterval[i];
