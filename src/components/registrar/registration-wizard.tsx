@@ -313,3 +313,4 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
     </div>
   );
 }
+

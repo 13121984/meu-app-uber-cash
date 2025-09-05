@@ -74,3 +74,4 @@ export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
         </Card>
     );
 }
+

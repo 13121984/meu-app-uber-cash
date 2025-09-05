@@ -120,3 +120,4 @@ export function HomeClient({ todayData }: HomeClientProps) {
     </div>
   );
 }
+
