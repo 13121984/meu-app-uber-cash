@@ -9,11 +9,12 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { format, isValid, parse } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { State, TimeEntry } from './registration-wizard';
 import { Card, CardContent } from '../ui/card';
 import { ScrollArea } from '../ui/scroll-area';
+import { Separator } from '../ui/separator';
 
 type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
 
@@ -36,12 +37,6 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
     dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
   };
   
-  const handleHoursInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const hours = value === '' ? 0 : parseFloat(value.replace(',', '.')) || 0;
-    handleFieldChange('hours', hours);
-  }
-
   const handleTimeEntriesChange = useCallback((newTimeEntries: TimeEntry[]) => {
       let totalMinutes = 0;
       newTimeEntries.forEach(entry => {
@@ -81,7 +76,7 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
         <div>
           <Label htmlFor="date">Data do Trabalho</Label>
            <div className="flex items-center gap-2">
-            <Input id="date" type="text" placeholder="DD/MM/AAAA" value={dateString} disabled={isDateDisabled} readOnly />
+            <Input id="date" type="text" placeholder="DD/MM/AAAA" value={dateString} disabled readOnly />
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="icon" disabled={isDateDisabled}>
@@ -106,7 +101,15 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
           <Label htmlFor="hours">Total de Horas</Label>
            <div className="relative">
              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500" />
-            <Input id="hours" type="text" placeholder="Ex: 8,5" value={data.hours ? data.hours.toString().replace('.', ',') : ''} onChange={handleHoursInputChange} className="pl-10" disabled={hasTimeEntries}/>
+            <Input 
+                id="hours" 
+                type="text" 
+                placeholder="Ex: 8,5" 
+                value={data.hours ? data.hours.toString().replace('.', ',') : ''} 
+                onChange={(e) => handleFieldChange('hours', parseFloat(e.target.value.replace(',', '.')) || 0)} 
+                className="pl-10" 
+                disabled={hasTimeEntries}
+            />
             {hasTimeEntries && <p className="text-xs text-muted-foreground mt-1">O total de horas é calculado automaticamente a partir dos períodos.</p>}
           </div>
         </div>

@@ -26,7 +26,7 @@ export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
         return performance.reduce((best, current) => current.profitPerHour > best.profitPerHour ? current : best);
     }, [performance]);
 
-    if (!performance || performance.length === 0) {
+    if (!performance || performance.filter(p => p.profit > 0 || p.hours > 0).length === 0) {
         return null; 
     }
 

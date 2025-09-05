@@ -120,20 +120,11 @@ export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Pr
     const existingDayIndex = allWorkDays.findIndex(d => format(d.date, 'yyyy-MM-dd') === dateToFind);
 
     if (existingDayIndex > -1) {
-      // Merge and update existing day
-      const existingDay = allWorkDays[existingDayIndex];
+      // Update existing day by replacing it
       const updatedDay: WorkDay = { 
-        ...existingDay, 
         ...data,
-        id: existingDay.id, // Keep original ID
-        // Sum values
-        km: Math.max(existingDay.km, data.km),
-        hours: Math.max(existingDay.hours, data.hours),
-        // Concatenate arrays
-        earnings: [...existingDay.earnings, ...data.earnings],
-        fuelEntries: [...existingDay.fuelEntries, ...data.fuelEntries],
-        timeEntries: [...existingDay.timeEntries, ...data.timeEntries],
-       };
+        id: allWorkDays[existingDayIndex].id, // Keep original ID
+      };
       allWorkDays[existingDayIndex] = updatedDay;
       await writeWorkDays(allWorkDays);
       revalidateAll();
@@ -155,6 +146,7 @@ export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Pr
     return { success: false, error: errorMessage, operation: 'created' }; // Assume created on failure
   }
 }
+
 
 export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     try {
@@ -330,9 +322,9 @@ const timeToMinutes = (time: string): number => {
 
 const getShift = (startTime: string): PerformanceByShift['shift'] => {
     const startMinutes = timeToMinutes(startTime);
-    if (startMinutes > timeToMinutes("06:00") && startMinutes <= timeToMinutes("12:00")) return 'Manhã';
+    if (startMinutes >= timeToMinutes("06:01") && startMinutes <= timeToMinutes("12:00")) return 'Manhã';
     if (startMinutes > timeToMinutes("12:00") && startMinutes <= timeToMinutes("18:00")) return 'Tarde';
-    if (startMinutes > timeToMinutes("18:00") || startMinutes <= timeToMinutes("00:00")) return 'Noite';
+    if (startMinutes > timeToMinutes("18:00") && startMinutes <= timeToMinutes("23:59")) return 'Noite';
     return 'Madrugada';
 };
 
@@ -386,7 +378,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         });
 
         // Shift performance calculation
-        if (day.timeEntries && day.timeEntries.length > 0 && day.earnings.length > 0) {
+        if (day.timeEntries && day.timeEntries.length > 0) {
             const totalDayHours = day.timeEntries.reduce((sum, entry) => {
                 const startMinutes = timeToMinutes(entry.start);
                 const endMinutes = timeToMinutes(entry.end);
@@ -394,13 +386,14 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
             }, 0);
 
             if (totalDayHours > 0) {
-                day.timeEntries.forEach(entry => {
+                 day.timeEntries.forEach(entry => {
                     const startMinutes = timeToMinutes(entry.start);
                     const endMinutes = timeToMinutes(entry.end);
                     const entryHours = endMinutes > startMinutes ? (endMinutes - startMinutes) / 60 : 0;
                     if (entryHours > 0) {
                         const shift = getShift(entry.start);
                         const shiftData = shiftPerformanceMap.get(shift) || { profit: 0, hours: 0 };
+                        // Prorate the day's profit to the entry's duration
                         const entryProfit = dailyProfit * (entryHours / totalDayHours);
                         shiftData.profit += entryProfit;
                         shiftData.hours += entryHours;
@@ -419,7 +412,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         shift,
         ...data,
         profitPerHour: data.hours > 0 ? data.profit / data.hours : 0
-    }));
+    })).sort((a,b) => a.shift.localeCompare(b.shift)); // Sort for consistent order
 
     const totalGanho = data.totalGanho;
     const totalLucroFinal = data.totalLucro;
@@ -428,6 +421,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
     const profitComposition = [
         { name: 'Lucro Líquido', value: totalLucroFinal, fill: 'hsl(var(--chart-1))', totalGanho },
         { name: 'Combustível', value: totalCombustivelFinal, fill: 'hsl(var(--chart-2))', totalGanho },
+        { name: 'Manutenção', value: maintenanceData.totalSpent, fill: 'hsl(var(--chart-3))', totalGanho },
       ].filter(item => item.value !== 0);
 
 

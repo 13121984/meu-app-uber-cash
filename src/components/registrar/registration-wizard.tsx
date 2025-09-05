@@ -44,21 +44,17 @@ type Action =
   | { type: 'RESET_STATE' };
 
 
-const getInitialState = (initialData?: Partial<WorkDay>, searchDate?: string, searchHours?: string): State => {
+const getInitialState = (initialData?: Partial<WorkDay>): State => {
     let date = new Date();
     if(initialData?.date) {
         date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
-    } else if (searchDate) {
-        date = parseISO(searchDate);
     }
-
-    const hours = searchHours ? parseFloat(searchHours) : (initialData?.hours || 0);
 
     return {
         id: initialData?.id || undefined,
         date,
         km: initialData?.km || 0,
-        hours,
+        hours: initialData?.hours || 0,
         timeEntries: (initialData as any)?.timeEntries || [],
         earnings: initialData?.earnings || [],
         fuelEntries: initialData?.fuelEntries || [],
@@ -113,7 +109,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [state, dispatch] = useReducer(reducer, getInitialState(initialData, searchParams.get('date') ?? undefined, searchParams.get('hours') ?? undefined));
+  const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
   
   useEffect(() => {
     // When not editing, check for an existing workday for the selected date
@@ -125,19 +121,15 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
                 // If a day is found, merge its data into the current state
                 dispatch({ 
                     type: 'SET_STATE', 
-                    payload: getInitialState(existingDay, searchParams.get('date') ?? undefined, searchParams.get('hours') ?? undefined)
-                });
-            } else {
-                 // If no day is found, reset specific fields but keep date and hours from URL
-                dispatch({ 
-                    type: 'SET_STATE', 
-                    payload: getInitialState({}, format(state.date, 'yyyy-MM-dd'), state.hours.toString())
+                    payload: getInitialState(existingDay)
                 });
             }
         };
         fetchExistingData();
+    } else if (isEditing && initialData) {
+        dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) })
     }
-  }, [state.date, isEditing, searchParams]);
+  }, [state.date, isEditing, initialData]);
 
 
   const resetWizard = () => {
@@ -250,7 +242,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
   const isStep1Or2 = currentStep === 1 || currentStep === 2;
   const isStep3 = currentStep === 3;
   const isLastStep = currentStep === steps.length;
-  const livePreviewData = isEditing ? { ...state, maintenance: { amount: 0, description: '' } } : state;
+  const livePreviewData = state;
 
   return (
     <div className={`grid grid-cols-1 ${isEditing ? '' : 'lg:grid-cols-3'} gap-8`}>
@@ -296,25 +288,13 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess, 
             </Button>
 
             <div className="flex gap-2">
-                {isStep1Or2 && (
+                {!isLastStep && (
                     <Button onClick={handleNext} disabled={isSubmitting}>
                         Próximo
                     </Button>
                 )}
 
-                {isStep3 && !isEditing && (
-                    <>
-                        <Button onClick={handleNext} variant="outline" disabled={isSubmitting}>
-                            Adicionar Despesa
-                        </Button>
-                        <Button onClick={handleSubmit} disabled={isSubmitting}>
-                             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            Concluir e Salvar
-                        </Button>
-                    </>
-                )}
-                
-                {(isLastStep || (isStep3 && isEditing)) && (
+                {isLastStep && (
                      <Button onClick={handleSubmit} disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {isEditing ? 'Salvar Alterações' : 'Concluir e Salvar'}
