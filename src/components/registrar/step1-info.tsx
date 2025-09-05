@@ -9,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { format, parse, isValid, setDate, setMonth, setYear, getYear, getMonth, getDate } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 type Action = { type: 'SET_BASIC_INFO'; payload: { date: Date; km: number; hours: number } };
@@ -21,9 +21,9 @@ interface Step1InfoProps {
 }
 
 export function Step1Info({ data, dispatch }: Step1InfoProps) {
-  const [day, setDay] = useState(format(data.date, 'dd'));
-  const [month, setMonth] = useState(format(data.date, 'MM'));
-  const [year, setYearState] = useState(format(data.date, 'yyyy'));
+  const [day, setDay] = useState(data.date ? format(data.date, 'dd') : '');
+  const [month, setMonth] = useState(data.date ? format(data.date, 'MM') : '');
+  const [year, setYearState] = useState(data.date ? format(data.date, 'yyyy') : '');
 
   useEffect(() => {
     if (data.date) {
@@ -34,9 +34,10 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
   }, [data.date]);
 
   const updateMainDate = (newDay: number, newMonth: number, newYear: number) => {
+    // Month is 0-indexed in JS Date
     const updatedDate = new Date(newYear, newMonth - 1, newDay);
 
-    if (isValid(updatedDate)) {
+    if (isValid(updatedDate) && updatedDate.getFullYear() === newYear && (updatedDate.getMonth() + 1) === newMonth && updatedDate.getDate() === newDay) {
       dispatch({
         type: 'SET_BASIC_INFO',
         payload: { ...data, date: updatedDate },
@@ -48,26 +49,32 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
     const value = e.target.value.slice(0, 2);
     setDay(value);
     const dayNum = parseInt(value, 10);
-    if (!isNaN(dayNum) && dayNum >= 1 && dayNum <= 31) {
-      updateMainDate(dayNum, parseInt(month, 10), parseInt(year, 10));
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
+    if (!isNaN(dayNum) && !isNaN(monthNum) && !isNaN(yearNum)) {
+      updateMainDate(dayNum, monthNum, yearNum);
     }
   };
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.slice(0, 2);
     setMonth(value);
+    const dayNum = parseInt(day, 10);
     const monthNum = parseInt(value, 10);
-    if (!isNaN(monthNum) && monthNum >= 1 && monthNum <= 12) {
-      updateMainDate(parseInt(day, 10), monthNum, parseInt(year, 10));
+    const yearNum = parseInt(year, 10);
+     if (!isNaN(dayNum) && !isNaN(monthNum) && !isNaN(yearNum)) {
+      updateMainDate(dayNum, monthNum, yearNum);
     }
   };
 
   const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.slice(0, 4);
     setYearState(value);
+    const dayNum = parseInt(day, 10);
+    const monthNum = parseInt(month, 10);
     const yearNum = parseInt(value, 10);
-    if (!isNaN(yearNum) && value.length === 4) {
-      updateMainDate(parseInt(day, 10), parseInt(month, 10), yearNum);
+    if (!isNaN(dayNum) && !isNaN(monthNum) && !isNaN(yearNum) && value.length === 4) {
+      updateMainDate(dayNum, monthNum, yearNum);
     }
   };
   
@@ -131,6 +138,7 @@ export function Step1Info({ data, dispatch }: Step1InfoProps) {
                         selected={data.date}
                         onSelect={handleDateSelect}
                         initialFocus
+                        locale={ptBR}
                     />
                 </PopoverContent>
             </Popover>
