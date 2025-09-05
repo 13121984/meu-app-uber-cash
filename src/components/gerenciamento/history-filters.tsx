@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,26 +23,32 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // State for the inputs
-  const [query, setQuery] = useState('');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  // State for the inputs, initialized from URL search params
+  const [query, setQuery] = useState(searchParams.get('query') || '');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const fromParam = searchParams.get('from');
+    const toParam = searchParams.get('to');
+    if (fromParam) {
+      const fromDate = parseISO(fromParam);
+      const toDate = toParam ? parseISO(toParam) : undefined;
+      if (isValid(fromDate)) {
+        return { from: fromDate, to: isValid(toDate) ? toDate : undefined };
+      }
+    }
+    return undefined;
+  });
 
   // Debounce the query input to avoid excessive URL updates
   const [debouncedQuery] = useDebounce(query, 500);
-  
+
   // This state ensures that client-side-only logic runs after hydration
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
+
   // This effect synchronizes the URL with the component's state
-  useEffect(() => {
-    // Only run this logic on the client
-    if (!isClient) {
-      return;
-    }
-    
+  const updateURL = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (debouncedQuery) {
       params.set('query', debouncedQuery);
@@ -64,29 +70,15 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
     
     // Using router.replace to avoid adding unnecessary entries to browser history
     router.replace(`${pathname}?${params.toString()}`);
+  }, [debouncedQuery, dateRange, pathname, router, searchParams]);
 
-  }, [debouncedQuery, dateRange, pathname, router, searchParams, isClient]);
-
-  // This effect synchronizes the component's state with the URL on initial load
   useEffect(() => {
-    const queryParam = searchParams.get('query');
-    const fromParam = searchParams.get('from');
-    const toParam = searchParams.get('to');
-
-    setQuery(queryParam || '');
-    
-    if (fromParam) {
-        try {
-            const fromDate = parseISO(fromParam);
-            const toDate = toParam ? parseISO(toParam) : undefined;
-            if (isValid(fromDate)) {
-              setDateRange({ from: fromDate, to: isValid(toDate) ? toDate : undefined });
-            }
-        } catch(e) {
-            // Invalid date in URL, ignore it
-        }
+    // Only run this logic on the client
+    if (isClient) {
+      updateURL();
     }
-  }, [searchParams]);
+  }, [isClient, updateURL]);
+
 
   const handleClearFilters = () => {
     setQuery('');
