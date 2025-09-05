@@ -17,6 +17,8 @@ export function Confetti() {
   const [pieces, setPieces] = useState<React.ReactNode[]>([]);
 
   useEffect(() => {
+    // This effect runs only on the client, after the component has mounted.
+    // This prevents hydration errors by ensuring Math.random() is not run on the server.
     const newPieces = Array.from({ length: 150 }).map((_, i) => {
       const style: React.CSSProperties = {
         left: `${Math.random() * 100}vw`,
