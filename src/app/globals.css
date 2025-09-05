@@ -9,60 +9,60 @@ body {
 
 @layer base {
   :root {
-    --background: 24 94% 95%; /* light orange */
-    --foreground: 24 10% 10%;
-    --card: 24 94% 98%;
-    --card-foreground: 24 10% 10%;
-    --popover: 0 0% 100%;
+    --background: 240 10% 98%; 
+    --foreground: 240 10% 10%;
+    --card: 240 10% 100%;
+    --card-foreground: 240 10% 10%;
+    --popover: 240 10% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 33 100% 50%; /* vibrant orange */
+    --primary: 262.1 83.3% 57.8%; /* vibrant purple */
     --primary-foreground: 210 20% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 33 80% 40%; /* deep orange */
+    --accent: 262.1 83.3% 67.8%; /* lighter purple */
     --accent-foreground: 210 20% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 20% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 33 100% 50%;
+    --ring: 262.1 83.3% 57.8%;
     --radius: 0.75rem;
 
     --chart-1: 142.1 76.2% 36.3%; /* Green */
     --chart-2: 0 84.2% 60.2%; /* Red */
-    --chart-3: 33 80% 40%; /* deep orange */
-    --chart-4: 43 74% 66%;
-    --chart-5: 33 100% 50%; /* vibrant orange */
+    --chart-3: 204 90% 50%; /* Blue */
+    --chart-4: 262.1 83.3% 57.8%; /* Purple */
+    --chart-5: 33 100% 50%; /* Orange */
   }
  
   .dark {
-    --background: 24 10% 10%;
+    --background: 240 10% 3.9%;
     --foreground: 210 20% 98%;
-    --card: 24 10% 10%;
+    --card: 240 4% 10%;
     --card-foreground: 210 20% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 210 20% 98%;
-    --primary: 33 100% 50%; /* vibrant orange */
+    --primary: 262.1 83.3% 57.8%; /* vibrant purple */
     --primary-foreground: 210 20% 98%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 210 20% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 33 80% 40%; /* deep orange */
+    --accent: 262.1 83.3% 47.8%; /* darker purple */
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 33 100% 50%;
+    --ring: 262.1 83.3% 57.8%;
 
     --chart-1: 142.1 76.2% 36.3%; /* Green */
-    --chart-2: 0 84.2% 60.2%; /* Red */
-    --chart-3: 33 80% 40%; /* deep orange */
-    --chart-4: 43 74% 66%;
-    --chart-5: 33 100% 50%; /* vibrant orange */
+    --chart-2: 0 72.2% 50.6%; /* Red */
+    --chart-3: 204 90% 50%; /* Blue */
+    --chart-4: 262.1 83.3% 57.8%; /* Purple */
+    --chart-5: 33 100% 50%; /* Orange */
   }
 }
 
