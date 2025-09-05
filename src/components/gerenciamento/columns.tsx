@@ -89,7 +89,9 @@ export const useWorkDayColumns = () => {
         )
       },
       cell: ({ row }) => {
-        const date = row.getValue("date") as Date;
+        // Correctly handle date formatting to avoid hydration errors
+        const dateValue = row.original.date;
+        const date = typeof dateValue === 'string' ? parseISO(dateValue) : dateValue;
         return <div className="font-medium whitespace-nowrap">{format(date, "dd/MM/yy (EEE)", { locale: ptBR })}</div>
       },
       sortingFn: 'datetime',
