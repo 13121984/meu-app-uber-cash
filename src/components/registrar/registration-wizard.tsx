@@ -12,6 +12,7 @@ import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { addWorkDay } from '@/services/work-day.service';
+import { addMaintenance } from '@/services/maintenance.service';
 import { updateWorkDayAction } from '../gerenciamento/actions';
 import { ScrollArea } from '../ui/scroll-area';
 
@@ -138,10 +139,23 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
     
     try {
       let result;
+      // Exclui a manutenção do objeto 'state' antes de enviar, pois ela será tratada separadamente
+      const { maintenance, ...workDayData } = state;
+
       if (isEditing && state.id) {
-        result = await updateWorkDayAction(state as State & { id: string });
+         // Na edição, só salvamos o dia de trabalho. A manutenção é editada em sua própria tela.
+        result = await updateWorkDayAction(workDayData as any);
       } else {
-        result = await addWorkDay(state);
+         // Ao criar um novo registro, salvamos o dia de trabalho primeiro.
+        result = await addWorkDay(workDayData);
+        // Se o dia foi salvo e há uma despesa de manutenção, a adicionamos separadamente.
+        if (result.success && maintenance.amount > 0 && maintenance.description) {
+            await addMaintenance({
+                date: state.date,
+                description: maintenance.description,
+                amount: maintenance.amount,
+            });
+        }
       }
       
       if (result.success) {
@@ -189,12 +203,14 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
       case 1: return <Step1Info data={state} dispatch={dispatch} />;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
       case 3: return <Step3Fuel data={state} dispatch={dispatch} />;
-      case 4: return <Step4Extras data={state} dispatch={dispatch} />;
+      case 4: return <Step4Extras data={state} dispatch={dispatch} isDisabled={isEditing} />;
       default: return null;
     }
   };
 
   const isLastStep = currentStep === steps.length;
+  // Desabilita o preview da manutenção quando estiver no modo de edição
+  const livePreviewData = isEditing ? { ...state, maintenance: { amount: 0, description: '' } } : state;
 
   return (
     <div className={`grid grid-cols-1 ${isEditing ? '' : 'lg:grid-cols-3'} gap-8`}>
@@ -254,7 +270,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
       {/* Live Preview */}
        {!isEditing && (
          <div className="lg:col-span-1">
-            <LivePreview data={state} />
+            <LivePreview data={livePreviewData} />
          </div>
        )}
     </div>

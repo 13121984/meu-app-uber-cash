@@ -13,7 +13,6 @@ interface LivePreviewProps {
     hours: number;
     earnings: Earning[];
     fuelEntries: FuelEntry[];
-    maintenance: { amount: number };
   };
 }
 
@@ -28,9 +27,6 @@ export function LivePreview({ data }: LivePreviewProps) {
   const calculations = useMemo(() => {
     const totalGanhos = data.earnings.reduce((sum, e) => sum + e.amount, 0);
     const totalCombustiveis = data.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-    const totalDespesasExtras = data.maintenance.amount || 0;
-    const totalGastos = totalCombustiveis + totalDespesasExtras;
-    // Lucro Líquido para o preview agora também reflete a nova regra (sem manutenção)
     const lucroLiquido = totalGanhos - totalCombustiveis;
     const totalViagens = data.earnings.reduce((sum, e) => sum + e.trips, 0);
     const totalLitros = data.fuelEntries.reduce((sum, f) => sum + (f.price > 0 ? f.paid / f.price : 0), 0);
@@ -43,8 +39,6 @@ export function LivePreview({ data }: LivePreviewProps) {
     return {
       totalGanhos,
       totalCombustiveis,
-      totalDespesasExtras,
-      totalGastos,
       lucroLiquido,
       totalViagens,
       totalLitros,
@@ -73,7 +67,6 @@ export function LivePreview({ data }: LivePreviewProps) {
         
         <StatItem label="Total Ganhos" value={formatCurrency(calculations.totalGanhos)} className="text-green-600 dark:text-green-500" />
         <StatItem label="Gastos (Combustível)" value={formatCurrency(calculations.totalCombustiveis)} className="text-red-600 dark:text-red-500" />
-        <StatItem label="Gastos (Extras)" value={formatCurrency(calculations.totalDespesasExtras)} className="text-red-600 dark:text-red-500" />
         
         <Separator />
         

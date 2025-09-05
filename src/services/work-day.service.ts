@@ -94,7 +94,8 @@ async function readWorkDays(): Promise<WorkDay[]> {
         await writeWorkDays([]); // Create the file if it doesn't exist
         return [];
     }
-    throw error;
+    console.error("Failed to read work-days.json", error);
+    return [];
   }
 }
 
@@ -448,12 +449,16 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   let totalGanho = 0, totalCombustivel = 0, totalKm = 0, totalHoras = 0, totalViagens = 0, totalLitros = 0;
   
   const totalManutencaoFromWorkdays = filteredDays.reduce((sum, d) => sum + (d.maintenance?.amount || 0), 0);
+  const totalMaintenanceFromService = filteredMaintenance.reduce((sum, m) => sum + m.amount, 0);
+  const totalManutencaoFinal = totalManutencaoFromWorkdays + totalMaintenanceFromService;
+
 
   filteredDays.forEach(day => {
     const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
     const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
     const dailyTrips = day.earnings.reduce((sum, e) => sum + e.trips, 0);
-    const dailyMaintenance = day.maintenance?.amount || 0;
+    // Lucro do dia de trabalho não considera mais manutenção, que agora é tratada de forma separada.
+    const dailyProfit = dailyEarnings - dailyFuel;
 
     totalGanho += dailyEarnings;
     totalCombustivel += dailyFuel;
@@ -474,7 +479,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
 
     const dateKey = format(new Date(day.date), 'yyyy-MM-dd');
     const currentDaily = dailyDataMap.get(dateKey) || { lucro: 0, viagens: 0 };
-    currentDaily.lucro += dailyEarnings - dailyFuel - dailyMaintenance;
+    currentDaily.lucro += dailyProfit;
     currentDaily.viagens += dailyTrips;
     dailyDataMap.set(dateKey, currentDaily);
   });
@@ -495,8 +500,8 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
       })
   }
   
-  const totalGastos = totalCombustivel + totalManutencaoFromWorkdays;
-  const totalLucro = totalGanho - totalGastos; 
+  const totalLucro = totalGanho - totalCombustivel - totalManutencaoFinal;
+  const totalGastos = totalCombustivel + totalManutencaoFinal;
   const ganhoPorHora = totalHoras > 0 ? totalGanho / totalHoras : 0;
   const ganhoPorKm = totalKm > 0 ? totalGanho / totalKm : 0;
   const eficiencia = totalKm > 0 && totalLitros > 0 ? totalKm / totalLitros : 0;
@@ -507,7 +512,7 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   const profitComposition = [
     { name: 'Lucro Líquido', value: totalLucro, fill: 'hsl(var(--chart-1))', totalGanho },
     { name: 'Combustível', value: totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho },
-    { name: 'Manutenção', value: totalManutencaoFromWorkdays, fill: 'hsl(var(--chart-3))', totalGanho },
+    { name: 'Manutenção', value: totalManutencaoFinal, fill: 'hsl(var(--chart-3))', totalGanho },
   ].filter(item => item.value !== 0);
   
   return {
