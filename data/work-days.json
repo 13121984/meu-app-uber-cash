@@ -1,5 +1,6 @@
 [
   {
+    "id": "1757025476863",
     "date": "2025-08-09T03:00:00.000Z",
     "km": 125,
     "hours": 8.9,
@@ -20,16 +21,11 @@
     "fuelEntries": [
       {
         "id": 1757025466039,
-        "type": "",
+        "type": "Gasolina Aditivada",
         "paid": 25.3,
         "price": 4.99
       }
-    ],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    },
-    "id": "1757025476863"
+    ]
   },
   {
     "id": "1756990521883",
@@ -59,7 +55,7 @@
     "fuelEntries": [
       {
         "id": 1756990460546,
-        "type": "",
+        "type": "Gasolina Aditivada",
         "paid": 20,
         "price": 5
       },
@@ -69,11 +65,7 @@
         "paid": 25,
         "price": 0
       }
-    ],
-    "maintenance": {
-      "description": "",
-      "amount": 0
-    }
+    ]
   },
   {
     "id": "1756980282170",

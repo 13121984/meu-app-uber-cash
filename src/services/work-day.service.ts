@@ -334,12 +334,10 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
     const totalGanho = data.totalGanho;
     const totalLucroFinal = data.totalLucro;
     const totalCombustivelFinal = data.totalCombustivel;
-    const totalManutencaoFinal = maintenanceData.totalSpent;
     
     const profitComposition = [
         { name: 'Lucro Líquido', value: totalLucroFinal, fill: 'hsl(var(--chart-1))', totalGanho },
         { name: 'Combustível', value: totalCombustivelFinal, fill: 'hsl(var(--chart-2))', totalGanho },
-        { name: 'Manutenção', value: totalManutencaoFinal, fill: 'hsl(var(--chart-3))', totalGanho },
       ].filter(item => item.value !== 0);
 
 
@@ -378,7 +376,10 @@ export async function getDashboardData() {
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(new Date(day.date), { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(new Date(day.date), { start: startOfMonth(now), end: endOfMonth(now) }));
 
-    const todayMaintenance = allMaintenance.filter(m => new Date(m.date).toDateString() === todayDateString);
+    const todayMaintenance = allMaintenance.filter(m => {
+      const mDate = new Date(m.date);
+      return mDate.toDateString() === todayDateString;
+    });
 
     const thisWeekMaintenance = allMaintenance.filter(m => isWithinInterval(new Date(m.date), { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthMaintenance = allMaintenance.filter(m => isWithinInterval(new Date(m.date), { start: startOfMonth(now), end: endOfMonth(now) }));
@@ -512,7 +513,6 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
   const profitComposition = [
     { name: 'Lucro Líquido', value: totalLucro, fill: 'hsl(var(--chart-1))', totalGanho },
     { name: 'Combustível', value: totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho },
-    { name: 'Manutenção', value: totalManutencaoFinal, fill: 'hsl(var(--chart-3))', totalGanho },
   ].filter(item => item.value !== 0);
   
   return {
