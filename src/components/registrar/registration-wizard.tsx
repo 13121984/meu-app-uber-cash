@@ -105,7 +105,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
     if (state.date === null) {
       dispatch({ type: 'SET_BASIC_INFO', payload: { ...state, date: new Date() } as { date: Date; km: number; hours: number; }});
     }
-  }, [state.date]); // Run only when state.date changes (initially from null)
+  }, []); // Run only once on mount.
 
 
   useEffect(() => {
