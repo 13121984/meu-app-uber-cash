@@ -21,7 +21,7 @@ export type FuelEntry = { id: number; type: string; paid: number; price: number 
 
 export type State = {
   id?: string;
-  date: Date;
+  date: Date | null;
   km: number;
   hours: number;
   earnings: Earning[];
@@ -38,9 +38,11 @@ type Action =
   | { type: 'RESET_STATE' };
 
 
-const getInitialState = (initialData?: Partial<State>): State => ({
+const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>): State => ({
   id: initialData?.id || undefined,
-  date: initialData?.date ? new Date(initialData.date) : new Date(),
+  // Initialize date as null on the server to prevent hydration mismatch.
+  // It will be set on the client via useEffect.
+  date: initialData?.date ? new Date(initialData.date) : null,
   km: initialData?.km || 0,
   hours: initialData?.hours || 0,
   earnings: initialData?.earnings || [],
@@ -55,7 +57,13 @@ function reducer(state: State, action: Action): State {
     case 'SET_EARNINGS': return { ...state, earnings: action.payload };
     case 'SET_FUEL': return { ...state, fuelEntries: action.payload };
     case 'SET_MAINTENANCE': return { ...state, maintenance: action.payload };
-    case 'RESET_STATE': return getInitialState();
+    case 'RESET_STATE': 
+        const newState = getInitialState();
+        // Set date to today on client-side reset
+        if (typeof window !== 'undefined') {
+            newState.date = new Date();
+        }
+        return newState;
     default: return state;
   }
 }
@@ -68,19 +76,17 @@ const steps = [
 ];
 
 interface RegistrationWizardProps {
-    initialData?: Partial<State>;
+    initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>;
     isEditing?: boolean;
     onSuccess?: () => void;
 }
 
-// Simple cash register sound in Base64 format
 const cashRegisterSound = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAABoR2tGYWFFAAAAAPcAAAN3AAAAAAAAAFl+ZWW3s1sLdGAAAAAAAAAIjbQBAAAAAAEAAAIiUKgZn3oAAAGPBAEABAAgAAEABpVoaWdodG9uZQAAAAAAbHVrYXNhbG1lbnRpbmVsbG9nYW5kZXZAAAAAAP/7QMQAAAAAAAAAAAAAAAAAAAAAAARsYXZjNTguOTEuMTAwBICAgAgAgIAHAAACAET/wkAAASIgaJkAMgAABwAAAnQCkQhEAEQwBIDS8AAAAAAD/8A/wD4AAAAA//pAQHwAAAAEwADAnQAAAD/8A/wDwAAAAAABYhEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGolEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAHYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wD4AAAAAAIAAAAAAAAggAB/AAD//dAwAAMAAAN4AAANIAAD/9gYBAkAAjSRgYhL//dAwLAAKAAAN4AAANIAAD/9gYBAkAEDSRgYhL//dAwqQAnAAAN4AAANIAAD/9gYBAkAEzSRgYhL//dAwjQCPAAAN4AAANIAAD/9gYBAkAFDS.";
 
 const playSuccessSound = () => {
     if (typeof window !== 'undefined') {
         const audio = new Audio(cashRegisterSound);
         audio.play().catch(error => {
-            // Log error if audio playback fails, e.g. due to browser restrictions
             console.error("Audio playback failed:", error);
         });
     }
@@ -93,9 +99,16 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
 
+  // Client-side effect to set the date on initial load if it's null
+  // This avoids hydration mismatch.
   useEffect(() => {
-      // Quando o initialData mudar (no modo de edição), reseta o estado do formulário
-      // e o passo para o início.
+    if (state.date === null) {
+      dispatch({ type: 'SET_BASIC_INFO', payload: { ...state, date: new Date() } as { date: Date; km: number; hours: number; }});
+    }
+  }, [state.date]); // Run only when state.date changes (initially from null)
+
+
+  useEffect(() => {
       dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) })
       if(isEditing) {
         setCurrentStep(1);
@@ -132,6 +145,15 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   };
   
   const handleSubmit = async () => {
+    if (!state.date) {
+        toast({
+            title: "Data Inválida",
+            description: "Por favor, selecione uma data válida antes de salvar.",
+            variant: "destructive"
+        });
+        return;
+    }
+
     setIsSubmitting(true);
     if (!completedSteps.includes(currentStep)) {
         setCompletedSteps([...completedSteps, currentStep]);
@@ -139,16 +161,12 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
     
     try {
       let result;
-      // Exclui a manutenção do objeto 'state' antes de enviar, pois ela será tratada separadamente
       const { maintenance, ...workDayData } = state;
 
       if (isEditing && state.id) {
-         // Na edição, só salvamos o dia de trabalho. A manutenção é editada em sua própria tela.
         result = await updateWorkDayAction(workDayData as any);
       } else {
-         // Ao criar um novo registro, salvamos o dia de trabalho primeiro.
-        result = await addWorkDay(workDayData);
-        // Se o dia foi salvo e há uma despesa de manutenção, a adicionamos separadamente.
+        result = await addWorkDay(workDayData as Omit<State, 'id' | 'maintenance'>);
         if (result.success && maintenance.amount > 0 && maintenance.description) {
             await addMaintenance({
                 date: state.date,
@@ -199,8 +217,13 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   };
 
   const renderStep = () => {
+    // Don't render Step1Info until date is initialized on the client
+    if (currentStep === 1 && !state.date) {
+        return <div className="h-48 flex justify-center items-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+    }
+
     switch (currentStep) {
-      case 1: return <Step1Info data={state} dispatch={dispatch} />;
+      case 1: return <Step1Info data={state as State & { date: Date }} dispatch={dispatch} />;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
       case 3: return <Step3Fuel data={state} dispatch={dispatch} />;
       case 4: return <Step4Extras data={state} dispatch={dispatch} isDisabled={isEditing} />;
@@ -281,7 +304,7 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
       {/* Live Preview */}
        {!isEditing && (
          <div className="lg:col-span-1">
-            <LivePreview data={livePreviewData} />
+            <LivePreview data={livePreviewData as State} />
          </div>
        )}
     </div>

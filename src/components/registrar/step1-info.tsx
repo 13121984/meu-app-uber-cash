@@ -21,21 +21,19 @@ interface Step1InfoProps {
 }
 
 export function Step1Info({ data, dispatch }: Step1InfoProps) {
-  // Local state for each part of the date
   const [day, setDay] = useState(format(data.date, 'dd'));
   const [month, setMonth] = useState(format(data.date, 'MM'));
   const [year, setYearState] = useState(format(data.date, 'yyyy'));
 
-  // Update local state if the main state date changes (e.g., from calendar)
   useEffect(() => {
-    setDay(format(data.date, 'dd'));
-    setMonth(format(data.date, 'MM'));
-    setYearState(format(data.date, 'yyyy'));
+    if (data.date) {
+      setDay(format(data.date, 'dd'));
+      setMonth(format(data.date, 'MM'));
+      setYearState(format(data.date, 'yyyy'));
+    }
   }, [data.date]);
 
   const updateMainDate = (newDay: number, newMonth: number, newYear: number) => {
-    const current = data.date;
-    // Ensure month is 0-indexed for Date object
     const updatedDate = new Date(newYear, newMonth - 1, newDay);
 
     if (isValid(updatedDate)) {
