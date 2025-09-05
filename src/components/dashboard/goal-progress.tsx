@@ -14,7 +14,7 @@ type GoalProgressProps = {
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const { toast } = useToast();
-  // Usando useRef para rastrear o estado do toast sem causar re-renderizações
+  // Usando useRef para garantir que o toast seja mostrado apenas uma vez por ciclo de "meta batida"
   const hasShownToast = useRef(false);
 
   // isComplete é determinado diretamente das props, garantindo consistência servidor/cliente.
@@ -23,15 +23,16 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
 
   useEffect(() => {
     // Este efeito lida com a notificação do lado do cliente.
-    // O uso de `useRef` evita que a atualização do estado cause um erro de hidratação.
     if (isComplete && !hasShownToast.current) {
-      hasShownToast.current = true;
       toast({
         title: "Meta Atingida!",
         description: "Você conseguiu! Continue acelerando para o próximo objetivo!",
       });
-    } else if (!isComplete && hasShownToast.current) {
-      // Redefine se a meta não for mais cumprida (por exemplo, se o filtro de período mudar)
+      // Marca que o toast foi exibido para esta "sessão" de meta batida.
+      hasShownToast.current = true;
+    } else if (!isComplete) {
+      // Redefine a flag se a meta não estiver mais batida (ex: mudança de filtro de período)
+      // para que o toast possa ser exibido novamente na próxima vez que a meta for alcançada.
       hasShownToast.current = false;
     }
   }, [isComplete, toast]);
