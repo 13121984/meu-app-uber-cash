@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Dispatch, useState, useEffect } from 'react';
@@ -82,25 +81,27 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
     }
   }, [data.hours])
 
-  // Recalculates total hours whenever time entries change or if manual input is cleared
+  // Effect for calculating hours from time entries
   useEffect(() => {
     if (data.timeEntries.length > 0) {
       const totalHours = calculateTotalHours(data.timeEntries);
-      dispatch({
-        type: 'SET_BASIC_INFO',
-        payload: { ...data, hours: totalHours },
-      });
-    } else {
-        const numValue = parseFloat(manualHours.toString().replace(',', '.')) || 0;
-        if (data.hours !== numValue) {
-          dispatch({
-              type: 'SET_BASIC_INFO',
-              payload: { ...data, hours: numValue },
-          });
-        }
+      if (totalHours !== data.hours) {
+        dispatch({ type: 'SET_BASIC_INFO', payload: { ...data, hours: totalHours } });
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.timeEntries, manualHours]);
+  }, [data.timeEntries]);
+  
+  // Effect for updating hours from manual input
+  useEffect(() => {
+    if (data.timeEntries.length === 0) {
+      const numValue = parseFloat(manualHours.toString().replace(',', '.')) || 0;
+      if (data.hours !== numValue) {
+        dispatch({ type: 'SET_BASIC_INFO', payload: { ...data, hours: numValue } });
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [manualHours, data.timeEntries.length]);
 
 
   const updateMainDate = (newDate: Date) => {
