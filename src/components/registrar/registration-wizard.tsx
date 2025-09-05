@@ -21,7 +21,7 @@ export type FuelEntry = { id: number; type: string; paid: number; price: number 
 
 export type State = {
   id?: string;
-  date: Date;
+  date: Date | null;
   km: number;
   hours: number;
   earnings: Earning[];
@@ -31,22 +31,27 @@ export type State = {
 
 type Action =
   | { type: 'SET_STATE'; payload: State }
-  | { type: 'SET_BASIC_INFO'; payload: { date: Date; km: number; hours: number } }
+  | { type: 'SET_BASIC_INFO'; payload: { date: Date | null; km: number; hours: number } }
   | { type: 'SET_EARNINGS'; payload: Earning[] }
   | { type: 'SET_FUEL'; payload: FuelEntry[] }
   | { type: 'SET_MAINTENANCE'; payload: { description: string; amount: number } }
   | { type: 'RESET_STATE' };
 
 
-const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>): State => ({
-  id: initialData?.id || undefined,
-  date: initialData?.date ? new Date(initialData.date) : new Date(),
-  km: initialData?.km || 0,
-  hours: initialData?.hours || 0,
-  earnings: initialData?.earnings || [],
-  fuelEntries: initialData?.fuelEntries || [],
-  maintenance: initialData?.maintenance || { description: '', amount: 0 },
-});
+const getInitialState = (initialData?: Partial<Omit<State, 'date'> & { date: Date | string }>): State => {
+    // If editing, use the provided date. Otherwise, start with null for server render.
+    const date = initialData?.date ? new Date(initialData.date) : null;
+    return {
+        id: initialData?.id || undefined,
+        date: date,
+        km: initialData?.km || 0,
+        hours: initialData?.hours || 0,
+        earnings: initialData?.earnings || [],
+        fuelEntries: initialData?.fuelEntries || [],
+        maintenance: initialData?.maintenance || { description: '', amount: 0 },
+    };
+};
+
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -91,17 +96,16 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(initialData));
 
+  // This effect runs only on the client to safely set the date to today for new entries
   useEffect(() => {
-      dispatch({ type: 'SET_STATE', payload: getInitialState(initialData) })
-      if(isEditing) {
-        setCurrentStep(1);
-        setCompletedSteps([1,2,3,4]);
-      } else {
-        setCurrentStep(1);
-        setCompletedSteps([]);
-      }
-  }, [initialData, isEditing])
-
+    // If it's a new entry (no initialData) and the date is currently null (from server render)
+    if (!initialData && state.date === null) {
+      dispatch({ 
+        type: 'SET_BASIC_INFO', 
+        payload: { ...state, date: new Date() } 
+      });
+    }
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   const resetWizard = () => {
     dispatch({ type: 'RESET_STATE' });
@@ -203,6 +207,13 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
   };
 
   const renderStep = () => {
+    if (state.date === null && !isEditing) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+        );
+    }
     switch (currentStep) {
       case 1: return <Step1Info data={state} dispatch={dispatch} />;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
@@ -261,21 +272,20 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
             </Button>
 
             <div className="flex gap-2">
-                {isStep3 && !isEditing && (
-                    <Button onClick={handleSubmit} variant="secondary" disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Pular e Salvar
-                    </Button>
-                )}
-
                 {!isLastStep ? (
-                    <Button onClick={isStep3 ? handleNext : handleNext} disabled={isSubmitting}>
-                        {isStep3 ? 'Adicionar Despesa e Continuar' : 'Próximo'}
+                    <Button onClick={handleNext} disabled={isSubmitting}>
+                        Próximo
                     </Button>
                 ) : (
                     <Button onClick={handleSubmit} disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {isEditing ? 'Salvar Alterações' : 'Concluir e Salvar'}
+                    </Button>
+                )}
+                 
+                 {isStep3 && !isEditing && (
+                    <Button onClick={handleNext} variant="outline" disabled={isSubmitting}>
+                        Adicionar Despesa
                     </Button>
                 )}
             </div>
@@ -291,5 +301,3 @@ export function RegistrationWizard({ initialData, isEditing = false, onSuccess }
     </div>
   );
 }
-
-    
