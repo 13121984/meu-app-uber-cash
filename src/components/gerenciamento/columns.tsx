@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, ArrowUpDown, Edit, Trash2, Loader2 } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Edit, Trash2, Loader2, Clock, Map } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { WorkDay } from "@/services/work-day.service"
 import { EditWorkDayDialog } from "./edit-dialog"
-import { deleteWorkDayAction } from "./actions"
+import { deleteFilteredWorkDaysAction } from "./actions"
 import { toast } from "@/hooks/use-toast"
 import {
   AlertDialog,
@@ -31,45 +31,45 @@ import {
 import { format, parseISO } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { cn } from "@/lib/utils"
+import { GroupedWorkDay } from "@/app/gerenciamento/page"
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-
 export const useWorkDayColumns = () => {
-  const [editingWorkDay, setEditingWorkDay] = useState<WorkDay | null>(null);
+  // O estado agora armazena a data do dia a ser editado/deletado
+  const [editingDay, setEditingDay] = useState<GroupedWorkDay | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [dayToDelete, setDayToDelete] = useState<WorkDay | null>(null);
+  const [dayToDelete, setDayToDelete] = useState<GroupedWorkDay | null>(null);
   
-  // State to ensure client-side-only logic runs after hydration
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
   }, []);
 
 
-  const handleDeleteClick = (e: React.MouseEvent, workDay: WorkDay) => {
-    e.stopPropagation(); // Impede que o clique dispare o evento da linha
-    setDayToDelete(workDay);
+  const handleDeleteClick = (e: React.MouseEvent, day: GroupedWorkDay) => {
+    e.stopPropagation(); 
+    setDayToDelete(day);
     setIsAlertOpen(true);
   }
 
-  const handleEditClick = (e: React.MouseEvent, workDay: WorkDay) => {
+  const handleEditClick = (e: React.MouseEvent, day: GroupedWorkDay) => {
     e.stopPropagation();
-    setEditingWorkDay(workDay);
+    setEditingDay(day);
   }
-
 
   const handleConfirmDelete = async () => {
     if (!dayToDelete) return;
     setIsDeleting(true);
     try {
-      await deleteWorkDayAction(dayToDelete.id);
-      toast({ title: "Sucesso!", description: "Registro apagado." });
-      // A revalidação agora acontece no GerenciamentoClient para atualizar o estado local
+      // Deleta todos os registros para a data especificada
+      const dateString = format(dayToDelete.date, 'yyyy-MM-dd');
+      await deleteFilteredWorkDaysAction({ from: dateString, to: dateString });
+      toast({ title: "Sucesso!", description: `Registros de ${format(dayToDelete.date, 'dd/MM/yyyy')} apagados.` });
     } catch (error) {
-      toast({ title: "Erro!", description: "Não foi possível apagar o registro.", variant: "destructive" });
+      toast({ title: "Erro!", description: "Não foi possível apagar os registros.", variant: "destructive" });
     } finally {
       setIsDeleting(false);
       setIsAlertOpen(false);
@@ -77,97 +77,71 @@ export const useWorkDayColumns = () => {
     }
   }
 
-
-  const columns: ColumnDef<WorkDay>[] = [
+  const columns: ColumnDef<GroupedWorkDay>[] = [
     {
       accessorKey: "date",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Data
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Data
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => {
-        if (!isClient) {
-            return null; // Avoid rendering on server to prevent mismatch
-        }
-        // Correctly handle date formatting to avoid hydration errors
-        const dateValue = row.original.date;
-        const date = typeof dateValue === 'string' ? parseISO(dateValue) : dateValue;
-        return <div className="font-medium whitespace-nowrap">{format(date, "dd/MM/yy (EEE)", { locale: ptBR })}</div>
+        if (!isClient) return null;
+        const day = row.original;
+        const date = typeof day.date === 'string' ? parseISO(day.date) : day.date;
+        return (
+            <div className="font-medium whitespace-nowrap">
+                <div>{format(date, "dd/MM/yy (EEE)", { locale: ptBR })}</div>
+                <div className="text-xs text-muted-foreground">{day.entries.length} {day.entries.length === 1 ? 'período' : 'períodos'}</div>
+            </div>
+        )
       },
       sortingFn: 'datetime',
     },
     {
-      accessorKey: "lucro",
-      header: () => <div className="text-right">Lucro</div>,
+      accessorKey: "totalProfit",
+      header: () => <div className="text-right">Lucro Total</div>,
       cell: ({ row }) => {
-        const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
-        const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-        const maintenance = row.original.maintenance?.amount || 0;
-        const profit = earnings - fuel - maintenance;
+        const profit = row.original.totalProfit;
         return <div className="text-green-600 dark:text-green-500 font-semibold text-right">{formatCurrency(profit)}</div>
       }
     },
     {
-      accessorKey: "totalGanhos",
-      header: () => <div className="text-right hidden sm:table-cell">Ganhos</div>,
+      accessorKey: "totalKm",
+      header: () => <div className="text-right hidden sm:table-cell">Distância</div>,
       cell: ({ row }) => {
-         const earnings = row.original.earnings.reduce((sum, e) => sum + e.amount, 0);
-         return <div className="text-right hidden sm:table-cell">{formatCurrency(earnings)}</div>
+         const km = row.original.totalKm;
+         return <div className="text-right hidden sm:table-cell">{km.toFixed(1)} km</div>
       }
     },
      {
-      accessorKey: "totalGastos",
-      header: () => <div className="text-right hidden md:table-cell">Gastos</div>,
+      accessorKey: "totalHours",
+      header: () => <div className="text-right hidden md:table-cell">Horas</div>,
       cell: ({ row }) => {
-        const fuel = row.original.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-        const maintenance = row.original.maintenance?.amount || 0;
-        const total = fuel + maintenance;
-        return <div className={cn("text-right hidden md:table-cell", total > 0 ? "text-red-600" : "text-muted-foreground")}>{formatCurrency(total)}</div>
+        const hours = row.original.totalHours;
+        return <div className="text-right hidden md:table-cell">{hours.toFixed(1)} h</div>
       }
     },
     {
       id: "actions",
       cell: ({ row }) => {
-        const workDay = row.original;
+        const day = row.original;
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className="h-8 w-8 p-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="sr-only">Abrir menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="end"
-              onClick={(e) => e.stopPropagation()}
+          <div className="text-right">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={(e) => handleEditClick(e, day)}
             >
-              <DropdownMenuLabel>Ações</DropdownMenuLabel>
-              <DropdownMenuItem onClick={(e) => handleEditClick(e, workDay)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={(e) => handleDeleteClick(e, workDay)}
-                className="text-destructive focus:text-destructive focus:bg-destructive/10"
-              >
-                 {isDeleting && dayToDelete?.id === workDay.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                Apagar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <Edit className="mr-2 h-4 w-4" />
+              Detalhes
+            </Button>
+          </div>
         );
       },
     },
@@ -176,16 +150,16 @@ export const useWorkDayColumns = () => {
   const Dialogs = (
     <>
       <EditWorkDayDialog
-        isOpen={!!editingWorkDay}
-        onOpenChange={(isOpen) => !isOpen && setEditingWorkDay(null)}
-        workDay={editingWorkDay}
+        isOpen={!!editingDay}
+        onOpenChange={(isOpen) => !isOpen && setEditingDay(null)}
+        groupedWorkDay={editingDay}
       />
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso irá apagar permanentemente o registro de trabalho deste dia.
+              Esta ação não pode ser desfeita. Isso irá apagar permanentemente TODOS os registros de trabalho para o dia {dayToDelete && format(dayToDelete.date, 'dd/MM/yyyy')}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -195,7 +169,7 @@ export const useWorkDayColumns = () => {
               disabled={isDeleting} 
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isDeleting ? "Apagando..." : "Apagar"}
+              {isDeleting ? "Apagando..." : "Apagar Tudo"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -203,5 +177,5 @@ export const useWorkDayColumns = () => {
     </>
   )
 
-  return { columns, Dialogs, setEditingWorkDay };
+  return { columns, Dialogs, setEditingDay };
 }

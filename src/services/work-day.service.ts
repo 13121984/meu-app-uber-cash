@@ -1,7 +1,7 @@
 
 "use server";
 
-import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isSameDay } from 'date-fns';
 import { PeriodData, EarningsByCategory, TripsByCategory, PerformanceByShift } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
@@ -113,7 +113,7 @@ async function writeWorkDays(data: WorkDay[]): Promise<void> {
 }
 
 
-export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
+export async function addOrUpdateWorkDay(data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
   try {
     const allWorkDays = await readWorkDays();
     // Se um ID é fornecido, tentamos atualizar.
@@ -121,7 +121,7 @@ export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Pr
       const existingDayIndex = allWorkDays.findIndex(d => d.id === data.id);
       if (existingDayIndex > -1) {
         // Update existing entry
-        allWorkDays[existingDayIndex] = { ...allWorkDays[existingDayIndex], ...data };
+        allWorkDays[existingDayIndex] = { ...data, date: startOfDay(data.date) };
         await writeWorkDays(allWorkDays);
         revalidateAll();
         return { success: true, id: data.id, operation: 'updated' };
@@ -129,10 +129,10 @@ export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Pr
     }
     
     // Se não há ID ou o ID não foi encontrado, criamos um novo registro.
-    // Isso permite múltiplos registros para o mesmo dia.
     const newWorkDay: WorkDay = {
       ...data,
       id: Date.now().toString(), // Always generate a new unique ID
+      date: startOfDay(data.date), // Normalize date
     };
     allWorkDays.unshift(newWorkDay); // Add as the newest entry
     await writeWorkDays(allWorkDays);
@@ -225,7 +225,7 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     }
 }
 
-export async function deleteWorkDay(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteWorkDayEntry(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     let allWorkDays = await readWorkDays();
     const initialLength = allWorkDays.length;
@@ -301,6 +301,7 @@ const revalidateAll = () => {
     revalidatePath('/gerenciamento');
     revalidatePath('/relatorios');
     revalidatePath('/manutencao');
+    revalidatePath('/registrar', 'layout'); // Revalida a página de registro e subpáginas
 }
 
 export async function getWorkDays(): Promise<WorkDay[]> {
@@ -308,11 +309,9 @@ export async function getWorkDays(): Promise<WorkDay[]> {
 }
 
 
-export async function findWorkDayByDate(date: string): Promise<WorkDay | null> {
+export async function getWorkDaysForDate(date: Date): Promise<WorkDay[]> {
     const allWorkDays = await readWorkDays();
-    // This function will now find the *first* entry for a given date.
-    // For editing, we'll need to pass specific IDs.
-    return allWorkDays.find(day => format(day.date, 'yyyy-MM-dd') === date) || null;
+    return allWorkDays.filter(day => isSameDay(day.date, date));
 }
 
 const timeToMinutes = (time: string): number => {
@@ -648,5 +647,3 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     rawWorkDays: filteredDays,
   };
 }
-
-    

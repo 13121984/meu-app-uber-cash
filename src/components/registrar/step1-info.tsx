@@ -22,6 +22,7 @@ interface Step1InfoProps {
   data: State;
   dispatch: Dispatch<Action>;
   isEditing?: boolean;
+  registrationType: 'today' | 'other-day';
 }
 
 const timeToMinutes = (time: string): number => {
@@ -44,7 +45,7 @@ const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<
     dispatch({ type: 'UPDATE_FIELD', payload: { field: 'hours', value: totalHours }});
 };
 
-export function Step1Info({ data, dispatch, isEditing }: Step1InfoProps) {
+export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1InfoProps) {
   
   const handleFieldChange = (field: keyof State, value: any) => {
     dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
@@ -71,13 +72,14 @@ export function Step1Info({ data, dispatch, isEditing }: Step1InfoProps) {
       handleTimeEntriesChange(updated);
   };
   
-  const isDateDisabled = data.id === 'today' && !isEditing;
+  // A data só é desabilitada se for um novo registro de HOJE.
+  // Se for "other-day" ou qualquer edição, a data pode ser alterada.
+  const isDateDisabled = registrationType === 'today' && !isEditing;
   const dateString = data.date && isValid(data.date) ? format(data.date, 'dd/MM/yyyy') : '';
   const hasTimeEntries = useMemo(() => data.timeEntries && data.timeEntries.length > 0, [data.timeEntries]);
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold font-headline">Informações do Dia</h2>
       <div className="space-y-4">
         <div>
           <Label htmlFor="date">Data do Trabalho</Label>

@@ -2,21 +2,27 @@
 "use client";
 
 import React, { useState, useReducer, useEffect } from 'react';
-import { Check, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Check, Loader2, CheckCircle, AlertTriangle, Edit, Trash2, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Step1Info } from './step1-info';
 import { Step2Earnings } from './step2-earnings';
 import { Step3Fuel } from './step3-fuel';
 import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
-import { addOrUpdateWorkDay } from '@/services/work-day.service';
+import { addOrUpdateWorkDay, deleteWorkDayEntry } from '@/services/work-day.service';
 import { addMaintenance } from '@/services/maintenance.service';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
-import { parseISO } from 'date-fns';
+import { parseISO, startOfDay } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
+import { Separator } from '../ui/separator';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
@@ -45,10 +51,11 @@ type Action =
 
 
 const getInitialState = (initialData?: Partial<WorkDay>): State => {
-    let date = new Date();
+    let date;
     if(initialData?.date) {
-        // Ensure date is a Date object, not a string
         date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
+    } else {
+        date = startOfDay(new Date());
     }
 
     return {
@@ -56,7 +63,7 @@ const getInitialState = (initialData?: Partial<WorkDay>): State => {
         date: date,
         km: initialData?.km || 0,
         hours: initialData?.hours || 0,
-        timeEntries: (initialData as any)?.timeEntries || [],
+        timeEntries: (initialData as any)?.timeEntries?.map((t: TimeEntry) => ({...t})) || [],
         earnings: initialData?.earnings?.map(e => ({...e})) || [],
         fuelEntries: initialData?.fuelEntries?.map(f => ({...f})) || [],
         maintenance: initialData?.maintenance ? {...initialData.maintenance} : { description: '', amount: 0 },
@@ -71,7 +78,8 @@ function reducer(state: State, action: Action): State {
     case 'UPDATE_FIELD': 
         return { ...state, [action.payload.field]: action.payload.value };
     case 'RESET_STATE': 
-        return getInitialState();
+        const today = startOfDay(new Date());
+        return getInitialState({ date: today }); // Reseta para a data de hoje
     default: 
         return state;
   }
@@ -85,10 +93,11 @@ const steps = [
 ];
 
 interface RegistrationWizardProps {
-    initialData: Partial<WorkDay> | null;
+    initialData?: Partial<WorkDay> | null;
     isEditing?: boolean;
     onSuccess?: () => void;
-    registrationType?: 'today' | 'other-day';
+    registrationType: 'today' | 'other-day';
+    existingDayEntries?: WorkDay[];
 }
 
 const cashRegisterSound = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAABoR2tGYWFFAAAAAPcAAAN3AAAAAAAAAFl+ZWW3s1sLdGAAAAAAAAAIjbQBAAAAAAEAAAIiUKgZn3oAAAGPBAEABAAgAAEABpVoaWdodG9uZQAAAAAAbHVrYXNhbG1lbnRpbmVsbG9nYW5kZXZAAAAAAP/7QMQAAAAAAAAAAAAAAAAAAAAAAARsYXZjNTguOTEuMTAwBICAgAgAgIAHAAACAET/wkAAASIgaJkAMgAABwAAAnQCkQhEAEQwBIDS8AAAAAAD/8A/wD4AAAAA//pAQHwAAAAEwADAnQAAAD/8A/wDwAAAAAABYhEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGYlEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wDwAAAAAAGolEcH3AATCQDP8AAAAnAAAHgQjGgANAQAAAwBvGgA//pAQHMAADASYAAAAnAAAD/8A/wD4AAAAAAIAAAAAAAAggAB/AAD//dAwAAMAAAN4AAANIAAD/9gYBAkAAjSRgYhL//dAwLAAKAAAN4AAANIAAD/9gYBAkAEDSRgYhL//dAwqQAnAAAN4AAANIAAD/9gYBAkAEzSRgYhL//dAwjQCPAAAN4AAANIAAD/9gYBAkAFDS.";
@@ -103,7 +112,7 @@ const playSuccessSound = () => {
 }
 
 
-export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess }: RegistrationWizardProps) {
+export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType, existingDayEntries: propsExistingEntries }: RegistrationWizardProps) {
   const router = useRouter();
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -111,15 +120,26 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData || undefined));
   
-   // Este useEffect agora SÓ atualiza o estado do formulário se os dados iniciais externos (props) mudarem.
+  // Novo estado para gerenciar os períodos existentes
+  const [existingEntries, setExistingEntries] = useState<WorkDay[]>(propsExistingEntries || []);
+  const [entryBeingEdited, setEntryBeingEdited] = useState<WorkDay | null>(null);
+
    useEffect(() => {
-    dispatch({ type: 'SET_STATE', payload: getInitialState(propsInitialData || undefined) });
-    if (isEditing) {
-        setCompletedSteps([1,2,3,4]);
+    setExistingEntries(propsExistingEntries || []);
+   }, [propsExistingEntries]);
+   
+   useEffect(() => {
+    if (entryBeingEdited) {
+        // Se estamos editando uma entrada, preenchemos o formulário com seus dados
+        dispatch({ type: 'SET_STATE', payload: getInitialState(entryBeingEdited) });
+        setCompletedSteps([1,2,3,4]); // Marcamos todos os passos como "completos" para facilitar a edição
     } else {
+        // Se não, resetamos para um novo registro
+        const dateToUse = registrationType === 'today' ? startOfDay(new Date()) : propsInitialData?.date;
+        dispatch({ type: 'SET_STATE', payload: getInitialState({ date: dateToUse }) });
         setCompletedSteps([]);
     }
-   }, [propsInitialData, isEditing]);
+   }, [entryBeingEdited, registrationType, propsInitialData]);
 
 
   const handleNext = () => {
@@ -160,12 +180,10 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     
     try {
       const { maintenance, ...workDayData } = state;
-      // Ensure the ID is not 'today' or 'other-day' when saving
-      const finalWorkDayData = { ...workDayData, id: (workDayData.id === 'today' || workDayData.id === 'other-day') ? undefined : workDayData.id };
+      const isActuallyEditing = !!workDayData.id && !['today', 'other-day'].includes(workDayData.id);
       
-      const result = await addOrUpdateWorkDay(finalWorkDayData as Omit<WorkDay, 'maintenance'>);
+      const result = await addOrUpdateWorkDay(workDayData as WorkDay);
       
-      // Add maintenance only if it has a value and description
       if (result.success && maintenance.amount > 0 && maintenance.description) {
           await addMaintenance({
               date: state.date,
@@ -175,25 +193,20 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       }
       
       if (result.success) {
-        if (!isEditing) {
+        if (!isActuallyEditing) {
           playSuccessSound();
         }
         toast({
-            title: (
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <span className="font-bold">Sucesso!</span>
-              </div>
-            ),
-            description: `Seu dia de trabalho foi ${result.operation === 'updated' ? 'atualizado' : 'registrado'}.`,
-            variant: "default",
+            title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><span>Sucesso!</span></div>,
+            description: `Seu período de trabalho foi ${result.operation === 'updated' ? 'atualizado' : 'registrado'}.`,
         });
         
         if (onSuccess) {
             onSuccess();
         } else {
-            router.push('/');
             router.refresh();
+             // Limpa o formulário e cancela o modo de edição
+            setEntryBeingEdited(null);
         }
 
       } else {
@@ -203,12 +216,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       console.error(error);
       const errorMessage = error instanceof Error ? error.message : `Não foi possível ${isEditing ? 'atualizar' : 'registrar'} seu dia de trabalho.`;
       toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              <span className="font-bold">Erro ao Salvar!</span>
-            </div>
-          ),
+          title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar!</span></div>,
           description: errorMessage,
           variant: "destructive",
       });
@@ -216,10 +224,20 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         setIsSubmitting(false);
     }
   };
+  
+  const handleDeleteEntry = async (id: string) => {
+      const result = await deleteWorkDayEntry(id);
+      if (result.success) {
+          toast({ description: "Período removido com sucesso."});
+          router.refresh(); // Recarrega os dados do servidor
+      } else {
+          toast({ description: `Erro ao remover período: ${result.error}`, variant: "destructive" });
+      }
+  };
 
   const renderStep = () => {
     switch (currentStep) {
-      case 1: return <Step1Info data={state} dispatch={dispatch} isEditing={isEditing}/>;
+      case 1: return <Step1Info data={state} dispatch={dispatch} isEditing={!!entryBeingEdited || isEditing} registrationType={registrationType}/>;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
       case 3: return <Step3Fuel data={state} dispatch={dispatch} />;
       case 4: return <Step4Extras data={state} dispatch={dispatch} isDisabled={isEditing} />;
@@ -233,58 +251,97 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="flex flex-col space-y-6 lg:col-span-2">
-        {/* Stepper */}
-        <div className="hidden sm:flex items-center justify-between p-4 border rounded-lg">
-        {steps.map((step, index) => (
-            <React.Fragment key={step.id}>
-            <div className="flex flex-col items-center text-center cursor-pointer" onClick={() => goToStep(step.id)}>
-                <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                    currentStep === step.id
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : completedSteps.includes(step.id)
-                    ? 'bg-green-500 text-white border-green-500'
-                    : 'bg-muted border-muted-foreground'
-                }`}
-                >
-                {completedSteps.includes(step.id) && currentStep !== step.id ? <Check /> : step.id}
+        
+        {/* Seção de Registros Existentes */}
+        {registrationType === 'today' && existingEntries.length > 0 && !entryBeingEdited && (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Períodos Registrados Hoje</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    {existingEntries.map(entry => {
+                        const profit = entry.earnings.reduce((sum, e) => sum + e.amount, 0) - entry.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+                        return (
+                            <Card key={entry.id} className="p-2 flex justify-between items-center bg-secondary">
+                                <div>
+                                    <p className="font-semibold">{entry.timeEntries.map(t => `${t.start}-${t.end}`).join(', ') || `${entry.hours.toFixed(1)}h`}</p>
+                                    <p className="text-sm text-green-500">{formatCurrency(profit)}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button size="icon" variant="ghost" onClick={() => setEntryBeingEdited(entry)}><Edit className="h-4 w-4" /></Button>
+                                    <Button size="icon" variant="ghost" onClick={() => handleDeleteEntry(entry.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                </div>
+                            </Card>
+                        )
+                    })}
+                </CardContent>
+            </Card>
+        )}
+
+        {/* Wizard de Registro */}
+        <div className="flex flex-col space-y-6">
+            {/* Stepper */}
+            <div className="hidden sm:flex items-center justify-between p-4 border rounded-lg">
+            {steps.map((step, index) => (
+                <React.Fragment key={step.id}>
+                <div className="flex flex-col items-center text-center cursor-pointer" onClick={() => goToStep(step.id)}>
+                    <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                        currentStep === step.id
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : completedSteps.includes(step.id)
+                        ? 'bg-green-500 text-white border-green-500'
+                        : 'bg-muted border-muted-foreground'
+                    }`}
+                    >
+                    {completedSteps.includes(step.id) && currentStep !== step.id ? <Check /> : step.id}
+                    </div>
+                    <p className={`mt-2 text-sm ${currentStep === step.id ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>
+                    {step.title}
+                    </p>
                 </div>
-                <p className={`mt-2 text-sm ${currentStep === step.id ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>
-                {step.title}
-                </p>
+                {index < steps.length - 1 && <div className="flex-1 h-0.5 bg-border" />}
+                </React.Fragment>
+            ))}
             </div>
-            {index < steps.length - 1 && <div className="flex-1 h-0.5 bg-border" />}
-            </React.Fragment>
-        ))}
-        </div>
-        
+            
 
-        {/* Step Content */}
-        <Card className="flex-1 flex flex-col">
-           <ScrollArea className="h-[60vh] overflow-y-auto">
-              <CardContent className="p-4 sm:p-6">
-                {renderStep()}
-              </CardContent>
-            </ScrollArea>
-        </Card>
-        
-        {/* Navigation */}
-        <div className="flex justify-between items-center">
-            <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
-                Voltar
-            </Button>
-
-            <div className="flex gap-2">
-                {!isLastStep ? (
-                    <Button onClick={handleNext} disabled={isSubmitting}>
-                        Próximo
+            {/* Step Content */}
+            <Card className="flex-1 flex flex-col">
+            <CardHeader>
+                <CardTitle className="font-headline">{entryBeingEdited ? 'Editando Período' : 'Novo Período'}</CardTitle>
+            </CardHeader>
+            <ScrollArea className="h-[60vh] overflow-y-auto">
+                <CardContent className="p-4 sm:p-6">
+                    {renderStep()}
+                </CardContent>
+                </ScrollArea>
+            </Card>
+            
+            {/* Navigation */}
+            <div className="flex justify-between items-center">
+                {entryBeingEdited ? (
+                    <Button variant="outline" onClick={() => setEntryBeingEdited(null)} disabled={isSubmitting}>
+                        Cancelar Edição
                     </Button>
                 ) : (
-                     <Button onClick={handleSubmit} disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        {isEditing ? 'Salvar Alterações' : 'Concluir e Salvar'}
+                    <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
+                        Voltar
                     </Button>
                 )}
+
+                <div className="flex gap-2">
+                    {!isLastStep ? (
+                        <Button onClick={handleNext} disabled={isSubmitting}>
+                            Próximo
+                        </Button>
+                    ) : (
+                        <Button onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            {isEditing || entryBeingEdited ? 'Salvar Alterações' : 'Concluir e Salvar'}
+                        </Button>
+                    )}
+                </div>
             </div>
         </div>
       </div>
@@ -296,5 +353,3 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     </div>
   );
 }
-
-    

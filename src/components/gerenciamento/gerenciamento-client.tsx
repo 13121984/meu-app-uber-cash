@@ -13,27 +13,28 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import type { GroupedWorkDay } from "@/app/gerenciamento/page";
 
 interface GerenciamentoClientProps {
-  // O componente agora recebe apenas os dados já filtrados pelo servidor.
-  filteredWorkDays: WorkDay[];
+  groupedWorkDays: GroupedWorkDay[];
+  allWorkDaysCount: number;
 }
 
-export function GerenciamentoClient({ filteredWorkDays }: GerenciamentoClientProps) {
+export function GerenciamentoClient({ groupedWorkDays, allWorkDaysCount }: GerenciamentoClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { columns, Dialogs, setEditingWorkDay } = useWorkDayColumns();
+  const { columns, Dialogs, setEditingDay } = useWorkDayColumns();
 
   const [isDeletingFiltered, setIsDeletingFiltered] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const hasFilters = searchParams.has('query') || searchParams.has('from');
+  const filteredCount = groupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
 
   const handleDeleteFiltered = async () => {
     setIsDeletingFiltered(true);
     
-    // Constrói o objeto de filtros a partir da URL
     const activeFilters: ActiveFilters = {
       query: searchParams.get('query') || undefined,
       from: searchParams.get('from') || undefined,
@@ -41,7 +42,6 @@ export function GerenciamentoClient({ filteredWorkDays }: GerenciamentoClientPro
     };
     
     try {
-        // Envia apenas os filtros para a server action
         const result = await deleteFilteredWorkDaysAction(activeFilters);
         if (result.success) {
             toast({ title: "Sucesso!", description: `${result.count || 0} registros apagados.` });
@@ -65,12 +65,12 @@ export function GerenciamentoClient({ filteredWorkDays }: GerenciamentoClientPro
         <CardHeader>
           <CardTitle>Seus Registros</CardTitle>
           <CardDescription>
-            Clique em um registro para editar. Filtre e gerencie todos os seus dias de trabalho.
+            Clique em um dia para ver os detalhes e editar os períodos. Total de {allWorkDaysCount} registros.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <HistoryFilters isPending={isPending} />
-          {hasFilters && filteredWorkDays.length > 0 && (
+          {hasFilters && filteredCount > 0 && (
             <div className="flex justify-end pt-4">
               <Button
                 variant="destructive"
@@ -78,15 +78,15 @@ export function GerenciamentoClient({ filteredWorkDays }: GerenciamentoClientPro
                 disabled={isDeletingFiltered || isPending}
               >
                 {isDeletingFiltered ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                Apagar {filteredWorkDays.length} {filteredWorkDays.length === 1 ? 'Registro Filtrado' : 'Registros Filtrados'}
+                Apagar {filteredCount} {filteredCount === 1 ? 'Registro Filtrado' : 'Registros Filtrados'}
               </Button>
             </div>
           )}
           <div className="mt-4">
             <DataTable 
               columns={columns} 
-              data={filteredWorkDays}
-              onRowClick={(row) => setEditingWorkDay(row.original)} 
+              data={groupedWorkDays}
+              onRowClick={(row) => setEditingDay(row.original)} 
             />
           </div>
         </CardContent>
@@ -99,7 +99,7 @@ export function GerenciamentoClient({ filteredWorkDays }: GerenciamentoClientPro
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso irá apagar permanentemente os <b>{filteredWorkDays.length}</b> registros de trabalho que correspondem aos filtros atuais.
+              Esta ação não pode ser desfeita. Isso irá apagar permanentemente os <b>{filteredCount}</b> registros de trabalho que correspondem aos filtros atuais.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

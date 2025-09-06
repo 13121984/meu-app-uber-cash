@@ -2,26 +2,27 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
-import { deleteWorkDay, deleteWorkDaysByFilter, getWorkDays, addOrUpdateWorkDay } from "@/services/work-day.service";
+import { deleteWorkDay, deleteWorkDaysByFilter, getWorkDays, addOrUpdateWorkDay, deleteWorkDayEntry } from "@/services/work-day.service";
 import type { WorkDay } from "@/services/work-day.service";
 import { z } from 'zod';
 import { parseISO, format } from 'date-fns';
 
 export async function updateWorkDayAction(workDay: WorkDay) {
-    // A função de serviço agora lida com a lógica de criar vs atualizar.
     const result = await addOrUpdateWorkDay(workDay);
     if (result.success) {
         revalidatePath("/gerenciamento");
+        revalidatePath("/registrar/today");
         revalidatePath("/");
     }
     return result;
 }
 
-export async function deleteWorkDayAction(workDayId: string) {
-    const result = await deleteWorkDay(workDayId);
+export async function deleteWorkDayEntryAction(workDayId: string) {
+    const result = await deleteWorkDayEntry(workDayId);
     if (result.success) {
         revalidatePath("/gerenciamento");
-        revalidatePath("/"); // Adicionado para revalidar a dashboard
+        revalidatePath("/registrar/today");
+        revalidatePath("/");
     }
     return result;
 }
@@ -44,5 +45,3 @@ export async function deleteFilteredWorkDaysAction(filters: ActiveFilters) {
     }
     return result;
 }
-
-    
