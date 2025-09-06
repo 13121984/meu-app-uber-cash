@@ -1,15 +1,8 @@
 
-import { DashboardClient, type DashboardData } from '@/components/dashboard/dashboard-client';
-import { getTodayData } from '@/services/work-day.service';
+import { DashboardClient } from '@/components/dashboard/dashboard-client';
 
 export default async function DashboardPage() {
-  // Otimização: Busca apenas os dados de hoje no carregamento inicial do servidor.
-  // Os dados da semana e do mês serão buscados no cliente sob demanda.
-  const todayData = await getTodayData();
-
-  const initialData: Partial<DashboardData> = {
-    hoje: todayData,
-  };
-
-  return <DashboardClient initialData={initialData} />;
+  // A página agora carrega instantaneamente, sem dados iniciais do servidor.
+  // O DashboardClient buscará os dados de "hoje" no lado do cliente.
+  return <DashboardClient initialData={{}} />;
 }

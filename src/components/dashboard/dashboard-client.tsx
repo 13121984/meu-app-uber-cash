@@ -76,6 +76,16 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const [data, setData] = useState<Partial<DashboardData>>(initialData);
   const [isLoading, startTransition] = useTransition();
 
+  // Busca os dados de "hoje" no cliente assim que o componente é montado.
+  useEffect(() => {
+    if (!data.hoje) {
+      startTransition(async () => {
+        const todayData = await getPeriodData('hoje');
+        setData(prevData => ({ ...prevData, hoje: todayData }));
+      });
+    }
+  }, []); // O array de dependências vazio garante que isso rode apenas uma vez.
+
   const handlePeriodChange = (newPeriod: Period) => {
     setPeriod(newPeriod);
     if (!data[newPeriod]) {

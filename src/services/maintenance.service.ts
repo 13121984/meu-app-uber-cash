@@ -4,6 +4,8 @@
 import { revalidatePath } from "next/cache";
 import fs from 'fs/promises';
 import path from 'path';
+import type { DateRange } from "react-day-picker";
+import { isWithinInterval } from "date-fns";
 
 export interface Maintenance {
   id: string; // ID is now mandatory
@@ -62,10 +64,33 @@ export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ s
 }
 
 /**
- * Busca todos os registros de manutenção do arquivo.
+ * Busca todos os registros de manutenção do arquivo, com filtros opcionais.
  */
-export async function getMaintenanceRecords(): Promise<Maintenance[]> {
-    return await readMaintenanceData();
+export async function getMaintenanceRecords(filters?: { query?: string, dateRange?: DateRange }): Promise<Maintenance[]> {
+    let records = await readMaintenanceData();
+
+    if (filters) {
+        records = records.filter(record => {
+            // Filter by Date
+            if (filters.dateRange?.from) {
+                if (!isWithinInterval(record.date, { start: filters.dateRange.from, end: filters.dateRange.to || filters.dateRange.from })) {
+                    return false;
+                }
+            }
+            
+            // Filter by Text Query
+            if (filters.query) {
+                const queryLower = filters.query.toLowerCase();
+                if (!record.description.toLowerCase().includes(queryLower)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+    }
+
+    return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 /**

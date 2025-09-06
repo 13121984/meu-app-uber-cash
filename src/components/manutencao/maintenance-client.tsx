@@ -50,10 +50,9 @@ const SummaryCard = ({ title, value, description, icon: Icon, iconClassName }: {
 
 interface MaintenanceClientProps {
     allRecords: Maintenance[];
-    filteredRecords: Maintenance[];
 }
 
-export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceClientProps) {
+export function MaintenanceClient({ allRecords: filteredRecords }: MaintenanceClientProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -64,12 +63,6 @@ export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceCl
     return filteredRecords.reduce((sum, record) => sum + record.amount, 0);
   }, [filteredRecords]);
 
-  const monthlyAverage = useMemo(() => {
-    if (allRecords.length === 0) return 0;
-    const totalSpent = allRecords.reduce((sum, record) => sum + record.amount, 0);
-    const months = new Set(allRecords.map(r => format(new Date(r.date), 'yyyy-MM')));
-    return totalSpent / months.size;
-  }, [allRecords]);
 
   const handleSuccess = () => {
       setIsFormOpen(false);
@@ -114,23 +107,6 @@ export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceCl
         if(!open) setSelectedRecord(null);
     }}>
       <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-             <SummaryCard 
-                title="Total Gasto (Filtrado)"
-                value={formatCurrency(filteredTotal)}
-                description={`${filteredRecords.length} ${filteredRecords.length === 1 ? 'registro' : 'registros'} no período`}
-                icon={DollarSign}
-                iconClassName="text-red-500"
-            />
-             <SummaryCard 
-                title="Média Mensal (Geral)"
-                value={formatCurrency(monthlyAverage)}
-                description={`Baseado em todos os ${allRecords.length} registros`}
-                icon={Wrench}
-                iconClassName="text-orange-500"
-            />
-        </div>
-
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -152,14 +128,31 @@ export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceCl
             <CardContent className="space-y-4">
                 <MaintenanceFilters />
 
+                <div className="pt-4 grid gap-4 md:grid-cols-2">
+                    <SummaryCard 
+                        title="Total Gasto (Filtrado)"
+                        value={formatCurrency(filteredTotal)}
+                        description={`${filteredRecords.length} ${filteredRecords.length === 1 ? 'registro encontrado' : 'registros encontrados'}`}
+                        icon={DollarSign}
+                        iconClassName="text-red-500"
+                    />
+                     <SummaryCard 
+                        title="Custo Médio (Filtrado)"
+                        value={formatCurrency(filteredRecords.length > 0 ? filteredTotal / filteredRecords.length : 0)}
+                        description={`Média por serviço no período`}
+                        icon={Wrench}
+                        iconClassName="text-orange-500"
+                    />
+                </div>
+
                 {filteredRecords.length === 0 ? (
-                <div className="text-center py-20 text-muted-foreground">
+                <div className="text-center py-20 text-muted-foreground border-dashed border-2 rounded-lg mt-4">
                     <Wrench className="mx-auto h-12 w-12" />
                     <p className="mt-4 font-semibold">Nenhum registro de manutenção encontrado</p>
                     <p className="text-sm">Tente ajustar os filtros ou adicione um novo registro.</p>
                 </div>
                 ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 mt-4">
                     {filteredRecords.map(record => (
                     <Card key={record.id}>
                         <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -181,11 +174,11 @@ export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceCl
                         </CardContent>
                     </Card>
                     ))}
-                    {allRecords.length > 0 && (
+                    {filteredRecords.length > 0 && (
                       <div className="pt-4 flex justify-end">
                         <Button variant="destructive" onClick={() => setIsAlertOpen(true)} disabled={isDeleting}>
                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                          Apagar Tudo ({allRecords.length})
+                          Apagar Todos os Registros
                         </Button>
                       </div>
                     )}
@@ -212,7 +205,7 @@ export function MaintenanceClient({ allRecords, filteredRecords }: MaintenanceCl
             <AlertDialogHeader>
               <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
               <AlertDialogDescription>
-                Esta ação não pode ser desfeita. Isso irá apagar permanentemente todos os seus registros de manutenção.
+                Esta ação não pode ser desfeita. Isso irá apagar permanentemente TODOS os seus registros de manutenção.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
