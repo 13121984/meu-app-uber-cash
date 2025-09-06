@@ -84,11 +84,11 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     });
   };
 
-  const periodMap = {
+  const periodMap: Record<Period, string> = {
       hoje: "Hoje",
       semana: "Esta Semana",
       mes: "Este Mês"
-  }
+  };
   
   const currentData = period ? data[period] : null;
   const currentPeriodName = period ? periodMap[period] : 'Nenhum período selecionado';
@@ -111,7 +111,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               </Card>
           )
       }
-
+      
       return (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -129,7 +129,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
           <Card>
               <CardHeader>
-                  <CardTitle className="font-headline text-lg">Meta de Lucro ({periodMap[period!]})</CardTitle>
+                  <CardTitle className="font-headline text-lg">Meta de Lucro ({period ? periodMap[period] : ''})</CardTitle>
               </CardHeader>
               <CardContent>
                 <GoalProgress progress={(currentData.meta.target > 0 ? (currentData.totalLucro / currentData.meta.target) * 100 : 0)} target={currentData.meta.target} current={currentData.totalLucro} />
@@ -143,12 +143,12 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               <CardHeader>
                   <CardTitle className="font-headline text-lg flex items-center gap-2">
                     <BarChart3 className="w-6 h-6 text-primary" />
-                    Análise por Categoria ({periodMap[period!]})
+                    Análise por Categoria ({period ? periodMap[period] : ''})
                   </CardTitle>
                   <CardDescription>
                     Detalhes sobre o desempenho das suas corridas por categoria.
                   </CardDescription>
-              </Header>
+              </CardHeader>
               <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-2">
                     <h3 className="font-semibold flex items-center gap-2">
