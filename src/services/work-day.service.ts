@@ -443,21 +443,11 @@ export async function getDashboardData() {
     const goals = await getGoals();
     const now = new Date();
 
-    const todayDateString = now.toDateString();
-
-    const todayWorkDays = allWorkDays.filter(day => {
-        const dayDate = new Date(day.date);
-        return dayDate.toDateString() === todayDateString;
-    });
-
+    const todayWorkDays = allWorkDays.filter(day => isSameDay(day.date, now));
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(new Date(day.date), { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(new Date(day.date), { start: startOfMonth(now), end: endOfMonth(now) }));
-
-    const todayMaintenance = allMaintenance.filter(m => {
-      const mDate = new Date(m.date);
-      return mDate.toDateString() === todayDateString;
-    });
-
+    
+    const todayMaintenance = allMaintenance.filter(m => isSameDay(m.date, now));
     const thisWeekMaintenance = allMaintenance.filter(m => isWithinInterval(new Date(m.date), { start: startOfWeek(now), end: endOfWeek(now) }));
     const thisMonthMaintenance = allMaintenance.filter(m => isWithinInterval(new Date(m.date), { start: startOfMonth(now), end: endOfMonth(now) }));
 
@@ -468,30 +458,51 @@ export async function getDashboardData() {
     return { hoje, semana, mes };
 }
 
+// Nova função para buscar dados de um período específico sob demanda
+export async function getPeriodData(period: 'hoje' | 'semana' | 'mes'): Promise<PeriodData> {
+    const allWorkDays = await getWorkDays();
+    const allMaintenance = await getMaintenanceRecords();
+    const goals = await getGoals();
+    const now = new Date();
+
+    let workDaysForPeriod: WorkDay[] = [];
+    let maintenanceForPeriod: Maintenance[] = [];
+    let goalPeriod: 'diária' | 'semanal' | 'mensal' = 'diária';
+
+    if (period === 'hoje') {
+        workDaysForPeriod = allWorkDays.filter(day => isSameDay(day.date, now));
+        maintenanceForPeriod = allMaintenance.filter(m => isSameDay(m.date, now));
+        goalPeriod = 'diária';
+    } else if (period === 'semana') {
+        workDaysForPeriod = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
+        maintenanceForPeriod = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfWeek(now), end: endOfWeek(now) }));
+        goalPeriod = 'semanal';
+    } else if (period === 'mes') {
+        workDaysForPeriod = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
+        maintenanceForPeriod = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfMonth(now), end: endOfMonth(now) }));
+        goalPeriod = 'mensal';
+    }
+    
+    return calculatePeriodData(workDaysForPeriod, goalPeriod, goals, maintenanceForPeriod);
+}
+
 export async function getTodayData(): Promise<PeriodData> {
     const allWorkDays = await getWorkDays();
     const allMaintenance = await getMaintenanceRecords();
     const goals = await getGoals();
     const now = new Date();
-    const todayDateString = now.toDateString();
-
-    const todayWorkDays = allWorkDays.filter(day => {
-        const dayDate = new Date(day.date);
-        return dayDate.toDateString() === todayDateString;
-    });
     
-    const todayMaintenance = allMaintenance.filter(m => {
-      const mDate = new Date(m.date);
-      return mDate.toDateString() === todayDateString;
-    });
+    const todayWorkDays = allWorkDays.filter(day => isSameDay(day.date, now));
+    const todayMaintenance = allMaintenance.filter(m => isSameDay(m.date, now));
 
     return calculatePeriodData(todayWorkDays, "diária", goals, todayMaintenance);
 }
 
-export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilterValues): Promise<ReportData> {
+export async function getReportData(filters: ReportFilterValues): Promise<ReportData> {
   const now = new Date();
   let filteredDays: WorkDay[] = [];
   let interval: { start: Date; end: Date } | null = null;
+  const allWorkDays = await getWorkDays();
 
   switch (filters.type) {
     case 'all':
@@ -527,11 +538,10 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
       break;
   }
   
-  const sourceDays = allWorkDays.length > 0 ? allWorkDays : await getWorkDays();
   if (interval) {
-    filteredDays = sourceDays.filter(d => isWithinInterval(new Date(d.date), interval!));
+    filteredDays = allWorkDays.filter(d => isWithinInterval(new Date(d.date), interval!));
   } else {
-    filteredDays = sourceDays;
+    filteredDays = allWorkDays; // Default to all if no interval matches, e.g., 'all' type with no days.
   }
   
   const allMaintenance = await getMaintenanceRecords();

@@ -4,7 +4,6 @@
 import { useState, useTransition } from "react";
 import { useWorkDayColumns } from "./columns";
 import { DataTable } from "./data-table";
-import type { WorkDay } from "@/services/work-day.service";
 import { HistoryFilters } from "./history-filters";
 import { Button } from "../ui/button";
 import { Loader2, Trash2 } from "lucide-react";
@@ -14,49 +13,43 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import type { GroupedWorkDay } from "@/app/gerenciamento/page";
+import type { ReportFilterValues } from "@/app/relatorios/actions";
 
 interface GerenciamentoClientProps {
-  groupedWorkDays: GroupedWorkDay[];
+  initialGroupedWorkDays: GroupedWorkDay[];
   allWorkDaysCount: number;
+  initialFilters?: ReportFilterValues;
 }
 
-export function GerenciamentoClient({ groupedWorkDays, allWorkDaysCount }: GerenciamentoClientProps) {
+export function GerenciamentoClient({ initialGroupedWorkDays, allWorkDaysCount, initialFilters }: GerenciamentoClientProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { columns, Dialogs, setEditingDay } = useWorkDayColumns();
 
-  const [isDeletingFiltered, setIsDeletingFiltered] = useState(false);
+  const [isDeletingFiltered, startDeleteTransition] = useTransition();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startFilterTransition] = useTransition();
+  const [activeFilters, setActiveFilters] = useState<ReportFilterValues | undefined>(initialFilters);
 
-  const hasFilters = searchParams.has('query') || searchParams.has('from');
-  const filteredCount = groupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
+  const filteredCount = initialGroupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
 
   const handleDeleteFiltered = async () => {
-    setIsDeletingFiltered(true);
-    
-    const activeFilters: ActiveFilters = {
-      query: searchParams.get('query') || undefined,
-      from: searchParams.get('from') || undefined,
-      to: searchParams.get('to') || undefined,
-    };
-    
-    try {
-        const result = await deleteFilteredWorkDaysAction(activeFilters);
-        if (result.success) {
-            toast({ title: "Sucesso!", description: `${result.count || 0} registros apagados.` });
-            startTransition(() => {
+    if (!activeFilters) return;
+
+    startDeleteTransition(async () => {
+      try {
+          const result = await deleteFilteredWorkDaysAction(activeFilters as ActiveFilters);
+          if (result.success) {
+              toast({ title: "Sucesso!", description: `${result.count || 0} registros apagados.` });
               router.refresh();
-            });
-        } else {
-            toast({ title: "Erro!", description: result.error, variant: "destructive" });
-        }
-    } catch (error) {
-        toast({ title: "Erro Inesperado!", description: "Ocorreu um erro ao apagar os registros.", variant: "destructive" });
-    } finally {
-        setIsDeletingFiltered(false);
-        setIsAlertOpen(false);
-    }
+          } else {
+              toast({ title: "Erro!", description: result.error, variant: "destructive" });
+          }
+      } catch (error) {
+          toast({ title: "Erro Inesperado!", description: "Ocorreu um erro ao apagar os registros.", variant: "destructive" });
+      } finally {
+          setIsAlertOpen(false);
+      }
+    });
   }
 
   return (
@@ -65,12 +58,17 @@ export function GerenciamentoClient({ groupedWorkDays, allWorkDaysCount }: Geren
         <CardHeader>
           <CardTitle>Seus Registros</CardTitle>
           <CardDescription>
-            Clique em um dia para ver os detalhes e editar os períodos. Total de {allWorkDaysCount} registros.
+            Total de {allWorkDaysCount} registros no histórico. Use os filtros para encontrar dias específicos.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <HistoryFilters isPending={isPending} />
-          {hasFilters && filteredCount > 0 && (
+          <HistoryFilters 
+            isPending={isPending} 
+            startTransition={startFilterTransition}
+            onFiltersChange={setActiveFilters}
+            initialFilters={initialFilters}
+          />
+          {activeFilters && filteredCount > 0 && (
             <div className="flex justify-end pt-4">
               <Button
                 variant="destructive"
@@ -85,7 +83,7 @@ export function GerenciamentoClient({ groupedWorkDays, allWorkDaysCount }: Geren
           <div className="mt-4">
             <DataTable 
               columns={columns} 
-              data={groupedWorkDays}
+              data={initialGroupedWorkDays}
               onRowClick={(row) => setEditingDay(row.original)} 
             />
           </div>
@@ -105,7 +103,7 @@ export function GerenciamentoClient({ groupedWorkDays, allWorkDaysCount }: Geren
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteFiltered} disabled={isDeletingFiltered} className="bg-destructive hover:bg-destructive/90">
-              {isDeletingFiltered ? "Apagando..." : "Apagar Tudo"}
+              {isDeletingFiltered ? "Apagando..." : "Sim, apagar tudo"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

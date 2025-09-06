@@ -1,9 +1,9 @@
 
 import { History } from 'lucide-react';
-import { getWorkDays } from '@/services/work-day.service';
+import { getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
 import { GerenciamentoClient } from '@/components/gerenciamento/gerenciamento-client';
-import type { WorkDay } from '@/services/work-day.service';
-import { parseISO, format, startOfDay } from "date-fns";
+import type { ReportFilterValues } from '@/app/relatorios/actions';
+import { format, parseISO, startOfDay, isWithinInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 
 // Interface para representar um dia agrupado
 export interface GroupedWorkDay {
@@ -36,7 +36,7 @@ function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
     
     const earnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
     const fuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-    const maintenance = day.maintenance?.amount || 0;
+    const maintenance = day.maintenanceEntries?.reduce((sum, m) => sum + m.amount, 0) || 0;
     const profit = earnings - fuel - maintenance;
 
     group.totalProfit += profit;
@@ -52,65 +52,65 @@ function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
 // A filtragem agora acontece no servidor, antes de renderizar a página.
 async function getFilteredWorkDays(
   allWorkDays: WorkDay[],
-  query?: string,
-  from?: string,
-  to?: string
+  filters?: ReportFilterValues
 ): Promise<GroupedWorkDay[]> {
-  const allDaysProcessed = allWorkDays
-    .map(day => ({
-      ...day,
-      date: typeof day.date === 'string' ? parseISO(day.date) : day.date
-    }));
 
-  const filteredEntries = allDaysProcessed.filter(day => {
-      const dayDateString = format(day.date, 'yyyy-MM-dd');
-      
-      if (from) {
-        const fromDateString = from;
-        const toDateString = to || from;
+  let filteredEntries: WorkDay[] = [];
 
-        if (dayDateString < fromDateString || dayDateString > toDateString) {
-          return false;
-        }
+  // Se nenhum filtro for fornecido, mostra apenas os dados de hoje.
+  if (!filters || !filters.type || filters.type === 'today') {
+    const today = new Date();
+    filteredEntries = allWorkDays.filter(day => isSameDay(day.date, today));
+  } else {
+      const now = new Date();
+      let interval: { start: Date; end: Date } | null = null;
+       switch (filters.type) {
+        case 'all':
+          filteredEntries = allWorkDays;
+          break;
+        case 'thisWeek':
+          interval = { start: startOfWeek(now), end: endOfWeek(now) };
+          break;
+        case 'thisMonth':
+          interval = { start: startOfMonth(now), end: endOfMonth(now) };
+          break;
+        case 'specificMonth':
+          if (filters.year !== undefined && filters.month !== undefined) {
+            interval = { start: startOfMonth(new Date(filters.year, filters.month)), end: endOfMonth(new Date(filters.year, filters.month)) };
+          }
+          break;
+        case 'specificYear':
+          if (filters.year !== undefined) {
+            interval = { start: startOfYear(new Date(filters.year, 0)), end: endOfYear(new Date(filters.year, 0)) };
+          }
+          break;
+        case 'custom':
+          if (filters.dateRange?.from) {
+            interval = { start: startOfDay(filters.dateRange.from), end: filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from) };
+          }
+          break;
       }
-      
-      if (query) {
-        const dateString = format(day.date, 'dd/MM/yyyy');
-        // A busca agora considera o dia inteiro, mesmo que apenas uma entrada corresponda
-        const searchString = JSON.stringify(day).toLowerCase();
-        const queryLower = query.toLowerCase();
-
-        return dateString.includes(queryLower) || searchString.includes(queryLower);
+      if (interval) {
+        filteredEntries = allWorkDays.filter(d => isWithinInterval(d.date, interval!));
       }
+  }
 
-      return true;
-    });
-
-    const groupedAndFiltered = groupWorkDays(filteredEntries);
-
-    return groupedAndFiltered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const groupedAndFiltered = groupWorkDays(filteredEntries);
+  return groupedAndFiltered.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
 
 export default async function GerenciamentoPage({
   searchParams,
 }: {
-  searchParams?: {
-    query?: string;
-    from?: string;
-    to?: string;
-  };
+  searchParams?: ReportFilterValues;
 }) {
-  // A busca de todos os dias de trabalho ainda é necessária
+  // Busca todos os dias de trabalho. A filtragem ocorrerá abaixo.
   const allWorkDays = await getWorkDays();
-
-  // A filtragem e agrupamento são feitos aqui, no servidor
-  const groupedAndFilteredWorkDays = await getFilteredWorkDays(
-    allWorkDays,
-    searchParams?.query,
-    searchParams?.from,
-    searchParams?.to
-  );
+  
+  // A filtragem e agrupamento são feitos aqui, no servidor.
+  // Por padrão, mostra apenas os registros de hoje.
+  const groupedAndFilteredWorkDays = await getFilteredWorkDays(allWorkDays, searchParams);
 
   return (
     <div className="space-y-6">
@@ -123,10 +123,12 @@ export default async function GerenciamentoPage({
       </div>
       
       <GerenciamentoClient 
-        groupedWorkDays={groupedAndFilteredWorkDays} 
+        initialGroupedWorkDays={groupedAndFilteredWorkDays} 
         allWorkDaysCount={allWorkDays.length}
+        initialFilters={searchParams}
       />
 
     </div>
   );
 }
+

@@ -2,12 +2,11 @@
 "use client";
 
 import React, { useState, useEffect, useTransition } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Download, Loader2, AlertTriangle, Info } from 'lucide-react';
+import { Calendar as CalendarIcon, Download, Loader2, AlertTriangle, Filter, Check } from 'lucide-react';
 import { format, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
@@ -17,7 +16,8 @@ import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions
 
 
 interface ReportsFilterProps {
-  initialFilters: ReportFilterValues;
+  onApplyFilters: (filters: ReportFilterValues) => void;
+  isPending: boolean;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -26,64 +26,52 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
 }));
 
-export function ReportsFilter({ initialFilters }: ReportsFilterProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
-
-  const [filterType, setFilterType] = useState<ReportFilterValues['type']>(initialFilters.type);
-  const [year, setYear] = useState<number>(initialFilters.year || getYear(new Date()));
-  const [month, setMonth] = useState<number>(initialFilters.month || new Date().getMonth());
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(initialFilters.dateRange);
+export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps) {
+  const [filterType, setFilterType] = useState<ReportFilterValues['type'] | null>(null);
+  const [year, setYear] = useState<number>(getYear(new Date()));
+  const [month, setMonth] = useState<number>(new Date().getMonth());
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [isExporting, startExportTransition] = useTransition();
-  const [currentFilters, setCurrentFilters] = useState<ReportFilterValues>(initialFilters);
+  const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
   
-  useEffect(() => {
-    const params = new URLSearchParams();
-    params.set('type', filterType);
+  const handleApply = () => {
+    if (!filterType) {
+        toast({ title: "Selecione um período", description: "Você precisa escolher um tipo de período para gerar o relatório.", variant: "destructive" });
+        return;
+    }
 
     const filters: ReportFilterValues = { type: filterType };
 
     if (filterType === 'specificMonth') {
         filters.year = year;
         filters.month = month;
-        params.set('year', year.toString());
-        params.set('month', month.toString());
     } else if (filterType === 'specificYear') {
         filters.year = year;
-        params.set('year', year.toString());
     } else if (filterType === 'custom' && dateRange?.from) {
         filters.dateRange = dateRange;
-        params.set('from', format(dateRange.from, 'yyyy-MM-dd'));
-        if (dateRange.to) {
-            params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
-        }
     }
-    
-    startTransition(() => {
-        router.replace(`${pathname}?${params.toString()}`);
-        setCurrentFilters(filters);
-    });
 
-  }, [filterType, year, month, dateRange, pathname, router]);
+    setCurrentFilters(filters);
+    onApplyFilters(filters);
+  };
   
   const handleDownload = () => {
+      if (!currentFilters) {
+          toast({ title: "Nenhum relatório gerado", description: "Aplique um filtro primeiro para poder exportar os dados.", variant: "destructive"});
+          return;
+      }
       startExportTransition(async () => {
         try {
             const result = await exportReportAction(currentFilters);
 
             if (result.csvContent) {
-                 // Create a blob from the CSV content
                 const blob = new Blob([result.csvContent], { type: 'text/csv;charset=utf-8;' });
-                
-                // Create a link element
                 const link = document.createElement("a");
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
                 const fileName = `Relatorio_UberCash_${format(new Date(), 'yyyy-MM-dd')}.csv`;
                 link.setAttribute("download", fileName);
                 
-                // Append to the document, click, and then remove
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -99,12 +87,7 @@ export function ReportsFilter({ initialFilters }: ReportsFilterProps) {
             console.error(error);
             const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro inesperado.";
             toast({
-                title: (
-                    <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-destructive" />
-                        <span className="font-bold">Erro na Exportação</span>
-                    </div>
-                ),
+                title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span className="font-bold">Erro na Exportação</span></div>,
                 description: errorMessage,
                 variant: "destructive",
             });
@@ -113,26 +96,26 @@ export function ReportsFilter({ initialFilters }: ReportsFilterProps) {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card items-center">
-      <Select value={filterType} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])} disabled={isPending}>
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="Tipo de Período" />
+    <div className="flex flex-col sm:flex-row flex-wrap gap-2 p-4 border rounded-lg bg-card items-center">
+      <Select value={filterType || ''} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])} disabled={isPending}>
+        <SelectTrigger className="w-full sm:w-auto sm:min-w-[180px]">
+          <SelectValue placeholder="Selecione um Período" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Todo o Período</SelectItem>
           <SelectItem value="today">Hoje</SelectItem>
           <SelectItem value="thisWeek">Esta Semana</SelectItem>
           <SelectItem value="thisMonth">Este Mês</SelectItem>
           <SelectItem value="specificMonth">Mês Específico</SelectItem>
           <SelectItem value="specificYear">Ano Específico</SelectItem>
           <SelectItem value="custom">Período Personalizado</SelectItem>
+          <SelectItem value="all">Todo o Período</SelectItem>
         </SelectContent>
       </Select>
       
       {filterType === 'specificMonth' && (
         <>
             <Select value={month.toString()} onValueChange={(val) => setMonth(parseInt(val))} disabled={isPending}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-auto flex-1">
                 <SelectValue placeholder="Mês" />
                 </SelectTrigger>
                 <SelectContent>
@@ -169,7 +152,7 @@ export function ReportsFilter({ initialFilters }: ReportsFilterProps) {
                 variant={"outline"}
                 disabled={isPending}
                 className={cn(
-                "w-full sm:w-[300px] justify-start text-left font-normal",
+                "w-full sm:w-auto sm:min-w-[240px] justify-start text-left font-normal",
                 !dateRange && "text-muted-foreground"
                 )}
             >
@@ -177,11 +160,11 @@ export function ReportsFilter({ initialFilters }: ReportsFilterProps) {
                 {dateRange?.from ? (
                 dateRange.to ? (
                     <>
-                    {format(dateRange.from, "LLL dd, y", { locale: ptBR })} -{" "}
-                    {format(dateRange.to, "LLL dd, y", { locale: ptBR })}
+                    {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
+                    {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
                     </>
                 ) : (
-                    format(dateRange.from, "LLL dd, y", { locale: ptBR })
+                    format(dateRange.from, "PPP", { locale: ptBR })
                 )
                 ) : (
                 <span>Selecione um período</span>
@@ -202,15 +185,17 @@ export function ReportsFilter({ initialFilters }: ReportsFilterProps) {
         </Popover>
       )}
 
+      <Button onClick={handleApply} className="w-full sm:w-auto" disabled={isPending || !filterType}>
+          {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+          Aplicar Filtro
+      </Button>
+
       <div className="flex-grow"></div>
       
-      {isPending && <Loader2 className="h-5 w-5 animate-spin" />}
-      
-      <Button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto" disabled={isExporting || isPending}>
+      <Button onClick={handleDownload} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !currentFilters}>
           {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
           {isExporting ? 'Exportando...' : 'Baixar CSV'}
       </Button>
-
     </div>
   );
 }

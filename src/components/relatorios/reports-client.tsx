@@ -1,14 +1,15 @@
 
 "use client";
 
-import { useMemo } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench, Loader2, CalendarDays } from 'lucide-react';
 import { ReportsFilter } from './reports-filter';
-import { ReportData } from '@/services/work-day.service';
+import { getReportData, ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
 import { StatsCard } from '@/components/dashboard/stats-card';
+import { Button } from '../ui/button';
 
 const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -17,14 +18,18 @@ const FuelBarChart = dynamic(() => import('./fuel-bar-chart').then(mod => mod.Fu
 const ProfitEvolutionChart = dynamic(() => import('./profit-evolution-chart').then(mod => mod.ProfitEvolutionChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
+export function ReportsClient() {
+  const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
+  const [isLoading, startTransition] = useTransition();
 
-interface ReportsClientProps {
-  initialReportData: ReportData;
-  initialFilters: ReportFilterValues;
-}
-
-export function ReportsClient({ initialReportData, initialFilters }: ReportsClientProps) {
-  const reportData = initialReportData; // Os dados agora vêm diretamente como prop
+  const handleApplyFilters = (filters: ReportFilterValues) => {
+    setCurrentFilters(filters);
+    startTransition(async () => {
+      const data = await getReportData(filters);
+      setReportData(data);
+    });
+  };
 
   const stats = useMemo(() => reportData ? [
     { title: "Lucro Líquido", value: reportData.totalLucro, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
@@ -40,106 +45,124 @@ export function ReportsClient({ initialReportData, initialFilters }: ReportsClie
     { title: "Combustível", value: reportData.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
   ] : [], [reportData]);
 
-  return (
-    <div className="space-y-6">
-      <ReportsFilter initialFilters={initialFilters} />
-      
-      {!reportData || reportData.diasTrabalhados === 0 ? (
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center h-96">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      );
+    }
+    
+    if (!currentFilters) {
+        return (
+             <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed bg-card border-border">
+                <BarChart className="w-16 h-16 text-muted-foreground mb-4" />
+                <h2 className="text-xl font-semibold">Selecione um Período</h2>
+                <p className="text-muted-foreground">Escolha uma das opções acima para gerar seu relatório.</p>
+            </Card>
+        )
+    }
+
+    if (!reportData || reportData.diasTrabalhados === 0) {
+      return (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed bg-card border-border">
             <BarChart className="w-16 h-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold">Nenhum dado encontrado</h2>
             <p className="text-muted-foreground">Não há registros para o período selecionado. Tente ajustar os filtros.</p>
         </Card>
-      ) : (
-        <div className="space-y-4">
+      );
+    }
 
-            {/* Resumo do Período */}
+    return (
+      <div className="space-y-4">
+          <Card>
+              <CardHeader>
+                  <CardTitle className="font-headline text-lg">Resumo do Período</CardTitle>
+                  <CardDescription>
+                      {reportData.diasTrabalhados} {reportData.diasTrabalhados === 1 ? 'dia trabalhado' : 'dias trabalhados'} no período selecionado.
+                  </CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                 {stats.map((stat) => (
+                    <StatsCard key={stat.title} {...stat} />
+                 ))}
+              </CardContent>
+          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-lg">Resumo do Período</CardTitle>
+                    <CardTitle className="font-headline text-lg flex items-center gap-2">
+                        <PieChartIcon className="w-5 h-5 text-primary" />
+                        Composição dos Ganhos
+                    </CardTitle>
                     <CardDescription>
-                        {reportData.diasTrabalhados} {reportData.diasTrabalhados === 1 ? 'dia trabalhado' : 'dias trabalhados'} no período selecionado.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                   {stats.map((stat) => (
-                      <StatsCard key={stat.title} {...stat} />
-                   ))}
-                </CardContent>
-            </Card>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card>
-                  <CardHeader>
-                      <CardTitle className="font-headline text-lg flex items-center gap-2">
-                          <PieChartIcon className="w-5 h-5 text-primary" />
-                          Composição dos Ganhos
-                      </CardTitle>
-                      <CardDescription>
-                          Distribuição do seu faturamento bruto.
-                      </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                      <div className="h-[350px]">
-                          <EarningsPieChart data={reportData.profitComposition} />
-                      </div>
-                  </CardContent>
-              </Card>
-              <Card>
-                  <CardHeader>
-                      <CardTitle className="font-headline text-lg">Gastos com Combustível</CardTitle>
-                      <CardDescription>
-                          Total gasto por tipo de combustível.
-                      </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                      <FuelBarChart data={reportData.fuelExpenses} />
-                  </CardContent>
-              </Card>
-            </div>
-            
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Evolução do Lucro no Período</CardTitle>
-                     <CardDescription>
-                        Desempenho do lucro líquido dia a dia.
+                        Distribuição do seu faturamento bruto.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ProfitEvolutionChart data={reportData.profitEvolution} />
+                    <div className="h-[350px]">
+                        <EarningsPieChart data={reportData.profitComposition} />
+                    </div>
                 </CardContent>
             </Card>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card>
-                  <CardHeader>
-                      <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                      <EarningsBarChart data={reportData.earningsByCategory} />
-                  </CardContent>
-              </Card>
-
-              <Card>
-                  <CardHeader>
-                      <CardTitle className="font-headline text-lg">Viagens por Categoria</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                      <TripsBarChart data={reportData.tripsByCategory} />
-                  </CardContent>
-              </Card>
-            </div>
-
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-lg">Total de Viagens por Dia</CardTitle>
+                    <CardTitle className="font-headline text-lg">Gastos com Combustível</CardTitle>
+                    <CardDescription>
+                        Total gasto por tipo de combustível.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <DailyTripsChart data={reportData.dailyTrips} />
+                    <FuelBarChart data={reportData.fuelExpenses} />
                 </CardContent>
             </Card>
-        </div>
-      )}
+          </div>
+          <Card>
+              <CardHeader>
+                  <CardTitle className="font-headline text-lg">Evolução do Lucro no Período</CardTitle>
+                   <CardDescription>
+                      Desempenho do lucro líquido dia a dia.
+                  </CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <ProfitEvolutionChart data={reportData.profitEvolution} />
+              </CardContent>
+          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <EarningsBarChart data={reportData.earningsByCategory} />
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Viagens por Categoria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <TripsBarChart data={reportData.tripsByCategory} />
+                </CardContent>
+            </Card>
+          </div>
+          <Card>
+              <CardHeader>
+                  <CardTitle className="font-headline text-lg">Total de Viagens por Dia</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <DailyTripsChart data={reportData.dailyTrips} />
+              </CardContent>
+          </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <ReportsFilter onApplyFilters={handleApplyFilters} isPending={isLoading} />
+      {renderContent()}
     </div>
   );
 }

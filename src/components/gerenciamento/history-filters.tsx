@@ -1,153 +1,167 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useCallback, useTransition, TransitionStartFunction } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Search, FilterX, Loader2 } from 'lucide-react';
-import { format, parseISO, isValid } from 'date-fns';
+import { Calendar as CalendarIcon, Download, Loader2, FilterX } from 'lucide-react';
+import { format, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
-import { useDebounce } from 'use-debounce';
+import type { ReportFilterValues } from '@/app/relatorios/actions';
 
 interface HistoryFiltersProps {
   isPending: boolean;
+  startTransition: TransitionStartFunction;
+  onFiltersChange: (filters: ReportFilterValues) => void;
+  initialFilters?: ReportFilterValues;
 }
 
-export function HistoryFilters({ isPending }: HistoryFiltersProps) {
+const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
+const months = Array.from({ length: 12 }, (_, i) => ({
+  value: i,
+  label: new Date(0, i).toLocaleString('pt-BR', { month: 'long' }),
+}));
+
+export function HistoryFilters({ isPending, startTransition, onFiltersChange, initialFilters }: HistoryFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  // State for the inputs, initialized from URL search params
-  const [query, setQuery] = useState(searchParams.get('query') || '');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    const fromParam = searchParams.get('from');
-    const toParam = searchParams.get('to');
-    if (fromParam) {
-      const fromDate = parseISO(fromParam);
-      const toDate = toParam ? parseISO(toParam) : undefined;
-      if (isValid(fromDate)) {
-        return { from: fromDate, to: isValid(toDate) ? toDate : undefined };
-      }
-    }
-    return undefined;
-  });
-
-  // Debounce the query input to avoid excessive URL updates
-  const [debouncedQuery] = useDebounce(query, 500);
-
-  // This state ensures that client-side-only logic runs after hydration
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const [filterType, setFilterType] = useState<ReportFilterValues['type']>(initialFilters?.type || 'today');
+  const [year, setYear] = useState<number>(initialFilters?.year || getYear(new Date()));
+  const [month, setMonth] = useState<number>(initialFilters?.month || new Date().getMonth());
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(initialFilters?.dateRange);
   
-  const [_, startURLTransition] = useTransition();
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set('type', filterType);
+    const newFilters: ReportFilterValues = { type: filterType };
 
-  // This effect synchronizes the URL with the component's state
-  const updateURL = useCallback(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (debouncedQuery) {
-      params.set('query', debouncedQuery);
-    } else {
-      params.delete('query');
-    }
-
-    if (dateRange?.from) {
+    if (filterType === 'specificMonth') {
+      newFilters.year = year;
+      newFilters.month = month;
+      params.set('year', year.toString());
+      params.set('month', month.toString());
+    } else if (filterType === 'specificYear') {
+      newFilters.year = year;
+      params.set('year', year.toString());
+    } else if (filterType === 'custom' && dateRange?.from) {
+      newFilters.dateRange = dateRange;
       params.set('from', format(dateRange.from, 'yyyy-MM-dd'));
       if (dateRange.to) {
         params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
-      } else {
-        params.delete('to');
       }
-    } else {
-      params.delete('from');
-      params.delete('to');
     }
     
-    startURLTransition(() => {
-        // Using router.replace to avoid adding unnecessary entries to browser history
-        router.replace(`${pathname}?${params.toString()}`);
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`);
+      onFiltersChange(newFilters);
     });
 
-  }, [debouncedQuery, dateRange, pathname, router, searchParams]);
-
-  useEffect(() => {
-    // Only run this logic on the client
-    if (isClient) {
-      updateURL();
-    }
-  }, [isClient, updateURL]);
-
+  }, [filterType, year, month, dateRange, pathname, router, startTransition, onFiltersChange]);
 
   const handleClearFilters = () => {
-    setQuery('');
+    setFilterType('today');
     setDateRange(undefined);
+    setYear(getYear(new Date()));
+    setMonth(new Date().getMonth());
   };
 
-  const hasActiveFilters = !!(searchParams.get('query') || searchParams.get('from'));
-
-  // Prevents rendering on the server and avoids hydration mismatch by returning null until client is mounted
-  if (!isClient) {
-    return null;
-  }
+  const hasActiveFilters = filterType !== 'today';
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 items-center">
-      <div className="relative flex-1 w-full">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Pesquisar..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="pl-10"
-          disabled={isPending}
-        />
-      </div>
+    <div className="flex flex-wrap gap-2 items-center">
+      <Select value={filterType} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])} disabled={isPending}>
+        <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectValue placeholder="Tipo de Período" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="today">Hoje</SelectItem>
+          <SelectItem value="thisWeek">Esta Semana</SelectItem>
+          <SelectItem value="thisMonth">Este Mês</SelectItem>
+          <SelectItem value="specificMonth">Mês Específico</SelectItem>
+          <SelectItem value="specificYear">Ano Específico</SelectItem>
+          <SelectItem value="custom">Período Personalizado</SelectItem>
+          <SelectItem value="all">Todo o Período</SelectItem>
+        </SelectContent>
+      </Select>
       
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            disabled={isPending}
-            className={cn(
-              "w-full sm:w-[300px] justify-start text-left font-normal",
-              !dateRange && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-            {dateRange?.from ? (
-              dateRange.to ? (
-                <>
-                  {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
-                  {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
-                </>
-              ) : (
-                format(dateRange.from, "PPP", { locale: ptBR })
-              )
-            ) : (
-              <span>Filtrar por período</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={dateRange?.from}
-            selected={dateRange}
-            onSelect={setDateRange}
-            numberOfMonths={1}
-            locale={ptBR}
-          />
-        </PopoverContent>
-      </Popover>
+      {filterType === 'specificMonth' && (
+        <>
+            <Select value={month.toString()} onValueChange={(val) => setMonth(parseInt(val))} disabled={isPending}>
+                <SelectTrigger className="w-full sm:w-auto flex-1">
+                <SelectValue placeholder="Mês" />
+                </SelectTrigger>
+                <SelectContent>
+                {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
+                </SelectContent>
+            </Select>
+            <Select value={year.toString()} onValueChange={(val) => setYear(parseInt(val))} disabled={isPending}>
+                <SelectTrigger className="w-full sm:w-[120px]">
+                <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                {years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}
+                </SelectContent>
+            </Select>
+        </>
+      )}
+
+      {filterType === 'specificYear' && (
+        <Select value={year.toString()} onValueChange={(val) => setYear(parseInt(val))} disabled={isPending}>
+            <SelectTrigger className="w-full sm:w-[120px]">
+            <SelectValue placeholder="Ano" />
+            </SelectTrigger>
+            <SelectContent>
+            {years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}
+            </SelectContent>
+        </Select>
+      )}
+
+      {filterType === 'custom' && (
+         <Popover>
+            <PopoverTrigger asChild>
+            <Button
+                id="date"
+                variant={"outline"}
+                disabled={isPending}
+                className={cn(
+                "w-full sm:w-auto sm:min-w-[240px] justify-start text-left font-normal",
+                !dateRange && "text-muted-foreground"
+                )}
+            >
+                <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                {dateRange?.from ? (
+                dateRange.to ? (
+                    <>
+                    {format(dateRange.from, "dd/MM/yy", { locale: ptBR })} -{" "}
+                    {format(dateRange.to, "dd/MM/yy", { locale: ptBR })}
+                    </>
+                ) : (
+                    format(dateRange.from, "PPP", { locale: ptBR })
+                )
+                ) : (
+                <span>Selecione um período</span>
+                )}
+            </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange?.from}
+                selected={dateRange}
+                onSelect={setDateRange}
+                numberOfMonths={2}
+                locale={ptBR}
+            />
+            </PopoverContent>
+        </Popover>
+      )}
       
       {hasActiveFilters && (
         <Button variant="ghost" onClick={handleClearFilters} disabled={isPending}>
@@ -155,6 +169,8 @@ export function HistoryFilters({ isPending }: HistoryFiltersProps) {
             Limpar
         </Button>
       )}
+
+       {isPending && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
     </div>
   );
 }
