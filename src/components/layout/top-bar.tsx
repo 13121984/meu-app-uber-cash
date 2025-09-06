@@ -3,20 +3,20 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, BarChart, Settings, Wrench, History, Target, Car } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, Car } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useEffect, useState } from "react"
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home },
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
-  { href: "/registrar", label: "Registrar", icon: PlusCircle },
-  { href: "/gerenciamento", label: "Gerenciar", icon: History },
-  { href: "/metas", label: "Metas", icon: Target },
-  { href: "/relatorios", label: "Relatórios", icon: BarChart },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench },
-  { href: "/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/", label: "Início", icon: Home, color: "text-sky-500" },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, color: "text-yellow-500" },
+  { href: "/registrar", label: "Registrar", icon: PlusCircle, color: "text-blue-500" },
+  { href: "/gerenciamento", label: "Gerenciar", icon: History, color: "text-orange-500" },
+  { href: "/metas", label: "Metas", icon: Target, color: "text-green-500" },
+  { href: "/relatorios", label: "Relatórios", icon: BarChart, color: "text-teal-500" },
+  { href: "/manutencao", label: "Manutenção", icon: Wrench, color: "text-red-500" },
+  { href: "/configuracoes", label: "Configurações", icon: Settings, color: "text-purple-500" },
 ]
 
 export function TopBar() {
@@ -52,7 +52,7 @@ export function TopBar() {
                                 : "text-foreground/60 hover:bg-accent hover:text-accent-foreground"
                             )}
                             >
-                            <item.icon className="h-5 w-5" />
+                            <item.icon className={cn("h-5 w-5", !isActive && item.color)} />
                             </button>
                         </Link>
                         </TooltipTrigger>

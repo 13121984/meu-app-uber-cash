@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, Clock, BarChart3 } from "lucide-react";
+import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, Clock, BarChart3, LayoutDashboard, BarChart as BarChartIcon, BookOpen } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { DailySummaryCard } from "./daily-summary-card";
@@ -12,12 +12,14 @@ import { ShiftPerformance } from "./shift-performance";
 
 
 const mainActions = [
-  { href: "/registrar/today", label: "Registrar Hoje", icon: Clock, bgColor: "bg-primary/5", iconColor: "text-blue-500" },
-  { href: "/registrar/other-day", label: "Registrar Outro Dia", icon: Calendar, bgColor: "bg-purple-500/5", iconColor: "text-purple-500" },
-  { href: "/dashboard", label: "Performance", icon: LineChart, bgColor: "bg-yellow-500/5", iconColor: "text-yellow-500" },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench, bgColor: "bg-red-500/5", iconColor: "text-red-500" },
+  { href: "/registrar", label: "Registrar", icon: PlusCircle, bgColor: "bg-blue-500/5", iconColor: "text-blue-500" },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, bgColor: "bg-yellow-500/5", iconColor: "text-yellow-500" },
+  { href: "/gerenciamento", label: "Gerenciar", icon: History, bgColor: "bg-orange-500/5", iconColor: "text-orange-500" },
   { href: "/metas", label: "Metas", icon: Target, bgColor: "bg-green-500/5", iconColor: "text-green-500" },
+  { href: "/relatorios", label: "Relatórios", icon: BarChartIcon, bgColor: "bg-teal-500/5", iconColor: "text-teal-500" },
+  { href: "/manutencao", label: "Manutenção", icon: Wrench, bgColor: "bg-red-500/5", iconColor: "text-red-500" },
   { href: "/configuracoes", label: "Configurações", icon: Settings, bgColor: "bg-purple-500/5", iconColor: "text-purple-500" },
+  { href: "/#", label: "Ajuda", icon: BookOpen, bgColor: "bg-gray-500/5", iconColor: "text-gray-500" },
 ];
 
 
@@ -45,7 +47,7 @@ export function HomeClient({ todayData }: HomeClientProps) {
 
         <div className="space-y-4">
             <h2 className="text-2xl font-semibold font-headline">Ações Rápidas</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
                 {mainActions.map((action) => (
                     <ActionButton key={action.href} {...action} />
                 ))}
