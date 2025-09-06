@@ -10,8 +10,8 @@ import { getCatalog } from './catalog.service';
 // Default settings
 const defaultSettings: Settings = {
     theme: 'dark',
-    weeklyBackup: false,
-    backupEmail: '',
+    weeklyBackup: false, // This field is now conceptually deprecated but kept for data integrity
+    backupEmail: '', // This field is now conceptually deprecated but kept for data integrity
     maintenanceNotifications: true,
     defaultFuelType: 'Gasolina Aditivada',
 };

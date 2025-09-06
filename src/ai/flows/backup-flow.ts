@@ -1,9 +1,9 @@
+
 'use server';
 /**
- * @fileOverview A flow for simulating a weekly data backup.
+ * @fileOverview A flow for creating a data backup.
  *
- * - backupFlow - A Genkit flow that handles the backup process.
- * - BackupInput - The input type for the backup function.
+ * - runBackupFlow - A Genkit flow that handles the backup process.
  * - BackupOutput - The return type for the backup function.
  */
 
@@ -12,34 +12,34 @@ import { z } from 'zod';
 import { getWorkDays } from '@/services/work-day.service';
 import { exportToCsvFlow } from './export-flow';
 import { format } from 'date-fns';
+import { saveBackupData } from '@/services/backup.service';
 
-const BackupInputSchema = z.object({
-    backupEmail: z.string().email().describe('The email address to send the backup to.'),
-});
+// No input is needed anymore as it's a manual trigger
+const BackupInputSchema = z.object({});
 export type BackupInput = z.infer<typeof BackupInputSchema>;
 
 const BackupOutputSchema = z.object({
   success: z.boolean(),
   message: z.string(),
+  backupDate: z.string().optional(),
 });
 export type BackupOutput = z.infer<typeof BackupOutputSchema>;
 
 /**
- * A server action to securely call the Genkit flow for simulating a backup.
+ * A server action to securely call the Genkit flow for creating a backup.
  */
-export async function runBackupAction(input: BackupInput): Promise<BackupOutput> {
-    const validatedInput = BackupInputSchema.parse(input);
-    return await backupFlow(validatedInput);
+export async function runBackupAction(input?: BackupInput): Promise<BackupOutput> {
+    return await runBackupFlow(input || {});
 }
 
 
-const backupFlow = ai.defineFlow(
+const runBackupFlow = ai.defineFlow(
   {
-    name: 'backupFlow',
+    name: 'runBackupFlow',
     inputSchema: BackupInputSchema,
     outputSchema: BackupOutputSchema,
   },
-  async ({ backupEmail }) => {
+  async () => {
     
     const allWorkDays = await getWorkDays();
     if (allWorkDays.length === 0) {
@@ -58,21 +58,23 @@ const backupFlow = ai.defineFlow(
     // Re-use the existing export flow to generate the CSV content
     const { csvContent } = await exportToCsvFlow(serializableWorkDays as any);
 
-    const backupFileName = `Backup_UberCash_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    const now = new Date();
+    const backupFileName = `Backup_UberCash_${format(now, 'yyyy-MM-dd_HH-mm')}.csv`;
 
-    // Here you would typically use an email service (e.g., SendGrid, Resend)
-    // For this simulation, we'll just log the action and return success.
-    console.log(`SIMULATING BACKUP:`);
-    console.log(`   Email: ${backupEmail}`);
-    console.log(`   File: ${backupFileName}`);
-    console.log(`   Content Length: ${csvContent.length} bytes`);
+    // Save the backup data to a local file
+    const saveResult = await saveBackupData({
+      fileName: backupFileName,
+      csvContent: csvContent,
+    });
+
+    if (!saveResult.success) {
+      return { success: false, message: saveResult.error || "Falha ao salvar o arquivo de backup." };
+    }
     
-    // Simulate a delay as if sending an email
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
     return {
       success: true,
-      message: `Backup enviado com sucesso para ${backupEmail}!`,
+      message: `Backup criado com sucesso!`,
+      backupDate: now.toISOString(),
     };
   }
 );
