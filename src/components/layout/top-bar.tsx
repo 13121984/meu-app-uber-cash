@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { Home, LayoutDashboard, PlusCircle, BarChart, Settings, Wrench, History, Target, Car } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useEffect, useState } from "react"
 
 const menuItems = [
   { href: "/", label: "Início", icon: Home },
@@ -19,7 +20,13 @@ const menuItems = [
 ]
 
 export function TopBar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   return (
     <TooltipProvider>
@@ -27,12 +34,14 @@ export function TopBar() {
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex flex-col items-center gap-1 font-semibold">
                     <Car className="h-7 w-7 text-primary" />
-                    <span className="font-headline text-xs">Uber Cash</span>
+                    <span className="font-headline text-xs">Rota Certa</span>
                 </Link>
             </div>
             <nav className="flex items-center gap-1">
                 {menuItems.map((item) => {
-                    const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
+                    // During server render and initial client render, `isActive` will be false.
+                    // It will only be calculated correctly after the component has mounted on the client.
+                    const isActive = isClient && (item.href === "/" ? pathname === item.href : pathname.startsWith(item.href));
                     return (
                     <Tooltip key={item.href}>
                         <TooltipTrigger asChild>
