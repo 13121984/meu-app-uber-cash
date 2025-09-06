@@ -26,7 +26,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { getCatalog, CatalogItem } from '@/services/catalog.service';
+import { getCatalog, CatalogItem, Catalog } from '@/services/catalog.service';
+import { Skeleton } from '../ui/skeleton';
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -117,6 +118,23 @@ const playSuccessSound = () => {
     }
 }
 
+function WizardSkeleton() {
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-[60vh] w-full" />
+                <div className="flex justify-between">
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                </div>
+            </div>
+            <div className="lg:col-span-1">
+                <Skeleton className="h-96 w-full" />
+            </div>
+        </div>
+    )
+}
 
 export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType, existingDayEntries: propsExistingEntries }: RegistrationWizardProps) {
   const router = useRouter();
@@ -130,7 +148,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const [entryBeingEdited, setEntryBeingEdited] = useState<WorkDay | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [catalog, setCatalog] = useState<{ earnings: CatalogItem[], fuel: CatalogItem[] }>({ earnings: [], fuel: [] });
+  const [catalog, setCatalog] = useState<Catalog | null>(null);
 
 
    useEffect(() => {
@@ -271,6 +289,10 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       setIsAlertOpen(false); 
     }
   };
+
+  if (!catalog) {
+      return <WizardSkeleton />;
+  }
 
   const activeEarningCategories = catalog.earnings.filter(c => c.active).map(c => c.name);
   const activeFuelCategories = catalog.fuel.filter(c => c.active).map(c => c.name);
