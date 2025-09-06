@@ -48,7 +48,7 @@ export function SettingsForm() {
           getCatalog(),
         ]);
         setInitialData(settingsData);
-        setFuelTypes(catalogData.fuel);
+        setFuelTypes(catalogData.fuel || []);
       } catch (error) {
         toast({
           title: "Erro ao carregar configurações",
@@ -80,7 +80,9 @@ export function SettingsForm() {
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Configurações Salvas!</span></div>,
         description: "Suas preferências foram atualizadas. A página será recarregada.",
       });
-      router.refresh();
+      // A página será recarregada para refletir a mudança de tema, se houver.
+      // Isso é melhor do que `router.refresh()` para garantir que o tema no `<html>` seja atualizado.
+      window.location.reload();
     } catch (error) {
       toast({
         title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,
@@ -200,7 +202,7 @@ export function SettingsForm() {
                                             <SelectValue placeholder="Selecione um tipo..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {fuelTypes.map(type => (
+                                            {fuelTypes && fuelTypes.map(type => (
                                                 <SelectItem key={type} value={type}>{type}</SelectItem>
                                             ))}
                                         </SelectContent>
