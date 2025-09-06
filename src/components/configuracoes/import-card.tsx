@@ -19,8 +19,7 @@ import {
 const CSV_HEADERS = [
     'date', 'km', 'hours', 
     'earnings_category', 'earnings_trips', 'earnings_amount',
-    'fuel_type', 'fuel_paid', 'fuel_price',
-    'maintenance_description', 'maintenance_amount'
+    'fuel_type', 'fuel_paid', 'fuel_price'
 ];
 
 export function ImportCard() {
@@ -156,7 +155,7 @@ export function ImportCard() {
                           <li>A primeira linha do arquivo deve ser o <strong>cabeçalho</strong>.</li>
                            <li>As colunas devem seguir a seguinte <strong>ordem e nome</strong>:
                             <code className="block bg-muted text-foreground p-2 rounded-md my-2 text-xs">
-                                date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount
+                                date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price
                             </code>
                           </li>
                           <li>

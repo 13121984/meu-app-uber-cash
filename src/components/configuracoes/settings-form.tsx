@@ -14,7 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import { saveSettings, getSettings } from '@/services/settings.service';
 import { getCatalog, Catalog } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
-import { Paintbrush, Database, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun } from 'lucide-react';
+import { Paintbrush, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun } from 'lucide-react';
 import type { Settings, AppTheme } from '@/types/settings';
 import { Skeleton } from '../ui/skeleton';
 

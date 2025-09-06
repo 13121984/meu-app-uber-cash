@@ -35,6 +35,10 @@ export async function exportReportAction(filters: ReportFilterValues): Promise<E
   const serializableWorkDays = rawWorkDays.map(day => ({
       ...day,
       date: day.date.toISOString(),
+      maintenance: { // Flatten the maintenance data
+        description: day.maintenanceEntries.map(m => m.description).join('; '),
+        amount: day.maintenanceEntries.reduce((sum, m) => sum + m.amount, 0),
+      }
   }));
 
   // Call the Genkit flow with the filtered and serialized data.
