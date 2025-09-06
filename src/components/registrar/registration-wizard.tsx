@@ -4,7 +4,7 @@
 import React, { useState, useReducer, useEffect } from 'react';
 import { Check, Loader2, CheckCircle, AlertTriangle, Edit, Trash2, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Step1Info } from './step1-info';
 import { Step2Earnings } from './step2-earnings';
 import { Step3Fuel } from './step3-fuel';
@@ -20,6 +20,16 @@ import type { WorkDay } from '@/services/work-day.service';
 import { Separator } from '../ui/separator';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -123,6 +133,9 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   // Novo estado para gerenciar os períodos existentes
   const [existingEntries, setExistingEntries] = useState<WorkDay[]>(propsExistingEntries || []);
   const [entryBeingEdited, setEntryBeingEdited] = useState<WorkDay | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+
 
    useEffect(() => {
     setExistingEntries(propsExistingEntries || []);
@@ -235,6 +248,25 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       }
   };
 
+  const handleDeleteAllEntries = async () => {
+    setIsDeleting(true);
+    // Cria uma lista de promessas, uma para cada exclusão
+    const deletePromises = existingEntries.map(entry => deleteWorkDayEntry(entry.id));
+    
+    try {
+      // Executa todas as promessas de exclusão
+      await Promise.all(deletePromises);
+      toast({ title: "Sucesso!", description: "Todos os períodos de hoje foram removidos." });
+      router.refresh(); // Recarrega a página para refletir as mudanças
+    } catch (error) {
+      toast({ title: "Erro!", description: "Não foi possível apagar todos os períodos.", variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
+      setIsAlertOpen(false); // Fecha o diálogo de alerta
+    }
+  };
+
+
   const renderStep = () => {
     switch (currentStep) {
       case 1: return <Step1Info data={state} dispatch={dispatch} isEditing={!!entryBeingEdited || isEditing} registrationType={registrationType}/>;
@@ -249,6 +281,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const livePreviewData = state;
 
   return (
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="flex flex-col space-y-6 lg:col-span-2">
         
@@ -256,7 +289,18 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         {registrationType === 'today' && existingEntries.length > 0 && !entryBeingEdited && (
             <Card>
                 <CardHeader>
-                    <CardTitle>Períodos Registrados Hoje</CardTitle>
+                    <div className="flex justify-between items-center">
+                        <CardTitle>Períodos Registrados Hoje</CardTitle>
+                        {existingEntries.length > 1 && (
+                            <Button variant="destructive" size="sm" onClick={() => setIsAlertOpen(true)} disabled={isDeleting}>
+                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4"/>}
+                                <span className="ml-2">Apagar Tudo</span>
+                            </Button>
+                        )}
+                    </div>
+                     <CardDescription>
+                        Você pode editar um período ou adicionar um novo abaixo.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                     {existingEntries.map(entry => {
@@ -351,5 +395,26 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         <LivePreview data={livePreviewData as State} />
       </div>
     </div>
+    <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isso irá apagar permanentemente <b>TODOS</b> os períodos de trabalho registrados hoje.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAllEntries} 
+              disabled={isDeleting} 
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isDeleting ? "Apagando..." : "Sim, apagar tudo"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
