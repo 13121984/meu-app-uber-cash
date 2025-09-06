@@ -48,7 +48,7 @@ export function TopBar() {
                             className={cn(
                                 "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
                                 isActive
-                                ? "bg-primary/10 text-primary"
+                                ? "bg-primary text-primary-foreground"
                                 : "text-foreground/60 hover:bg-accent hover:text-accent-foreground"
                             )}
                             >

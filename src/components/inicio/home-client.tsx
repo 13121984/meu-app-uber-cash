@@ -17,7 +17,7 @@ const mainActions = [
   { href: "/dashboard", label: "Performance", icon: LineChart, bgColor: "bg-yellow-500/5", iconColor: "text-yellow-500" },
   { href: "/manutencao", label: "Manutenção", icon: Wrench, bgColor: "bg-red-500/5", iconColor: "text-red-500" },
   { href: "/metas", label: "Metas", icon: Target, bgColor: "bg-green-500/5", iconColor: "text-green-500" },
-  { href: "/configuracoes", label: "Configurações", icon: Settings, bgColor: "bg-gray-500/5", iconColor: "text-gray-500" },
+  { href: "/configuracoes", label: "Configurações", icon: Settings, bgColor: "bg-purple-500/5", iconColor: "text-purple-500" },
 ];
 
 
