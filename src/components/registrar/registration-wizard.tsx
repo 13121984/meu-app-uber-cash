@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useReducer, useEffect } from 'react';
@@ -12,6 +11,7 @@ import { Step3Fuel } from './step3-fuel';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { addOrUpdateWorkDay, deleteWorkDayEntry } from '@/services/work-day.service';
+import { addMaintenance } from '@/services/maintenance.service';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
 import { parseISO, startOfDay } from 'date-fns';
@@ -34,6 +34,7 @@ const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style:
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id: number; type: string; paid: number; price: number };
+export type MaintenanceEntry = { id: number; description: string; amount: number };
 
 export type TimeEntry = {
     id: number;
@@ -49,6 +50,7 @@ export type State = {
   timeEntries: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
+  maintenanceEntries: MaintenanceEntry[]; // Alterado para uma lista
 };
 
 type Action =
@@ -73,6 +75,7 @@ const getInitialState = (initialData?: Partial<WorkDay>, registrationType: 'toda
         timeEntries: (initialData as any)?.timeEntries?.map((t: TimeEntry) => ({...t})) || [],
         earnings: initialData?.earnings?.map(e => ({...e})) || [],
         fuelEntries: initialData?.fuelEntries?.map(f => ({...f})) || [],
+        maintenanceEntries: [], // Começa vazio, pois a manutenção é tratada separadamente agora
     };
 };
 
@@ -93,7 +96,7 @@ function reducer(state: State, action: Action): State {
 const steps = [
   { id: 1, title: 'Informações' },
   { id: 2, title: 'Ganhos' },
-  { id: 3, title: 'Combustível' },
+  { id: 3, title: 'Abastecimento' },
 ];
 
 interface RegistrationWizardProps {
@@ -186,10 +189,23 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     }
     
     try {
-      const { ...workDayData } = state;
+      const { maintenanceEntries, ...workDayData } = state;
       const isActuallyEditing = !!workDayData.id && !['today', 'other-day'].includes(workDayData.id);
       
       const result = await addOrUpdateWorkDay(workDayData as WorkDay);
+
+      // Salva as despesas de manutenção separadamente
+      if (maintenanceEntries.length > 0) {
+          for (const maintenance of maintenanceEntries) {
+              if (maintenance.description && maintenance.amount > 0) {
+                  await addMaintenance({
+                      date: workDayData.date,
+                      description: maintenance.description,
+                      amount: maintenance.amount,
+                  });
+              }
+          }
+      }
       
       if (result.success) {
         if (!isActuallyEditing) {

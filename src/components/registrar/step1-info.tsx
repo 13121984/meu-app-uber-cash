@@ -49,7 +49,11 @@ const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<
 export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1InfoProps) {
 
   const handleFieldChange = (field: keyof State, value: any) => {
-    dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
+      let processedValue = value;
+      if (field === 'km' || field === 'hours') {
+        processedValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) || 0 : value;
+      }
+      dispatch({ type: 'UPDATE_FIELD', payload: { field, value: processedValue } });
   };
   
   const handleTimeEntriesChange = useCallback((newTimeEntries: TimeEntry[]) => {
@@ -107,11 +111,12 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
             <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-500" />
             <Input
               id="km"
-              type="number"
+              type="text"
+              inputMode="decimal"
               step="0.1"
               placeholder="Ex: 150.5"
               value={data.km || ''}
-              onChange={(e) => handleFieldChange('km', parseFloat(e.target.value) || 0)}
+              onChange={(e) => handleFieldChange('km', e.target.value)}
               className="pl-10"
             />
           </div>
@@ -123,11 +128,12 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500" />
             <Input
               id="hours"
-              type="number"
+              type="text"
+              inputMode="decimal"
               step="0.1"
               placeholder="Ex: 8.5"
               value={data.hours || ''}
-              onChange={(e) => handleFieldChange('hours', parseFloat(e.target.value) || 0)}
+              onChange={(e) => handleFieldChange('hours', e.target.value)}
               className="pl-10"
               disabled={hasTimeEntries}
             />
@@ -165,3 +171,5 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     </div>
   );
 }
+
+    

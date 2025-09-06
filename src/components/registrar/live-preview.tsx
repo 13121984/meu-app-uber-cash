@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useMemo } from 'react';
@@ -23,7 +22,9 @@ export function LivePreview({ data }: LivePreviewProps) {
   const calculations = useMemo(() => {
     const totalGanhos = data.earnings.reduce((sum, e) => sum + e.amount, 0);
     const totalCombustiveis = data.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-    const lucroLiquido = totalGanhos - totalCombustiveis;
+    const totalManutencao = data.maintenanceEntries.reduce((sum, m) => sum + m.amount, 0);
+    const totalDespesas = totalCombustiveis + totalManutencao;
+    const lucroLiquido = totalGanhos - totalDespesas;
     const totalViagens = data.earnings.reduce((sum, e) => sum + e.trips, 0);
     const totalLitros = data.fuelEntries.reduce((sum, f) => sum + (f.price > 0 ? f.paid / f.price : 0), 0);
     const eficiencia = data.km > 0 && totalLitros > 0 ? data.km / totalLitros : 0;
@@ -35,6 +36,8 @@ export function LivePreview({ data }: LivePreviewProps) {
     return {
       totalGanhos,
       totalCombustiveis,
+      totalManutencao,
+      totalDespesas,
       lucroLiquido,
       totalViagens,
       totalLitros,
@@ -62,7 +65,7 @@ export function LivePreview({ data }: LivePreviewProps) {
         <Separator />
         
         <StatItem label="Total Ganhos" value={formatCurrency(calculations.totalGanhos)} className="text-green-600 dark:text-green-500" />
-        <StatItem label="Gastos (Combustível)" value={formatCurrency(calculations.totalCombustiveis)} className="text-red-600 dark:text-red-500" />
+        <StatItem label="Gastos (Comb.+Manut.)" value={formatCurrency(calculations.totalDespesas)} className="text-red-600 dark:text-red-500" />
         
         <Separator />
         

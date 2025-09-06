@@ -38,7 +38,7 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
     const updatedEarnings = data.earnings.map((e) => {
       if (e.id === id) {
         if (field === 'trips' || field === 'amount') {
-            const numValue = typeof value === 'string' ? parseFloat(value) : value;
+            const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
             return { ...e, [field]: isNaN(numValue) ? 0 : numValue };
         }
         return { ...e, [field]: value };
@@ -107,7 +107,8 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
                     <Input
                       id={`amount-${index}`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       step="0.01"
                       placeholder="Ex: 150.50"
                       value={earning.amount || ''}
@@ -132,3 +133,5 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
     </div>
   );
 }
+
+    
