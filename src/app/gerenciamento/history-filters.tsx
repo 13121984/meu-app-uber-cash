@@ -32,20 +32,43 @@ export function HistoryFilters({ isPending, startTransition, onFiltersChange, in
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [filterType, setFilterType] = useState<ReportFilterValues['type']>(() => searchParams.get('type') as ReportFilterValues['type'] || 'today');
-  const [year, setYear] = useState<number>(() => parseInt(searchParams.get('year') || getYear(new Date()).toString()));
-  const [month, setMonth] = useState<number>(() => parseInt(searchParams.get('month') || new Date().getMonth().toString()));
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-     const fromParam = searchParams.get('from');
-     if (!fromParam) return undefined;
-     const fromDate = parseISO(fromParam);
-     if (!isValid(fromDate)) return undefined;
-     const toParam = searchParams.get('to');
-     const toDate = toParam ? parseISO(toParam) : undefined;
-     return { from: fromDate, to: isValid(toDate) ? toDate : undefined };
-  });
+  // Initialize with static values to prevent hydration mismatch
+  const [filterType, setFilterType] = useState<ReportFilterValues['type']>('today');
+  const [year, setYear] = useState<number>(getYear(new Date()));
+  const [month, setMonth] = useState<number>(new Date().getMonth());
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   
+  // State to track if client-side logic has run
+  const [isClient, setIsClient] = useState(false);
+
   useEffect(() => {
+    // This effect runs once on the client to sync state with URL params
+    const typeFromURL = searchParams.get('type') as ReportFilterValues['type'] || 'today';
+    const yearFromURL = parseInt(searchParams.get('year') || getYear(new Date()).toString());
+    const monthFromURL = parseInt(searchParams.get('month') || new Date().getMonth().toString());
+    const fromParam = searchParams.get('from');
+    let rangeFromURL: DateRange | undefined = undefined;
+
+    if (fromParam) {
+        const fromDate = parseISO(fromParam);
+        if (isValid(fromDate)) {
+            const toParam = searchParams.get('to');
+            const toDate = toParam ? parseISO(toParam) : undefined;
+            rangeFromURL = { from: fromDate, to: isValid(toDate) ? toDate : undefined };
+        }
+    }
+
+    setFilterType(typeFromURL);
+    setYear(yearFromURL);
+    setMonth(monthFromURL);
+    setDateRange(rangeFromURL);
+    setIsClient(true); // Mark client as hydrated
+  }, []); // Empty dependency array means this runs once on mount
+
+  useEffect(() => {
+    // This effect runs only after the initial state hydration
+    if (!isClient) return;
+
     const params = new URLSearchParams();
     params.set('type', filterType);
     const newFilters: ReportFilterValues = { type: filterType };
@@ -73,7 +96,7 @@ export function HistoryFilters({ isPending, startTransition, onFiltersChange, in
       }
     });
 
-  }, [filterType, year, month, dateRange, pathname, router, startTransition, onFiltersChange]);
+  }, [isClient, filterType, year, month, dateRange, pathname, router, startTransition, onFiltersChange]);
 
   const handleClearFilters = () => {
     setFilterType('today');
