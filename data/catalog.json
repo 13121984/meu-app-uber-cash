@@ -23,27 +23,27 @@
     {
       "name": "MD Drivers",
       "active": true,
-      "isDefault": false
+      "isDefault": true
     },
     {
       "name": "In Driver",
       "active": true,
-      "isDefault": false
+      "isDefault": true
     },
     {
       "name": "Outros",
       "active": true,
-      "isDefault": false
+      "isDefault": true
     },
     {
       "name": "Uber Confort",
       "active": false,
-      "isDefault": false
+      "isDefault": true
     },
     {
       "name": "Uber Black",
       "active": false,
-      "isDefault": false
+      "isDefault": true
     }
   ],
   "fuel": [
@@ -65,7 +65,7 @@
     {
       "name": "Gasolina Comum",
       "active": true,
-      "isDefault": false
+      "isDefault": true
     }
   ]
 }
