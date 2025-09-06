@@ -17,7 +17,6 @@ import { useRouter } from 'next/navigation';
 import { Paintbrush, Database, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun } from 'lucide-react';
 import type { Settings, AppTheme } from '@/types/settings';
 import { ImportCard } from './import-card';
-import { getCatalog } from '@/services/catalog.service';
 
 const settingsSchema = z.object({
     theme: z.enum(['light', 'dark']),
@@ -29,6 +28,7 @@ const settingsSchema = z.object({
 
 interface SettingsFormProps {
   initialData: Settings;
+  fuelTypes: string[];
 }
 
 const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
@@ -37,22 +37,13 @@ const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
 ];
 
 
-export function SettingsForm({ initialData }: SettingsFormProps) {
+export function SettingsForm({ initialData, fuelTypes }: SettingsFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fuelTypes, setFuelTypes] = useState<string[]>([]);
 
   const { control, handleSubmit, formState: { errors } } = useForm<Settings>({
     resolver: zodResolver(settingsSchema),
     defaultValues: initialData,
-  });
-  
-  useState(() => {
-    async function fetchFuelTypes() {
-      const catalog = await getCatalog();
-      setFuelTypes(catalog.fuel);
-    }
-    fetchFuelTypes();
   });
 
   const onSubmit = async (data: Settings) => {

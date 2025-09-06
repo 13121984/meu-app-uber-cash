@@ -14,7 +14,7 @@ interface ConfiguracoesClientProps {
 export function ConfiguracoesClient({ settings, catalog }: ConfiguracoesClientProps) {
     return (
         <>
-            <SettingsForm initialData={settings} />
+            <SettingsForm initialData={settings} fuelTypes={catalog.fuel} />
             <CatalogManager initialData={catalog} />
         </>
     )
