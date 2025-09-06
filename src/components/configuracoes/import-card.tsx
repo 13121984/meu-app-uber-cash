@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen, Sparkles } from 'lucide-react';
 import { addMultipleWorkDays, type ImportedWorkDay } from '@/services/work-day.service';
 import { useRouter } from 'next/navigation';
+import { runIntelligentImportAction } from '@/ai/flows/importer-flow';
 import {
   Accordion,
   AccordionContent,
@@ -16,10 +17,12 @@ import {
 } from "@/components/ui/accordion"
 
 
+// This remains the same, as it's the target format
 const CSV_HEADERS = [
     'date', 'km', 'hours', 
     'earnings_category', 'earnings_trips', 'earnings_amount',
-    'fuel_type', 'fuel_paid', 'fuel_price'
+    'fuel_type', 'fuel_paid', 'fuel_price',
+    'maintenance_description', 'maintenance_amount'
 ];
 
 export function ImportCard() {
@@ -52,30 +55,38 @@ export function ImportCard() {
 
         const reader = new FileReader();
         reader.onload = async (e) => {
-            const text = e.target?.result;
-            if (typeof text !== 'string') {
+            const rawCsvText = e.target?.result;
+            if (typeof rawCsvText !== 'string') {
                 toast({ title: "Erro", description: "Não foi possível ler o arquivo.", variant: "destructive" });
                 setIsImporting(false);
                 return;
             }
 
             try {
-                const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                // Step 1: Send the raw CSV to the AI for processing
+                toast({
+                    title: "Processando Planilha...",
+                    description: "A IA está analisando e formatando seu arquivo. Isso pode levar um momento.",
+                });
+
+                const importResult = await runIntelligentImportAction({ csvContent: rawCsvText });
+                const processedCsv = importResult.processedCsv;
+                
+                // Step 2: Parse the processed CSV from the AI
+                const lines = processedCsv.split(/\r?\n/).filter(line => line.trim() !== '');
                 if (lines.length < 2) {
-                    throw new Error("O arquivo CSV está vazio ou contém apenas o cabeçalho.");
+                    throw new Error("A IA não conseguiu processar o arquivo. Verifique o formato.");
                 }
 
-                const header = lines[0].split(',').map(h => h.trim());
-                // Validação mais flexível do cabeçalho (ignora espaços extras e case)
-                const normalizedHeader = JSON.stringify(header.map(h => h.toLowerCase().trim()));
-                const normalizedExpectedHeader = JSON.stringify(CSV_HEADERS.map(h => h.toLowerCase().trim()));
+                const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+                const expectedHeader = CSV_HEADERS.map(h => h.toLowerCase());
 
-                if (normalizedHeader !== normalizedExpectedHeader) {
-                    console.error("Cabeçalho esperado:", CSV_HEADERS);
-                    console.error("Cabeçalho recebido:", header);
-                    throw new Error("O cabeçalho do arquivo CSV está incorreto. Verifique as colunas e a ordem.");
+                if (JSON.stringify(header) !== JSON.stringify(expectedHeader)) {
+                     console.error("Cabeçalho esperado:", expectedHeader);
+                     console.error("Cabeçalho recebido da IA:", header);
+                    throw new Error("A IA retornou um formato de cabeçalho inesperado. A importação foi cancelada.");
                 }
-
+                
                 const data: Record<string, string>[] = lines.slice(1).map(line => {
                     const values = line.split(',');
                     return CSV_HEADERS.reduce((obj, nextKey, index) => {
@@ -84,6 +95,7 @@ export function ImportCard() {
                     }, {} as Record<string, string>);
                 });
 
+                // Step 3: Import the structured data
                 const result = await addMultipleWorkDays(data as ImportedWorkDay[]);
                 
                 if (result.success) {
@@ -91,9 +103,9 @@ export function ImportCard() {
                         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Importação Concluída!</span></div>,
                         description: `${result.count} dias de trabalho foram importados com sucesso.`,
                     });
-                    router.refresh(); // Recarrega os dados em outras páginas
+                    router.refresh();
                 } else {
-                    throw new Error(result.error || "Ocorreu um erro desconhecido durante a importação.");
+                    throw new Error(result.error || "Ocorreu um erro desconhecido durante a importação final.");
                 }
 
             } catch (error) {
@@ -117,11 +129,11 @@ export function ImportCard() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
-                    <Upload className="h-6 w-6 text-primary" />
-                    Importar Dados por CSV
+                    <Sparkles className="h-6 w-6 text-primary" />
+                    Importador Inteligente (CSV)
                 </CardTitle>
                 <CardDescription>
-                    Faça o upload de um arquivo CSV com seu histórico para adicioná-lo ao aplicativo.
+                    Faça o upload do seu arquivo CSV. A IA irá analisá-lo e formatá-lo para importação, mesmo que as colunas estejam em ordens diferentes.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -146,27 +158,25 @@ export function ImportCard() {
                     <AccordionTrigger>
                         <div className="flex items-center gap-2">
                             <BookOpen className="h-4 w-4" />
-                            <span>Ver detalhes da estrutura do arquivo</span>
+                            <span>Ver estrutura recomendada do arquivo</span>
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-md">
+                      <p className='mb-4'>O importador inteligente tentará entender sua planilha, mas seguir esta estrutura garante os melhores resultados.</p>
                       <ul className="space-y-2 list-disc pl-5">
                           <li>O arquivo deve estar no formato <strong>CSV</strong> (valores separados por vírgula).</li>
                           <li>A primeira linha do arquivo deve ser o <strong>cabeçalho</strong>.</li>
-                           <li>As colunas devem seguir a seguinte <strong>ordem e nome</strong>:
+                           <li>As colunas-chave que a IA procura são: 
                             <code className="block bg-muted text-foreground p-2 rounded-md my-2 text-xs">
-                                date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price
+                                Data, Kms Percorridos, Horas Trabalhadas, [Nome da Categoria de Ganho], Viagens, [Nome do Combustível], [Preço do Combustível]
                             </code>
                           </li>
                           <li>
-                            <strong>Agrupamento por Data:</strong> O sistema agrupa múltiplas linhas com a mesma data (`AAAA-MM-DD`) em um único registro de dia de trabalho.
+                            **Ganhos:** Colunas separadas para cada categoria (ex: "99Pop R$", "Uber R$").
                           </li>
                            <li>
-                             <strong>Campos numéricos</strong> como `km` e `hours` devem usar ponto (`.`) como separador decimal (Ex: `120.5`).
+                             **Valores Monetários:** Podem usar "R$" e vírgula como decimal (ex: `R$ 120,50`).
                            </li>
-                          <li>
-                            Você pode ter múltiplas linhas para o mesmo dia para registrar diferentes ganhos ou abastecimentos.
-                          </li>
                       </ul>
                     </AccordionContent>
                   </AccordionItem>
@@ -175,7 +185,7 @@ export function ImportCard() {
                     {isImporting ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Importando...
+                            Importando com IA...
                         </>
                     ) : (
                         "Importar Arquivo"
