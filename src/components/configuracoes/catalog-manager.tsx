@@ -5,18 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { BookCopy, PlusCircle, Trash2, Loader2, CheckCircle, AlertTriangle, UploadCloud } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, CheckCircle, AlertTriangle, UploadCloud, ArrowUp, ArrowDown } from 'lucide-react';
 import { saveCatalog, type Catalog, type CatalogItem } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 
 interface CatalogManagerProps {
     initialCatalog: Catalog;
 }
-
 
 export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
   const router = useRouter();
@@ -26,7 +24,6 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
   const [fuelCategories, setFuelCategories] = useState<CatalogItem[]>(initialCatalog.fuel);
   const [textToImport, setTextToImport] = useState('');
   const [importTarget, setImportTarget] = useState<'earnings' | 'fuel'>('earnings');
-
 
   const handleToggle = (type: 'earnings' | 'fuel', name: string) => {
     const updater = type === 'earnings' ? setEarningsCategories : setFuelCategories;
@@ -40,6 +37,23 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
     updater(prev => prev.filter(item => item.name !== name));
   };
   
+  const handleReorder = (type: 'earnings' | 'fuel', index: number, direction: 'up' | 'down') => {
+    const updater = type === 'earnings' ? setEarningsCategories : setFuelCategories;
+    updater(prev => {
+        const list = [...prev];
+        const item = list[index];
+        const swapIndex = direction === 'up' ? index - 1 : index + 1;
+        
+        // Check bounds and ensure we don't swap between default and custom groups
+        if (swapIndex < 0 || swapIndex >= list.length || list[swapIndex].isDefault !== item.isDefault) {
+            return list;
+        }
+
+        [list[index], list[swapIndex]] = [list[swapIndex], list[index]]; // Swap elements
+        return list;
+    });
+  }
+
   const handleImport = () => {
     if(!textToImport.trim()) return;
     const newItems = textToImport.split('\n')
@@ -47,8 +61,7 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
         .filter(line => line.length > 0);
 
     const updater = importTarget === 'earnings' ? setEarningsCategories : setFuelCategories;
-    const existingItems = importTarget === 'earnings' ? earningsCategories : fuelCategories;
-
+    
     updater(prev => {
         const existingNames = new Set(prev.map(i => i.name));
         const itemsToAdd = newItems
@@ -63,7 +76,6 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
         description: `${newItems.length} novas categorias foram adicionadas e ativadas. Salve as alterações para confirmar.`
     })
   }
-
 
   const handleSaveChanges = async () => {
     startSavingTransition(async () => {
@@ -87,22 +99,34 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
     });
   };
 
-  const CategorySection = ({ title, categories, onToggle, onDelete }: {
+  const CategorySection = ({ title, categories, type, onToggle, onDelete, onReorder }: {
     title: string;
     categories: CatalogItem[];
+    type: 'earnings' | 'fuel';
     onToggle: (name: string) => void;
     onDelete: (name: string) => void;
-  }) => (
-    <Card className="flex-1">
-      <CardHeader>
-        <CardTitle className="font-headline">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-72">
-            <div className="space-y-4 pr-6">
-            {categories.map(cat => (
-              <div key={cat.name} className="flex items-center justify-between p-3 rounded-md bg-secondary">
-                <Label htmlFor={`switch-${cat.name}`} className="flex-1 cursor-pointer">{cat.name}</Label>
+    onReorder: (index: number, direction: 'up' | 'down') => void;
+  }) => {
+    const defaultItems = categories.filter(c => c.isDefault);
+    const customItems = categories.filter(c => !c.isDefault);
+
+    const renderCategoryItem = (cat: CatalogItem, index: number, isCustomGroup: boolean) => {
+        const group = isCustomGroup ? customItems : defaultItems;
+        const originalIndex = categories.findIndex(c => c.name === cat.name);
+        
+        return (
+             <div key={cat.name} className="flex items-center justify-between p-2 rounded-md bg-secondary">
+                <div className="flex items-center gap-2 flex-1">
+                    <div className="flex flex-col">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onReorder(originalIndex, 'up')} disabled={index === 0}>
+                            <ArrowUp className="h-4 w-4" />
+                        </Button>
+                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onReorder(originalIndex, 'down')} disabled={index === group.length - 1}>
+                            <ArrowDown className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    <Label htmlFor={`switch-${cat.name}`} className="flex-1 cursor-pointer">{cat.name}</Label>
+                </div>
                 <div className="flex items-center gap-2">
                     {!cat.isDefault && (
                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(cat.name)}>
@@ -116,12 +140,26 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
                     />
                 </div>
               </div>
-            ))}
-            </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
-  );
+        )
+    };
+    
+    return (
+        <Card className="flex-1">
+          <CardHeader>
+            <CardTitle className="font-headline">{title}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-80">
+                <div className="space-y-4 pr-6">
+                  {defaultItems.map((cat, index) => renderCategoryItem(cat, index, false))}
+                  {customItems.length > 0 && defaultItems.length > 0 && <hr className="my-4 border-dashed" />}
+                  {customItems.map((cat, index) => renderCategoryItem(cat, index, true))}
+                </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      );
+  }
 
   return (
     <div className="space-y-6">
@@ -161,15 +199,19 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
         <div className="flex flex-col md:flex-row gap-6">
             <CategorySection
                 title="Categorias de Ganhos"
+                type="earnings"
                 categories={earningsCategories}
                 onToggle={(name) => handleToggle('earnings', name)}
                 onDelete={(name) => handleDelete('earnings', name)}
+                onReorder={(index, direction) => handleReorder('earnings', index, direction)}
             />
             <CategorySection
                 title="Tipos de Combustível"
+                type="fuel"
                 categories={fuelCategories}
                 onToggle={(name) => handleToggle('fuel', name)}
                 onDelete={(name) => handleDelete('fuel', name)}
+                onReorder={(index, direction) => handleReorder('fuel', index, direction)}
             />
         </div>
 

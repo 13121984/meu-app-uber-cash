@@ -61,6 +61,11 @@
       "name": "GNV",
       "active": true,
       "isDefault": true
+    },
+    {
+      "name": "Gasolina Comum",
+      "active": true,
+      "isDefault": false
     }
   ]
 }
