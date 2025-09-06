@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils';
 import { TopBar } from '@/components/layout/top-bar';
 
 
-const APP_NAME = "Rota Certa";
-const APP_DEFAULT_TITLE = "Rota Certa";
-const APP_TITLE_TEMPLATE = "%s - Rota Certa";
+const APP_NAME = "Uber Cash";
+const APP_DEFAULT_TITLE = "Uber Cash";
+const APP_TITLE_TEMPLATE = "%s - Uber Cash";
 const APP_DESCRIPTION = "Seu app para gestão de ganhos como motorista de aplicativo.";
 
 export const metadata: Metadata = {

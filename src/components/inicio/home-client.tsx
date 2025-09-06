@@ -2,7 +2,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, LayoutDashboard } from "lucide-react";
+import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, LayoutDashboard, BarChart } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { DailySummaryCard } from "./daily-summary-card";
@@ -12,7 +12,9 @@ import { ShiftPerformance } from "./shift-performance";
 const mainActions = [
   { href: "/registrar/today", label: "Registrar Hoje", icon: PlusCircle, iconColor: "text-blue-500" },
   { href: "/registrar/other-day", label: "Registrar Outro Dia", icon: Calendar, iconColor: "text-teal-500" },
-  { href: "/dashboard", label: "Performance", icon: LayoutDashboard, iconColor: "text-yellow-500" },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, iconColor: "text-yellow-500" },
+  { href: "/gerenciamento", label: "Gerenciar", icon: History, iconColor: "text-orange-500" },
+  { href: "/relatorios", label: "Relatórios", icon: BarChart, iconColor: "text-indigo-500" },
   { href: "/manutencao", label: "Manutenção", icon: Wrench, iconColor: "text-red-500" },
   { href: "/metas", label: "Metas", icon: Target, iconColor: "text-green-500" },
   { href: "/configuracoes", label: "Configurações", icon: Settings, iconColor: "text-purple-500" },
@@ -36,13 +38,13 @@ export function HomeClient({ todayData }: HomeClientProps) {
   return (
     <div className="space-y-8 animate-fade-in">
         <div className="space-y-2">
-            <h1 className="text-5xl font-bold font-headline text-foreground">Rota Certa</h1>
+            <h1 className="text-5xl font-bold font-headline text-foreground">Uber Cash</h1>
             <p className="text-muted-foreground text-lg">Bem-vindo ao seu painel diário.</p>
         </div>
 
         <div className="space-y-4">
             <h2 className="text-2xl font-semibold font-headline">Ações Rápidas</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {mainActions.map((action) => (
                     <ActionButton key={action.href} {...action} />
                 ))}
