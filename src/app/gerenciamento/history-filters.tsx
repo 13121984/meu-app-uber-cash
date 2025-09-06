@@ -18,7 +18,6 @@ interface HistoryFiltersProps {
   isPending: boolean;
   startTransition: TransitionStartFunction;
   onFiltersChange?: (filters: ReportFilterValues) => void;
-  initialFilters?: ReportFilterValues;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -27,13 +26,13 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: new Date(0, i).toLocaleString('pt-BR', { month: 'long' }),
 }));
 
-export function HistoryFilters({ isPending, startTransition, onFiltersChange, initialFilters }: HistoryFiltersProps) {
+export function HistoryFilters({ isPending, startTransition, onFiltersChange }: HistoryFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   // Initialize with static values to prevent hydration mismatch
-  const [filterType, setFilterType] = useState<ReportFilterValues['type']>('today');
+  const [filterType, setFilterType] = useState<ReportFilterValues['type'] | null>(null);
   const [year, setYear] = useState<number>(getYear(new Date()));
   const [month, setMonth] = useState<number>(new Date().getMonth());
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -43,7 +42,7 @@ export function HistoryFilters({ isPending, startTransition, onFiltersChange, in
 
   useEffect(() => {
     // This effect runs once on the client to sync state with URL params
-    const typeFromURL = searchParams.get('type') as ReportFilterValues['type'] || 'today';
+    const typeFromURL = searchParams.get('type') as ReportFilterValues['type'] || null;
     const yearFromURL = parseInt(searchParams.get('year') || getYear(new Date()).toString());
     const monthFromURL = parseInt(searchParams.get('month') || new Date().getMonth().toString());
     const fromParam = searchParams.get('from');
@@ -59,15 +58,18 @@ export function HistoryFilters({ isPending, startTransition, onFiltersChange, in
     }
 
     setFilterType(typeFromURL);
-    setYear(yearFromURL);
-    setMonth(monthFromURL);
-    setDateRange(rangeFromURL);
+    if(typeFromURL){
+        setYear(yearFromURL);
+        setMonth(monthFromURL);
+        setDateRange(rangeFromURL);
+    }
+    
     setIsClient(true); // Mark client as hydrated
-  }, []); // Empty dependency array means this runs once on mount
+  }, [searchParams]); // Depend on searchParams to re-sync if URL changes externally
 
   useEffect(() => {
     // This effect runs only after the initial state hydration
-    if (!isClient) return;
+    if (!isClient || filterType === null) return;
 
     const params = new URLSearchParams();
     params.set('type', filterType);
@@ -99,17 +101,17 @@ export function HistoryFilters({ isPending, startTransition, onFiltersChange, in
   }, [isClient, filterType, year, month, dateRange, pathname, router, startTransition, onFiltersChange]);
 
   const handleClearFilters = () => {
-    setFilterType('today');
+    setFilterType(null);
     setDateRange(undefined);
     setYear(getYear(new Date()));
     setMonth(new Date().getMonth());
   };
 
-  const hasActiveFilters = filterType !== 'today';
+  const hasActiveFilters = filterType !== null;
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
-      <Select value={filterType} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])} disabled={isPending}>
+      <Select value={filterType || ""} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])} disabled={isPending}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Tipo de Período" />
         </SelectTrigger>
