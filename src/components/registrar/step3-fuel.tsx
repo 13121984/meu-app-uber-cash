@@ -38,8 +38,8 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
   const handleFuelChange = (id: number, field: keyof Omit<FuelEntry, 'id'>, value: string | number) => {
     const updatedEntries = data.fuelEntries.map((f) => {
       if (f.id === id) {
-        const newValue = (field === 'paid' || field === 'price') ? (parseFloat(value.toString()) || 0) : value;
-        return { ...f, [field]: newValue };
+        const parsedValue = (field === 'paid' || field === 'price') ? (parseFloat(String(value).replace(',', '.')) || 0) : value;
+        return { ...f, [field]: parsedValue };
       }
       return f;
     });
@@ -53,7 +53,7 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
             <Fuel className="h-6 w-6 text-red-600"/>
             <span>Abastecimentos</span>
         </h2>
-        <Button size="sm" onClick={handleAddFuelEntry} variant="destructive">
+        <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline">
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
         </Button>
       </div>
@@ -92,9 +92,10 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600" />
                         <Input
                           id={`fuel-paid-${index}`}
-                          type="number"
-                          placeholder="Ex: 50.00"
-                          value={entry.paid || ''}
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="Ex: 50,00"
+                          value={String(entry.paid || '').replace('.', ',')}
                           onChange={(e) => handleFuelChange(entry.id, 'paid', e.target.value)}
                           className="pl-10"
                         />
@@ -107,9 +108,10 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                             <Fuel className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
                             id={`fuel-price-${index}`}
-                            type="number"
-                            placeholder="Ex: 5.50"
-                            value={entry.price || ''}
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="Ex: 5,50"
+                            value={String(entry.price || '').replace('.', ',')}
                             onChange={(e) => handleFuelChange(entry.id, 'price', e.target.value)}
                             className="pl-10"
                             />
@@ -118,11 +120,12 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                     <div>
                         <Label>Total ({unit})</Label>
                         <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm">
-                            {volume} {unit}
+                            {volume.replace('.', ',')} {unit}
                         </div>
                     </div>
                 </div>
                 <Button
+                  type="button"
                   variant="destructive"
                   size="sm"
                   className="w-full"
@@ -138,5 +141,3 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
     </div>
   );
 }
-
-    

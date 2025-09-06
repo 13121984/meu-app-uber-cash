@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Step1Info } from './step1-info';
 import { Step2Earnings } from './step2-earnings';
 import { Step3Fuel } from './step3-fuel';
-import { Step4Extras } from './step4-extras';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { addOrUpdateWorkDay, deleteWorkDayEntry } from '@/services/work-day.service';
@@ -98,7 +97,6 @@ const steps = [
   { id: 1, title: 'Informações do Dia' },
   { id: 2, title: 'Ganhos' },
   { id: 3, title: 'Abastecimentos' },
-  { id: 4, title: 'Despesas Extras' },
 ];
 
 interface RegistrationWizardProps {
@@ -125,7 +123,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const router = useRouter();
   
   const [currentStep, setCurrentStep] = useState(1);
-  const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
+  const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData || undefined, registrationType));
   
@@ -144,7 +142,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     if (entryBeingEdited) {
         // Se estamos editando uma entrada, preenchemos o formulário com seus dados
         dispatch({ type: 'SET_STATE', payload: getInitialState(entryBeingEdited, registrationType) });
-        setCompletedSteps([1,2,3,4]); // Marcamos todos os passos como "completos" para facilitar a edição
+        setCompletedSteps([1,2,3]); // Marcamos todos os passos como "completos" para facilitar a edição
     } else {
         // Se não, resetamos para um novo registro
         const dateToUse = registrationType === 'today' ? startOfDay(new Date()) : propsInitialData?.date;
@@ -277,7 +275,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       case 1: return <Step1Info data={state} dispatch={dispatch} isEditing={!!entryBeingEdited || isEditing} registrationType={registrationType}/>;
       case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
       case 3: return <Step3Fuel data={state} dispatch={dispatch} />;
-      case 4: return <Step4Extras data={state} dispatch={dispatch} isDisabled={isEditing} />;
       default: return null;
     }
   };

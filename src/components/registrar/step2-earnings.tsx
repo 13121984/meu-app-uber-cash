@@ -36,7 +36,6 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
   const handleEarningChange = (id: number, field: keyof Omit<Earning, 'id'>, value: string | number) => {
     const updatedEarnings = data.earnings.map((e) => {
       if (e.id === id) {
-        // More robust parsing for number fields
         if (field === 'trips') {
             const trips = parseInt(String(value), 10);
             return { ...e, [field]: isNaN(trips) ? 0 : trips };
@@ -110,6 +109,7 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
                     <Input
                       id={`amount-${index}`}
                       type="text"
+                      inputMode="decimal"
                       placeholder="Ex: 150,50"
                       value={String(earning.amount || '').replace('.',',')}
                       onChange={(e) => handleEarningChange(earning.id, 'amount', e.target.value)}
