@@ -1,7 +1,7 @@
 {
   "theme": "dark",
-  "weeklyBackup": false,
-  "backupEmail": "",
+  "weeklyBackup": true,
+  "backupEmail": "pvitormc@gmail.com",
   "maintenanceNotifications": true,
   "defaultFuelType": "GNV"
 }

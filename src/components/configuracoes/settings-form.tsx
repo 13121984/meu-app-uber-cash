@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,9 +14,11 @@ import { toast } from "@/hooks/use-toast";
 import { saveSettings, getSettings } from '@/services/settings.service';
 import { getCatalog, Catalog } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
-import { Paintbrush, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun } from 'lucide-react';
+import { Paintbrush, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun, Send } from 'lucide-react';
 import type { Settings, AppTheme } from '@/types/settings';
 import { Skeleton } from '../ui/skeleton';
+import { runBackupAction } from '@/ai/flows/backup-flow';
+
 
 // Schema continua o mesmo
 const settingsSchema = z.object({
@@ -38,11 +40,15 @@ const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
 function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings: Settings, fuelTypes: string[] }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTestingBackup, startBackupTransition] = useTransition();
 
-  const { control, handleSubmit, formState: { errors } } = useForm<Settings>({
+  const { control, handleSubmit, watch, formState: { errors } } = useForm<Settings>({
     resolver: zodResolver(settingsSchema),
     defaultValues: initialSettings,
   });
+
+  const backupEmail = watch('backupEmail');
+  const weeklyBackupEnabled = watch('weeklyBackup');
 
   const onSubmit = async (data: Settings) => {
     setIsSubmitting(true);
@@ -63,6 +69,32 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
       setIsSubmitting(false);
     }
   };
+
+  const handleTestBackup = () => {
+    if (!backupEmail) {
+        toast({
+            title: 'Email de Backup Necessário',
+            description: 'Por favor, insira um email válido para testar o backup.',
+            variant: 'destructive'
+        });
+        return;
+    }
+    startBackupTransition(async () => {
+        const result = await runBackupAction({ backupEmail });
+        if (result.success) {
+            toast({
+                title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Backup Simulado!</span></div>,
+                description: result.message,
+            });
+        } else {
+             toast({
+                title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro no Backup</span></div>,
+                description: result.message,
+                variant: 'destructive'
+            });
+        }
+    });
+  }
   
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -143,6 +175,7 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
                     <div className="flex items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
                             <Label>Habilitar Notificações de Manutenção</Label>
+                            <p className="text-xs text-muted-foreground">Funcionalidade em desenvolvimento.</p>
                         </div>
                         <Controller name="maintenanceNotifications" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
                     </div>
@@ -150,10 +183,19 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
                     <div className="flex items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
                             <Label>Backup Automático Semanal</Label>
+                             <p className="text-xs text-muted-foreground">Simulação via botão de teste.</p>
                         </div>
                         <Controller name="weeklyBackup" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
                     </div>
                 </div>
+                 {weeklyBackupEnabled && (
+                    <div className="pt-2 flex justify-end">
+                        <Button type="button" variant="outline" onClick={handleTestBackup} disabled={isTestingBackup || !backupEmail}>
+                            {isTestingBackup ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4"/>}
+                            {isTestingBackup ? 'Enviando...' : 'Testar Backup Agora'}
+                        </Button>
+                    </div>
+                )}
             </CardContent>
         </Card>
     </form>
