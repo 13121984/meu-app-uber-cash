@@ -3,8 +3,11 @@ import { BookCopy } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { getCatalog } from '@/services/catalog.service';
 
-export default function GerenciarCatalogosPage() {
+export default async function GerenciarCatalogosPage() {
+  const initialCatalog = await getCatalog();
+  
   return (
     <div className="space-y-6">
        <div className="flex items-center gap-4">
@@ -18,11 +21,11 @@ export default function GerenciarCatalogosPage() {
             <BookCopy className="w-8 h-8 text-primary" />
             Gerenciar Catálogos
           </h1>
-          <p className="text-muted-foreground">Adicione ou remova categorias de ganhos e tipos de combustível.</p>
+          <p className="text-muted-foreground">Ative ou desative as categorias que você usa no dia a dia.</p>
         </div>
       </div>
       
-      <CatalogManager />
+      <CatalogManager initialCatalog={initialCatalog} />
     </div>
   );
 }

@@ -24,7 +24,10 @@ const settingsSchema = z.object({
     weeklyBackup: z.boolean(),
     backupEmail: z.string().email({ message: "Por favor, insira um e-mail válido." }).or(z.literal('')),
     maintenanceNotifications: z.boolean(),
-    defaultFuelType: z.string(),
+    defaultFuelType: z.string().min(1, { message: "Selecione um tipo de combustível." }),
+}).refine(data => data.weeklyBackup ? data.backupEmail !== '' : true, {
+    message: "O e-mail de backup é obrigatório para o backup semanal.",
+    path: ["backupEmail"],
 });
 
 const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
@@ -32,14 +35,13 @@ const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
     { value: 'light', label: 'Claro', icon: Sun },
 ];
 
-// O formulário real, agora recebe todos os dados como props.
-function SettingsFormInternal({ initialSettings, initialFuelTypes }: { initialSettings: Settings, initialFuelTypes: string[] }) {
+function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings: Settings, fuelTypes: string[] }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { control, handleSubmit, formState: { errors }, watch } = useForm<Settings>({
+  const { control, handleSubmit, formState: { errors } } = useForm<Settings>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: initialSettings, // Inicializa o formulário com os dados já carregados
+    defaultValues: initialSettings,
   });
 
   const onSubmit = async (data: Settings) => {
@@ -50,7 +52,6 @@ function SettingsFormInternal({ initialSettings, initialFuelTypes }: { initialSe
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Configurações Salvas!</span></div>,
         description: "Suas preferências foram atualizadas. A página será recarregada.",
       });
-      // Recarrega a página inteira para aplicar o tema novo
       window.location.reload(); 
     } catch (error) {
       toast({
@@ -116,13 +117,14 @@ function SettingsFormInternal({ initialSettings, initialFuelTypes }: { initialSe
                                         <SelectValue placeholder="Selecione um tipo..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {initialFuelTypes.map(type => (
+                                        {fuelTypes.map(type => (
                                             <SelectItem key={type} value={type}>{type}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             )}
                         />
+                        {errors.defaultFuelType && <p className="text-sm text-destructive">{errors.defaultFuelType.message}</p>}
                     </div>
                      {/* Email de Backup */}
                      <div className="space-y-2">
@@ -158,7 +160,6 @@ function SettingsFormInternal({ initialSettings, initialFuelTypes }: { initialSe
   );
 }
 
-// Componente Wrapper que lida com o carregamento dos dados.
 export function SettingsForm() {
     const [settings, setSettings] = useState<Settings | null>(null);
     const [catalog, setCatalog] = useState<Catalog | null>(null);
@@ -212,6 +213,6 @@ export function SettingsForm() {
         );
     }
     
-    // Renderiza o formulário interno apenas quando os dados estiverem prontos.
-    return <SettingsFormInternal initialSettings={settings} initialFuelTypes={catalog.fuel} />;
+    const activeFuelTypes = catalog.fuel.filter(f => f.active).map(f => f.name);
+    return <SettingsFormInternal initialSettings={settings} fuelTypes={activeFuelTypes} />;
 }

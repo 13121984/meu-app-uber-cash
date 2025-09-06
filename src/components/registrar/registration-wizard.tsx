@@ -26,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { getCatalog } from '@/services/catalog.service';
+import { getCatalog, CatalogItem } from '@/services/catalog.service';
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -130,7 +130,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const [entryBeingEdited, setEntryBeingEdited] = useState<WorkDay | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [catalog, setCatalog] = useState<{ earnings: string[], fuel: string[] }>({ earnings: [], fuel: [] });
+  const [catalog, setCatalog] = useState<{ earnings: CatalogItem[], fuel: CatalogItem[] }>({ earnings: [], fuel: [] });
 
 
    useEffect(() => {
@@ -272,12 +272,14 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     }
   };
 
+  const activeEarningCategories = catalog.earnings.filter(c => c.active).map(c => c.name);
+  const activeFuelCategories = catalog.fuel.filter(c => c.active).map(c => c.name);
 
   const renderStep = () => {
     switch (currentStep) {
       case 1: return <Step1Info data={state} dispatch={dispatch} isEditing={!!entryBeingEdited || isEditing} registrationType={registrationType}/>;
-      case 2: return <Step2Earnings data={state} dispatch={dispatch} categories={catalog.earnings} />;
-      case 3: return <Step3Fuel data={state} dispatch={dispatch} fuelTypes={catalog.fuel} />;
+      case 2: return <Step2Earnings data={state} dispatch={dispatch} categories={activeEarningCategories} />;
+      case 3: return <Step3Fuel data={state} dispatch={dispatch} fuelTypes={activeFuelCategories} />;
       default: return null;
     }
   };

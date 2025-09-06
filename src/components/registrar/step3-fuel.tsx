@@ -33,7 +33,8 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
   }, [dispatch]);
 
   const handleAddFuelEntry = () => {
-    const newEntry: FuelEntry = { id: Date.now(), type: '', paid: 0, price: 0 };
+    const defaultFuelType = fuelTypes.length > 0 ? fuelTypes[0] : '';
+    const newEntry: FuelEntry = { id: Date.now(), type: defaultFuelType, paid: 0, price: 0 };
     handleFuelEntriesChange([...data.fuelEntries, newEntry]);
   };
   
@@ -88,12 +89,14 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                 <Fuel className="h-6 w-6 text-red-600"/>
                 <span>Abastecimentos</span>
             </h2>
-            <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline">
+            <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline" disabled={fuelTypes.length === 0}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
             </Button>
         </div>
         
-        {data.fuelEntries.length === 0 && (
+        {fuelTypes.length === 0 ? (
+          <p className="text-muted-foreground text-center py-4">Nenhum tipo de combustível ativo. Adicione ou ative um em Configurações &gt; Gerenciar Catálogos.</p>
+        ) : data.fuelEntries.length === 0 && (
             <p className="text-muted-foreground text-center py-4">Clique em "Adicionar" se abasteceu hoje.</p>
         )}
 

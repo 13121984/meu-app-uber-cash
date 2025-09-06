@@ -24,7 +24,9 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
   };
 
   const handleAddEarning = () => {
-    const newEarning: Earning = { id: Date.now(), category: '', trips: 0, amount: 0 };
+    // Adiciona a primeira categoria ativa como padrão, ou a primeira da lista se nenhuma estiver ativa.
+    const defaultCategory = categories.length > 0 ? categories[0] : '';
+    const newEarning: Earning = { id: Date.now(), category: defaultCategory, trips: 0, amount: 0 };
     handleEarningsChange([...data.earnings, newEarning]);
   };
 
@@ -53,12 +55,14 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
             <CircleDollarSign className="h-6 w-6 text-green-600"/>
             <span>Ganhos do Dia</span>
         </h2>
-        <Button size="sm" onClick={handleAddEarning} type="button">
+        <Button size="sm" onClick={handleAddEarning} type="button" disabled={categories.length === 0}>
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Ganho
         </Button>
       </div>
 
-      {data.earnings.length === 0 && (
+      {categories.length === 0 ? (
+        <p className="text-muted-foreground text-center py-4">Nenhuma categoria de ganho ativa. Adicione ou ative uma em Configurações &gt; Gerenciar Catálogos.</p>
+      ) : data.earnings.length === 0 && (
         <p className="text-muted-foreground text-center py-4">Clique em "Adicionar Ganho" para começar.</p>
       )}
 

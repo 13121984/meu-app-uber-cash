@@ -1,187 +1,184 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { BookCopy, PlusCircle, Trash2, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
-import { saveCatalog, getCatalog } from '@/services/catalog.service';
+import { BookCopy, PlusCircle, Trash2, Loader2, CheckCircle, AlertTriangle, UploadCloud } from 'lucide-react';
+import { saveCatalog, type Catalog, type CatalogItem } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
-import { Skeleton } from '../ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
-export function CatalogManager() {
+interface CatalogManagerProps {
+    initialCatalog: Catalog;
+}
+
+
+export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [earningsCategories, setEarningsCategories] = useState<string[]>([]);
-  const [fuelCategories, setFuelCategories] = useState<string[]>([]);
-  const [newEarningCat, setNewEarningCat] = useState('');
-  const [newFuelCat, setNewFuelCat] = useState('');
-
-  useEffect(() => {
-    async function loadCatalog() {
-        setIsLoading(true);
-        try {
-            const initialData = await getCatalog();
-            setEarningsCategories(initialData.earnings);
-            setFuelCategories(initialData.fuel);
-        } catch (error) {
-            toast({
-                title: "Erro ao carregar catálogos",
-                variant: "destructive"
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }
-    loadCatalog();
-  }, []);
-
-  const handleAddCategory = (type: 'earnings' | 'fuel') => {
-    if (type === 'earnings') {
-      if (newEarningCat && !earningsCategories.includes(newEarningCat)) {
-        setEarningsCategories([...earningsCategories, newEarningCat]);
-        setNewEarningCat('');
-      }
-    } else {
-      if (newFuelCat && !fuelCategories.includes(newFuelCat)) {
-        setFuelCategories([...fuelCategories, newFuelCat]);
-        setNewFuelCat('');
-      }
-    }
-  };
-
-  const handleRemoveCategory = (type: 'earnings' | 'fuel', category: string) => {
-    if (type === 'earnings') {
-      setEarningsCategories(earningsCategories.filter(c => c !== category));
-    } else {
-      setFuelCategories(fuelCategories.filter(c => c !== category));
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    setIsSaving(true);
-    try {
-      await saveCatalog({
-        earnings: earningsCategories,
-        fuel: fuelCategories
-      });
-      toast({
-        title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Catálogos Salvos!</span></div>,
-        description: "Suas categorias foram atualizadas com sucesso.",
-      });
-      // A atualização do router aqui é importante para que outras páginas recebam o novo catálogo
-      router.refresh(); 
-    } catch (error) {
-      toast({
-        title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,
-        description: "Não foi possível salvar os catálogos.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const CategorySection = ({ title, categories, newCat, setNewCat, onAdd, onRemove }: {
-    title: string;
-    categories: string[];
-    newCat: string;
-    setNewCat: (val: string) => void;
-    onAdd: () => void;
-    onRemove: (cat: string) => void;
-  }) => (
-    <div className="space-y-4">
-      <h4 className="font-semibold text-lg">{title}</h4>
-      <div className="flex gap-2">
-        <Input 
-          placeholder="Nova categoria..."
-          value={newCat}
-          onChange={(e) => setNewCat(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && onAdd()}
-        />
-        <Button onClick={onAdd}><PlusCircle className="mr-2 h-4 w-4" /> Adicionar</Button>
-      </div>
-      <div className="space-y-2">
-        {categories.map(cat => (
-          <div key={cat} className="flex items-center justify-between p-2 rounded-md bg-secondary">
-            <span className="text-sm">{cat}</span>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onRemove(cat)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  const [isSaving, startSavingTransition] = useTransition();
   
-  if (isLoading) {
-      return (
-          <Card>
-              <CardHeader className="flex-row justify-between items-center">
-                  <div>
-                    <Skeleton className="h-7 w-48" />
-                    <Skeleton className="h-4 w-64 mt-2" />
-                  </div>
-                  <Skeleton className="h-10 w-40" />
-              </CardHeader>
-              <CardContent className="space-y-6 pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <Skeleton className="h-7 w-32" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                  </div>
-                   <div className="space-y-4">
-                    <Skeleton className="h-7 w-32" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                  </div>
-                </div>
-              </CardContent>
-          </Card>
-      );
+  const [earningsCategories, setEarningsCategories] = useState<CatalogItem[]>(initialCatalog.earnings);
+  const [fuelCategories, setFuelCategories] = useState<CatalogItem[]>(initialCatalog.fuel);
+  const [textToImport, setTextToImport] = useState('');
+  const [importTarget, setImportTarget] = useState<'earnings' | 'fuel'>('earnings');
+
+
+  const handleToggle = (type: 'earnings' | 'fuel', name: string) => {
+    const updater = type === 'earnings' ? setEarningsCategories : setFuelCategories;
+    updater(prev => prev.map(item => 
+        item.name === name ? { ...item, active: !item.active } : item
+    ));
+  };
+  
+  const handleDelete = (type: 'earnings' | 'fuel', name: string) => {
+    const updater = type === 'earnings' ? setEarningsCategories : setFuelCategories;
+    updater(prev => prev.filter(item => item.name !== name));
+  };
+  
+  const handleImport = () => {
+    if(!textToImport.trim()) return;
+    const newItems = textToImport.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+    const updater = importTarget === 'earnings' ? setEarningsCategories : setFuelCategories;
+    const existingItems = importTarget === 'earnings' ? earningsCategories : fuelCategories;
+
+    updater(prev => {
+        const existingNames = new Set(prev.map(i => i.name));
+        const itemsToAdd = newItems
+            .filter(name => !existingNames.has(name))
+            .map(name => ({ name, active: true, isDefault: false }));
+        return [...prev, ...itemsToAdd];
+    });
+
+    setTextToImport('');
+    toast({
+        title: "Categorias Importadas",
+        description: `${newItems.length} novas categorias foram adicionadas e ativadas. Salve as alterações para confirmar.`
+    })
   }
 
-  return (
-    <Card>
-      <CardHeader className="flex-row justify-between items-center">
-        <div>
-            <CardTitle className="flex items-center gap-2 font-headline">
-            <BookCopy className="h-6 w-6 text-primary" />
-            Editor de Catálogos
-            </CardTitle>
-            <CardDescription>
-            Adicione ou remova categorias para personalizar os formulários.
-            </CardDescription>
-        </div>
-         <Button onClick={handleSaveChanges} disabled={isSaving}>
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Salvar Alterações
-        </Button>
+
+  const handleSaveChanges = async () => {
+    startSavingTransition(async () => {
+        try {
+          await saveCatalog({
+            earnings: earningsCategories,
+            fuel: fuelCategories
+          });
+          toast({
+            title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Catálogos Salvos!</span></div>,
+            description: "Suas categorias foram atualizadas com sucesso.",
+          });
+          router.refresh(); 
+        } catch (error) {
+          toast({
+            title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,
+            description: "Não foi possível salvar os catálogos.",
+            variant: "destructive",
+          });
+        }
+    });
+  };
+
+  const CategorySection = ({ title, categories, onToggle, onDelete }: {
+    title: string;
+    categories: CatalogItem[];
+    onToggle: (name: string) => void;
+    onDelete: (name: string) => void;
+  }) => (
+    <Card className="flex-1">
+      <CardHeader>
+        <CardTitle className="font-headline">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <CardContent>
+        <ScrollArea className="h-72">
+            <div className="space-y-4 pr-6">
+            {categories.map(cat => (
+              <div key={cat.name} className="flex items-center justify-between p-3 rounded-md bg-secondary">
+                <Label htmlFor={`switch-${cat.name}`} className="flex-1 cursor-pointer">{cat.name}</Label>
+                <div className="flex items-center gap-2">
+                    {!cat.isDefault && (
+                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(cat.name)}>
+                         <Trash2 className="h-4 w-4" />
+                       </Button>
+                    )}
+                    <Switch
+                        id={`switch-${cat.name}`}
+                        checked={cat.active}
+                        onCheckedChange={() => onToggle(cat.name)}
+                    />
+                </div>
+              </div>
+            ))}
+            </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="space-y-6">
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-headline">
+                    <UploadCloud className="h-6 w-6 text-primary" />
+                    Importar Novas Categorias
+                </CardTitle>
+                <CardDescription>
+                    Cole uma lista de categorias (uma por linha) para adicioná-las rapidamente.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <Textarea 
+                    placeholder="Uber Comfort&#x0a;Uber Black&#x0a;Indriver"
+                    value={textToImport}
+                    onChange={(e) => setTextToImport(e.target.value)}
+                    className="h-28"
+                />
+                 <div className="flex flex-col sm:flex-row gap-4">
+                     <div className="flex-1">
+                         <Label>Importar para:</Label>
+                         <div className="flex gap-4 pt-2">
+                            <Button variant={importTarget === 'earnings' ? 'default' : 'outline'} onClick={() => setImportTarget('earnings')}>Ganhos</Button>
+                            <Button variant={importTarget === 'fuel' ? 'default' : 'outline'} onClick={() => setImportTarget('fuel')}>Combustível</Button>
+                        </div>
+                     </div>
+                     <Button onClick={handleImport} className="w-full sm:w-auto self-end">
+                        <PlusCircle className="mr-2 h-4 w-4"/>
+                        Adicionar à Lista
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+
+        <div className="flex flex-col md:flex-row gap-6">
             <CategorySection
                 title="Categorias de Ganhos"
                 categories={earningsCategories}
-                newCat={newEarningCat}
-                setNewCat={setNewEarningCat}
-                onAdd={() => handleAddCategory('earnings')}
-                onRemove={(cat) => handleRemoveCategory('earnings', cat)}
+                onToggle={(name) => handleToggle('earnings', name)}
+                onDelete={(name) => handleDelete('earnings', name)}
             />
             <CategorySection
                 title="Tipos de Combustível"
                 categories={fuelCategories}
-                newCat={newFuelCat}
-                setNewCat={setNewFuelCat}
-                onAdd={() => handleAddCategory('fuel')}
-                onRemove={(cat) => handleRemoveCategory('fuel', cat)}
+                onToggle={(name) => handleToggle('fuel', name)}
+                onDelete={(name) => handleDelete('fuel', name)}
             />
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="flex justify-end pt-4">
+             <Button onClick={handleSaveChanges} disabled={isSaving} size="lg">
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Salvar Todas as Alterações
+            </Button>
+        </div>
+    </div>
   );
 }

@@ -1,14 +1,41 @@
-
 {
   "earnings": [
-    "Uber Cash",
-    "99 Pop",
-    "Particular",
-    "Ganhos Extras"
+    {
+      "name": "Uber Cash",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "99 Pop",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Particular",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Ganhos Extras",
+      "active": true,
+      "isDefault": true
+    }
   ],
   "fuel": [
-    "Etanol",
-    "Gasolina Aditivada",
-    "GNV"
+    {
+      "name": "Etanol",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Gasolina Aditivada",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "GNV",
+      "active": true,
+      "isDefault": true
+    }
   ]
 }
