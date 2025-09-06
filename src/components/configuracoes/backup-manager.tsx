@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -19,12 +19,17 @@ interface BackupManagerProps {
 export function BackupManager({ initialBackupData }: BackupManagerProps) {
   const [backupData, setBackupData] = useState(initialBackupData);
   const [isProcessing, startTransition] = useTransition();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const formatDateForDisplay = (dateString: string) => {
+    if (!isClient) return ''; // Renderiza vazio no servidor para evitar mismatch
     if (!dateString) return "Data inválida";
     try {
-      // Usar new Date() para garantir a interpretação correta da string ISO
-      const date = new Date(dateString);
+      const date = parseISO(dateString);
       return format(date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
     } catch (e) {
       return "Data inválida";
