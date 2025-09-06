@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useTransition } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -16,9 +17,7 @@ import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions
 
 
 interface ReportsFilterProps {
-  onFilterChange: (filters: ReportFilterValues) => void;
   initialFilters: ReportFilterValues;
-  isPending: boolean;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -27,7 +26,11 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
 }));
 
-export function ReportsFilter({ onFilterChange, initialFilters, isPending }: ReportsFilterProps) {
+export function ReportsFilter({ initialFilters }: ReportsFilterProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
   const [filterType, setFilterType] = useState<ReportFilterValues['type']>(initialFilters.type);
   const [year, setYear] = useState<number>(initialFilters.year || getYear(new Date()));
   const [month, setMonth] = useState<number>(initialFilters.month || new Date().getMonth());
@@ -36,18 +39,33 @@ export function ReportsFilter({ onFilterChange, initialFilters, isPending }: Rep
   const [currentFilters, setCurrentFilters] = useState<ReportFilterValues>(initialFilters);
   
   useEffect(() => {
+    const params = new URLSearchParams();
+    params.set('type', filterType);
+
     const filters: ReportFilterValues = { type: filterType };
+
     if (filterType === 'specificMonth') {
         filters.year = year;
         filters.month = month;
+        params.set('year', year.toString());
+        params.set('month', month.toString());
     } else if (filterType === 'specificYear') {
         filters.year = year;
-    } else if (filterType === 'custom') {
+        params.set('year', year.toString());
+    } else if (filterType === 'custom' && dateRange?.from) {
         filters.dateRange = dateRange;
+        params.set('from', format(dateRange.from, 'yyyy-MM-dd'));
+        if (dateRange.to) {
+            params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
+        }
     }
-    onFilterChange(filters);
-    setCurrentFilters(filters);
-  }, [filterType, year, month, dateRange, onFilterChange]);
+    
+    startTransition(() => {
+        router.replace(`${pathname}?${params.toString()}`);
+        setCurrentFilters(filters);
+    });
+
+  }, [filterType, year, month, dateRange, pathname, router]);
   
   const handleDownload = () => {
       startExportTransition(async () => {
@@ -185,6 +203,8 @@ export function ReportsFilter({ onFilterChange, initialFilters, isPending }: Rep
       )}
 
       <div className="flex-grow"></div>
+      
+      {isPending && <Loader2 className="h-5 w-5 animate-spin" />}
       
       <Button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 w-full sm:w-auto" disabled={isExporting || isPending}>
           {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}

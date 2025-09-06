@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState, useMemo, useEffect, useTransition } from 'react';
+import { useMemo } from 'react';
 import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench, Loader2, CalendarDays } from 'lucide-react';
 import { ReportsFilter } from './reports-filter';
-import { WorkDay, getReportData, ReportData } from '@/services/work-day.service';
+import { ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
@@ -19,23 +19,14 @@ const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => 
 
 
 interface ReportsClientProps {
-  initialData: WorkDay[];
+  initialReportData: ReportData;
+  initialFilters: ReportFilterValues;
 }
 
-export function ReportsClient({ initialData }: ReportsClientProps) {
-  const [filters, setFilters] = useState<ReportFilterValues>({ type: 'thisMonth' });
-  const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const isLoading = isPending || !reportData;
+export function ReportsClient({ initialReportData, initialFilters }: ReportsClientProps) {
+  const reportData = initialReportData; // Os dados agora vêm diretamente como prop
 
-  useEffect(() => {
-    startTransition(async () => {
-        const data = await getReportData(initialData, filters);
-        setReportData(data);
-    });
-  }, [initialData, filters]);
-
-  const stats = reportData ? [
+  const stats = useMemo(() => reportData ? [
     { title: "Lucro Líquido", value: reportData.totalLucro, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
     { title: "Ganhos Brutos", value: reportData.totalGanho, icon: DollarSign, isCurrency: true, iconBg: "bg-primary/20", iconColor: "text-primary" },
     { title: "Viagens", value: reportData.totalViagens, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
@@ -47,31 +38,13 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
     { title: "Eficiência Média", value: reportData.eficiencia, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
     { title: "Manutenção", value: reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0, icon: Wrench, isCurrency: true, iconBg: "bg-orange-500/20", iconColor: "text-orange-400" },
     { title: "Combustível", value: reportData.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
-  ] : [];
-
+  ] : [], [reportData]);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
-          <BarChart className="w-8 h-8 text-primary" />
-          Relatórios
-        </h1>
-      </div>
-
-      <ReportsFilter 
-        onFilterChange={setFilters} 
-        initialFilters={filters}
-        isPending={isPending}
-      />
+      <ReportsFilter initialFilters={initialFilters} />
       
-      {isLoading ? (
-        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed bg-card border-border">
-            <Loader2 className="w-16 h-16 text-muted-foreground mb-4 animate-spin" />
-            <h2 className="text-xl font-semibold">Carregando dados...</h2>
-            <p className="text-muted-foreground">Aguarde enquanto processamos as informações.</p>
-        </Card>
-      ) : !reportData || reportData.diasTrabalhados === 0 ? (
+      {!reportData || reportData.diasTrabalhados === 0 ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed bg-card border-border">
             <BarChart className="w-16 h-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold">Nenhum dado encontrado</h2>
@@ -167,7 +140,6 @@ export function ReportsClient({ initialData }: ReportsClientProps) {
             </Card>
         </div>
       )}
-
     </div>
   );
 }
