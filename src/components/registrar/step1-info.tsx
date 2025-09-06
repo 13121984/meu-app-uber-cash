@@ -125,7 +125,7 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                 type="text" 
                 inputMode="decimal"
                 placeholder="Ex: 8,5" 
-                value={data.hours ? String(data.hours.toFixed(2)).replace('.', ',') : ''} 
+                value={String(data.hours || '').replace('.', ',')}
                 onChange={(e) => handleFieldChange('hours', parseFloat(e.target.value.replace(',', '.')) || 0)} 
                 className="pl-10" 
                 disabled={hasTimeEntries}
