@@ -1,9 +1,8 @@
 
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, Clock, BarChart3, LayoutDashboard, BarChart as BarChartIcon } from "lucide-react";
+import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { DailySummaryCard } from "./daily-summary-card";
@@ -11,17 +10,15 @@ import type { PeriodData } from "../dashboard/dashboard-client";
 import { ShiftPerformance } from "./shift-performance";
 
 const mainActions = [
-  { href: "/registrar/today", label: "Registrar Hoje", icon: PlusCircle, bgColor: "bg-blue-500/5", iconColor: "text-blue-500" },
-  { href: "/registrar/other-day", label: "Registrar Outro Dia", icon: Calendar, bgColor: "bg-teal-500/5", iconColor: "text-teal-500" },
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, bgColor: "bg-yellow-500/5", iconColor: "text-yellow-500" },
-  { href: "/gerenciamento", label: "Histórico", icon: History, bgColor: "bg-orange-500/5", iconColor: "text-orange-500" },
-  { href: "/relatorios", label: "Relatórios", icon: BarChartIcon, bgColor: "bg-green-500/5", iconColor: "text-green-500" },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench, bgColor: "bg-red-500/5", iconColor: "text-red-500" },
-  { href: "/metas", label: "Metas", icon: Target, bgColor: "bg-purple-500/5", iconColor: "text-purple-500" },
-  { href: "/configuracoes", label: "Configurações", icon: Settings, bgColor: "bg-gray-500/5", iconColor: "text-gray-500" },
+  { href: "/registrar/today", label: "Registrar Hoje", icon: PlusCircle, iconColor: "text-blue-500" },
+  { href: "/registrar/other-day", label: "Registrar Outro Dia", icon: Calendar, iconColor: "text-teal-500" },
+  { href: "/dashboard", label: "Performance", icon: LayoutDashboard, iconColor: "text-yellow-500" },
+  { href: "/manutencao", label: "Manutenção", icon: Wrench, iconColor: "text-red-500" },
+  { href: "/metas", label: "Metas", icon: Target, iconColor: "text-green-500" },
+  { href: "/configuracoes", label: "Configurações", icon: Settings, iconColor: "text-purple-500" },
 ];
 
-const ActionButton = ({ href, label, icon: Icon, bgColor, iconColor }: typeof mainActions[0]) => (
+const ActionButton = ({ href, label, icon: Icon, iconColor }: typeof mainActions[0]) => (
     <Link href={href} passHref>
         <Card className="group w-full h-32 flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-primary">
             <Icon className={`h-8 w-8 ${iconColor} transition-colors group-hover:text-primary-foreground`} />
@@ -45,7 +42,7 @@ export function HomeClient({ todayData }: HomeClientProps) {
 
         <div className="space-y-4">
             <h2 className="text-2xl font-semibold font-headline">Ações Rápidas</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {mainActions.map((action) => (
                     <ActionButton key={action.href} {...action} />
                 ))}

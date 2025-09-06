@@ -27,6 +27,19 @@ export function TopBar() {
     setIsClient(true);
   }, []);
 
+  if (!isClient) {
+    return (
+        <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
+            <div className="flex items-center gap-4">
+                <Link href="/" className="flex flex-col items-center gap-1 font-semibold">
+                    <Car className="h-7 w-7 text-primary" />
+                    <span className="font-headline text-xs">Rota Certa</span>
+                </Link>
+            </div>
+        </header>
+    )
+  }
+
   return (
     <TooltipProvider>
         <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
@@ -38,7 +51,7 @@ export function TopBar() {
             </div>
             <nav className="hidden sm:flex items-center gap-1">
                 {menuItems.map((item) => {
-                    const isActive = isClient && (item.href === "/" ? pathname === item.href : pathname.startsWith(item.href));
+                    const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
                     return (
                     <Tooltip key={item.href}>
                         <TooltipTrigger asChild>
