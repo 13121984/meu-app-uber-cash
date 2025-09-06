@@ -27,11 +27,19 @@ export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
     }, [performance]);
 
     if (!performance || performance.filter(p => p.profit > 0 || p.hours > 0).length === 0) {
-        return null; 
+        return (
+            <Card className="h-full min-h-[400px] flex items-center justify-center border-dashed">
+                <div className="text-center text-muted-foreground">
+                    <Sunrise className="mx-auto h-12 w-12" />
+                    <p className="mt-4 font-semibold">Nenhum dado de turno para hoje</p>
+                    <p className="text-sm">Registre seus períodos de trabalho para ver esta análise.</p>
+                </div>
+            </Card>
+        );
     }
 
     return (
-        <Card className="bg-secondary/30">
+        <Card className="h-full">
             <CardHeader>
                 <CardTitle className="font-headline text-lg">Análise por Turno</CardTitle>
                 <CardDescription>Veja qual período do dia foi mais lucrativo para você hoje.</CardDescription>
@@ -74,4 +82,3 @@ export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
         </Card>
     );
 }
-

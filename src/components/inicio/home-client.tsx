@@ -3,11 +3,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PlusCircle, BarChart, Wrench, Target, Settings, History, Calendar, Clock, BarChart3, LineChart } from "lucide-react";
+import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, Clock, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { DailySummaryCard } from "./daily-summary-card";
 import type { PeriodData } from "../dashboard/dashboard-client";
+import { ShiftPerformance } from "./shift-performance";
 
 
 const mainActions = [
@@ -20,7 +21,7 @@ const mainActions = [
 ];
 
 
-const ActionButton = ({ href, label, icon: Icon, iconColor }: typeof mainActions[0] & { iconColor: string }) => (
+const ActionButton = ({ href, label, icon: Icon, iconColor }: typeof mainActions[0]) => (
     <Link href={href} passHref>
         <Card className="group w-full h-36 flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-primary">
             <Icon className={`h-10 w-10 ${iconColor} transition-colors group-hover:text-primary-foreground`} />
@@ -58,10 +59,7 @@ export function HomeClient({ todayData }: HomeClientProps) {
                     <DailySummaryCard data={todayData} />
                 </div>
                 <div className="lg:col-span-2">
-                    {/* Placeholder for future charts */}
-                    <Card className="h-full min-h-[400px] flex items-center justify-center">
-                        <p className="text-muted-foreground">Gráficos diários em breve...</p>
-                    </Card>
+                    <ShiftPerformance performance={todayData.performanceByShift} />
                 </div>
              </div>
         </div>
