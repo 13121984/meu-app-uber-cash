@@ -12,12 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { toast } from "@/hooks/use-toast";
 import { saveSettings, getSettings } from '@/services/settings.service';
-import { getCatalog } from '@/services/catalog.service';
+import { getCatalog, Catalog } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
 import { Paintbrush, Database, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun } from 'lucide-react';
 import type { Settings, AppTheme } from '@/types/settings';
 import { Skeleton } from '../ui/skeleton';
 
+// Schema continua o mesmo
 const settingsSchema = z.object({
     theme: z.enum(['light', 'dark']),
     weeklyBackup: z.boolean(),
@@ -31,46 +32,15 @@ const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
     { value: 'light', label: 'Claro', icon: Sun },
 ];
 
-
-export function SettingsForm() {
+// O formulário real, agora recebe todos os dados como props.
+function SettingsFormInternal({ initialSettings, initialFuelTypes }: { initialSettings: Settings, initialFuelTypes: string[] }) {
   const router = useRouter();
-  const [initialData, setInitialData] = useState<Settings | null>(null);
-  const [fuelTypes, setFuelTypes] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function loadInitialData() {
-      setIsLoading(true);
-      try {
-        const [settingsData, catalogData] = await Promise.all([
-          getSettings(),
-          getCatalog(),
-        ]);
-        setInitialData(settingsData);
-        setFuelTypes(catalogData.fuel || []);
-      } catch (error) {
-        toast({
-          title: "Erro ao carregar configurações",
-          description: "Não foi possível buscar os dados iniciais.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadInitialData();
-  }, []);
-
-  const { control, handleSubmit, formState: { errors }, reset } = useForm<Settings>({
+  const { control, handleSubmit, formState: { errors } } = useForm<Settings>({
     resolver: zodResolver(settingsSchema),
+    defaultValues: initialSettings, // Inicializa o formulário com os dados já carregados
   });
-
-  useEffect(() => {
-    if(initialData) {
-      reset(initialData);
-    }
-  }, [initialData, reset]);
 
   const onSubmit = async (data: Settings) => {
     setIsSubmitting(true);
@@ -80,8 +50,6 @@ export function SettingsForm() {
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Configurações Salvas!</span></div>,
         description: "Suas preferências foram atualizadas. A página será recarregada.",
       });
-      // A página será recarregada para refletir a mudança de tema, se houver.
-      // Isso é melhor do que `router.refresh()` para garantir que o tema no `<html>` seja atualizado.
       window.location.reload();
     } catch (error) {
       toast({
@@ -93,20 +61,6 @@ export function SettingsForm() {
       setIsSubmitting(false);
     }
   };
-
-  if (isLoading) {
-      return (
-          <Card>
-              <CardHeader>
-                  <Skeleton className="h-8 w-1/2" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-              </CardContent>
-          </Card>
-      );
-  }
   
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -119,7 +73,6 @@ export function SettingsForm() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-6">
-                {/* Aparência */}
                 <Card>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline"><Paintbrush className="h-6 w-6 text-primary" />Aparência</CardTitle>
@@ -153,7 +106,6 @@ export function SettingsForm() {
                     </CardContent>
                 </Card>
 
-                {/* Backup */}
                 <Card>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline"><Database className="h-6 w-6 text-primary" />Backup</CardTitle>
@@ -179,7 +131,6 @@ export function SettingsForm() {
             </div>
             
             <div className="space-y-6">
-                {/* Notificações e Padrões */}
                 <Card>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline"><Bell className="h-6 w-6 text-primary" />Notificações e Padrões</CardTitle>
@@ -202,7 +153,7 @@ export function SettingsForm() {
                                             <SelectValue placeholder="Selecione um tipo..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {fuelTypes && fuelTypes.map(type => (
+                                            {initialFuelTypes.map(type => (
                                                 <SelectItem key={type} value={type}>{type}</SelectItem>
                                             ))}
                                         </SelectContent>
@@ -216,4 +167,56 @@ export function SettingsForm() {
         </div>
     </form>
   );
+}
+
+// Componente Wrapper que lida com o carregamento dos dados.
+export function SettingsForm() {
+    const [settings, setSettings] = useState<Settings | null>(null);
+    const [catalog, setCatalog] = useState<Catalog | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadInitialData() {
+            setIsLoading(true);
+            try {
+                const [settingsData, catalogData] = await Promise.all([
+                    getSettings(),
+                    getCatalog(),
+                ]);
+                setSettings(settingsData);
+                setCatalog(catalogData);
+            } catch (error) {
+                toast({
+                    title: "Erro ao carregar configurações",
+                    description: "Não foi possível buscar os dados iniciais.",
+                    variant: "destructive"
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        loadInitialData();
+    }, []);
+
+    if (isLoading || !settings || !catalog) {
+        return (
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-8 w-1/2" />
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6">
+                    <div className="space-y-4">
+                        <Skeleton className="h-24 w-full" />
+                        <Skeleton className="h-24 w-full" />
+                    </div>
+                     <div className="space-y-4">
+                        <Skeleton className="h-36 w-full" />
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+    
+    // Renderiza o formulário interno apenas quando os dados estiverem prontos.
+    return <SettingsFormInternal initialSettings={settings} initialFuelTypes={catalog.fuel} />;
 }
