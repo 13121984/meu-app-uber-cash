@@ -112,7 +112,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData || undefined));
   
    // Este useEffect agora SÓ atualiza o estado do formulário se os dados iniciais externos (props) mudarem.
-   // Ele não busca mais dados por conta própria.
    useEffect(() => {
     dispatch({ type: 'SET_STATE', payload: getInitialState(propsInitialData || undefined) });
     if (isEditing) {
@@ -297,3 +296,5 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     </div>
   );
 }
+
+    
