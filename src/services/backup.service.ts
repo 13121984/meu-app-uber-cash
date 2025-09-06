@@ -24,12 +24,18 @@ async function ensureDataFile(): Promise<void> {
 }
 
 /**
- * Busca os dados do último backup.
+ * Busca os metadados do último backup (sem o conteúdo CSV).
  */
-export async function getBackupData(): Promise<BackupData> {
+export async function getBackupData(): Promise<Omit<BackupData, 'csvContent'>> {
   await ensureDataFile();
   const fileContent = await fs.readFile(dataFilePath, 'utf8');
-  return JSON.parse(fileContent);
+  const data = JSON.parse(fileContent);
+  // Retorna os dados sem o conteúdo CSV pesado
+  return {
+    lastBackupDate: data.lastBackupDate,
+    fileName: data.fileName,
+    csvContent: null, // Exclui o conteúdo
+  };
 }
 
 /**
@@ -48,4 +54,24 @@ export async function saveBackupData(data: Omit<BackupData, 'lastBackupDate'>): 
     const errorMessage = error instanceof Error ? error.message : "Falha ao salvar dados de backup.";
     return { success: false, error: errorMessage };
   }
+}
+
+/**
+ * Busca o conteúdo completo do backup para download.
+ */
+export async function getBackupForDownload(): Promise<{ success: boolean; csvContent?: string; fileName?: string; error?: string; }> {
+    try {
+        await ensureDataFile();
+        const fileContent = await fs.readFile(dataFilePath, 'utf8');
+        const data: BackupData = JSON.parse(fileContent);
+        
+        if (data.csvContent && data.fileName) {
+            return { success: true, csvContent: data.csvContent, fileName: data.fileName };
+        } else {
+            return { success: false, error: 'Arquivo de backup não encontrado ou vazio.' };
+        }
+    } catch (e) {
+        const error = e instanceof Error ? e.message : 'Falha ao ler o arquivo de backup.';
+        return { success: false, error };
+    }
 }
