@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useTransition, useEffect, useMemo, useCallback } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { useWorkDayColumns } from "./columns";
 import { DataTable } from "./data-table";
 import { ReportsFilter } from "@/components/relatorios/reports-filter";
@@ -10,7 +10,7 @@ import { Loader2, Trash2, History } from "lucide-react";
 import { deleteFilteredWorkDaysAction, ActiveFilters } from "./actions";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { getFilteredWorkDays, type WorkDay } from '@/services/work-day.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
@@ -25,7 +25,6 @@ export interface GroupedWorkDay {
 
 export function GerenciamentoClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { columns, Dialogs, setEditingDay } = useWorkDayColumns();
 
   const [isDeletingFiltered, startDeleteTransition] = useTransition();

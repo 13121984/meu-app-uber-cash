@@ -2,12 +2,13 @@
 "use client";
 
 import React, { useState, useEffect, useTransition } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Calendar as CalendarIcon, Download, Loader2, AlertTriangle, Filter, Check } from 'lucide-react';
-import { format, getYear } from 'date-fns';
+import { format, getYear, parseISO, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
@@ -27,13 +28,51 @@ const months = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [filterType, setFilterType] = useState<ReportFilterValues['type'] | null>(null);
   const [year, setYear] = useState<number>(getYear(new Date()));
   const [month, setMonth] = useState<number>(new Date().getMonth());
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [isExporting, startExportTransition] = useTransition();
-  const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
-  
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    // Sync state with URL params on initial client load
+    const typeFromURL = searchParams.get('type') as ReportFilterValues['type'] | null;
+    if (typeFromURL) {
+      const yearFromURL = parseInt(searchParams.get('year') || getYear(new Date()).toString());
+      const monthFromURL = parseInt(searchParams.get('month') || new Date().getMonth().toString());
+      const fromParam = searchParams.get('from');
+      let rangeFromURL: DateRange | undefined = undefined;
+
+      if (fromParam) {
+          const fromDate = parseISO(fromParam);
+          if (isValid(fromDate)) {
+              const toParam = searchParams.get('to');
+              const toDate = toParam ? parseISO(toParam) : undefined;
+              rangeFromURL = { from: fromDate, to: isValid(toDate) ? toDate : undefined };
+          }
+      }
+      setFilterType(typeFromURL);
+      setYear(yearFromURL);
+      setMonth(monthFromURL);
+      setDateRange(rangeFromURL);
+      
+      // Apply filters on initial load if params exist
+      onApplyFilters({
+          type: typeFromURL,
+          year: yearFromURL,
+          month: monthFromURL,
+          dateRange: rangeFromURL
+      });
+    }
+  }, []); // Empty dependency array ensures this runs only once on the client
+
+
   const handleApply = () => {
     if (!filterType) {
         toast({ title: "Selecione um período", description: "Você precisa escolher um tipo de período para gerar o relatório.", variant: "destructive" });
@@ -41,28 +80,50 @@ export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps)
     }
 
     const filters: ReportFilterValues = { type: filterType };
-
+    const params = new URLSearchParams();
+    params.set('type', filterType);
+    
     if (filterType === 'specificMonth') {
         filters.year = year;
         filters.month = month;
+        params.set('year', year.toString());
+        params.set('month', month.toString());
     } else if (filterType === 'specificYear') {
         filters.year = year;
+        params.set('year', year.toString());
     } else if (filterType === 'custom' && dateRange?.from) {
         filters.dateRange = dateRange;
+        params.set('from', format(dateRange.from, 'yyyy-MM-dd'));
+        if (dateRange.to) {
+            params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
+        }
     }
-
-    setCurrentFilters(filters);
+    
+    router.push(`${pathname}?${params.toString()}`);
     onApplyFilters(filters);
   };
   
   const handleDownload = () => {
-      if (!currentFilters) {
+      const filtersToExport = {
+        type: searchParams.get('type') as ReportFilterValues['type'] | null,
+        year: parseInt(searchParams.get('year') || '0'),
+        month: parseInt(searchParams.get('month') || '0'),
+        dateRange: (() => {
+            const fromParam = searchParams.get('from');
+            const toParam = searchParams.get('to');
+            if(fromParam) return { from: parseISO(fromParam), to: toParam ? parseISO(toParam) : undefined };
+            return undefined;
+        })()
+      };
+      
+      if (!filtersToExport.type) {
           toast({ title: "Nenhum relatório gerado", description: "Aplique um filtro primeiro para poder exportar os dados.", variant: "destructive"});
           return;
       }
+
       startExportTransition(async () => {
         try {
-            const result = await exportReportAction(currentFilters);
+            const result = await exportReportAction(filtersToExport as ReportFilterValues);
 
             if (result.csvContent) {
                 const blob = new Blob([result.csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -93,6 +154,18 @@ export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps)
             });
         }
       });
+  }
+
+  if (!isClient) {
+      return (
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 p-4 border rounded-lg bg-card items-center animate-pulse">
+              <div className="h-10 bg-muted rounded-md w-full sm:w-auto sm:min-w-[180px]"></div>
+              <div className="h-10 bg-muted rounded-md w-full sm:w-auto flex-1"></div>
+              <div className="h-10 bg-muted rounded-md w-full sm:w-auto sm:w-32"></div>
+              <div className="flex-grow"></div>
+              <div className="h-10 bg-muted rounded-md w-full sm:w-auto sm:w-36"></div>
+          </div>
+      )
   }
 
   return (
@@ -192,7 +265,7 @@ export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps)
 
       <div className="flex-grow"></div>
       
-      <Button onClick={handleDownload} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !currentFilters}>
+      <Button onClick={handleDownload} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !searchParams.get('type')}>
           {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
           {isExporting ? 'Exportando...' : 'Baixar CSV'}
       </Button>
