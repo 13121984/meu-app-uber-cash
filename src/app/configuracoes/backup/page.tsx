@@ -4,11 +4,10 @@ import { DatabaseBackup } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { getBackupData, getRestorePointData } from '@/services/backup.service';
+import { getBackupData } from '@/services/backup.service';
 
 export default async function BackupPage() {
   const initialBackupData = await getBackupData();
-  const initialRestorePointData = await getRestorePointData();
   
   return (
     <div className="space-y-6">
@@ -27,7 +26,7 @@ export default async function BackupPage() {
         </div>
       </div>
       
-      <BackupManager initialBackupData={initialBackupData} initialRestorePointData={initialRestorePointData} />
+      <BackupManager initialBackupData={initialBackupData} />
     </div>
   );
 }
