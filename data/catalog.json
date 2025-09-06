@@ -19,6 +19,31 @@
       "name": "Ganhos Extras",
       "active": true,
       "isDefault": true
+    },
+    {
+      "name": "Uber Confort",
+      "active": false,
+      "isDefault": false
+    },
+    {
+      "name": "Uber Black",
+      "active": false,
+      "isDefault": false
+    },
+    {
+      "name": "MD Drivers",
+      "active": true,
+      "isDefault": false
+    },
+    {
+      "name": "In Driver",
+      "active": true,
+      "isDefault": false
+    },
+    {
+      "name": "Outros",
+      "active": true,
+      "isDefault": false
     }
   ],
   "fuel": [
