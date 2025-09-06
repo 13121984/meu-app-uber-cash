@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useTransition } from 'react';
+import React, { useState, useEffect, useTransition, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -21,10 +21,22 @@ export function MaintenanceFilters() {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  // State for the inputs
-  const [query, setQuery] = useState('');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  
+  // State for the inputs, initialized from URL search params
+  const [query, setQuery] = useState(searchParams.get('query') || '');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const fromParam = searchParams.get('from');
+    const toParam = searchParams.get('to');
+    if (fromParam) {
+      const fromDate = parseISO(fromParam);
+      const toDate = toParam ? parseISO(toParam) : undefined;
+      if (isValid(fromDate)) {
+        return { from: fromDate, to: isValid(toDate) ? toDate : undefined };
+      }
+    }
+    return undefined;
+  });
+
+  // Debounce the query input to avoid excessive URL updates
   const [debouncedQuery] = useDebounce(query, 500);
 
   // This state ensures that client-side-only logic runs after hydration
@@ -32,17 +44,16 @@ export function MaintenanceFilters() {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
+  
   // This effect synchronizes the URL with the component's state
-  useEffect(() => {
-    if (!isClient) return;
-
+  const updateURL = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (debouncedQuery) {
       params.set('query', debouncedQuery);
     } else {
       params.delete('query');
     }
+
     if (dateRange?.from) {
       params.set('from', format(dateRange.from, 'yyyy-MM-dd'));
       if (dateRange.to) {
@@ -54,50 +65,37 @@ export function MaintenanceFilters() {
       params.delete('from');
       params.delete('to');
     }
-
+    
     startTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`);
+        // Using router.replace to avoid adding unnecessary entries to browser history
+        router.replace(`${pathname}?${params.toString()}`);
     });
 
-  }, [debouncedQuery, dateRange, pathname, router, searchParams, isClient]);
+  }, [debouncedQuery, dateRange, pathname, router, searchParams]);
 
-  // This effect synchronizes the component's state with the URL on initial load
   useEffect(() => {
-    const queryParam = searchParams.get('query');
-    const fromParam = searchParams.get('from');
-    const toParam = searchParams.get('to');
-    
-    setQuery(queryParam || '');
-
-    if (fromParam) {
-        try {
-            const fromDate = parseISO(fromParam);
-            const toDate = toParam ? parseISO(toParam) : undefined;
-             if (isValid(fromDate)) {
-              setDateRange({ from: fromDate, to: isValid(toDate) ? toDate : undefined });
-            }
-        } catch(e) {
-            // Invalid date, do nothing
-        }
+    // Only run this logic on the client
+    if (isClient) {
+      updateURL();
     }
-  }, [searchParams]);
+  }, [isClient, updateURL]);
 
 
   const handleClearFilters = () => {
     setQuery('');
     setDateRange(undefined);
-  }
+  };
 
-  const hasActiveFilters = !!(query || dateRange?.from);
+  const hasActiveFilters = !!(searchParams.get('query') || searchParams.get('from'));
 
-  // Prevents rendering on the server and avoids hydration mismatch
+  // Prevents rendering on the server and avoids hydration mismatch by returning null until client is mounted
   if (!isClient) {
     return null;
   }
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg bg-card items-center">
-      <div className="relative flex-1">
+      <div className="relative flex-1 w-full">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Pesquisar por descrição..."
