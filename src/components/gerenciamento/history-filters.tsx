@@ -17,7 +17,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 interface HistoryFiltersProps {
   isPending: boolean;
   startTransition: TransitionStartFunction;
-  onFiltersChange: (filters: ReportFilterValues) => void;
+  onFiltersChange?: (filters: ReportFilterValues) => void;
   initialFilters?: ReportFilterValues;
 }
 
@@ -59,7 +59,9 @@ export function HistoryFilters({ isPending, startTransition, onFiltersChange, in
     
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}`);
-      onFiltersChange(newFilters);
+      if (onFiltersChange) {
+        onFiltersChange(newFilters);
+      }
     });
 
   }, [filterType, year, month, dateRange, pathname, router, startTransition, onFiltersChange]);
