@@ -30,8 +30,16 @@ export function BackupManager({ initialBackupData, initialRestorePointData }: Ba
   const isAnyActionPending = isProcessing || isRestoring || isCreatingRestorePoint;
 
   const formatDateForDisplay = (dateString: string) => {
+    if (!dateString) return "Data inválida";
     try {
-      return format(parseISO(dateString), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+      // Using a locale-sensitive format that's robust
+      return new Date(dateString).toLocaleString('pt-BR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     } catch (e) {
       return "Data inválida";
     }
