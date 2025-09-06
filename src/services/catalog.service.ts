@@ -20,15 +20,21 @@ const dataFilePath = path.join(process.cwd(), 'data', 'catalog.json');
 
 const defaultCatalog: Catalog = {
   earnings: [
-    { name: "Uber Cash", active: true, isDefault: true },
     { name: "99 Pop", active: true, isDefault: true },
+    { name: "Uber Cash", active: true, isDefault: true },
     { name: "Particular", active: true, isDefault: true },
     { name: "Ganhos Extras", active: true, isDefault: true },
+    { name: "MD Drivers", active: true, isDefault: false },
+    { name: "In Driver", active: true, isDefault: false },
+    { name: "Outros", active: true, isDefault: false },
+    { name: "Uber Confort", active: false, isDefault: false },
+    { name: "Uber Black", active: false, isDefault: false },
   ],
   fuel: [
+    { name: "GNV", active: true, isDefault: true },
     { name: "Etanol", active: true, isDefault: true },
     { name: "Gasolina Aditivada", active: true, isDefault: true },
-    { name: "GNV", active: true, isDefault: true },
+    { name: "Gasolina Comum", active: true, isDefault: false },
   ]
 };
 
@@ -49,40 +55,46 @@ export async function getCatalog(): Promise<Catalog> {
   const fileContent = await fs.readFile(dataFilePath, 'utf8');
   const data = JSON.parse(fileContent);
   
-  // Merge with default to ensure all default items are present
+  // Merge with default to ensure all default items are present and ordered
   const mergedEarnings = [...defaultCatalog.earnings];
   const mergedFuel = [...defaultCatalog.fuel];
 
-  const defaultEarningNames = new Set(defaultCatalog.earnings.map(i => i.name));
-  const defaultFuelNames = new Set(defaultCatalog.fuel.map(i => i.name));
-
   if (data.earnings && Array.isArray(data.earnings)) {
-    data.earnings.forEach((item: CatalogItem) => {
-        const existingIndex = mergedEarnings.findIndex(i => i.name === item.name);
-        if (existingIndex > -1) {
-            // Update existing default item with saved state
-            mergedEarnings[existingIndex].active = item.active;
-        } else if (!defaultEarningNames.has(item.name)) {
-            // Add custom item
-            mergedEarnings.push({ ...item, isDefault: false });
-        }
-    });
+      data.earnings.forEach((item: CatalogItem) => {
+          const existingIndex = mergedEarnings.findIndex(i => i.name === item.name);
+          if (existingIndex > -1) {
+              mergedEarnings[existingIndex] = { ...mergedEarnings[existingIndex], ...item };
+          } else {
+              mergedEarnings.push({ ...item, isDefault: false });
+          }
+      });
+  }
+
+  if (data.fuel && Array.isArray(data.fuel)) {
+      data.fuel.forEach((item: CatalogItem) => {
+          const existingIndex = mergedFuel.findIndex(i => i.name === item.name);
+          if (existingIndex > -1) {
+              mergedFuel[existingIndex] = { ...mergedFuel[existingIndex], ...item };
+          } else {
+              mergedFuel.push({ ...item, isDefault: false });
+          }
+      });
   }
   
-  if (data.fuel && Array.isArray(data.fuel)) {
-     data.fuel.forEach((item: CatalogItem) => {
-        const existingIndex = mergedFuel.findIndex(i => i.name === item.name);
-        if (existingIndex > -1) {
-            mergedFuel[existingIndex].active = item.active;
-        } else if (!defaultFuelNames.has(item.name)) {
-            mergedFuel.push({ ...item, isDefault: false });
-        }
-    });
-  }
+  const finalEarnings = data.earnings ? data.earnings.map((item: CatalogItem) => {
+    const defaultItem = defaultCatalog.earnings.find(d => d.name === item.name);
+    return { ...item, isDefault: !!defaultItem };
+  }) : defaultCatalog.earnings;
+
+  const finalFuel = data.fuel ? data.fuel.map((item: CatalogItem) => {
+    const defaultItem = defaultCatalog.fuel.find(d => d.name === item.name);
+    return { ...item, isDefault: !!defaultItem };
+  }) : defaultCatalog.fuel;
+
 
   return {
-      earnings: mergedEarnings,
-      fuel: mergedFuel
+      earnings: finalEarnings,
+      fuel: finalFuel
   };
 }
 
@@ -95,8 +107,10 @@ export async function saveCatalog(catalog: Catalog): Promise<{ success: boolean,
     await fs.writeFile(dataFilePath, JSON.stringify(catalog, null, 2), 'utf8');
     
     // Revalidate all relevant paths that might use this catalog data
-    revalidatePath('/configuracoes/catalogos');
+    revalidatePath('/configuracoes', 'layout');
     revalidatePath('/registrar', 'layout');
+    revalidatePath('/dashboard');
+    revalidatePath('/relatorios');
 
     return { success: true };
   } catch (error) {
