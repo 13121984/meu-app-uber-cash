@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from 'react';
@@ -68,13 +67,19 @@ export function ImportCard() {
                 }
 
                 const header = lines[0].split(',').map(h => h.trim());
-                if (JSON.stringify(header) !== JSON.stringify(CSV_HEADERS)) {
+                // Validação mais flexível do cabeçalho (ignora espaços extras e case)
+                const normalizedHeader = JSON.stringify(header.map(h => h.toLowerCase().trim()));
+                const normalizedExpectedHeader = JSON.stringify(CSV_HEADERS.map(h => h.toLowerCase().trim()));
+
+                if (normalizedHeader !== normalizedExpectedHeader) {
+                    console.error("Cabeçalho esperado:", CSV_HEADERS);
+                    console.error("Cabeçalho recebido:", header);
                     throw new Error("O cabeçalho do arquivo CSV está incorreto. Verifique as colunas e a ordem.");
                 }
 
                 const data: Record<string, string>[] = lines.slice(1).map(line => {
                     const values = line.split(',');
-                    return header.reduce((obj, nextKey, index) => {
+                    return CSV_HEADERS.reduce((obj, nextKey, index) => {
                         obj[nextKey] = values[index]?.trim() || '';
                         return obj;
                     }, {} as Record<string, string>);
@@ -114,11 +119,10 @@ export function ImportCard() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <Upload className="h-6 w-6 text-primary" />
-                    Importar e Exportar Dados
+                    Importar Dados por CSV
                 </CardTitle>
                 <CardDescription>
                     Faça o upload de um arquivo CSV com seu histórico para adicioná-lo ao aplicativo.
-                    Certifique-se de que o arquivo siga o formato especificado.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -158,9 +162,9 @@ export function ImportCard() {
                           <li>
                             <strong>Agrupamento por Data:</strong> O sistema agrupa múltiplas linhas com a mesma data (`AAAA-MM-DD`) em um único registro de dia de trabalho.
                           </li>
-                          <li>
-                            Campos como `km` e `hours` só precisam ser preenchidos uma vez por dia (o sistema usará o maior valor).
-                          </li>
+                           <li>
+                             <strong>Campos numéricos</strong> como `km` e `hours` devem usar ponto (`.`) como separador decimal (Ex: `120.5`).
+                           </li>
                           <li>
                             Você pode ter múltiplas linhas para o mesmo dia para registrar diferentes ganhos ou abastecimentos.
                           </li>

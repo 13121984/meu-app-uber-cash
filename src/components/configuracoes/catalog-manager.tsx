@@ -122,7 +122,7 @@ export function CatalogManager() {
                   <Skeleton className="h-8 w-1/3" />
                   <Skeleton className="h-4 w-2/3" />
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-6">
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-8 w-full" />
                   <Skeleton className="h-8 w-full" />
@@ -133,14 +133,20 @@ export function CatalogManager() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-headline">
-          <BookCopy className="h-6 w-6 text-primary" />
-          Gerenciar Catálogos
-        </CardTitle>
-        <CardDescription>
-          Adicione ou remova categorias de ganhos e tipos de combustível para personalizar os formulários de registro.
-        </CardDescription>
+      <CardHeader className="flex-row justify-between items-center">
+        <div>
+            <CardTitle className="flex items-center gap-2 font-headline">
+            <BookCopy className="h-6 w-6 text-primary" />
+            Gerenciar Catálogos
+            </CardTitle>
+            <CardDescription>
+            Adicione ou remova categorias para personalizar os formulários.
+            </CardDescription>
+        </div>
+         <Button onClick={handleSaveChanges} disabled={isSaving}>
+            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Salvar Catálogos
+        </Button>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -160,12 +166,6 @@ export function CatalogManager() {
                 onAdd={() => handleAddCategory('fuel')}
                 onRemove={(cat) => handleRemoveCategory('fuel', cat)}
             />
-        </div>
-        <div className="flex justify-end">
-            <Button onClick={handleSaveChanges} disabled={isSaving}>
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Salvar Alterações nos Catálogos
-            </Button>
         </div>
       </CardContent>
     </Card>

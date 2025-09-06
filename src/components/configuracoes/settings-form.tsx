@@ -37,7 +37,7 @@ function SettingsFormInternal({ initialSettings, initialFuelTypes }: { initialSe
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { control, handleSubmit, formState: { errors } } = useForm<Settings>({
+  const { control, handleSubmit, formState: { errors }, watch } = useForm<Settings>({
     resolver: zodResolver(settingsSchema),
     defaultValues: initialSettings, // Inicializa o formulário com os dados já carregados
   });
@@ -64,107 +64,95 @@ function SettingsFormInternal({ initialSettings, initialFuelTypes }: { initialSe
   
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
-        </div>
+        
+        <Card>
+            <CardHeader className="flex-row justify-between items-center">
+                <div>
+                    <CardTitle className="flex items-center gap-2 font-headline"><Paintbrush className="h-6 w-6 text-primary" />Preferências Gerais</CardTitle>
+                    <CardDescription>Personalize o visual e as notificações do aplicativo.</CardDescription>
+                </div>
+                <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {isSubmitting ? 'Salvando...' : 'Salvar Preferências'}
+                </Button>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Tema */}
+                    <div className="space-y-2">
+                        <Label>Tema do Aplicativo</Label>
+                        <Controller
+                            name="theme"
+                            control={control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione um tema..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {themes.map(theme => (
+                                            <SelectItem key={theme.value} value={theme.value}>
+                                                <div className="flex items-center gap-2">
+                                                    <theme.icon className="h-4 w-4" />
+                                                    {theme.label}
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                    </div>
+                    {/* Combustível Padrão */}
+                     <div className="space-y-2">
+                        <Label>Tipo de Combustível Padrão</Label>
+                        <Controller
+                            name="defaultFuelType"
+                            control={control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione um tipo..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {initialFuelTypes.map(type => (
+                                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                    </div>
+                     {/* Email de Backup */}
+                     <div className="space-y-2">
+                        <Label htmlFor="backupEmail">Email para Backup (Google Drive)</Label>
+                        <Controller
+                            name="backupEmail"
+                            control={control}
+                            render={({ field }) => <Input id="backupEmail" placeholder="seu-email@gmail.com" {...field} />}
+                        />
+                        {errors.backupEmail && <p className="text-sm text-destructive">{errors.backupEmail.message}</p>}
+                    </div>
+                </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline"><Paintbrush className="h-6 w-6 text-primary" />Aparência</CardTitle>
-                    <CardDescription>Personalize o visual do aplicativo.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Tema do Aplicativo</Label>
-                            <Controller
-                                name="theme"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecione um tema..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {themes.map(theme => (
-                                                <SelectItem key={theme.value} value={theme.value}>
-                                                    <div className="flex items-center gap-2">
-                                                        <theme.icon className="h-4 w-4" />
-                                                        {theme.label}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                     {/* Notificações */}
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label>Habilitar Notificações de Manutenção</Label>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline"><Database className="h-6 w-6 text-primary" />Backup</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <Label>Backup Automático Semanal</Label>
-                            </div>
-                            <Controller name="weeklyBackup" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                        <Controller name="maintenanceNotifications" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
+                    </div>
+                    {/* Backup Semanal */}
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                            <Label>Backup Automático Semanal</Label>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="backupEmail">Email para Backup (Google Drive)</Label>
-                            <Controller
-                                name="backupEmail"
-                                control={control}
-                                render={({ field }) => <Input id="backupEmail" placeholder="seu-email@gmail.com" {...field} />}
-                            />
-                            {errors.backupEmail && <p className="text-sm text-destructive">{errors.backupEmail.message}</p>}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-            
-            <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline"><Bell className="h-6 w-6 text-primary" />Notificações e Padrões</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <Label>Habilitar Notificações de Manutenção</Label>
-                            </div>
-                            <Controller name="maintenanceNotifications" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Tipo de Combustível Padrão</Label>
-                            <Controller
-                                name="defaultFuelType"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecione um tipo..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {initialFuelTypes.map(type => (
-                                                <SelectItem key={type} value={type}>{type}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                        <Controller name="weeklyBackup" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     </form>
   );
 }
@@ -202,16 +190,12 @@ export function SettingsForm() {
         return (
             <Card>
                 <CardHeader>
-                    <Skeleton className="h-8 w-1/2" />
+                    <Skeleton className="h-8 w-1/3" />
+                    <Skeleton className="h-4 w-2/3" />
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6">
-                    <div className="space-y-4">
-                        <Skeleton className="h-24 w-full" />
-                        <Skeleton className="h-24 w-full" />
-                    </div>
-                     <div className="space-y-4">
-                        <Skeleton className="h-36 w-full" />
-                    </div>
+                <CardContent className="space-y-4 pt-6">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
                 </CardContent>
             </Card>
         );
