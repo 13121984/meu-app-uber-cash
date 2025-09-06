@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Dispatch } from 'react';
@@ -58,7 +59,7 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
             <CircleDollarSign className="h-6 w-6 text-green-600"/>
             <span>Ganhos do Dia</span>
         </h2>
-        <Button size="sm" onClick={handleAddEarning}>
+        <Button size="sm" onClick={handleAddEarning} type="button">
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Ganho
         </Button>
       </div>
@@ -89,7 +90,8 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor={`trips-${index}`}>Nº de Viagens</Label>                   <div className="relative">
+                  <Label htmlFor={`trips-${index}`}>Nº de Viagens</Label>
+                   <div className="relative">
                     <Car className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
                     <Input
                       id={`trips-${index}`}
@@ -104,7 +106,8 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
                 </div>
               </div>
               <div>
-                <Label htmlFor={`amount-${index}`}>Valor Ganho</Label>                 <div className="relative">
+                <Label htmlFor={`amount-${index}`}>Valor Ganho</Label>
+                <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
                     <Input
                       id={`amount-${index}`}
@@ -122,6 +125,7 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
                 size="sm"
                 className="w-full"
                 onClick={() => handleRemoveEarning(earning.id)}
+                type="button"
               >
                 <Trash2 className="mr-2 h-4 w-4" /> Remover
               </Button>
@@ -132,3 +136,5 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
     </div>
   );
 }
+
+    

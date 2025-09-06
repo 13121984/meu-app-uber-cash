@@ -1,19 +1,15 @@
 
+
 "use client";
 
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import type { Earning, FuelEntry } from './registration-wizard';
+import type { State } from './registration-wizard';
 import { cn } from '@/lib/utils';
 
 interface LivePreviewProps {
-  data: {
-    km: number;
-    hours: number;
-    earnings: Earning[];
-    fuelEntries: FuelEntry[];
-  };
+  data: State;
 }
 
 const StatItem = ({ label, value, className }: { label: string; value: string, className?: string }) => (
@@ -87,3 +83,5 @@ export function LivePreview({ data }: LivePreviewProps) {
     </Card>
   );
 }
+
+    

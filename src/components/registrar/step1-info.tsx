@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { Dispatch, useCallback, useMemo } from 'react';
@@ -52,9 +53,7 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
   };
   
   const handleTimeEntriesChange = useCallback((newTimeEntries: TimeEntry[]) => {
-      // First, update the timeEntries array in the state
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'timeEntries', value: newTimeEntries }});
-      // Then, calculate the new total hours based on the new array
       calculateAndDispatchHours(newTimeEntries, dispatch);
   }, [dispatch]);
 
@@ -72,8 +71,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
       handleTimeEntriesChange(updated);
   };
   
-  // A data só é desabilitada se for um novo registro de HOJE.
-  // Se for "other-day" ou qualquer edição, a data pode ser alterada.
   const isDateDisabled = registrationType === 'today' && !isEditing;
   const dateString = data.date && isValid(data.date) ? format(data.date, 'dd/MM/yyyy') : '';
   const hasTimeEntries = useMemo(() => data.timeEntries && data.timeEntries.length > 0, [data.timeEntries]);
@@ -108,7 +105,14 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
           <Label htmlFor="km">KM Rodados</Label>
           <div className="relative">
             <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-500" />
-            <Input id="km" type="number" placeholder="Ex: 150" value={data.km === 0 ? '' : data.km} onChange={(e) => handleFieldChange('km', parseFloat(e.target.value) || 0)} className="pl-10"/>
+            <Input 
+                id="km" 
+                type="text" 
+                inputMode="decimal"
+                placeholder="Ex: 150" 
+                value={String(data.km || '').replace('.', ',')} 
+                onChange={(e) => handleFieldChange('km', parseFloat(e.target.value.replace(',', '.')) || 0)} 
+                className="pl-10"/>
           </div>
         </div>
         
@@ -119,8 +123,9 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
             <Input 
                 id="hours" 
                 type="text" 
-                placeholder="Ex: 8.5" 
-                value={data.hours ? data.hours.toFixed(2).replace('.', ',') : ''} 
+                inputMode="decimal"
+                placeholder="Ex: 8,5" 
+                value={data.hours ? String(data.hours.toFixed(2)).replace('.', ',') : ''} 
                 onChange={(e) => handleFieldChange('hours', parseFloat(e.target.value.replace(',', '.')) || 0)} 
                 className="pl-10" 
                 disabled={hasTimeEntries}
@@ -159,3 +164,5 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     </div>
   );
 }
+
+    

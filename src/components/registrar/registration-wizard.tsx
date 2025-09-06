@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useReducer, useEffect } from 'react';
@@ -11,12 +12,10 @@ import { Step3Fuel } from './step3-fuel';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { addOrUpdateWorkDay, deleteWorkDayEntry } from '@/services/work-day.service';
-import { addMaintenance } from '@/services/maintenance.service';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
 import { parseISO, startOfDay } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
-import { Separator } from '../ui/separator';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -50,7 +49,6 @@ export type State = {
   timeEntries: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
-  maintenance: { description: string; amount: number };
 };
 
 type Action =
@@ -75,7 +73,6 @@ const getInitialState = (initialData?: Partial<WorkDay>, registrationType: 'toda
         timeEntries: (initialData as any)?.timeEntries?.map((t: TimeEntry) => ({...t})) || [],
         earnings: initialData?.earnings?.map(e => ({...e})) || [],
         fuelEntries: initialData?.fuelEntries?.map(f => ({...f})) || [],
-        maintenance: initialData?.maintenance ? {...initialData.maintenance} : { description: '', amount: 0 },
     };
 };
 
@@ -94,9 +91,9 @@ function reducer(state: State, action: Action): State {
 }
 
 const steps = [
-  { id: 1, title: 'Informações do Dia' },
+  { id: 1, title: 'Informações' },
   { id: 2, title: 'Ganhos' },
-  { id: 3, title: 'Abastecimentos' },
+  { id: 3, title: 'Combustível' },
 ];
 
 interface RegistrationWizardProps {
@@ -189,18 +186,10 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     }
     
     try {
-      const { maintenance, ...workDayData } = state;
+      const { ...workDayData } = state;
       const isActuallyEditing = !!workDayData.id && !['today', 'other-day'].includes(workDayData.id);
       
       const result = await addOrUpdateWorkDay(workDayData as WorkDay);
-      
-      if (result.success && maintenance.amount > 0 && maintenance.description) {
-          await addMaintenance({
-              date: state.date,
-              description: maintenance.description,
-              amount: maintenance.amount,
-          });
-      }
       
       if (result.success) {
         if (!isActuallyEditing) {
@@ -213,16 +202,14 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         
         if (onSuccess) {
             onSuccess();
-        } else if (registrationType === 'other-day' && !isEditing) {
-            // Se registrou "outro dia", limpa o formulário para um novo registro, mas mantém na página
-            dispatch({ type: 'RESET_STATE', payload: { registrationType: 'other-day' }});
+        } else {
+            // Cancelar edição
+            setEntryBeingEdited(null);
+            // Limpa o formulário para um novo registro
+            dispatch({ type: 'RESET_STATE', payload: { registrationType }});
             setCurrentStep(1);
             setCompletedSteps([]);
-        }
-        else {
-            router.refresh();
-             // Limpa o formulário e cancela o modo de edição
-            setEntryBeingEdited(null);
+             router.refresh();
         }
 
       } else {
@@ -253,19 +240,17 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
 
   const handleDeleteAllEntries = async () => {
     setIsDeleting(true);
-    // Cria uma lista de promessas, uma para cada exclusão
     const deletePromises = existingEntries.map(entry => deleteWorkDayEntry(entry.id));
     
     try {
-      // Executa todas as promessas de exclusão
       await Promise.all(deletePromises);
       toast({ title: "Sucesso!", description: "Todos os períodos de hoje foram removidos." });
-      router.refresh(); // Recarrega a página para refletir as mudanças
+      router.refresh(); 
     } catch (error) {
       toast({ title: "Erro!", description: "Não foi possível apagar todos os períodos.", variant: "destructive" });
     } finally {
       setIsDeleting(false);
-      setIsAlertOpen(false); // Fecha o diálogo de alerta
+      setIsAlertOpen(false); 
     }
   };
 
@@ -287,7 +272,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="flex flex-col space-y-6 lg:col-span-2">
         
-        {/* Seção de Registros Existentes */}
         {registrationType === 'today' && existingEntries.length > 0 && !entryBeingEdited && (
             <Card>
                 <CardHeader>
@@ -324,9 +308,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
             </Card>
         )}
 
-        {/* Wizard de Registro */}
         <div className="flex flex-col space-y-6">
-            {/* Stepper */}
             <div className="hidden sm:flex items-center justify-between p-4 border rounded-lg">
             {steps.map((step, index) => (
                 <React.Fragment key={step.id}>
@@ -351,11 +333,9 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
             ))}
             </div>
             
-
-            {/* Step Content */}
             <Card className="flex-1 flex flex-col">
             <CardHeader>
-                <CardTitle className="font-headline">{entryBeingEdited ? 'Editando Período' : 'Novo Período'}</CardTitle>
+                <CardTitle className="font-headline">{entryBeingEdited ? 'Editando Período' : (isEditing ? 'Editar Registro' : 'Novo Período')}</CardTitle>
             </CardHeader>
             <ScrollArea className="h-[60vh] overflow-y-auto">
                 <CardContent className="p-4 sm:p-6">
@@ -364,7 +344,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
                 </ScrollArea>
             </Card>
             
-            {/* Navigation */}
             <div className="flex justify-between items-center">
                 {entryBeingEdited ? (
                     <Button variant="outline" onClick={() => setEntryBeingEdited(null)} disabled={isSubmitting}>
@@ -392,7 +371,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         </div>
       </div>
 
-      {/* Live Preview */}
       <div className="lg:col-span-1">
         <LivePreview data={livePreviewData as State} />
       </div>
@@ -420,3 +398,5 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     </>
   );
 }
+
+    
