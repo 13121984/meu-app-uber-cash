@@ -5,20 +5,29 @@ import { useState, useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { Download, Loader2, CheckCircle, AlertTriangle, HardDriveUpload } from 'lucide-react';
+import { Download, Loader2, CheckCircle, AlertTriangle, HardDriveUpload, History, UploadCloud, RefreshCw } from 'lucide-react';
 import { runBackupAction } from '@/ai/flows/backup-flow';
 import type { BackupData } from '@/services/backup.service';
-import { getBackupForDownload } from '@/services/backup.service';
+import { getBackupForDownload, createRestorePoint, restoreFromPoint, getRestorePointData, type RestorePointData } from '@/services/backup.service';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 interface BackupManagerProps {
     initialBackupData: BackupData;
+    initialRestorePointData: RestorePointData;
 }
 
-export function BackupManager({ initialBackupData }: BackupManagerProps) {
+export function BackupManager({ initialBackupData, initialRestorePointData }: BackupManagerProps) {
   const [backupData, setBackupData] = useState(initialBackupData);
+  const [restorePointData, setRestorePointData] = useState(initialRestorePointData);
+  
   const [isProcessing, startTransition] = useTransition();
+  const [isRestoring, startRestoreTransition] = useTransition();
+  const [isCreatingRestorePoint, startCreateRestorePointTransition] = useTransition();
+
+  const isAnyActionPending = isProcessing || isRestoring || isCreatingRestorePoint;
   
   const handleGenerateBackup = () => {
     startTransition(async () => {
@@ -61,40 +70,133 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
           }
       });
   }
+
+  const handleCreateRestorePoint = () => {
+      startCreateRestorePointTransition(async () => {
+          const result = await createRestorePoint();
+           if (result.success) {
+                toast({
+                    title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Ponto de Restauração Criado!</span></div>,
+                    description: "O estado atual dos seus dados foi salvo.",
+                });
+                setRestorePointData({ lastRestoreDate: result.date });
+            } else {
+                toast({
+                    title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro</span></div>,
+                    description: result.error || "Não foi possível criar o ponto de restauração.",
+                    variant: 'destructive'
+                });
+            }
+      });
+  };
+
+  const handleRestoreFromPoint = () => {
+      startRestoreTransition(async () => {
+          const result = await restoreFromPoint();
+           if (result.success) {
+                toast({
+                    title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Dados Restaurados!</span></div>,
+                    description: "Seus dados foram revertidos para o ponto de restauração salvo.",
+                });
+            } else {
+                toast({
+                    title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro na Restauração</span></div>,
+                    description: result.error || "Não foi possível restaurar os dados.",
+                    variant: 'destructive'
+                });
+            }
+      })
+  }
   
   return (
-    <Card>
-        <CardHeader>
-            <CardTitle className="font-headline text-lg">Gerenciador de Backup</CardTitle>
-            <CardDescription>
-                O sistema mantém apenas o backup mais recente. Gerar um novo backup irá sobrescrever o anterior.
-            </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="p-6 rounded-lg bg-secondary flex flex-col md:flex-row items-center justify-between gap-4">
-                <div>
-                    <h3 className="font-semibold">Último Backup</h3>
-                    {backupData.lastBackupDate ? (
-                        <p className="text-sm text-muted-foreground">
-                            {format(parseISO(backupData.lastBackupDate), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
-                        </p>
-                    ) : (
-                        <p className="text-sm text-muted-foreground">Nenhum backup foi gerado ainda.</p>
+    <div className="space-y-6">
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline text-lg flex items-center gap-2">
+                    <History className="w-5 h-5 text-primary" />
+                    Ponto de Restauração Interno
+                </CardTitle>
+                <CardDescription>
+                    Crie um "snapshot" interno dos seus dados para poder reverter a um estado anterior. Esta ação sobrescreve o ponto anterior.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="p-4 rounded-lg bg-secondary flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h3 className="font-semibold">Último Ponto Salvo</h3>
+                        {restorePointData.lastRestoreDate ? (
+                            <p className="text-sm text-muted-foreground">
+                                {format(parseISO(restorePointData.lastRestoreDate), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+                            </p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Nenhum ponto de restauração foi criado ainda.</p>
+                        )}
+                    </div>
+                     <div className="flex flex-col sm:flex-row gap-2">
+                        <Button onClick={handleCreateRestorePoint} variant="outline" disabled={isAnyActionPending}>
+                            {isCreatingRestorePoint ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <RefreshCw className="mr-2 h-4 w-4"/>}
+                            {isCreatingRestorePoint ? 'Criando...' : 'Criar/Atualizar Ponto'}
+                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" disabled={!restorePointData.lastRestoreDate || isAnyActionPending}>
+                                    {isRestoring ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <UploadCloud className="mr-2 h-4 w-4"/>}
+                                    Restaurar Dados
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Esta ação não pode ser desfeita. Todos os seus dados de trabalho e manutenção atuais serão **permanentemente apagados** e substituídos pelos dados do ponto de restauração.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleRestoreFromPoint} className="bg-destructive hover:bg-destructive/80">
+                                        Sim, restaurar agora
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline text-lg">Backup Externo (CSV)</CardTitle>
+                <CardDescription>
+                    O sistema mantém apenas o backup mais recente. Gerar um novo backup irá sobrescrever o anterior.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="p-6 rounded-lg bg-secondary flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h3 className="font-semibold">Último Backup</h3>
+                        {backupData.lastBackupDate ? (
+                            <p className="text-sm text-muted-foreground">
+                                {format(parseISO(backupData.lastBackupDate), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+                            </p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Nenhum backup foi gerado ainda.</p>
+                        )}
+                    </div>
+                    {backupData.lastBackupDate && (
+                        <Button onClick={handleDownloadBackup} variant="outline" disabled={isAnyActionPending}>
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4"/>}
+                            Baixar Último Backup
+                        </Button>
                     )}
                 </div>
-                {backupData.lastBackupDate && (
-                    <Button onClick={handleDownloadBackup} variant="outline" disabled={isProcessing}>
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4"/>}
-                        Baixar Último Backup
-                    </Button>
-                )}
-            </div>
 
-            <Button onClick={handleGenerateBackup} size="lg" className="w-full" disabled={isProcessing}>
-                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <HardDriveUpload className="mr-2 h-4 w-4"/>}
-                {isProcessing ? 'Processando...' : 'Gerar Novo Backup Agora'}
-            </Button>
-        </CardContent>
-    </Card>
+                <Button onClick={handleGenerateBackup} size="lg" className="w-full" disabled={isAnyActionPending}>
+                    {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <HardDriveUpload className="mr-2 h-4 w-4"/>}
+                    {isProcessing ? 'Processando...' : 'Gerar Novo Backup CSV'}
+                </Button>
+            </CardContent>
+        </Card>
+    </div>
   );
 }
