@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useTransition, useEffect } from "react"
-import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Wrench, BarChart3, GripVertical, Loader2 } from "lucide-react"
+import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Wrench, BarChart3, GripVertical, Loader2, BarChart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatsCard } from "./stats-card"
@@ -72,30 +72,17 @@ interface DashboardClientProps {
 type Period = "hoje" | "semana" | "mes"
 
 export function DashboardClient({ initialData }: DashboardClientProps) {
-  const [period, setPeriod] = useState<Period>("hoje")
-  const [data, setData] = useState<Partial<DashboardData>>(initialData);
+  const [period, setPeriod] = useState<Period | null>(null);
+  const [data, setData] = useState<Partial<DashboardData>>({});
   const [isLoading, startTransition] = useTransition();
-
-  useEffect(() => {
-    // This effect now fetches data for the default period ("hoje") after the component mounts.
-    // This makes the initial page load faster.
-    startTransition(async () => {
-      const todayData = await getPeriodData('hoje');
-      setData(prevData => ({ ...prevData, hoje: todayData }));
-    });
-  }, []); // The empty dependency array ensures this runs only once on mount.
 
   const handlePeriodChange = (newPeriod: Period) => {
     setPeriod(newPeriod);
-    if (!data[newPeriod]) {
-      startTransition(async () => {
-        const periodData = await getPeriodData(newPeriod);
-        setData(prevData => ({ ...prevData, [newPeriod]: periodData }));
-      });
-    }
+    startTransition(async () => {
+      const periodData = await getPeriodData(newPeriod);
+      setData(prevData => ({ ...prevData, [newPeriod]: periodData }));
+    });
   };
-
-  const currentData = data[period];
 
   const periodMap = {
       hoje: "Hoje",
@@ -103,41 +90,29 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       mes: "Este Mês"
   }
   
-  return (
-    <div className="space-y-8">
-      <div className="text-center w-full">
-        <h1 className="text-4xl font-bold font-headline">Painel de Performance</h1>
-        <p className="text-muted-foreground">Resumo de {periodMap[period]}</p>
-      </div>
+  const currentData = period ? data[period] : null;
+  const currentPeriodName = period ? periodMap[period] : 'Nenhum período selecionado';
 
-       <Card>
-          <CardHeader>
-              <CardTitle className="font-headline text-lg">Filtrar Período</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-center gap-2">
-             {(["hoje", "semana", "mes"] as Period[]).map(p => (
-                 <Button 
-                    key={p} 
-                    variant={period === p ? "default" : "secondary"}
-                    onClick={() => handlePeriodChange(p)}
-                    className={cn(
-                        "rounded-full transition-all",
-                        period === p ? "bg-primary text-primary-foreground" : "bg-card text-foreground"
-                    )}
-                >
-                    {periodMap[p]}
-                </Button>
-            ))}
-          </CardContent>
-      </Card>
-      
-      {isLoading && (
-          <div className="flex justify-center items-center h-96">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          </div>
-      )}
+  const renderContent = () => {
+      if(isLoading) {
+          return (
+              <div className="flex justify-center items-center h-96">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              </div>
+          );
+      }
 
-      {!isLoading && currentData && (
+      if(!currentData) {
+          return (
+              <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed bg-card border-border">
+                  <BarChart className="w-16 h-16 text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold">Selecione um Período</h2>
+                  <p className="text-muted-foreground">Escolha uma das opções acima para ver seu resumo.</p>
+              </Card>
+          )
+      }
+
+      return (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <StatsCard title="Lucro Líquido" value={currentData.totalLucro} icon={DollarSign} isCurrency iconBg="bg-green-500/20" iconColor="text-green-400" />
@@ -154,7 +129,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
           <Card>
               <CardHeader>
-                  <CardTitle className="font-headline text-lg">Meta de Lucro ({periodMap[period]})</CardTitle>
+                  <CardTitle className="font-headline text-lg">Meta de Lucro ({periodMap[period!]})</CardTitle>
               </CardHeader>
               <CardContent>
                 <GoalProgress progress={(currentData.meta.target > 0 ? (currentData.totalLucro / currentData.meta.target) * 100 : 0)} target={currentData.meta.target} current={currentData.totalLucro} />
@@ -168,7 +143,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               <CardHeader>
                   <CardTitle className="font-headline text-lg flex items-center gap-2">
                     <BarChart3 className="w-6 h-6 text-primary" />
-                    Análise por Categoria ({periodMap[period]})
+                    Análise por Categoria ({periodMap[period!]})
                   </CardTitle>
                   <CardDescription>
                     Detalhes sobre o desempenho das suas corridas por categoria.
@@ -204,7 +179,40 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                 </CardContent>
             </Card>
           </>
-      )}
+      )
+  }
+  
+  return (
+    <div className="space-y-8">
+      <div className="text-center w-full">
+        <h1 className="text-4xl font-bold font-headline">Painel de Performance</h1>
+        <p className="text-muted-foreground">Resumo de {currentPeriodName}</p>
+      </div>
+
+       <Card>
+          <CardHeader>
+              <CardTitle className="font-headline text-lg">Filtrar Período</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center gap-2">
+             {(["hoje", "semana", "mes"] as Period[]).map(p => (
+                 <Button 
+                    key={p} 
+                    variant={period === p ? "default" : "secondary"}
+                    onClick={() => handlePeriodChange(p)}
+                    disabled={isLoading}
+                    className={cn(
+                        "rounded-full transition-all",
+                        period === p ? "bg-primary text-primary-foreground" : "bg-card text-foreground"
+                    )}
+                >
+                    {periodMap[p]}
+                </Button>
+            ))}
+          </CardContent>
+      </Card>
+      
+      {renderContent()}
+      
     </div>
   )
 }
