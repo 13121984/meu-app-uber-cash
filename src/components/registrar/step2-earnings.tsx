@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { Dispatch } from 'react';
@@ -16,11 +15,10 @@ type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any 
 interface Step2EarningsProps {
   data: State;
   dispatch: Dispatch<Action>;
+  categories: string[];
 }
 
-const categories = ['Uber Cash', '99 Pop', 'Particular', 'Ganhos Extras'];
-
-export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
+export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps) {
   const handleEarningsChange = (newEarnings: Earning[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: newEarnings } });
   };
@@ -107,8 +105,7 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
                     <Input
                       id={`amount-${index}`}
-                      type="text"
-                      inputMode="decimal"
+                      type="number"
                       step="0.01"
                       placeholder="Ex: 150.50"
                       value={earning.amount || ''}
@@ -133,5 +130,3 @@ export function Step2Earnings({ data, dispatch }: Step2EarningsProps) {
     </div>
   );
 }
-
-    

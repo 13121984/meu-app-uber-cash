@@ -19,11 +19,10 @@ type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any 
 interface Step3FuelProps {
   data: State;
   dispatch: Dispatch<Action>;
+  fuelTypes: string[];
 }
 
-const fuelTypes = ['Etanol', 'Gasolina Aditivada', 'GNV'];
-
-export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
+export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
 
   const handleFuelEntriesChange = useCallback((newEntries: FuelEntry[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'fuelEntries', value: newEntries } });
@@ -55,7 +54,7 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
     const updatedEntries = data.fuelEntries.map((f) => {
       if (f.id === id) {
         if (field === 'paid' || field === 'price') {
-            const numValue = typeof value === 'string' ? parseFloat(value) : value;
+            const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
             return { ...f, [field]: isNaN(numValue) ? 0 : numValue };
         }
         return { ...f, [field]: value };
@@ -69,7 +68,7 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
       const updatedEntries = data.maintenanceEntries.map((m) => {
           if (m.id === id) {
               if(field === 'amount') {
-                   const numValue = typeof value === 'string' ? parseFloat(value) : value;
+                   const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
                    return { ...m, [field]: isNaN(numValue) ? 0 : numValue };
               }
               return { ...m, [field]: value };
@@ -130,7 +129,6 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                             <Input
                             id={`fuel-paid-${index}`}
                             type="number"
-                            inputMode='decimal'
                             step="0.01"
                             placeholder="Ex: 50.00"
                             value={entry.paid || ''}
@@ -148,7 +146,6 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                                 <Input
                                 id={`fuel-price-${index}`}
                                 type="number"
-                                inputMode='decimal'
                                 step="0.01"
                                 placeholder="Ex: 5.50"
                                 value={entry.price || ''}
@@ -218,7 +215,6 @@ export function Step3Fuel({ data, dispatch }: Step3FuelProps) {
                                 <Input
                                     id={`maintenance-amount-${entry.id}`}
                                     type="number"
-                                    inputMode='decimal'
                                     step="0.01"
                                     placeholder="Ex: 120.50"
                                     value={entry.amount || ''}

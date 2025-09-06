@@ -16,8 +16,6 @@ import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
 import { parseISO, startOfDay } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { getCatalog } from '@/services/catalog.service';
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -75,7 +74,7 @@ const getInitialState = (initialData?: Partial<WorkDay>, registrationType: 'toda
         timeEntries: (initialData as any)?.timeEntries?.map((t: TimeEntry) => ({...t})) || [],
         earnings: initialData?.earnings?.map(e => ({...e})) || [],
         fuelEntries: initialData?.fuelEntries?.map(f => ({...f})) || [],
-        maintenanceEntries: [], // Começa vazio, pois a manutenção é tratada separadamente agora
+        maintenanceEntries: initialData?.maintenanceEntries || [],
     };
 };
 
@@ -96,7 +95,7 @@ function reducer(state: State, action: Action): State {
 const steps = [
   { id: 1, title: 'Informações' },
   { id: 2, title: 'Ganhos' },
-  { id: 3, title: 'Abastecimento' },
+  { id: 3, title: 'Combustível e Despesas' },
 ];
 
 interface RegistrationWizardProps {
@@ -127,11 +126,11 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData || undefined, registrationType));
   
-  // Novo estado para gerenciar os períodos existentes
   const [existingEntries, setExistingEntries] = useState<WorkDay[]>(propsExistingEntries || []);
   const [entryBeingEdited, setEntryBeingEdited] = useState<WorkDay | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [catalog, setCatalog] = useState<{ earnings: string[], fuel: string[] }>({ earnings: [], fuel: [] });
 
 
    useEffect(() => {
@@ -140,16 +139,22 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
    
    useEffect(() => {
     if (entryBeingEdited) {
-        // Se estamos editando uma entrada, preenchemos o formulário com seus dados
         dispatch({ type: 'SET_STATE', payload: getInitialState(entryBeingEdited, registrationType) });
-        setCompletedSteps([1,2,3]); // Marcamos todos os passos como "completos" para facilitar a edição
+        setCompletedSteps([1,2,3]);
     } else {
-        // Se não, resetamos para um novo registro
         const dateToUse = registrationType === 'today' ? startOfDay(new Date()) : propsInitialData?.date;
-        dispatch({ type: 'SET_STATE', payload: getInitialState({ date: dateToUse }, registrationType) });
+        dispatch({ type: 'RESET_STATE', payload: { registrationType }});
         setCompletedSteps([]);
     }
    }, [entryBeingEdited, registrationType, propsInitialData]);
+   
+   useEffect(() => {
+       const fetchCatalog = async () => {
+           const catalogData = await getCatalog();
+           setCatalog(catalogData);
+       }
+       fetchCatalog();
+   }, []);
 
 
   const handleNext = () => {
@@ -194,7 +199,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       
       const result = await addOrUpdateWorkDay(workDayData as WorkDay);
 
-      // Salva as despesas de manutenção separadamente
       if (maintenanceEntries.length > 0) {
           for (const maintenance of maintenanceEntries) {
               if (maintenance.description && maintenance.amount > 0) {
@@ -219,13 +223,11 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         if (onSuccess) {
             onSuccess();
         } else {
-            // Cancelar edição
             setEntryBeingEdited(null);
-            // Limpa o formulário para um novo registro
             dispatch({ type: 'RESET_STATE', payload: { registrationType }});
             setCurrentStep(1);
             setCompletedSteps([]);
-             router.refresh();
+            router.refresh();
         }
 
       } else {
@@ -274,8 +276,8 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const renderStep = () => {
     switch (currentStep) {
       case 1: return <Step1Info data={state} dispatch={dispatch} isEditing={!!entryBeingEdited || isEditing} registrationType={registrationType}/>;
-      case 2: return <Step2Earnings data={state} dispatch={dispatch} />;
-      case 3: return <Step3Fuel data={state} dispatch={dispatch} />;
+      case 2: return <Step2Earnings data={state} dispatch={dispatch} categories={catalog.earnings} />;
+      case 3: return <Step3Fuel data={state} dispatch={dispatch} fuelTypes={catalog.fuel} />;
       default: return null;
     }
   };
@@ -414,5 +416,3 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     </>
   );
 }
-
-    

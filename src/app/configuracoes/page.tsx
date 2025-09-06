@@ -1,9 +1,13 @@
+
 import { Settings } from 'lucide-react';
 import { getSettings } from '@/services/settings.service';
 import { SettingsForm } from '@/components/configuracoes/settings-form';
+import { getCatalog } from '@/services/catalog.service';
+import { CatalogManager } from '@/components/configuracoes/catalog-manager';
 
 export default async function ConfiguracoesPage() {
   const settings = await getSettings();
+  const catalog = await getCatalog();
 
   return (
     <div className="space-y-6">
@@ -13,10 +17,11 @@ export default async function ConfiguracoesPage() {
                 <Settings className="w-8 h-8 text-primary" />
                 Configurações
             </h1>
-            <p className="text-muted-foreground">Ajuste as preferências do aplicativo.</p>
+            <p className="text-muted-foreground">Ajuste as preferências e catálogos do aplicativo.</p>
         </div>
       </div>
       <SettingsForm initialData={settings} />
+      <CatalogManager initialData={catalog} />
     </div>
   );
 }

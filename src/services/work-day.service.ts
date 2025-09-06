@@ -27,10 +27,7 @@ export interface WorkDay {
   timeEntries: TimeEntry[];
   earnings: Earning[];
   fuelEntries: FuelEntry[];
-  maintenance?: { // Maintenance is now optional on the work-day itself
-    description: string;
-    amount: number;
-  };
+  maintenanceEntries: { id: number, description: string, amount: number }[];
 }
 
 export interface ImportedWorkDay {
@@ -93,6 +90,8 @@ async function readWorkDays(): Promise<WorkDay[]> {
     return (JSON.parse(fileContent) as any[]).map(day => ({
         ...day,
         date: parseISO(day.date),
+        // Certifica que maintenanceEntries existe, mesmo para dados antigos
+        maintenanceEntries: day.maintenanceEntries || [],
     }));
   } catch (error) {
     // If file doesn't exist or is empty
@@ -173,7 +172,7 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
                     timeEntries: [],
                     earnings: [],
                     fuelEntries: [],
-                    maintenance: { description: '', amount: 0 }
+                    maintenanceEntries: []
                 };
             }
 
@@ -199,14 +198,6 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
                     paid: parseFloat(row.fuel_paid) || 0,
                     price: parseFloat(row.fuel_price) || 0
                 });
-            }
-
-            // Adiciona manutenção (apenas um por dia, sobrescreve se houver múltiplos)
-            if (row.maintenance_description && row.maintenance_amount) {
-                day.maintenance = {
-                    description: row.maintenance_description,
-                    amount: parseFloat(row.maintenance_amount) || 0
-                };
             }
             
             workDaysMap.set(dateKey, day);
@@ -302,6 +293,7 @@ const revalidateAll = () => {
     revalidatePath('/relatorios');
     revalidatePath('/manutencao');
     revalidatePath('/registrar', 'layout'); // Revalida a página de registro e subpáginas
+    revalidatePath('/configuracoes');
 }
 
 export async function getWorkDays(): Promise<WorkDay[]> {
@@ -554,9 +546,8 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
 
   let totalGanho = 0, totalCombustivel = 0, totalKm = 0, totalHoras = 0, totalViagens = 0, totalLitros = 0;
   
-  const totalManutencaoFromWorkdays = filteredDays.reduce((sum, d) => sum + (d.maintenance?.amount || 0), 0);
-  const totalMaintenanceFromService = filteredMaintenance.reduce((sum, m) => sum + m.amount, 0);
-  const totalManutencaoFinal = totalManutencaoFromWorkdays + totalMaintenanceFromService;
+  // As despesas de manutenção agora são calculadas com base nos registros do serviço de manutenção
+  const totalManutencaoFinal = filteredMaintenance.reduce((sum, m) => sum + m.amount, 0);
 
 
   filteredDays.forEach(day => {

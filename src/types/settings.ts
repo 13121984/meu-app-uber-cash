@@ -6,5 +6,5 @@ export interface Settings {
   weeklyBackup: boolean;
   backupEmail: string;
   maintenanceNotifications: boolean;
-  defaultFuelType: 'Etanol' | 'Gasolina Aditivada' | 'GNV' | '';
+  defaultFuelType: string;
 }

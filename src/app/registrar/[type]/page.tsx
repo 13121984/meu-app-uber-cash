@@ -1,7 +1,7 @@
 
 import { RegistrationWizard } from '@/components/registrar/registration-wizard';
-import { findWorkDayByDate, getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
-import { format, startOfDay } from 'date-fns';
+import { getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
+import { startOfDay } from 'date-fns';
 import { notFound } from 'next/navigation';
 
 export default async function RegistrarPage({ params }: { params: { type: string } }) {
