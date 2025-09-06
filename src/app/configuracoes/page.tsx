@@ -1,9 +1,8 @@
 
 import { Settings } from 'lucide-react';
 import { getSettings } from '@/services/settings.service';
-import { SettingsForm } from '@/components/configuracoes/settings-form';
 import { getCatalog } from '@/services/catalog.service';
-import { CatalogManager } from '@/components/configuracoes/catalog-manager';
+import { ConfiguracoesClient } from '@/components/configuracoes/configuracoes-client';
 
 export default async function ConfiguracoesPage() {
   const settings = await getSettings();
@@ -20,8 +19,7 @@ export default async function ConfiguracoesPage() {
             <p className="text-muted-foreground">Ajuste as preferências e catálogos do aplicativo.</p>
         </div>
       </div>
-      <SettingsForm initialData={settings} />
-      <CatalogManager initialData={catalog} />
+      <ConfiguracoesClient settings={settings} catalog={catalog} />
     </div>
   );
 }
