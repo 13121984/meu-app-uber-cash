@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useTransition } from 'react';
+import React, { useState, useMemo, useTransition, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -23,15 +23,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { Maintenance, deleteMaintenance, deleteAllMaintenance } from "@/services/maintenance.service";
+import { Maintenance, deleteMaintenance, deleteAllMaintenance, getFilteredMaintenanceRecords } from "@/services/maintenance.service";
 import { MaintenanceForm } from "./maintenance-form";
 import { HistoryFilters } from '@/components/gerenciamento/history-filters';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Wrench, Trash2, Edit, DollarSign, Filter, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
+import { Skeleton } from '../ui/skeleton';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -49,28 +50,46 @@ const SummaryCard = ({ title, value, description, icon: Icon, iconClassName }: {
     </Card>
 );
 
-interface MaintenanceClientProps {
-    initialRecords: Maintenance[];
-    initialFilters?: ReportFilterValues;
-}
-
-export function MaintenanceClient({ initialRecords, initialFilters }: MaintenanceClientProps) {
+export function MaintenanceClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [records, setRecords] = useState<Maintenance[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<Maintenance | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const initialFilters = useMemo(() => {
+    const type = (searchParams.get('type') as ReportFilterValues['type']) || 'today';
+    const year = searchParams.get('year') ? parseInt(searchParams.get('year')!) : undefined;
+    const month = searchParams.get('month') ? parseInt(searchParams.get('month')!) : undefined;
+    return { type, year, month };
+  }, [searchParams]);
+
+  useEffect(() => {
+    startTransition(async () => {
+      const currentFilters = new URLSearchParams(window.location.search);
+      const type = (currentFilters.get('type') as ReportFilterValues['type']) || 'today';
+      const year = currentFilters.get('year') ? parseInt(currentFilters.get('year')!) : undefined;
+      const month = currentFilters.get('month') ? parseInt(currentFilters.get('month')!) : undefined;
+      // Adicionar lógica para dateRange se necessário
+      const data = await getFilteredMaintenanceRecords({ type, year, month });
+      setRecords(data);
+    });
+  }, [searchParams]);
+
+
   const filteredTotal = useMemo(() => {
-    return initialRecords.reduce((sum, record) => sum + record.amount, 0);
-  }, [initialRecords]);
+    return records.reduce((sum, record) => sum + record.amount, 0);
+  }, [records]);
 
 
   const handleSuccess = () => {
       setIsFormOpen(false);
       setSelectedRecord(null);
-      router.refresh(); // Re-fetches data from server
+      router.refresh(); 
   }
 
   const handleEdit = (record: Maintenance) => {
@@ -135,24 +154,35 @@ export function MaintenanceClient({ initialRecords, initialFilters }: Maintenanc
                     initialFilters={initialFilters}
                 />
 
-                <div className="pt-4 grid gap-4 md:grid-cols-2">
-                    <SummaryCard 
-                        title="Total Gasto (Filtrado)"
-                        value={formatCurrency(filteredTotal)}
-                        description={`${initialRecords.length} ${initialRecords.length === 1 ? 'registro encontrado' : 'registros encontrados'}`}
-                        icon={DollarSign}
-                        iconClassName="text-red-500"
-                    />
-                     <SummaryCard 
-                        title="Custo Médio (Filtrado)"
-                        value={formatCurrency(initialRecords.length > 0 ? filteredTotal / initialRecords.length : 0)}
-                        description={`Média por serviço no período`}
-                        icon={Wrench}
-                        iconClassName="text-orange-500"
-                    />
-                </div>
+                {isPending ? (
+                  <div className="pt-4 grid gap-4 md:grid-cols-2">
+                    <Skeleton className="h-24 w-full"/>
+                    <Skeleton className="h-24 w-full"/>
+                  </div>
+                ) : (
+                  <div className="pt-4 grid gap-4 md:grid-cols-2">
+                      <SummaryCard 
+                          title="Total Gasto (Filtrado)"
+                          value={formatCurrency(filteredTotal)}
+                          description={`${records.length} ${records.length === 1 ? 'registro encontrado' : 'registros encontrados'}`}
+                          icon={DollarSign}
+                          iconClassName="text-red-500"
+                      />
+                      <SummaryCard 
+                          title="Custo Médio (Filtrado)"
+                          value={formatCurrency(records.length > 0 ? filteredTotal / records.length : 0)}
+                          description={`Média por serviço no período`}
+                          icon={Wrench}
+                          iconClassName="text-orange-500"
+                      />
+                  </div>
+                )}
 
-                {initialRecords.length === 0 ? (
+                {isPending ? (
+                  <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                  </div>
+                ) : records.length === 0 ? (
                 <div className="text-center py-20 text-muted-foreground border-dashed border-2 rounded-lg mt-4">
                     <Wrench className="mx-auto h-12 w-12" />
                     <p className="mt-4 font-semibold">Nenhum registro de manutenção encontrado</p>
@@ -160,7 +190,7 @@ export function MaintenanceClient({ initialRecords, initialFilters }: Maintenanc
                 </div>
                 ) : (
                 <div className="space-y-4 mt-4">
-                    {initialRecords.map(record => (
+                    {records.map(record => (
                     <Card key={record.id}>
                         <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div className="flex-1 space-y-1">
@@ -181,7 +211,7 @@ export function MaintenanceClient({ initialRecords, initialFilters }: Maintenanc
                         </CardContent>
                     </Card>
                     ))}
-                    {initialRecords.length > 0 && (
+                    {records.length > 0 && (
                       <div className="pt-4 flex justify-end">
                         <Button variant="destructive" onClick={() => setIsAlertOpen(true)} disabled={isDeleting}>
                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}

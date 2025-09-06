@@ -2,12 +2,14 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, LayoutDashboard, BarChart } from "lucide-react";
+import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, LayoutDashboard, BarChart, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { DailySummaryCard } from "./daily-summary-card";
 import type { PeriodData } from "../dashboard/dashboard-client";
 import { ShiftPerformance } from "./shift-performance";
+import { getTodayData } from "@/services/work-day.service";
+import { Skeleton } from "../ui/skeleton";
 
 const mainActions = [
   { href: "/registrar/today", label: "Registrar Hoje", icon: PlusCircle, iconColor: "text-blue-500" },
@@ -29,12 +31,36 @@ const ActionButton = ({ href, label, icon: Icon, iconColor }: typeof mainActions
     </Link>
 )
 
-interface HomeClientProps {
-    todayData: PeriodData;
-}
+const DailySummarySkeleton = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+            <Skeleton className="h-[500px] w-full" />
+        </div>
+        <div className="lg:col-span-2">
+            <Skeleton className="h-[400px] w-full" />
+        </div>
+    </div>
+);
 
 
-export function HomeClient({ todayData }: HomeClientProps) {
+export function HomeClient() {
+  const [todayData, setTodayData] = useState<PeriodData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+        try {
+            const data = await getTodayData();
+            setTodayData(data);
+        } catch (error) {
+            console.error("Failed to load today's data", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    loadData();
+  }, []);
+
   return (
     <div className="space-y-8 animate-fade-in">
         <div className="space-y-2">
@@ -53,14 +79,18 @@ export function HomeClient({ todayData }: HomeClientProps) {
 
         <div className="space-y-4">
              <h2 className="text-2xl font-semibold font-headline">Resumo do Dia</h2>
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1">
-                    <DailySummaryCard data={todayData} />
-                </div>
-                <div className="lg:col-span-2">
-                    <ShiftPerformance performance={todayData.performanceByShift} />
-                </div>
-             </div>
+             {isLoading || !todayData ? (
+                 <DailySummarySkeleton />
+             ) : (
+                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-1">
+                        <DailySummaryCard data={todayData} />
+                    </div>
+                    <div className="lg:col-span-2">
+                        <ShiftPerformance performance={todayData.performanceByShift} />
+                    </div>
+                 </div>
+             )}
         </div>
     </div>
   );

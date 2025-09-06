@@ -4,8 +4,9 @@
 import { revalidatePath } from "next/cache";
 import fs from 'fs/promises';
 import path from 'path';
-import type { DateRange } from "react-day-picker";
-import { isWithinInterval } from "date-fns";
+import { isWithinInterval, startOfDay, endOfDay, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import type { ReportFilterValues } from "@/app/relatorios/actions";
+
 
 export interface Maintenance {
   id: string; // ID is now mandatory
@@ -66,32 +67,57 @@ export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ s
 /**
  * Busca todos os registros de manutenção do arquivo, com filtros opcionais.
  */
-export async function getMaintenanceRecords(filters?: { query?: string, dateRange?: DateRange }): Promise<Maintenance[]> {
+export async function getMaintenanceRecords(): Promise<Maintenance[]> {
     let records = await readMaintenanceData();
-
-    if (filters) {
-        records = records.filter(record => {
-            // Filter by Date
-            if (filters.dateRange?.from) {
-                if (!isWithinInterval(record.date, { start: filters.dateRange.from, end: filters.dateRange.to || filters.dateRange.from })) {
-                    return false;
-                }
-            }
-            
-            // Filter by Text Query
-            if (filters.query) {
-                const queryLower = filters.query.toLowerCase();
-                if (!record.description.toLowerCase().includes(queryLower)) {
-                    return false;
-                }
-            }
-            
-            return true;
-        });
-    }
-
     return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
+
+export async function getFilteredMaintenanceRecords(filters?: ReportFilterValues): Promise<Maintenance[]> {
+    const allRecords = await getMaintenanceRecords();
+    
+    // Por padrão (sem filtro), mostra apenas os de hoje
+    if (!filters || !filters.type || filters.type === 'today') {
+        const today = new Date();
+        return allRecords.filter(record => isSameDay(record.date, today));
+    }
+    
+    let interval: { start: Date; end: Date } | null = null;
+    const now = new Date();
+
+    switch (filters.type) {
+        case 'all':
+          return allRecords;
+        case 'thisWeek':
+          interval = { start: startOfWeek(now), end: endOfWeek(now) };
+          break;
+        case 'thisMonth':
+          interval = { start: startOfMonth(now), end: endOfMonth(now) };
+          break;
+        case 'specificMonth':
+          if (filters.year !== undefined && filters.month !== undefined) {
+            interval = { start: startOfMonth(new Date(filters.year, filters.month)), end: endOfMonth(new Date(filters.year, filters.month)) };
+          }
+          break;
+        case 'specificYear':
+          if (filters.year !== undefined) {
+            interval = { start: startOfYear(new Date(filters.year, 0)), end: endOfYear(new Date(filters.year, 0)) };
+          }
+          break;
+        case 'custom':
+          if (filters.dateRange?.from) {
+            interval = { start: startOfDay(filters.dateRange.from), end: filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from) };
+          }
+          break;
+    }
+    
+    if (interval) {
+        return allRecords.filter(record => isWithinInterval(record.date, interval!));
+    }
+
+    // Fallback para os registros de hoje se algo der errado
+    return allRecords.filter(record => isSameDay(record.date, new Date()));
+}
+
 
 /**
  * Atualiza um registro de manutenção existente no arquivo.
