@@ -21,7 +21,6 @@ type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any 
 interface Step1InfoProps {
   data: State;
   dispatch: Dispatch<Action>;
-  registrationType: 'today' | 'other-day';
   isEditing?: boolean;
 }
 
@@ -45,7 +44,7 @@ const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<
     dispatch({ type: 'UPDATE_FIELD', payload: { field: 'hours', value: totalHours }});
 };
 
-export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1InfoProps) {
+export function Step1Info({ data, dispatch, isEditing }: Step1InfoProps) {
   
   const handleFieldChange = (field: keyof State, value: any) => {
     dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
@@ -72,7 +71,7 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
       handleTimeEntriesChange(updated);
   };
   
-  const isDateDisabled = registrationType === 'today' && !isEditing;
+  const isDateDisabled = data.id === 'today' && !isEditing;
   const dateString = data.date && isValid(data.date) ? format(data.date, 'dd/MM/yyyy') : '';
   const hasTimeEntries = useMemo(() => data.timeEntries && data.timeEntries.length > 0, [data.timeEntries]);
 
@@ -158,5 +157,3 @@ export function Step1Info({ data, dispatch, registrationType, isEditing }: Step1
     </div>
   );
 }
-
-    

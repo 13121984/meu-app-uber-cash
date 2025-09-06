@@ -45,7 +45,7 @@ export function TopBar() {
                                 : "text-foreground/60 hover:bg-accent hover:text-accent-foreground"
                             )}
                             >
-                            <item.icon className="h-5 w-5" />
+                            <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
                             </button>
                         </Link>
                         </TooltipTrigger>

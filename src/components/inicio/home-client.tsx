@@ -21,7 +21,7 @@ const mainActions = [
 ];
 
 
-const ActionButton = ({ href, label, icon: Icon, iconColor }: typeof mainActions[0]) => (
+const ActionButton = ({ href, label, icon: Icon, iconColor }: Omit<typeof mainActions[0], 'bgColor'>) => (
     <Link href={href} passHref>
         <Card className="group w-full h-36 flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-primary">
             <Icon className={`h-10 w-10 ${iconColor} transition-colors group-hover:text-primary-foreground`} />
