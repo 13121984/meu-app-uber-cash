@@ -32,14 +32,7 @@ export function BackupManager({ initialBackupData, initialRestorePointData }: Ba
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Data inválida";
     try {
-      // Using a locale-sensitive format that's robust
-      return new Date(dateString).toLocaleString('pt-BR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      return format(parseISO(dateString), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
     } catch (e) {
       return "Data inválida";
     }
