@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,8 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DollarSign, CheckCircle, AlertTriangle, Loader2, Target } from 'lucide-react';
 import { toast } from "@/hooks/use-toast"
-import { Goals, saveGoals } from '@/services/goal.service';
+import { Goals, saveGoals, getGoals } from '@/services/goal.service';
 import { useRouter } from 'next/navigation';
+import { Skeleton } from '../ui/skeleton';
 
 
 const goalsSchema = z.object({
@@ -21,11 +22,35 @@ const goalsSchema = z.object({
   monthly: z.number().min(0, "A meta deve ser um valor positivo."),
 });
 
-interface GoalFormProps {
-  initialData: Goals;
+function GoalFormSkeleton() {
+    return (
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-7 w-64" />
+                <Skeleton className="h-4 w-full mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                 <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                 <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </CardContent>
+            <CardFooter>
+                <Skeleton className="h-10 w-36" />
+            </CardFooter>
+        </Card>
+    );
 }
 
-export function GoalForm({ initialData }: GoalFormProps) {
+function GoalFormInternal({ initialData }: { initialData: Goals }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit, formState: { errors } } = useForm<Goals>({
@@ -50,7 +75,6 @@ export function GoalForm({ initialData }: GoalFormProps) {
         ),
         description: "Suas novas metas foram salvas com sucesso.",
       });
-       // Força a revalidação dos dados no dashboard
       router.refresh(); 
     } catch (error) {
       toast({
@@ -93,9 +117,7 @@ export function GoalForm({ initialData }: GoalFormProps) {
                         id="daily"
                         type="number"
                         placeholder="Ex: 200"
-                        // Mostra string vazia se o valor for 0
                         value={field.value === 0 ? '' : field.value}
-                        // Converte para float ou 0 se o campo estiver vazio
                         onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                         className="pl-10"
                         />
@@ -156,4 +178,22 @@ export function GoalForm({ initialData }: GoalFormProps) {
       </Card>
     </form>
   );
+}
+
+export function GoalForm() {
+    const [initialData, setInitialData] = useState<Goals | null>(null);
+
+    useEffect(() => {
+        const loadData = async () => {
+            const goals = await getGoals();
+            setInitialData(goals);
+        };
+        loadData();
+    }, []);
+
+    if (!initialData) {
+        return <GoalFormSkeleton />;
+    }
+
+    return <GoalFormInternal initialData={initialData} />;
 }

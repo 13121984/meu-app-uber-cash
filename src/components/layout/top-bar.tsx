@@ -32,9 +32,12 @@ export function TopBar() {
     <TooltipProvider>
         <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
             <div className="flex items-center gap-4">
-                <Link href="/" className="flex flex-col items-center gap-1 font-semibold">
+                <Link href="/" className="flex items-center gap-2 font-semibold">
                     <Car className="h-7 w-7 text-primary" />
-                    <span className="font-headline text-xs">Uber Cash</span>
+                    <div className="flex flex-col items-start">
+                      <span className="font-headline text-lg leading-tight">Uber Cash</span>
+                      <span className="text-xs text-muted-foreground leading-tight">Menu</span>
+                    </div>
                 </Link>
             </div>
             {isClient && (
