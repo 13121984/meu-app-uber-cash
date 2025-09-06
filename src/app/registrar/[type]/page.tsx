@@ -14,21 +14,14 @@ export default async function RegistrarPage({ params }: { params: { type: string
   let initialData = null;
   let isEditing = false;
   
-  // Para 'today', verificamos se já existe um registro para decidir se estamos editando ou criando.
+  // Para 'today', o objetivo é sempre ADICIONAR um novo período/turno.
+  // Portanto, sempre começamos com uma lousa em branco.
   if (registrationType === 'today') {
-    const dateStr = format(new Date(), 'yyyy-MM-dd');
-    const existingDay = await findWorkDayByDate(dateStr);
-    if (existingDay) {
-        initialData = existingDay;
-        isEditing = true;
-    } else {
-        // Se não houver dia existente, passamos um objeto mínimo para indicar um novo registro hoje.
-        initialData = { id: 'today' };
-    }
+      initialData = { id: 'today' }; // Passa um objeto mínimo para indicar um novo registro hoje.
+      isEditing = false; // Garante que não estamos no modo de edição.
   }
 
-  // Para 'other-day', começamos sempre com uma lousa em branco.
-  // Passamos um objeto mínimo para que o wizard saiba que é um novo registro.
+  // Para 'other-day', começamos sempre com uma lousa em branco para um novo dia.
   if (registrationType === 'other-day') {
       initialData = { id: 'other-day' };
   }
@@ -38,7 +31,7 @@ export default async function RegistrarPage({ params }: { params: { type: string
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold font-headline">
-          {isEditing ? 'Editar Dia Atual' : registrationType === 'today' ? 'Registrar Dia Atual' : 'Registrar Outro Dia'}
+          {registrationType === 'today' ? 'Registrar Novo Período' : 'Registrar Outro Dia'}
         </h1>
         <p className="text-muted-foreground">Preencha as informações do seu dia para acompanhar seu progresso.</p>
       </div>

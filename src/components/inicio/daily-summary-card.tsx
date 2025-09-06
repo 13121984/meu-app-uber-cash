@@ -53,6 +53,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                 label="Horas Trabalhadas"
                 value={`${data.totalHoras.toFixed(1)}h`}
                 description={`${data.diasTrabalhados > 0 ? data.diasTrabalhados : 'Nenhum'} dia de trabalho`}
+                iconColor="text-amber-500"
             />
 
             <Separator />
@@ -62,6 +63,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                 label="Valor Médio/Hora"
                 value={formatCurrency(data.ganhoPorHora)}
                 description="Média de ganhos por hora"
+                iconColor="text-blue-500"
             />
         </div>
         
