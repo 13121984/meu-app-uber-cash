@@ -1,29 +1,42 @@
-
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { BookCopy, PlusCircle, Trash2, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
-import { saveCatalog } from '@/services/catalog.service';
+import { saveCatalog, getCatalog } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
+import { Skeleton } from '../ui/skeleton';
 
-interface CatalogManagerProps {
-  initialData: {
-    earnings: string[];
-    fuel: string[];
-  };
-}
-
-export function CatalogManager({ initialData }: CatalogManagerProps) {
+export function CatalogManager() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [earningsCategories, setEarningsCategories] = useState<string[]>(initialData.earnings);
-  const [fuelCategories, setFuelCategories] = useState<string[]>(initialData.fuel);
+  const [earningsCategories, setEarningsCategories] = useState<string[]>([]);
+  const [fuelCategories, setFuelCategories] = useState<string[]>([]);
   const [newEarningCat, setNewEarningCat] = useState('');
   const [newFuelCat, setNewFuelCat] = useState('');
+
+  useEffect(() => {
+    async function loadCatalog() {
+        setIsLoading(true);
+        try {
+            const initialData = await getCatalog();
+            setEarningsCategories(initialData.earnings);
+            setFuelCategories(initialData.fuel);
+        } catch (error) {
+            toast({
+                title: "Erro ao carregar catálogos",
+                variant: "destructive"
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    loadCatalog();
+  }, []);
 
   const handleAddCategory = (type: 'earnings' | 'fuel') => {
     if (type === 'earnings') {
@@ -101,6 +114,22 @@ export function CatalogManager({ initialData }: CatalogManagerProps) {
       </div>
     </div>
   );
+  
+  if (isLoading) {
+      return (
+          <Card>
+              <CardHeader>
+                  <Skeleton className="h-8 w-1/3" />
+                  <Skeleton className="h-4 w-2/3" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+              </CardContent>
+          </Card>
+      );
+  }
 
   return (
     <Card>
