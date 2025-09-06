@@ -156,41 +156,43 @@ export async function addOrUpdateWorkDay(data: WorkDay): Promise<{ success: bool
 
 export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     try {
-        const allWorkDays = await readWorkDays();
-        const workDaysMap = new Map<string, WorkDay>();
+        let allWorkDays = await readWorkDays();
 
-        // Pré-popula o mapa com os dias de trabalho existentes
-        allWorkDays.forEach(day => {
-            const dateKey = format(new Date(day.date), 'yyyy-MM-dd');
-            workDaysMap.set(dateKey, day);
-        });
+        // Process each row from the processed CSV
+        const newEntries: WorkDay[] = [];
+        let currentDate: Date | null = null;
+        let currentKm = 0;
+        let currentHours = 0;
+        let currentDayEntries: { earnings: Earning[], fuelEntries: FuelEntry[], maintenanceEntries: { id: number, description: string, amount: number }[] } = { earnings: [], fuelEntries: [], maintenanceEntries: [] };
 
-        // Processa os dados importados
-        importedData.forEach(row => {
-            if (!row.date) return;
-            const dateKey = format(parseISO(row.date), 'yyyy-MM-dd');
-            let day = workDaysMap.get(dateKey);
-
-            if (!day) {
-                day = {
+        const finalizeDay = () => {
+            if (currentDate) {
+                newEntries.push({
                     id: Date.now().toString() + Math.random(),
-                    date: parseISO(row.date),
-                    km: 0,
-                    hours: 0,
+                    date: currentDate,
+                    km: currentKm,
+                    hours: currentHours,
+                    earnings: currentDayEntries.earnings,
+                    fuelEntries: currentDayEntries.fuelEntries,
+                    maintenanceEntries: currentDayEntries.maintenanceEntries,
                     timeEntries: [],
-                    earnings: [],
-                    fuelEntries: [],
-                    maintenanceEntries: []
-                };
+                });
+            }
+        };
+
+        for (const row of importedData) {
+            // If there's a date, it's a new day's record
+            if (row.date) {
+                finalizeDay(); // Finalize the previous day's record
+                currentDate = parseISO(row.date);
+                currentKm = parseFloat(row.km) || 0;
+                currentHours = parseFloat(row.hours) || 0;
+                currentDayEntries = { earnings: [], fuelEntries: [], maintenanceEntries: [] };
             }
 
-            // Adiciona km e horas (apenas se for maior que o existente, para não zerar)
-            day.km = Math.max(day.km, parseFloat(row.km) || 0);
-            day.hours = Math.max(day.hours, parseFloat(row.hours) || 0);
-
-            // Adiciona ganhos
+            // Add earning entry for the current day
             if (row.earnings_category && row.earnings_amount) {
-                day.earnings.push({
+                currentDayEntries.earnings.push({
                     id: Date.now() + Math.random(),
                     category: row.earnings_category,
                     trips: parseInt(row.earnings_trips) || 0,
@@ -198,24 +200,37 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
                 });
             }
 
-            // Adiciona abastecimento
+            // Add fuel entry for the current day
             if (row.fuel_type && row.fuel_paid) {
-                day.fuelEntries.push({
+                currentDayEntries.fuelEntries.push({
                     id: Date.now() + Math.random(),
                     type: row.fuel_type,
                     paid: parseFloat(row.fuel_paid) || 0,
                     price: parseFloat(row.fuel_price) || 0
                 });
             }
-            
-            workDaysMap.set(dateKey, day);
-        });
 
+            // Add maintenance entry
+            if (row.maintenance_description && row.maintenance_amount) {
+                 currentDayEntries.maintenanceEntries.push({
+                    id: Date.now() + Math.random(),
+                    description: row.maintenance_description,
+                    amount: parseFloat(row.maintenance_amount) || 0
+                });
+            }
+        }
+        finalizeDay(); // Finalize the last day
+
+        // Combine new entries with existing ones, replacing by date
+        const workDaysMap = new Map<string, WorkDay>();
+        allWorkDays.forEach(day => workDaysMap.set(format(day.date, 'yyyy-MM-dd'), day));
+        newEntries.forEach(day => workDaysMap.set(format(day.date, 'yyyy-MM-dd'), day));
+        
         const updatedWorkDays = Array.from(workDaysMap.values());
         await writeWorkDays(updatedWorkDays);
         
         revalidateAll();
-        return { success: true, count: workDaysMap.size };
+        return { success: true, count: newEntries.length };
 
     } catch(e) {
         console.error("Error adding multiple work days: ", e);
@@ -223,6 +238,7 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
         return { success: false, error: errorMessage };
     }
 }
+
 
 export async function deleteWorkDayEntry(id: string): Promise<{ success: boolean; error?: string }> {
   try {
