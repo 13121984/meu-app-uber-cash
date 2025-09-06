@@ -105,14 +105,15 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
           <Label htmlFor="km">KM Rodados</Label>
           <div className="relative">
             <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-500" />
-            <Input 
-                id="km" 
-                type="text" 
-                inputMode="decimal"
-                placeholder="Ex: 150" 
-                value={String(data.km || '').replace('.', ',')} 
-                onChange={(e) => handleFieldChange('km', parseFloat(e.target.value.replace(',', '.')) || 0)} 
-                className="pl-10"/>
+            <Input
+              id="km"
+              type="number"
+              step="0.1"
+              placeholder="Ex: 150.5"
+              value={data.km || ''}
+              onChange={(e) => handleFieldChange('km', parseFloat(e.target.value) || 0)}
+              className="pl-10"
+            />
           </div>
         </div>
         
@@ -120,15 +121,15 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
           <Label htmlFor="hours">Total de Horas</Label>
            <div className="relative">
              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500" />
-            <Input 
-                id="hours" 
-                type="text" 
-                inputMode="decimal"
-                placeholder="Ex: 8,5" 
-                value={String(data.hours || '').replace('.', ',')}
-                onChange={(e) => handleFieldChange('hours', parseFloat(e.target.value.replace(',', '.')) || 0)} 
-                className="pl-10" 
-                disabled={hasTimeEntries}
+            <Input
+              id="hours"
+              type="number"
+              step="0.1"
+              placeholder="Ex: 8.5"
+              value={data.hours || ''}
+              onChange={(e) => handleFieldChange('hours', parseFloat(e.target.value) || 0)}
+              className="pl-10"
+              disabled={hasTimeEntries}
             />
             {hasTimeEntries && <p className="text-xs text-muted-foreground mt-1">O total de horas é calculado automaticamente a partir dos períodos.</p>}
           </div>
@@ -164,5 +165,3 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     </div>
   );
 }
-
-    
