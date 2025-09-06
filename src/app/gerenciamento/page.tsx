@@ -1,9 +1,9 @@
 
 import { History } from 'lucide-react';
-import { getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
+import { getWorkDays, getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
 import { GerenciamentoClient } from '@/components/gerenciamento/gerenciamento-client';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import { format, parseISO, startOfDay, isWithinInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { format, parseISO, startOfDay, endOfDay, isWithinInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isSameDay } from "date-fns";
 
 // Interface para representar um dia agrupado
 export interface GroupedWorkDay {
@@ -131,4 +131,3 @@ export default async function GerenciamentoPage({
     </div>
   );
 }
-
