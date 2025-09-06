@@ -28,6 +28,14 @@ export function BackupManager({ initialBackupData, initialRestorePointData }: Ba
   const [isCreatingRestorePoint, startCreateRestorePointTransition] = useTransition();
 
   const isAnyActionPending = isProcessing || isRestoring || isCreatingRestorePoint;
+
+  const formatDateForDisplay = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+    } catch (e) {
+      return "Data inválida";
+    }
+  }
   
   const handleGenerateBackup = () => {
     startTransition(async () => {
@@ -126,7 +134,7 @@ export function BackupManager({ initialBackupData, initialRestorePointData }: Ba
                         <h3 className="font-semibold">Último Ponto Salvo</h3>
                         {restorePointData.lastRestoreDate ? (
                             <p className="text-sm text-muted-foreground">
-                                {format(parseISO(restorePointData.lastRestoreDate), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+                                {formatDateForDisplay(restorePointData.lastRestoreDate)}
                             </p>
                         ) : (
                             <p className="text-sm text-muted-foreground">Nenhum ponto de restauração foi criado ainda.</p>
@@ -177,7 +185,7 @@ export function BackupManager({ initialBackupData, initialRestorePointData }: Ba
                         <h3 className="font-semibold">Último Backup</h3>
                         {backupData.lastBackupDate ? (
                             <p className="text-sm text-muted-foreground">
-                                {format(parseISO(backupData.lastBackupDate), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+                                {formatDateForDisplay(backupData.lastBackupDate)}
                             </p>
                         ) : (
                             <p className="text-sm text-muted-foreground">Nenhum backup foi gerado ainda.</p>
