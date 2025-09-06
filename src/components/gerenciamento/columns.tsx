@@ -31,7 +31,7 @@ import {
 import { format, parseISO } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { cn } from "@/lib/utils"
-import { GroupedWorkDay } from "@/app/gerenciamento/page"
+import type { GroupedWorkDay } from '@/components/gerenciamento/gerenciamento-client'
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -43,11 +43,6 @@ export const useWorkDayColumns = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [dayToDelete, setDayToDelete] = useState<GroupedWorkDay | null>(null);
   
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
 
   const handleDeleteClick = (e: React.MouseEvent, day: GroupedWorkDay) => {
     e.stopPropagation(); 

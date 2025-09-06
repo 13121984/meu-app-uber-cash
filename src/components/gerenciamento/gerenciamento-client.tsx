@@ -12,9 +12,16 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { getFilteredWorkDays, type WorkDay, type GroupedWorkDay } from '@/services/work-day.service';
+import { getFilteredWorkDays, type WorkDay } from '@/services/work-day.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 
+export interface GroupedWorkDay {
+  date: Date;
+  totalProfit: number;
+  totalHours: number;
+  totalKm: number;
+  entries: WorkDay[];
+}
 
 export function GerenciamentoClient() {
   const router = useRouter();

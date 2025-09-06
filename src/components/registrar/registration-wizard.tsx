@@ -103,7 +103,7 @@ interface RegistrationWizardProps {
     initialData?: Partial<WorkDay> | null;
     isEditing?: boolean;
     onSuccess?: () => void;
-    registrationType: 'today' | 'other-day';
+    registrationType?: 'today' | 'other-day';
     existingDayEntries?: WorkDay[];
 }
 
@@ -136,7 +136,7 @@ function WizardSkeleton() {
     )
 }
 
-export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType, existingDayEntries: propsExistingEntries }: RegistrationWizardProps) {
+export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType = 'today', existingDayEntries: propsExistingEntries }: RegistrationWizardProps) {
   const router = useRouter();
   
   const [currentStep, setCurrentStep] = useState(1);

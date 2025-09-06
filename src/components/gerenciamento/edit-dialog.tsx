@@ -7,7 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { RegistrationWizard } from "@/components/registrar/registration-wizard";
 import type { WorkDay } from "@/services/work-day.service";
-import type { GroupedWorkDay } from "@/app/gerenciamento/page";
+import type { GroupedWorkDay } from "@/components/gerenciamento/gerenciamento-client";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Edit, Trash2, Loader2, PlusCircle } from "lucide-react";
