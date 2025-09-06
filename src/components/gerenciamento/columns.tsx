@@ -90,7 +90,6 @@ export const useWorkDayColumns = () => {
         </Button>
       ),
       cell: ({ row }) => {
-        if (!isClient) return null;
         const day = row.original;
         const date = typeof day.date === 'string' ? parseISO(day.date) : day.date;
         return (
