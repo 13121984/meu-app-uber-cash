@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { Dispatch, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { Dispatch, useCallback, useMemo } from 'react';
 import { CalendarIcon, Clock, Milestone, PlusCircle, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { format, isValid, setDate, setMonth, setYear, getDate, getMonth, getYear } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { State, TimeEntry } from './registration-wizard';
 import { Card, CardContent } from '../ui/card';
@@ -46,38 +46,10 @@ const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<
 };
 
 export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1InfoProps) {
-  
-  const [day, setDay] = useState(data.date ? getDate(data.date).toString() : '');
-  const [month, setMonth] = useState(data.date ? (getMonth(data.date) + 1).toString() : '');
-  const [year, setYear] = useState(data.date ? getYear(data.date).toString() : '');
 
   const handleFieldChange = (field: keyof State, value: any) => {
     dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
   };
-
-  // Update main date state when day/month/year inputs change
-  useEffect(() => {
-    const dayNum = parseInt(day, 10);
-    const monthNum = parseInt(month, 10) - 1; // month is 0-indexed in Date
-    const yearNum = parseInt(year, 10);
-
-    if (!isNaN(dayNum) && !isNaN(monthNum) && !isNaN(yearNum) &&
-        dayNum > 0 && dayNum <= 31 &&
-        monthNum >= 0 && monthNum <= 11 &&
-        yearNum > 1900 && year.length === 4) {
-      
-      let newDate = new Date();
-      newDate = setYear(newDate, yearNum);
-      newDate = setMonth(newDate, monthNum);
-      // setDate needs to be last to handle month-end correctly
-      newDate = setDate(newDate, dayNum);
-
-      if (isValid(newDate)) {
-        handleFieldChange('date', newDate);
-      }
-    }
-  }, [day, month, year]);
-
   
   const handleTimeEntriesChange = useCallback((newTimeEntries: TimeEntry[]) => {
       // First, update the timeEntries array in the state
@@ -111,13 +83,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
       <div className="space-y-4">
         <div>
           <Label htmlFor="date">Data do Trabalho</Label>
-          {registrationType === 'other-day' && !isEditing ? (
-            <div className="flex items-center gap-2">
-                <Input placeholder="DD" value={day} onChange={(e) => setDay(e.target.value)} maxLength={2} />
-                <Input placeholder="MM" value={month} onChange={(e) => setMonth(e.target.value)} maxLength={2} />
-                <Input placeholder="AAAA" value={year} onChange={(e) => setYear(e.target.value)} maxLength={4} />
-            </div>
-          ) : (
             <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -138,7 +103,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                   </PopoverContent>
                 </Popover>
             </div>
-          )}
         </div>
         <div>
           <Label htmlFor="km">KM Rodados</Label>
