@@ -11,19 +11,19 @@ import type { PeriodData } from "../dashboard/dashboard-client";
 
 
 const mainActions = [
-  { href: "/registrar/today", label: "Registrar Hoje", icon: Clock, bgColor: "bg-primary/5" },
-  { href: "/registrar/other-day", label: "Registrar Outro Dia", icon: Calendar, bgColor: "bg-blue-500/5" },
-  { href: "/dashboard", label: "Performance", icon: LineChart, bgColor: "bg-yellow-500/5" },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench, bgColor: "bg-red-500/5" },
-  { href: "/metas", label: "Metas", icon: Target, bgColor: "bg-green-500/5" },
-  { href: "/configuracoes", label: "Configurações", icon: Settings, bgColor: "bg-gray-500/5" },
+  { href: "/registrar/today", label: "Registrar Hoje", icon: Clock, bgColor: "bg-primary/5", iconColor: "text-blue-500" },
+  { href: "/registrar/other-day", label: "Registrar Outro Dia", icon: Calendar, bgColor: "bg-purple-500/5", iconColor: "text-purple-500" },
+  { href: "/dashboard", label: "Performance", icon: LineChart, bgColor: "bg-yellow-500/5", iconColor: "text-yellow-500" },
+  { href: "/manutencao", label: "Manutenção", icon: Wrench, bgColor: "bg-red-500/5", iconColor: "text-red-500" },
+  { href: "/metas", label: "Metas", icon: Target, bgColor: "bg-green-500/5", iconColor: "text-green-500" },
+  { href: "/configuracoes", label: "Configurações", icon: Settings, bgColor: "bg-gray-500/5", iconColor: "text-gray-500" },
 ];
 
 
-const ActionButton = ({ href, label, icon: Icon, bgColor }: typeof mainActions[0]) => (
+const ActionButton = ({ href, label, icon: Icon, iconColor }: typeof mainActions[0] & { iconColor: string }) => (
     <Link href={href} passHref>
         <Card className="group w-full h-36 flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-primary">
-            <Icon className="h-10 w-10 text-foreground/80 transition-colors group-hover:text-primary-foreground" />
+            <Icon className={`h-10 w-10 ${iconColor} transition-colors group-hover:text-primary-foreground`} />
             <span className="font-semibold text-center text-foreground transition-colors group-hover:text-primary-foreground">{label}</span>
         </Card>
     </Link>
@@ -44,7 +44,7 @@ export function HomeClient({ todayData }: HomeClientProps) {
 
         <div className="space-y-4">
             <h2 className="text-2xl font-semibold font-headline">Ações Rápidas</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {mainActions.map((action) => (
                     <ActionButton key={action.href} {...action} />
                 ))}
@@ -60,7 +60,7 @@ export function HomeClient({ todayData }: HomeClientProps) {
                 <div className="lg:col-span-2">
                     {/* Placeholder for future charts */}
                     <Card className="h-full min-h-[400px] flex items-center justify-center">
-                        <p className="text-muted-foreground">Gráficos em breve...</p>
+                        <p className="text-muted-foreground">Gráficos diários em breve...</p>
                     </Card>
                 </div>
              </div>
