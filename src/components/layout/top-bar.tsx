@@ -9,14 +9,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useEffect, useState } from "react"
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home, color: "text-sky-500" },
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, color: "text-yellow-500" },
-  { href: "/registrar", label: "Registrar", icon: PlusCircle, color: "text-blue-500" },
-  { href: "/gerenciamento", label: "Gerenciar", icon: History, color: "text-orange-500" },
-  { href: "/metas", label: "Metas", icon: Target, color: "text-green-500" },
-  { href: "/relatorios", label: "Relatórios", icon: BarChart, color: "text-teal-500" },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench, color: "text-red-500" },
-  { href: "/configuracoes", label: "Configurações", icon: Settings, color: "text-purple-500" },
+  { href: "/", label: "Início", icon: Home },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
+  { href: "/registrar", label: "Registrar", icon: PlusCircle },
+  { href: "/gerenciamento", label: "Gerenciar", icon: History },
+  { href: "/metas", label: "Metas", icon: Target },
+  { href: "/relatorios", label: "Relatórios", icon: BarChart },
+  { href: "/manutencao", label: "Manutenção", icon: Wrench },
+  { href: "/configuracoes", label: "Configurações", icon: Settings },
 ]
 
 export function TopBar() {
@@ -27,7 +27,6 @@ export function TopBar() {
     setIsClient(true);
   }, []);
 
-
   return (
     <TooltipProvider>
         <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
@@ -37,7 +36,7 @@ export function TopBar() {
                     <span className="font-headline text-xs">Rota Certa</span>
                 </Link>
             </div>
-            <nav className="flex items-center gap-1">
+            <nav className="hidden sm:flex items-center gap-1">
                 {menuItems.map((item) => {
                     const isActive = isClient && (item.href === "/" ? pathname === item.href : pathname.startsWith(item.href));
                     return (
@@ -49,10 +48,10 @@ export function TopBar() {
                                 "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
                                 isActive
                                 ? "bg-primary text-primary-foreground"
-                                : "text-foreground/60 hover:bg-accent hover:text-accent-foreground"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                             )}
                             >
-                            <item.icon className={cn("h-5 w-5", !isActive && item.color)} />
+                            <item.icon className="h-5 w-5" />
                             </button>
                         </Link>
                         </TooltipTrigger>
