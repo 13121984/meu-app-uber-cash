@@ -151,7 +151,7 @@ export function CatalogManager() {
         <div>
             <CardTitle className="flex items-center gap-2 font-headline">
             <BookCopy className="h-6 w-6 text-primary" />
-            Gerenciar Catálogos
+            Editor de Catálogos
             </CardTitle>
             <CardDescription>
             Adicione ou remova categorias para personalizar os formulários.
@@ -159,7 +159,7 @@ export function CatalogManager() {
         </div>
          <Button onClick={handleSaveChanges} disabled={isSaving}>
             {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Salvar Catálogos
+            Salvar Alterações
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">

@@ -1,5 +1,8 @@
-import { Settings } from 'lucide-react';
+import { Settings, BookCopy } from 'lucide-react';
 import { ConfiguracoesClient } from '@/components/configuracoes/configuracoes-client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default async function ConfiguracoesPage() {
   return (
@@ -13,8 +16,9 @@ export default async function ConfiguracoesPage() {
             <p className="text-muted-foreground">Ajuste as preferências e catálogos do aplicativo.</p>
         </div>
       </div>
-      {/* O componente cliente agora é responsável por buscar seus próprios dados */}
+      
       <ConfiguracoesClient />
+
     </div>
   );
 }
