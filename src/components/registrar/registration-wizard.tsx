@@ -57,15 +57,15 @@ export type State = {
 type Action =
   | { type: 'SET_STATE'; payload: State }
   | { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } }
-  | { type: 'RESET_STATE' };
+  | { type: 'RESET_STATE'; payload: { registrationType: 'today' | 'other-day' }};
 
 
-const getInitialState = (initialData?: Partial<WorkDay>): State => {
+const getInitialState = (initialData?: Partial<WorkDay>, registrationType: 'today' | 'other-day' = 'today'): State => {
     let date;
     if(initialData?.date) {
         date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
     } else {
-        date = startOfDay(new Date());
+        date = registrationType === 'today' ? startOfDay(new Date()) : new Date(); // Use new Date() for 'other-day' to allow user input
     }
 
     return {
@@ -88,8 +88,7 @@ function reducer(state: State, action: Action): State {
     case 'UPDATE_FIELD': 
         return { ...state, [action.payload.field]: action.payload.value };
     case 'RESET_STATE': 
-        const today = startOfDay(new Date());
-        return getInitialState({ date: today }); // Reseta para a data de hoje
+        return getInitialState(undefined, action.payload.registrationType);
     default: 
         return state;
   }
@@ -128,7 +127,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>(isEditing ? [1,2,3,4] : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData || undefined));
+  const [state, dispatch] = useReducer(reducer, getInitialState(propsInitialData || undefined, registrationType));
   
   // Novo estado para gerenciar os períodos existentes
   const [existingEntries, setExistingEntries] = useState<WorkDay[]>(propsExistingEntries || []);
@@ -144,12 +143,12 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
    useEffect(() => {
     if (entryBeingEdited) {
         // Se estamos editando uma entrada, preenchemos o formulário com seus dados
-        dispatch({ type: 'SET_STATE', payload: getInitialState(entryBeingEdited) });
+        dispatch({ type: 'SET_STATE', payload: getInitialState(entryBeingEdited, registrationType) });
         setCompletedSteps([1,2,3,4]); // Marcamos todos os passos como "completos" para facilitar a edição
     } else {
         // Se não, resetamos para um novo registro
         const dateToUse = registrationType === 'today' ? startOfDay(new Date()) : propsInitialData?.date;
-        dispatch({ type: 'SET_STATE', payload: getInitialState({ date: dateToUse }) });
+        dispatch({ type: 'SET_STATE', payload: getInitialState({ date: dateToUse }, registrationType) });
         setCompletedSteps([]);
     }
    }, [entryBeingEdited, registrationType, propsInitialData]);
@@ -216,7 +215,13 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         
         if (onSuccess) {
             onSuccess();
-        } else {
+        } else if (registrationType === 'other-day' && !isEditing) {
+            // Se registrou "outro dia", limpa o formulário para um novo registro, mas mantém na página
+            dispatch({ type: 'RESET_STATE', payload: { registrationType: 'other-day' }});
+            setCurrentStep(1);
+            setCompletedSteps([]);
+        }
+        else {
             router.refresh();
              // Limpa o formulário e cancela o modo de edição
             setEntryBeingEdited(null);
