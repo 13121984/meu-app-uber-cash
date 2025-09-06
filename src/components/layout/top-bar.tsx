@@ -27,6 +27,7 @@ export function TopBar() {
     setIsClient(true);
   }, []);
 
+  // Render a static version on the server and during the initial client render
   if (!isClient) {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
@@ -36,6 +37,8 @@ export function TopBar() {
                     <span className="font-headline text-xs">Rota Certa</span>
                 </Link>
             </div>
+             {/* Render an empty nav or a placeholder to avoid layout shifts */}
+            <nav className="hidden sm:flex items-center gap-1 h-10 w-[360px]"></nav>
         </header>
     )
   }
