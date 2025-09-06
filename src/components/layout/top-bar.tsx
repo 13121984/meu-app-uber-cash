@@ -39,8 +39,6 @@ export function TopBar() {
             </div>
             <nav className="flex items-center gap-1">
                 {menuItems.map((item) => {
-                    // During server render and initial client render, `isActive` will be false.
-                    // It will only be calculated correctly after the component has mounted on the client.
                     const isActive = isClient && (item.href === "/" ? pathname === item.href : pathname.startsWith(item.href));
                     return (
                     <Tooltip key={item.href}>
@@ -54,7 +52,7 @@ export function TopBar() {
                                 : "text-foreground/60 hover:bg-accent hover:text-accent-foreground"
                             )}
                             >
-                            <item.icon className={cn("h-5 w-5", isActive ? "text-primary" : "")} />
+                            <item.icon className="h-5 w-5" />
                             </button>
                         </Link>
                         </TooltipTrigger>

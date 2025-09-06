@@ -1,5 +1,27 @@
 [
   {
+    "date": "2025-09-06T01:45:44.453Z",
+    "km": 30,
+    "hours": 2.5,
+    "timeEntries": [
+      {
+        "id": 1757123155117,
+        "start": "14:00",
+        "end": "16:30"
+      }
+    ],
+    "earnings": [
+      {
+        "id": 1757123206490,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 85
+      }
+    ],
+    "fuelEntries": [],
+    "id": "1757123224524"
+  },
+  {
     "date": "2025-09-06T01:29:04.622Z",
     "km": 45,
     "hours": 6,
