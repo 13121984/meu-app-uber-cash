@@ -1,12 +1,12 @@
 {
   "earnings": [
     {
-      "name": "Uber Cash",
+      "name": "99 Pop",
       "active": true,
       "isDefault": true
     },
     {
-      "name": "99 Pop",
+      "name": "Uber Cash",
       "active": true,
       "isDefault": true
     },
@@ -48,17 +48,17 @@
   ],
   "fuel": [
     {
+      "name": "GNV",
+      "active": true,
+      "isDefault": true
+    },
+    {
       "name": "Etanol",
       "active": true,
       "isDefault": true
     },
     {
       "name": "Gasolina Aditivada",
-      "active": true,
-      "isDefault": true
-    },
-    {
-      "name": "GNV",
       "active": true,
       "isDefault": true
     },

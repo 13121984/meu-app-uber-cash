@@ -49,7 +49,8 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
             return list;
         }
 
-        [list[index], list[swapIndex]] = [list[swapIndex], list[index]]; // Swap elements
+        // Simple swap
+        [list[index], list[swapIndex]] = [list[swapIndex], list[index]]; 
         return list;
     });
   }
@@ -110,8 +111,8 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
     const defaultItems = categories.filter(c => c.isDefault);
     const customItems = categories.filter(c => !c.isDefault);
 
-    const renderCategoryItem = (cat: CatalogItem, index: number, isCustomGroup: boolean) => {
-        const group = isCustomGroup ? customItems : defaultItems;
+    // This function now receives the index within its own group (default or custom)
+    const renderCategoryItem = (cat: CatalogItem, index: number, group: CatalogItem[]) => {
         const originalIndex = categories.findIndex(c => c.name === cat.name);
         
         return (
@@ -151,9 +152,9 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
           <CardContent>
             <ScrollArea className="h-80">
                 <div className="space-y-4 pr-6">
-                  {defaultItems.map((cat, index) => renderCategoryItem(cat, index, false))}
+                  {defaultItems.map((cat, index) => renderCategoryItem(cat, index, defaultItems))}
                   {customItems.length > 0 && defaultItems.length > 0 && <hr className="my-4 border-dashed" />}
-                  {customItems.map((cat, index) => renderCategoryItem(cat, index, true))}
+                  {customItems.map((cat, index) => renderCategoryItem(cat, index, customItems))}
                 </div>
             </ScrollArea>
           </CardContent>
