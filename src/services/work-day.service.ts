@@ -116,30 +116,29 @@ async function writeWorkDays(data: WorkDay[]): Promise<void> {
 export async function addOrUpdateWorkDay(data: Omit<WorkDay, 'maintenance'>): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
   try {
     const allWorkDays = await readWorkDays();
-    const dateToFind = format(data.date, 'yyyy-MM-dd');
-    const existingDayIndex = allWorkDays.findIndex(d => format(d.date, 'yyyy-MM-dd') === dateToFind);
-
-    if (existingDayIndex > -1) {
-      // Update existing day by replacing it
-      const updatedDay: WorkDay = { 
-        ...data,
-        id: allWorkDays[existingDayIndex].id, // Keep original ID
-      };
-      allWorkDays[existingDayIndex] = updatedDay;
-      await writeWorkDays(allWorkDays);
-      revalidateAll();
-      return { success: true, id: updatedDay.id, operation: 'updated' };
-    } else {
-      // Add new day
-      const newWorkDay: WorkDay = {
-        ...data,
-        id: data.id || Date.now().toString(), // Use provided ID or generate a new one
-      };
-      allWorkDays.unshift(newWorkDay);
-      await writeWorkDays(allWorkDays);
-      revalidateAll();
-      return { success: true, id: newWorkDay.id, operation: 'created' };
+    // Se um ID é fornecido, tentamos atualizar.
+    if (data.id && data.id !== 'today' && data.id !== 'other-day') {
+      const existingDayIndex = allWorkDays.findIndex(d => d.id === data.id);
+      if (existingDayIndex > -1) {
+        // Update existing entry
+        allWorkDays[existingDayIndex] = { ...allWorkDays[existingDayIndex], ...data };
+        await writeWorkDays(allWorkDays);
+        revalidateAll();
+        return { success: true, id: data.id, operation: 'updated' };
+      }
     }
+    
+    // Se não há ID ou o ID não foi encontrado, criamos um novo registro.
+    // Isso permite múltiplos registros para o mesmo dia.
+    const newWorkDay: WorkDay = {
+      ...data,
+      id: Date.now().toString(), // Always generate a new unique ID
+    };
+    allWorkDays.unshift(newWorkDay); // Add as the newest entry
+    await writeWorkDays(allWorkDays);
+    revalidateAll();
+    return { success: true, id: newWorkDay.id, operation: 'created' };
+
   } catch (e) {
     console.error("Error adding or updating work day: ", e);
     const errorMessage = e instanceof Error ? e.message : "Failed to save work day.";
@@ -311,6 +310,8 @@ export async function getWorkDays(): Promise<WorkDay[]> {
 
 export async function findWorkDayByDate(date: string): Promise<WorkDay | null> {
     const allWorkDays = await readWorkDays();
+    // This function will now find the *first* entry for a given date.
+    // For editing, we'll need to pass specific IDs.
     return allWorkDays.find(day => format(day.date, 'yyyy-MM-dd') === date) || null;
 }
 
@@ -338,7 +339,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         totalLucro: 0,
         totalCombustivel: 0,
         totalExtras: 0,
-        diasTrabalhados: workDays.length,
+        diasTrabalhados: new Set(workDays.map(d => d.date.toDateString())).size,
         totalKm: 0,
         totalHoras: 0,
         totalViagens: 0,
@@ -647,3 +648,5 @@ export async function getReportData(allWorkDays: WorkDay[], filters: ReportFilte
     rawWorkDays: filteredDays,
   };
 }
+
+    
