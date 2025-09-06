@@ -30,6 +30,14 @@ export interface WorkDay {
   maintenanceEntries: { id: number, description: string, amount: number }[];
 }
 
+export interface GroupedWorkDay {
+  date: Date;
+  totalProfit: number;
+  totalHours: number;
+  totalKm: number;
+  entries: WorkDay[];
+}
+
 export interface ImportedWorkDay {
     date: string;
     km: string;
@@ -306,6 +314,87 @@ export async function getWorkDaysForDate(date: Date): Promise<WorkDay[]> {
     return allWorkDays.filter(day => isSameDay(day.date, date));
 }
 
+export async function getFilteredWorkDays(
+  filters: ReportFilterValues
+): Promise<GroupedWorkDay[]> {
+  const allWorkDays = await readWorkDays();
+  let filteredEntries: WorkDay[] = [];
+
+  const now = new Date();
+  let interval: { start: Date; end: Date } | null = null;
+  switch (filters.type) {
+    case 'all':
+      filteredEntries = allWorkDays;
+      break;
+    case 'today':
+      interval = { start: startOfDay(now), end: endOfDay(now) };
+      break;
+    case 'thisWeek':
+      interval = { start: startOfWeek(now), end: endOfWeek(now) };
+      break;
+    case 'thisMonth':
+      interval = { start: startOfMonth(now), end: endOfMonth(now) };
+      break;
+    case 'specificMonth':
+      if (filters.year !== undefined && filters.month !== undefined) {
+        interval = { start: startOfMonth(new Date(filters.year, filters.month)), end: endOfMonth(new Date(filters.year, filters.month)) };
+      }
+      break;
+    case 'specificYear':
+      if (filters.year !== undefined) {
+        interval = { start: startOfYear(new Date(filters.year, 0)), end: endOfYear(new Date(filters.year, 0)) };
+      }
+      break;
+    case 'custom':
+      if (filters.dateRange?.from) {
+        interval = { start: startOfDay(filters.dateRange.from), end: filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from) };
+      }
+      break;
+  }
+  if (interval) {
+    filteredEntries = allWorkDays.filter(d => isWithinInterval(d.date, interval!));
+  } else if(filters.type !== 'all') {
+    // If no interval could be determined and it's not 'all', return empty.
+    return [];
+  }
+
+  return groupWorkDays(filteredEntries).sort((a, b) => b.date.getTime() - a.date.getTime());
+}
+
+
+function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
+  const grouped = new Map<string, GroupedWorkDay>();
+
+  workDays.forEach(day => {
+    const dateKey = format(startOfDay(day.date), 'yyyy-MM-dd');
+    
+    let group = grouped.get(dateKey);
+    if (!group) {
+      group = {
+        date: startOfDay(day.date),
+        totalProfit: 0,
+        totalHours: 0,
+        totalKm: 0,
+        entries: [],
+      };
+      grouped.set(dateKey, group);
+    }
+    
+    const earnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
+    const fuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
+    const maintenance = day.maintenanceEntries?.reduce((sum, m) => sum + m.amount, 0) || 0;
+    const profit = earnings - fuel - maintenance;
+
+    group.totalProfit += profit;
+    group.totalHours += day.hours;
+    group.totalKm += day.km;
+    group.entries.push(day);
+  });
+
+  return Array.from(grouped.values());
+}
+
+
 const timeToMinutes = (time: string): number => {
     if (!time || !time.includes(':')) return 0;
     const [hours, minutes] = time.split(':').map(Number);
@@ -541,7 +630,7 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
   if (interval) {
     filteredDays = allWorkDays.filter(d => isWithinInterval(new Date(d.date), interval!));
   } else {
-    filteredDays = allWorkDays; // Default to all if no interval matches, e.g., 'all' type with no days.
+    filteredDays = []; // Default to empty if no interval matches
   }
   
   const allMaintenance = await getMaintenanceRecords();

@@ -76,15 +76,14 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const [data, setData] = useState<Partial<DashboardData>>(initialData);
   const [isLoading, startTransition] = useTransition();
 
-  // Busca os dados de "hoje" no cliente assim que o componente é montado.
   useEffect(() => {
-    if (!data.hoje) {
-      startTransition(async () => {
-        const todayData = await getPeriodData('hoje');
-        setData(prevData => ({ ...prevData, hoje: todayData }));
-      });
-    }
-  }, []); // O array de dependências vazio garante que isso rode apenas uma vez.
+    // This effect now fetches data for the default period ("hoje") after the component mounts.
+    // This makes the initial page load faster.
+    startTransition(async () => {
+      const todayData = await getPeriodData('hoje');
+      setData(prevData => ({ ...prevData, hoje: todayData }));
+    });
+  }, []); // The empty dependency array ensures this runs only once on mount.
 
   const handlePeriodChange = (newPeriod: Period) => {
     setPeriod(newPeriod);
@@ -174,7 +173,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                   <CardDescription>
                     Detalhes sobre o desempenho das suas corridas por categoria.
                   </CardDescription>
-              </CardHeader>
+              </Header>
               <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-2">
                     <h3 className="font-semibold flex items-center gap-2">

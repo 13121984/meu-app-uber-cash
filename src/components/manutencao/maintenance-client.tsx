@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useTransition, useEffect } from 'react';
+import React, { useState, useMemo, useTransition, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -25,12 +25,12 @@ import {
 
 import { Maintenance, deleteMaintenance, deleteAllMaintenance, getFilteredMaintenanceRecords } from "@/services/maintenance.service";
 import { MaintenanceForm } from "./maintenance-form";
-import { HistoryFilters } from '@/components/gerenciamento/history-filters';
+import { ReportsFilter } from '@/components/relatorios/reports-filter';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Wrench, Trash2, Edit, DollarSign, Filter, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { Skeleton } from '../ui/skeleton';
 
@@ -52,7 +52,6 @@ const SummaryCard = ({ title, value, description, icon: Icon, iconClassName }: {
 
 export function MaintenanceClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [records, setRecords] = useState<Maintenance[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -60,26 +59,19 @@ export function MaintenanceClient() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<Maintenance | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
 
-  const initialFilters = useMemo(() => {
-    const type = (searchParams.get('type') as ReportFilterValues['type']) || 'today';
-    const year = searchParams.get('year') ? parseInt(searchParams.get('year')!) : undefined;
-    const month = searchParams.get('month') ? parseInt(searchParams.get('month')!) : undefined;
-    return { type, year, month };
-  }, [searchParams]);
-
-  useEffect(() => {
+  const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
+    setCurrentFilters(filters);
     startTransition(async () => {
-      const currentFilters = new URLSearchParams(window.location.search);
-      const type = (currentFilters.get('type') as ReportFilterValues['type']) || 'today';
-      const year = currentFilters.get('year') ? parseInt(currentFilters.get('year')!) : undefined;
-      const month = currentFilters.get('month') ? parseInt(currentFilters.get('month')!) : undefined;
-      // Adicionar lógica para dateRange se necessário
-      const data = await getFilteredMaintenanceRecords({ type, year, month });
-      setRecords(data);
+      try {
+        const data = await getFilteredMaintenanceRecords(filters);
+        setRecords(data);
+      } catch (e) {
+        toast({ title: "Erro ao buscar dados", variant: "destructive" });
+      }
     });
-  }, [searchParams]);
-
+  }, []);
 
   const filteredTotal = useMemo(() => {
     return records.reduce((sum, record) => sum + record.amount, 0);
@@ -89,7 +81,9 @@ export function MaintenanceClient() {
   const handleSuccess = () => {
       setIsFormOpen(false);
       setSelectedRecord(null);
-      router.refresh(); 
+      if (currentFilters) {
+        handleApplyFilters(currentFilters);
+      }
   }
 
   const handleEdit = (record: Maintenance) => {
@@ -102,7 +96,9 @@ export function MaintenanceClient() {
     const result = await deleteMaintenance(id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Registro apagado." });
-      router.refresh();
+      if (currentFilters) {
+        handleApplyFilters(currentFilters);
+      }
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }
@@ -114,12 +110,96 @@ export function MaintenanceClient() {
     const result = await deleteAllMaintenance();
      if(result.success) {
       toast({ title: "Sucesso!", description: "Todos os registros foram apagados." });
-      router.refresh();
+      if (currentFilters) {
+        handleApplyFilters(currentFilters);
+      } else {
+        setRecords([]);
+      }
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }
     setIsAlertOpen(false);
     setIsDeleting(false);
+  }
+  
+  const renderContent = () => {
+    if (isPending) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        );
+    }
+    
+    if (!currentFilters) {
+        return (
+            <div className="text-center py-20 text-muted-foreground border-dashed border-2 rounded-lg mt-4">
+                <Wrench className="mx-auto h-12 w-12" />
+                <p className="mt-4 font-semibold">Selecione um período para começar</p>
+                <p className="text-sm">Use os filtros acima para visualizar seus registros de manutenção.</p>
+            </div>
+        )
+    }
+
+    if (records.length === 0) {
+        return (
+            <div className="text-center py-20 text-muted-foreground border-dashed border-2 rounded-lg mt-4">
+                <Wrench className="mx-auto h-12 w-12" />
+                <p className="mt-4 font-semibold">Nenhum registro de manutenção encontrado</p>
+                <p className="text-sm">Tente ajustar os filtros ou adicione um novo registro.</p>
+            </div>
+        );
+    }
+    
+    return (
+      <div className="space-y-4 mt-4">
+          <div className="pt-4 grid gap-4 md:grid-cols-2">
+              <SummaryCard 
+                  title="Total Gasto (Filtrado)"
+                  value={formatCurrency(filteredTotal)}
+                  description={`${records.length} ${records.length === 1 ? 'registro encontrado' : 'registros encontrados'}`}
+                  icon={DollarSign}
+                  iconClassName="text-red-500"
+              />
+              <SummaryCard 
+                  title="Custo Médio (Filtrado)"
+                  value={formatCurrency(records.length > 0 ? filteredTotal / records.length : 0)}
+                  description={`Média por serviço no período`}
+                  icon={Wrench}
+                  iconClassName="text-orange-500"
+              />
+          </div>
+          {records.map(record => (
+          <Card key={record.id}>
+              <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex-1 space-y-1">
+                      <p className="font-bold">{record.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                          {format(new Date(record.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
+                      </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                      <p className="font-semibold text-red-500">{formatCurrency(record.amount)}</p>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(record)} disabled={isDeleting}>
+                          <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(record.id!)} disabled={isDeleting}>
+                          {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </Button>
+                  </div>
+              </CardContent>
+          </Card>
+          ))}
+          {records.length > 0 && (
+            <div className="pt-4 flex justify-end">
+              <Button variant="destructive" onClick={() => setIsAlertOpen(true)} disabled={isDeleting}>
+                  {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                Apagar Todos os Registros
+              </Button>
+            </div>
+          )}
+      </div>
+    )
   }
 
 
@@ -148,79 +228,11 @@ export function MaintenanceClient() {
                 </DialogTrigger>
             </CardHeader>
             <CardContent className="space-y-4">
-                <HistoryFilters 
+                <ReportsFilter 
+                    onApplyFilters={handleApplyFilters}
                     isPending={isPending}
-                    startTransition={startTransition}
-                    initialFilters={initialFilters}
                 />
-
-                {isPending ? (
-                  <div className="pt-4 grid gap-4 md:grid-cols-2">
-                    <Skeleton className="h-24 w-full"/>
-                    <Skeleton className="h-24 w-full"/>
-                  </div>
-                ) : (
-                  <div className="pt-4 grid gap-4 md:grid-cols-2">
-                      <SummaryCard 
-                          title="Total Gasto (Filtrado)"
-                          value={formatCurrency(filteredTotal)}
-                          description={`${records.length} ${records.length === 1 ? 'registro encontrado' : 'registros encontrados'}`}
-                          icon={DollarSign}
-                          iconClassName="text-red-500"
-                      />
-                      <SummaryCard 
-                          title="Custo Médio (Filtrado)"
-                          value={formatCurrency(records.length > 0 ? filteredTotal / records.length : 0)}
-                          description={`Média por serviço no período`}
-                          icon={Wrench}
-                          iconClassName="text-orange-500"
-                      />
-                  </div>
-                )}
-
-                {isPending ? (
-                  <div className="flex justify-center items-center h-64">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                  </div>
-                ) : records.length === 0 ? (
-                <div className="text-center py-20 text-muted-foreground border-dashed border-2 rounded-lg mt-4">
-                    <Wrench className="mx-auto h-12 w-12" />
-                    <p className="mt-4 font-semibold">Nenhum registro de manutenção encontrado</p>
-                    <p className="text-sm">Tente ajustar os filtros ou adicione um novo registro.</p>
-                </div>
-                ) : (
-                <div className="space-y-4 mt-4">
-                    {records.map(record => (
-                    <Card key={record.id}>
-                        <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div className="flex-1 space-y-1">
-                                <p className="font-bold">{record.description}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {format(new Date(record.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                               <p className="font-semibold text-red-500">{formatCurrency(record.amount)}</p>
-                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(record)} disabled={isDeleting}>
-                                   <Edit className="h-4 w-4" />
-                               </Button>
-                               <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(record.id!)} disabled={isDeleting}>
-                                   {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                               </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    ))}
-                    {records.length > 0 && (
-                      <div className="pt-4 flex justify-end">
-                        <Button variant="destructive" onClick={() => setIsAlertOpen(true)} disabled={isDeleting}>
-                           {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                          Apagar Todos os Registros
-                        </Button>
-                      </div>
-                    )}
-                </div>
-                )}
+                {renderContent()}
             </CardContent>
         </Card>
         </div>
