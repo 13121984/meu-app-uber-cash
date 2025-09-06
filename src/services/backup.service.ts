@@ -28,14 +28,23 @@ async function ensureFile(filePath: string, defaultContent: object): Promise<voi
  */
 export async function getBackupData(): Promise<Omit<BackupData, 'csvContent'>> {
   await ensureFile(dataFilePath, { lastBackupDate: null, fileName: null, csvContent: null });
-  const fileContent = await fs.readFile(dataFilePath, 'utf8');
-  const data = JSON.parse(fileContent);
-  // Retorna os dados sem o conteúdo CSV pesado
-  return {
-    lastBackupDate: data.lastBackupDate,
-    fileName: data.fileName,
-    csvContent: null, // Exclui o conteúdo
-  };
+  try {
+    const fileContent = await fs.readFile(dataFilePath, 'utf8');
+    const data = JSON.parse(fileContent);
+    // Retorna os dados sem o conteúdo CSV pesado
+    return {
+      lastBackupDate: data.lastBackupDate,
+      fileName: data.fileName,
+      csvContent: null, // Exclui o conteúdo
+    };
+  } catch (error) {
+    // Retorna um estado padrão em caso de arquivo malformado ou outro erro de leitura
+    return {
+      lastBackupDate: null,
+      fileName: null,
+      csvContent: null,
+    };
+  }
 }
 
 /**

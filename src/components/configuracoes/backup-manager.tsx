@@ -23,7 +23,9 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Data inválida";
     try {
-      return format(parseISO(dateString), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+      // Usar new Date() para garantir a interpretação correta da string ISO
+      const date = new Date(dateString);
+      return format(date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
     } catch (e) {
       return "Data inválida";
     }
