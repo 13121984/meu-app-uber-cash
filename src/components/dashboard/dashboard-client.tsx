@@ -2,27 +2,32 @@
 "use client"
 
 import React, { useState, useTransition, useEffect } from "react"
-import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Hourglass, Route, Loader2, BarChart, PlusCircle } from "lucide-react"
+import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Hourglass, Route, Loader2, BarChart, PlusCircle, Wrench, LineChart, PieChart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatsCard } from "./stats-card"
 import { GoalProgress } from "./goal-progress"
 import { cn } from "@/lib/utils"
 import dynamic from 'next/dynamic';
-import { getSummaryForPeriod, PeriodData, SummaryData } from "@/services/summary.service"
+import { ReportData, getReportData } from "@/services/summary.service"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { allStats, mandatoryCards, allCharts } from '@/lib/dashboard-items';
+import { ReportFilterValues } from "@/app/relatorios/actions"
 
 
-const EarningsPieChart = dynamic(() => import('./earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const EarningsPieChart = dynamic(() => import('../dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const ProfitEvolutionChart = dynamic(() => import('../relatorios/profit-evolution-chart').then(mod => mod.ProfitEvolutionChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
-const EarningsBarChart = dynamic(() => import('./earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
-const TripsBarChart = dynamic(() => import('./trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
-const MaintenanceSummary = dynamic(() => import('./maintenance-summary').then(mod => mod.MaintenanceSummary), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const EarningsBarChart = dynamic(() => import('../dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const TripsBarChart = dynamic(() => import('../dashboard/trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const MaintenanceSummary = dynamic(() => import('../dashboard/maintenance-summary').then(mod => mod.MaintenanceSummary), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const FuelBarChart = dynamic(() => import('../relatorios/fuel-bar-chart').then(mod => mod.FuelBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const DailyTripsChart = dynamic(() => import('../relatorios/daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const AverageEarningPerHourChart = dynamic(() => import('../relatorios/average-earning-per-hour-chart').then(mod => mod.AverageEarningPerHourChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const AverageEarningPerTripChart = dynamic(() => import('../relatorios/average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
 
-type Period = "hoje" | "semana" | "mes"
+type Period = "today" | "thisWeek" | "thisMonth"
 
 const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
   earningsComposition: EarningsPieChart,
@@ -30,34 +35,38 @@ const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
   earningsByCategory: EarningsBarChart,
   tripsByCategory: TripsBarChart,
   maintenance: MaintenanceSummary,
+  fuelExpenses: FuelBarChart,
+  dailyTrips: DailyTripsChart,
+  averageEarningPerHour: AverageEarningPerHourChart,
+  averageEarningPerTrip: AverageEarningPerTripChart,
 };
 
 export function DashboardClient() {
   const { user } = useAuth();
-  const [period, setPeriod] = useState<Period | null>(null);
-  const [data, setData] = useState<Partial<SummaryData>>({});
+  const [period, setPeriod] = useState<Period>('today');
+  const [data, setData] = useState<ReportData | null>(null);
   const [isLoading, startTransition] = useTransition();
 
   const handlePeriodChange = (newPeriod: Period) => {
     setPeriod(newPeriod);
     startTransition(async () => {
-      const summary = await getSummaryForPeriod();
+      const summary = await getReportData({ type: newPeriod });
       setData(summary);
     });
   };
 
   useEffect(() => {
-    handlePeriodChange('hoje');
+    handlePeriodChange('today');
   }, []);
 
   const periodMap: Record<Period, string> = {
-      hoje: "Hoje",
-      semana: "Esta Semana",
-      mes: "Este Mês"
+      today: "Hoje",
+      thisWeek: "Esta Semana",
+      thisMonth: "Este Mês"
   };
   
-  const currentData = period ? data[period] : null;
-  const currentPeriodName = period ? periodMap[period] : 'Nenhum período selecionado';
+  const currentData = data;
+  const currentPeriodName = periodMap[period];
   
   const isPremium = user?.isPremium || false;
 
@@ -120,13 +129,17 @@ export function DashboardClient() {
       const userChartOrder = user?.preferences?.reportChartOrder || allCharts.filter(c => c.isMandatory).map(c => c.id);
       const chartsToShow = userChartOrder.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
-      const getChartData = (id: string) => {
-        switch (id) {
+      const getChartData = (chartId: string) => {
+        switch (chartId) {
             case 'earningsComposition': return currentData.profitComposition;
-            case 'profitEvolution': return (currentData as any).profitEvolution || []; // Add fallback
+            case 'profitEvolution': return currentData.profitEvolution;
             case 'earningsByCategory': return currentData.earningsByCategory;
             case 'tripsByCategory': return currentData.tripsByCategory;
             case 'maintenance': return currentData.maintenance;
+            case 'fuelExpenses': return currentData.fuelExpenses;
+            case 'dailyTrips': return currentData.dailyTrips;
+            case 'averageEarningPerHour': return currentData.averageEarningPerHour;
+            case 'averageEarningPerTrip': return currentData.averageEarningPerTrip;
             default: return [];
         }
       }
@@ -150,7 +163,7 @@ export function DashboardClient() {
 
           <Card>
               <CardHeader>
-                  <CardTitle className="font-headline text-lg">Meta de Lucro ({period ? periodMap[period] : ''})</CardTitle>
+                  <CardTitle className="font-headline text-lg">Meta de Lucro ({periodMap[period]})</CardTitle>
               </CardHeader>
               <CardContent>
                 <GoalProgress progress={(currentData.meta.target > 0 ? (currentData.totalLucro / currentData.meta.target) * 100 : 0)} target={currentData.meta.target} current={currentData.totalLucro} />
@@ -203,7 +216,7 @@ export function DashboardClient() {
               <CardTitle className="font-headline text-lg">Filtrar Período</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center gap-2">
-             {(["hoje", "semana", "mes"] as Period[]).map(p => (
+             {(["today", "thisWeek", "thisMonth"] as Period[]).map(p => (
                  <Button 
                     key={p} 
                     variant={period === p ? "default" : "secondary"}
@@ -225,3 +238,5 @@ export function DashboardClient() {
     </div>
   )
 }
+
+    

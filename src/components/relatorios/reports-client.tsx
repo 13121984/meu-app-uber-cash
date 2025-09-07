@@ -5,7 +5,7 @@ import React, { useState, useTransition, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { ReportsFilter } from './reports-filter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Loader2, Info, PlusCircle } from 'lucide-react';
+import { Loader2, Info, PlusCircle, Wrench, LineChart, PieChart, BarChart3, CandlestickChart } from 'lucide-react';
 import { ReportData, getReportData } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
@@ -184,3 +184,5 @@ export function ReportsClient() {
     </div>
   );
 }
+
+    
