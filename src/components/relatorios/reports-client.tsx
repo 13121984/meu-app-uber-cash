@@ -44,6 +44,7 @@ export function ReportsClient() {
     { title: "Manutenção", value: reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0, icon: Wrench, isCurrency: true, iconBg: "bg-orange-500/20", iconColor: "text-orange-400" },
     { title: "Combustível", value: reportData.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
     { title: "KM Rodados", value: reportData.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
+    { title: "Horas Trabalhadas", value: reportData.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
   ] : [], [reportData]);
 
   const renderContent = () => {
