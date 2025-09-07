@@ -33,7 +33,10 @@ const DraggableCard = ({ id, title, description, children, onPointerDown, ...pro
                          <Button
                             variant="ghost"
                             size="icon"
-                            onPointerDown={onPointerDown}
+                            onPointerDown={(e) => {
+                                e.preventDefault();
+                                onPointerDown(e);
+                            }}
                             className="cursor-grab active:cursor-grabbing p-1 h-8 w-8"
                         >
                             <GripVertical className="h-5 w-5 text-muted-foreground" />
