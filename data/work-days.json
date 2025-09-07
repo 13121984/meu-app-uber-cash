@@ -1,35 +1,6 @@
 [
   {
     "date": "2025-09-06T00:00:00.000Z",
-    "km": 25.5,
-    "hours": 6.416666666666667,
-    "timeEntries": [
-      {
-        "id": 1757136803353,
-        "start": "17:30",
-        "end": "23:55"
-      }
-    ],
-    "earnings": [
-      {
-        "id": 1757136835657,
-        "category": "99 Pop",
-        "trips": 15,
-        "amount": 250.5
-      }
-    ],
-    "fuelEntries": [
-      {
-        "id": 1757136896664,
-        "type": "GNV",
-        "paid": 30.15,
-        "price": 4.77
-      }
-    ],
-    "id": "1757136957135"
-  },
-  {
-    "date": "2025-09-06T00:00:00.000Z",
     "km": 30,
     "hours": 2.5833333333333335,
     "timeEntries": [
@@ -55,7 +26,8 @@
         "price": 5
       }
     ],
-    "id": "1757136362904"
+    "id": "1757136362904",
+    "maintenanceEntries": []
   },
   {
     "date": "2025-09-01T03:00:00.000Z",
@@ -77,7 +49,3245 @@
       }
     ],
     "fuelEntries": [],
-    "id": "1757121502217"
+    "id": "1757121502217",
+    "maintenanceEntries": []
+  },
+  {
+    "id": "17572145141620.20695626157066926",
+    "date": "2025-07-22T00:00:00.000Z",
+    "km": 54.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.4412,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.1646,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 3
+      },
+      {
+        "id": 1757214514162.9275,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 27.12
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.9951741235571987",
+    "date": "2025-07-20T00:00:00.000Z",
+    "km": 127.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.319,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.711,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 7
+      },
+      {
+        "id": 1757214514162.834,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 82.05
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.195203555741561",
+    "date": "2025-07-19T00:00:00.000Z",
+    "km": 145.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.5085,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.1992,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 5
+      },
+      {
+        "id": 1757214514162.0977,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 63.43
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.7874426842551407",
+    "date": "2025-07-18T00:00:00.000Z",
+    "km": 146.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.289,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.1099,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 13
+      },
+      {
+        "id": 1757214514162.8345,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 141.62
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.6843144180245606",
+    "date": "2025-07-16T00:00:00.000Z",
+    "km": 115.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.4265,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.485,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 13
+      },
+      {
+        "id": 1757214514162.7102,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 142.35
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.907633098103791",
+    "date": "2025-07-15T00:00:00.000Z",
+    "km": 42,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.8938,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.8499,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514162.3594,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 58.84
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.03403888576007441",
+    "date": "2025-07-14T00:00:00.000Z",
+    "km": 146,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.7385,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.5981,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 7
+      },
+      {
+        "id": 1757214514162.3086,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 63.84
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.48081084715436573",
+    "date": "2025-07-12T00:00:00.000Z",
+    "km": 117.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.1155,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.7217,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514162.483,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 88.92
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.45267326245984263",
+    "date": "2025-07-11T00:00:00.000Z",
+    "km": 112.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.974,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.849,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514162.1553,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 105.6
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.18255942644411327",
+    "date": "2025-07-10T00:00:00.000Z",
+    "km": 113.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.833,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.7048,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514162.9287,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 93.4
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.047663500594719244",
+    "date": "2025-07-09T00:00:00.000Z",
+    "km": 44.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.9993,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514162.624,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 64.32
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.7100581266014254",
+    "date": "2025-07-06T00:00:00.000Z",
+    "km": 138.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514162.6453,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514162.3474,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 255.27
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141620.7687918990786997",
+    "date": "2025-07-05T00:00:00.000Z",
+    "km": 104.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.3271,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514162.3765,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514162.4822,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 10.8
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.8974670778394005",
+    "date": "2025-07-04T00:00:00.000Z",
+    "km": 36,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.1553,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.251,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 50
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.1899547764196612",
+    "date": "2025-07-03T00:00:00.000Z",
+    "km": 142.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.7722,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2651,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514161.3574,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 92.2
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.8735300508000001",
+    "date": "2025-07-02T00:00:00.000Z",
+    "km": 113.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.5842,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2834,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.7312,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 77.19
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.37514188890857114",
+    "date": "2025-07-01T00:00:00.000Z",
+    "km": 101.1,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.8135,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.3872,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 10
+      },
+      {
+        "id": 1757214514161.2625,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 133.51
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.9071453142896189",
+    "date": "2025-06-30T00:00:00.000Z",
+    "km": 33,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.8179,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.9836,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.3872,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 6.9
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.9331985678445041",
+    "date": "2025-06-28T00:00:00.000Z",
+    "km": 64,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.9636,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2969,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.3523,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 14.16
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.46169412280666533",
+    "date": "2025-06-27T00:00:00.000Z",
+    "km": 105.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.5825,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.3813,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 4
+      },
+      {
+        "id": 1757214514161.0803,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 41.88
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.39899872369600575",
+    "date": "2025-06-26T00:00:00.000Z",
+    "km": 108.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.5337,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.274,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 4
+      },
+      {
+        "id": 1757214514161.76,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 35.14
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6948455989930982",
+    "date": "2025-06-25T00:00:00.000Z",
+    "km": 121,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.2334,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.1448,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 3
+      },
+      {
+        "id": 1757214514161.802,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 49.68
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.24411504777104232",
+    "date": "2025-06-24T00:00:00.000Z",
+    "km": 160,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.9817,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.8347,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514161.6035,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 122.55
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.5280570776009772",
+    "date": "2025-06-23T00:00:00.000Z",
+    "km": 126,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.6226,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.1653,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514161.4932,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 108.23
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.7049894284697544",
+    "date": "2025-06-21T00:00:00.000Z",
+    "km": 105.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.1575,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 13
+      },
+      {
+        "id": 1757214514161.4124,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 240.43
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.25448857104075806",
+    "date": "2025-06-20T00:00:00.000Z",
+    "km": 47.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.7974,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.32,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 100.13
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.5764728111470907",
+    "date": "2025-06-19T00:00:00.000Z",
+    "km": 55.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4072,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514161.5806,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 112.7
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.11523679545634136",
+    "date": "2025-06-15T00:00:00.000Z",
+    "km": 69,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.951,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 10
+      },
+      {
+        "id": 1757214514161.637,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 151.68
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.5660091194932049",
+    "date": "2025-06-14T00:00:00.000Z",
+    "km": 200.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.2993,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.7783,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 2
+      },
+      {
+        "id": 1757214514161.9663,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 24.8
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.43308507701655796",
+    "date": "2025-06-13T00:00:00.000Z",
+    "km": 97.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.038,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514161.5862,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 197.22
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6971376324670902",
+    "date": "2025-06-12T00:00:00.000Z",
+    "km": 100.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4453,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 8
+      },
+      {
+        "id": 1757214514161.569,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 189.54
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.36911739271433164",
+    "date": "2025-06-07T00:00:00.000Z",
+    "km": 117.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.2808,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.5024,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 2
+      },
+      {
+        "id": 1757214514161.7654,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 121.2
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.2486851081354975",
+    "date": "2025-06-06T00:00:00.000Z",
+    "km": 146.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.3743,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 14
+      },
+      {
+        "id": 1757214514161.5132,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 255.2
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6373636114866865",
+    "date": "2025-06-05T00:00:00.000Z",
+    "km": 95.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4644,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.0134,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.8638,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 6.6
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.5032314296970466",
+    "date": "2025-06-01T00:00:00.000Z",
+    "km": 76.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.9976,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2126,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 4
+      },
+      {
+        "id": 1757214514161.5188,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 66.66
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6165942612956927",
+    "date": "2025-05-31T00:00:00.000Z",
+    "km": 244.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.0715,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2974,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.3606,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 13.93
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6014272038907831",
+    "date": "2025-05-30T00:00:00.000Z",
+    "km": 162.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.9177,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.5557,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.102,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 77.38
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.32922360785528504",
+    "date": "2025-05-29T00:00:00.000Z",
+    "km": 90,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.266,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.8838,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 10
+      },
+      {
+        "id": 1757214514161.4849,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 116.34
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.07099815992443359",
+    "date": "2025-05-23T00:00:00.000Z",
+    "km": 49,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.149,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.3567,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 3
+      },
+      {
+        "id": 1757214514161.9453,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 41.21
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.3592940717388513",
+    "date": "2025-05-22T00:00:00.000Z",
+    "km": 181.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.7961,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.9312,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514161.666,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 146.45
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.8740169301789822",
+    "date": "2025-05-21T00:00:00.000Z",
+    "km": 38.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.0842,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.025,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 4
+      },
+      {
+        "id": 1757214514161.6885,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 41.91
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.30567166589805184",
+    "date": "2025-05-20T00:00:00.000Z",
+    "km": 0,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.0327,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 8
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.554885997653924",
+    "date": "2025-05-19T00:00:00.000Z",
+    "km": 156.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.42,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2422,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514161.6816,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 132.31
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.38784375746131405",
+    "date": "2025-05-18T00:00:00.000Z",
+    "km": 118,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.701,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.5933,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.7957,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 82.46
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.8492053656453258",
+    "date": "2025-05-17T00:00:00.000Z",
+    "km": 195.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.5933,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.1804,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 3
+      },
+      {
+        "id": 1757214514161.1086,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 62.4
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.011810342856735767",
+    "date": "2025-05-16T00:00:00.000Z",
+    "km": 187.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.942,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.3188,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514161.0178,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 108.86
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.23585067253523673",
+    "date": "2025-05-15T00:00:00.000Z",
+    "km": 116.4,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.782,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 10
+      },
+      {
+        "id": 1757214514161.1365,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 202
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.716512341060586",
+    "date": "2025-04-20T00:00:00.000Z",
+    "km": 171.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.785,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 18
+      },
+      {
+        "id": 1757214514161.3418,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 336.32
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.7795367192063796",
+    "date": "2025-04-16T00:00:00.000Z",
+    "km": 188.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4915,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.1086,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.1636,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 93.61
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.3859176686728718",
+    "date": "2025-04-14T00:00:00.000Z",
+    "km": 158.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.2117,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.4736,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.0684,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 8.9
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.7761026774190962",
+    "date": "2025-04-13T00:00:00.000Z",
+    "km": 134.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.015,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 15
+      },
+      {
+        "id": 1757214514161.8967,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 226
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.5462127966456578",
+    "date": "2025-04-12T00:00:00.000Z",
+    "km": 191.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.6968,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 21
+      },
+      {
+        "id": 1757214514161.1902,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 357.6
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.311478023387433",
+    "date": "2025-04-11T00:00:00.000Z",
+    "km": 199.1,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4912,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 19
+      },
+      {
+        "id": 1757214514161.2341,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 302.94
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.35245821320966875",
+    "date": "2025-03-30T00:00:00.000Z",
+    "km": 83.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.532,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514161.1072,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 160
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.3127486882886945",
+    "date": "2025-03-29T00:00:00.000Z",
+    "km": 135.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.7922,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 14
+      },
+      {
+        "id": 1757214514161.7375,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 216.67
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.3850143353233628",
+    "date": "2025-03-28T00:00:00.000Z",
+    "km": 151.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.9795,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.1174,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 2
+      },
+      {
+        "id": 1757214514161.163,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 13.2
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6069816071078677",
+    "date": "2025-03-24T00:00:00.000Z",
+    "km": 46,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.7349,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.823,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.5398,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 88.4
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.5754798761606801",
+    "date": "2025-03-23T00:00:00.000Z",
+    "km": 103.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.266,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2078,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 22
+      },
+      {
+        "id": 1757214514161.694,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 249.42
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.22731032114587557",
+    "date": "2025-03-22T00:00:00.000Z",
+    "km": 147.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4795,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.1714,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514161.2363,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 89.82
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.21824512794079465",
+    "date": "2025-03-21T00:00:00.000Z",
+    "km": 187.4,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.7546,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.5579,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.4163,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 88.83
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.9543795515498754",
+    "date": "2025-03-15T00:00:00.000Z",
+    "km": 174.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.1973,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.5417,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 3
+      },
+      {
+        "id": 1757214514161.555,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 33.9
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6422253374057376",
+    "date": "2025-03-14T00:00:00.000Z",
+    "km": 143,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.786,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2175,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 7
+      },
+      {
+        "id": 1757214514161.0378,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 75.3
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.36899806133745794",
+    "date": "2025-03-13T00:00:00.000Z",
+    "km": 103.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.912,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.1633,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.3809,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 51.5
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.866747953183286",
+    "date": "2025-03-11T00:00:00.000Z",
+    "km": 36,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.9495,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.9192,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 2
+      },
+      {
+        "id": 1757214514161.9016,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 17.6
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.775975232689345",
+    "date": "2025-03-07T00:00:00.000Z",
+    "km": 38.1,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4304,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.7578,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 3
+      },
+      {
+        "id": 1757214514161.0618,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 28.34
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6270200594947173",
+    "date": "2025-03-06T00:00:00.000Z",
+    "km": 51.4,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.9233,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.189,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 90
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.15793837485958973",
+    "date": "2025-03-05T00:00:00.000Z",
+    "km": 16.76,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.1184,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.169,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 25
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.7271685010128492",
+    "date": "2025-03-04T00:00:00.000Z",
+    "km": 39.1,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.1914,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514161.0454,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 29.16
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.2843684797475685",
+    "date": "2025-03-02T00:00:00.000Z",
+    "km": 30,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4146,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.2046,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 4
+      },
+      {
+        "id": 1757214514161.7844,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 51.75
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6471261194070383",
+    "date": "2025-03-01T00:00:00.000Z",
+    "km": 92.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.4282,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.206,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 12
+      },
+      {
+        "id": 1757214514161.777,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 143.9
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.3234626686482247",
+    "date": "2025-02-28T00:00:00.000Z",
+    "km": 204,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.5547,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.163,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 15
+      },
+      {
+        "id": 1757214514161.9868,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 205.1
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.32073222232436804",
+    "date": "2025-02-27T00:00:00.000Z",
+    "km": 102.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.0923,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.5916,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514161.1548,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 88.99
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.9313683108203761",
+    "date": "2025-02-26T00:00:00.000Z",
+    "km": 69.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.427,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.98,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 10
+      },
+      {
+        "id": 1757214514161.74,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 90.7
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.9526792822930465",
+    "date": "2025-02-19T00:00:00.000Z",
+    "km": 106.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.6729,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.9365,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514161.065,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 114.24
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.21750858555665586",
+    "date": "2025-02-18T00:00:00.000Z",
+    "km": 115.1,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.9272,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.4326,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 8
+      },
+      {
+        "id": 1757214514161.109,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 126.27
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6652476567905214",
+    "date": "2025-02-17T00:00:00.000Z",
+    "km": 147.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.6904,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.459,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 10
+      },
+      {
+        "id": 1757214514161.062,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 96.2
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.8547523866167255",
+    "date": "2025-02-16T00:00:00.000Z",
+    "km": 15,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.649,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 2
+      },
+      {
+        "id": 1757214514161.7874,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 45
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.6318730531319687",
+    "date": "2025-02-15T00:00:00.000Z",
+    "km": 51.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.2415,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.3752,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 6
+      },
+      {
+        "id": 1757214514161.5972,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 59.4
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.9301862326693451",
+    "date": "2025-02-14T00:00:00.000Z",
+    "km": 175.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.5588,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.021,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 7
+      },
+      {
+        "id": 1757214514161.2773,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 73.1
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.28309133112032736",
+    "date": "2025-02-13T00:00:00.000Z",
+    "km": 79,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.2922,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.3877,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 16
+      },
+      {
+        "id": 1757214514161.122,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 105.97
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.5946031798104114",
+    "date": "2025-02-12T00:00:00.000Z",
+    "km": 135.4,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.809,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.9915,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 20
+      },
+      {
+        "id": 1757214514161.595,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 183.66
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141610.4496909759005445",
+    "date": "2025-02-11T00:00:00.000Z",
+    "km": 52.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514161.291,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514161.0283,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 7
+      },
+      {
+        "id": 1757214514161.1455,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 50.4
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.5629117552366514",
+    "date": "2025-02-10T00:00:00.000Z",
+    "km": 164.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.7334,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.8435,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 26
+      },
+      {
+        "id": 1757214514160.2903,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 243.3
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.6149560744907554",
+    "date": "2025-02-09T00:00:00.000Z",
+    "km": 26.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.516,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 3
+      },
+      {
+        "id": 1757214514160.42,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 75
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.8077968224834442",
+    "date": "2025-02-08T00:00:00.000Z",
+    "km": 142,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.5933,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.5955,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 23
+      },
+      {
+        "id": 1757214514160.7092,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 259.75
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.3993409513288657",
+    "date": "2025-02-07T00:00:00.000Z",
+    "km": 57.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.063,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.1584,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 7
+      },
+      {
+        "id": 1757214514160.9854,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 55.12
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.5512097774185967",
+    "date": "2025-02-06T00:00:00.000Z",
+    "km": 6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.9844,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514160.8066,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 15
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.5244009624961121",
+    "date": "2025-02-05T00:00:00.000Z",
+    "km": 109.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.7642,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.0623,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 15
+      },
+      {
+        "id": 1757214514160.5708,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 147.49
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.350308033798135",
+    "date": "2025-02-04T00:00:00.000Z",
+    "km": 61.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.441,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.1016,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514160.5237,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 105.1
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.8697994492080163",
+    "date": "2025-02-03T00:00:00.000Z",
+    "km": 103.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.2493,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.0212,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 13
+      },
+      {
+        "id": 1757214514160.2732,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 132.19
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.007709332850758699",
+    "date": "2025-02-02T00:00:00.000Z",
+    "km": 11.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.3135,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.4324,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 2
+      },
+      {
+        "id": 1757214514160.99,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 20
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.0032747138444291224",
+    "date": "2025-02-01T00:00:00.000Z",
+    "km": 55.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.644,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.8374,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 8
+      },
+      {
+        "id": 1757214514160.4397,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 67.1
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.42854099976618776",
+    "date": "2025-01-29T00:00:00.000Z",
+    "km": 106.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.4216,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.1038,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 13
+      },
+      {
+        "id": 1757214514160.0088,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 113.84
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.4758562517595477",
+    "date": "2025-01-28T00:00:00.000Z",
+    "km": 87,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.5984,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.6562,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 14
+      },
+      {
+        "id": 1757214514160.3179,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 139.4
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.8020140311264201",
+    "date": "2025-01-27T00:00:00.000Z",
+    "km": 40,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.4946,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.6782,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 4
+      },
+      {
+        "id": 1757214514160.1943,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 39.6
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.4919603051955732",
+    "date": "2025-01-26T00:00:00.000Z",
+    "km": 55.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.3882,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.822,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 8
+      },
+      {
+        "id": 1757214514160.5366,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 70.71
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.7333166456652593",
+    "date": "2025-01-25T00:00:00.000Z",
+    "km": 122.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.7065,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.9836,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 22
+      },
+      {
+        "id": 1757214514160.6296,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 190.1
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.7415247881842411",
+    "date": "2025-01-24T00:00:00.000Z",
+    "km": 102.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.3499,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.9126,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 14
+      },
+      {
+        "id": 1757214514160.5684,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 139.4
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.15145155257765386",
+    "date": "2025-01-23T00:00:00.000Z",
+    "km": 38.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.7063,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.2913,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 8
+      },
+      {
+        "id": 1757214514160.847,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 69.6
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.08277457917225939",
+    "date": "2025-01-22T00:00:00.000Z",
+    "km": 122.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.9072,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.6682,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 19
+      },
+      {
+        "id": 1757214514160.754,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 182.02
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.633408425470041",
+    "date": "2025-01-21T00:00:00.000Z",
+    "km": 75.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.2244,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.3984,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 13
+      },
+      {
+        "id": 1757214514160.219,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 113.2
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.007624170794658269",
+    "date": "2025-01-20T00:00:00.000Z",
+    "km": 96.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.1562,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.7898,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 16
+      },
+      {
+        "id": 1757214514160.8975,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 160.5
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.056926831129342714",
+    "date": "2025-01-19T00:00:00.000Z",
+    "km": 57.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.9575,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.823,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514160.0112,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 92.1
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.03275264187578997",
+    "date": "2025-01-18T00:00:00.000Z",
+    "km": 114.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.3374,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.1116,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 18
+      },
+      {
+        "id": 1757214514160.0242,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 179.23
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.6556368914112956",
+    "date": "2025-01-17T00:00:00.000Z",
+    "km": 160.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.85,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.656,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 21
+      },
+      {
+        "id": 1757214514160.8728,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 195.18
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.426541182838561",
+    "date": "2025-01-16T00:00:00.000Z",
+    "km": 24,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.8145,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.037,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 4
+      },
+      {
+        "id": 1757214514160.6404,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 30.64
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.00965426758112442",
+    "date": "2025-01-15T00:00:00.000Z",
+    "km": 56,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.4138,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.272,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 4
+      },
+      {
+        "id": 1757214514160.602,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 62.9
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.4049190530645774",
+    "date": "2025-01-14T00:00:00.000Z",
+    "km": 135.7,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.2913,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.4487,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 16
+      },
+      {
+        "id": 1757214514160.7498,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 147.21
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.36153971718516353",
+    "date": "2025-01-11T00:00:00.000Z",
+    "km": 162,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.5283,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.7942,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 30
+      },
+      {
+        "id": 1757214514160.379,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 284.58
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.8101530667316479",
+    "date": "2025-01-10T00:00:00.000Z",
+    "km": 118.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.7988,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.1987,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 22
+      },
+      {
+        "id": 1757214514160.5105,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 205.31
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.7070668844953507",
+    "date": "2025-01-08T00:00:00.000Z",
+    "km": 165.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.4597,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 1
+      },
+      {
+        "id": 1757214514160.175,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 358.1
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.4046075988855591",
+    "date": "2025-01-07T00:00:00.000Z",
+    "km": 56.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.7256,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.2954,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514160.6494,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 96.6
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141600.5550890752406223",
+    "date": "2025-01-06T00:00:00.000Z",
+    "km": 75.07,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514160.2385,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514160.4724,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 9
+      },
+      {
+        "id": 1757214514160.3699,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 95.03
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141590.10354770195071139",
+    "date": "2025-01-05T00:00:00.000Z",
+    "km": 109.4,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514159.2593,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514159.4387,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 19
+      },
+      {
+        "id": 1757214514159.494,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 187.06
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141590.4576718676630245",
+    "date": "2025-01-04T00:00:00.000Z",
+    "km": 117.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514159.5427,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514159.5952,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 11
+      },
+      {
+        "id": 1757214514159.0576,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 113.7
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141590.282906648160028",
+    "date": "2025-01-03T00:00:00.000Z",
+    "km": 72.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514159.4456,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514159.4072,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 12
+      },
+      {
+        "id": 1757214514159.8457,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 111.51
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572145141590.4919613202151909",
+    "date": "2025-01-02T00:00:00.000Z",
+    "km": 37.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757214514159.1182,
+        "category": "earnings_category",
+        "trips": 0,
+        "amount": 99
+      },
+      {
+        "id": 1757214514159.8425,
+        "category": "earnings_trips",
+        "trips": 0,
+        "amount": 3
+      },
+      {
+        "id": 1757214514159.003,
+        "category": "earnings_amount",
+        "trips": 0,
+        "amount": 23.5
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
   },
   {
     "id": "17570416129890.43429974284522843",
@@ -111,7 +3321,8 @@
         "paid": 50.9,
         "price": 5.09
       }
-    ]
+    ],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129890.40213124138235656",
@@ -126,7 +3337,8 @@
         "amount": 168.8
       }
     ],
-    "fuelEntries": []
+    "fuelEntries": [],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129890.3805855263570257",
@@ -148,7 +3360,8 @@
         "paid": 38.57,
         "price": 4.99
       }
-    ]
+    ],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129880.2030353632291666",
@@ -170,7 +3383,8 @@
         "paid": 20.85,
         "price": 4.99
       }
-    ]
+    ],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129880.4989594974664291",
@@ -192,7 +3406,8 @@
         "paid": 71.25,
         "price": 4.99
       }
-    ]
+    ],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129880.9607908794241973",
@@ -220,7 +3435,8 @@
         "paid": 50,
         "price": 5.09
       }
-    ]
+    ],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129880.9023337840007626",
@@ -242,7 +3458,8 @@
         "paid": 54.41,
         "price": 4.99
       }
-    ]
+    ],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129880.5058040835707598",
@@ -270,7 +3487,8 @@
         "paid": 40.26,
         "price": 5.09
       }
-    ]
+    ],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129880.12371981477254868",
@@ -292,22 +3510,8 @@
         "paid": 43.2,
         "price": 4.99
       }
-    ]
-  },
-  {
-    "date": "2024-12-15T03:00:00.000Z",
-    "km": 0,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757043120671,
-        "category": "Ganhos Extras",
-        "trips": 0,
-        "amount": 61
-      }
     ],
-    "fuelEntries": [],
-    "id": "1757043129951"
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129870.037924107799283124",
@@ -335,7 +3539,8 @@
         "paid": 30,
         "price": 5.09
       }
-    ]
+    ],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129870.7501600546904026",
@@ -368,7 +3573,8 @@
         "amount": 7
       }
     ],
-    "fuelEntries": []
+    "fuelEntries": [],
+    "maintenanceEntries": []
   },
   {
     "id": "17570416129870.6894510512028853",
@@ -396,6 +3602,7 @@
         "paid": 68.58,
         "price": 4.99
       }
-    ]
+    ],
+    "maintenanceEntries": []
   }
 ]

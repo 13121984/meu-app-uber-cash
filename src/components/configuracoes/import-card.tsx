@@ -37,99 +37,84 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
     const rows = lines.slice(1);
     const dataForImport: ImportedWorkDay[] = [];
 
-    const knownDataColumns = ['data', 'date'];
-    const knownKmColumns = ['kms percorridos', 'km'];
-    const knownHoursColumns = ['horas trabalhadas', 'hours', 'horas'];
-    const knownFuelTypes = ['gnv', 'etanol', 'gasolina'];
+    // Mapeamento dos possíveis nomes de cabeçalho para os nomes padrão
+    const headerMapping: { [key: string]: keyof ImportedWorkDay } = {
+        'date': 'date',
+        'km': 'km',
+        'hours': 'hours',
+        'earnings_category': 'earnings_category',
+        'earnings_trips': 'earnings_trips',
+        'earnings_amount': 'earnings_amount',
+        'fuel_type': 'fuel_type',
+        'fuel_paid': 'fuel_paid',
+        'fuel_price': 'fuel_price',
+        'maintenance_description': 'maintenance_description',
+        'maintenance_amount': 'maintenance_amount',
+    };
+    
+    const mappedHeaders = headers.map(h => {
+        for (const key in headerMapping) {
+            if (h.includes(key)) return headerMapping[key];
+        }
+        return h; // Keep original if no match
+    });
 
     for (const row of rows) {
         const values = row.split(',');
-        if (values.length < headers.length) continue; // Pula linhas malformadas
+        if (values.length === 0 || values.every(v => v.trim() === '')) continue; // Pula linhas vazias
 
         const rowData: { [key: string]: string } = {};
-        headers.forEach((header, index) => {
-            rowData[header] = values[index]?.trim() || '';
+        mappedHeaders.forEach((header, index) => {
+            if (values[index]) {
+                rowData[header] = values[index].trim();
+            }
         });
-
-        // 1. Extrair dados base (Data, KM, Horas)
-        const dateHeader = headers.find(h => knownDataColumns.includes(h));
-        const kmHeader = headers.find(h => knownKmColumns.includes(h));
-        const hoursHeader = headers.find(h => knownHoursColumns.includes(h));
-
-        if (!dateHeader) continue; // Pula linha se não tiver data
-
-        const dateRaw = rowData[dateHeader];
-        let formattedDate = '';
-        try {
-            // Tenta parsear formatos DD/MM/YY e YYYY-MM-DD
-            const parsedDate = dateRaw.includes('-') ? parse(dateRaw, 'yyyy-MM-dd', new Date()) : parse(dateRaw, 'dd/MM/yy', new Date());
-            if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
-            formattedDate = format(parsedDate, 'yyyy-MM-dd');
-        } catch (e) {
-            continue; // Pula para a próxima linha se a data for inválida
-        }
         
-        const km = (kmHeader ? rowData[kmHeader] : '0').replace(',', '.');
-        const hoursRaw = hoursHeader ? rowData[hoursHeader] : '0';
+        const dateRaw = rowData['date'];
+        let workDayDate = '';
+        if (dateRaw) {
+             try {
+                const parsedDate = dateRaw.includes('-') ? parse(dateRaw, 'yyyy-MM-dd', new Date()) : parse(dateRaw, 'dd/MM/yy', new Date());
+                if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
+                workDayDate = format(parsedDate, 'yyyy-MM-dd');
+            } catch (e) {
+                // Tenta analisar o próximo formato
+                try {
+                    const parsedDate = parse(dateRaw, 'dd/MM/yyyy', new Date());
+                    if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
+                     workDayDate = format(parsedDate, 'yyyy-MM-dd');
+                } catch (e2) {
+                     continue; // Pula para a próxima linha se a data for inválida
+                }
+            }
+        }
+       
+        const km = (rowData['km'] || '0').replace(',', '.');
+        const hoursRaw = rowData['hours'] || '0';
         const hours = timeToDecimal(hoursRaw).toString();
-        
-        let entriesForThisDay: ImportedWorkDay[] = [];
 
-        // 2. Processar Ganhos e Combustíveis
-        headers.forEach((header, index) => {
-            const amountRaw = rowData[header];
-            if (!amountRaw || parseFloat(amountRaw.replace(/[^0-9,.]/g, '').replace(',', '.') || '0') <= 0) return;
+        // Cria uma única entrada base para o dia
+        const baseEntry: ImportedWorkDay = {
+            date: workDayDate,
+            km: km,
+            hours: hours,
+            earnings_category: rowData['earnings_category'] || '',
+            earnings_trips: rowData['earnings_trips'] || '',
+            earnings_amount: rowData['earnings_amount'] || '',
+            fuel_type: rowData['fuel_type'] || '',
+            fuel_paid: rowData['fuel_paid'] || '',
+            fuel_price: rowData['fuel_price'] || '',
+            maintenance_description: rowData['maintenance_description'] || '',
+            maintenance_amount: rowData['maintenance_amount'] || '',
+        };
 
-            const amount = parseFloat(amountRaw.replace(/[^0-9,.]/g, '').replace(',', '.') || '0').toString();
-            
-            // É um ganho?
-            const isEarning = !knownDataColumns.concat(knownKmColumns, knownHoursColumns, knownFuelTypes).some(kw => header.includes(kw)) && !header.includes('viagens') && !header.includes('valor por');
-            
-            if (isEarning) {
-                 const tripsHeader = headers[index + 1];
-                 const trips = (tripsHeader && tripsHeader.includes('viagens')) ? (rowData[tripsHeader] || '0') : '0';
-                 entriesForThisDay.push({
-                    date: '', km: '', hours: '',
-                    earnings_category: header,
-                    earnings_trips: trips,
-                    earnings_amount: amount,
-                    fuel_type: '', fuel_paid: '', fuel_price: '',
-                    maintenance_description: '', maintenance_amount: ''
-                });
-            }
-
-            // É um combustível?
-            const isFuel = knownFuelTypes.some(ft => header.includes(ft));
-            if (isFuel) {
-                const priceHeader = headers.find(h => h.includes('valor por') && knownFuelTypes.some(ft => h.includes(ft) && header.includes(ft)));
-                const price = priceHeader ? (rowData[priceHeader] || '0').replace(',', '.') : '0';
-                 entriesForThisDay.push({
-                    date: '', km: '', hours: '',
-                    earnings_category: '', earnings_trips: '', earnings_amount: '',
-                    fuel_type: header,
-                    fuel_paid: amount,
-                    fuel_price: price,
-                    maintenance_description: '', maintenance_amount: ''
-                });
-            }
-        });
-        
-        // Atribui os dados do dia (data, km, horas) à primeira entrada
-        if(entriesForThisDay.length > 0) {
-            entriesForThisDay[0].date = formattedDate;
-            entriesForThisDay[0].km = km;
-            entriesForThisDay[0].hours = hours;
-            dataForImport.push(...entriesForThisDay);
-        } else if (parseFloat(km) > 0 || parseFloat(hours) > 0) {
-            // Adiciona a linha mesmo que não tenha ganhos ou abastecimentos
-            dataForImport.push({
-                date: formattedDate, km, hours,
-                earnings_category: '', earnings_trips: '', earnings_amount: '',
-                fuel_type: '', fuel_paid: '', fuel_price: '',
-                maintenance_description: '', maintenance_amount: ''
-            });
-        }
+        dataForImport.push(baseEntry);
     }
+    
+    if (dataForImport.length === 0) {
+        throw new Error("Nenhum dado válido foi encontrado na planilha. Verifique se os cabeçalhos e formatos de dados estão corretos.");
+    }
+    
     return dataForImport;
 }
 
@@ -314,7 +299,7 @@ export function ImportCard() {
                           <li>A primeira linha do arquivo deve ser o <strong>cabeçalho</strong>.</li>
                            <li>Colunas-chave que o sistema procura: 
                             <code className="block bg-muted text-foreground p-2 rounded-md my-2 text-xs">
-                                Data, Kms Percorridos, Horas Trabalhadas, [Nome da Categoria de Ganho], Viagens, [Nome do Combustível], [Valor por litro/m³]
+                                date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount
                             </code>
                           </li>
                           <li>
@@ -325,6 +310,9 @@ export function ImportCard() {
                            </li>
                            <li>
                              **Datas:** Formato `DD/MM/YY` ou `DD/MM/YYYY`.
+                           </li>
+                           <li>
+                             **Horas:** Formato `HH:MM` ou `HH:MM:SS`.
                            </li>
                       </ul>
                        <Button onClick={handleCopyPrompt} variant="ghost" className="mt-4 w-full">

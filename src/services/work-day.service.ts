@@ -5,7 +5,7 @@ import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth,
 import { PeriodData, EarningsByCategory, TripsByCategory, PerformanceByShift } from "@/components/dashboard/dashboard-client";
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import { getMaintenanceRecords, Maintenance } from './maintenance.service';
+import { getMaintenanceRecords, Maintenance, addMaintenance } from './maintenance.service';
 import fs from 'fs/promises';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
@@ -157,80 +157,78 @@ export async function addOrUpdateWorkDay(data: WorkDay): Promise<{ success: bool
 export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     try {
         let allWorkDays = await readWorkDays();
+        const workDaysToUpsert: WorkDay[] = [];
 
-        // Process each row from the processed CSV
-        const newEntries: WorkDay[] = [];
-        let currentDate: Date | null = null;
-        let currentKm = 0;
-        let currentHours = 0;
-        let currentDayEntries: { earnings: Earning[], fuelEntries: FuelEntry[], maintenanceEntries: { id: number, description: string, amount: number }[] } = { earnings: [], fuelEntries: [], maintenanceEntries: [] };
-
-        const finalizeDay = () => {
-            if (currentDate) {
-                newEntries.push({
-                    id: Date.now().toString() + Math.random(),
-                    date: currentDate,
-                    km: currentKm,
-                    hours: currentHours,
-                    earnings: currentDayEntries.earnings,
-                    fuelEntries: currentDayEntries.fuelEntries,
-                    maintenanceEntries: currentDayEntries.maintenanceEntries,
-                    timeEntries: [],
-                });
-            }
-        };
-
+        // Group imported data by date
+        const groupedByDate = new Map<string, ImportedWorkDay[]>();
         for (const row of importedData) {
-            // If there's a date, it's a new day's record
-            if (row.date) {
-                finalizeDay(); // Finalize the previous day's record
-                currentDate = parseISO(row.date);
-                currentKm = parseFloat(row.km) || 0;
-                currentHours = parseFloat(row.hours) || 0;
-                currentDayEntries = { earnings: [], fuelEntries: [], maintenanceEntries: [] };
+            if (!row.date) continue; // Skip rows without a date
+            const dateKey = row.date;
+            if (!groupedByDate.has(dateKey)) {
+                groupedByDate.set(dateKey, []);
             }
-
-            // Add earning entry for the current day
-            if (row.earnings_category && row.earnings_amount) {
-                currentDayEntries.earnings.push({
-                    id: Date.now() + Math.random(),
-                    category: row.earnings_category,
-                    trips: parseInt(row.earnings_trips) || 0,
-                    amount: parseFloat(row.earnings_amount) || 0
-                });
-            }
-
-            // Add fuel entry for the current day
-            if (row.fuel_type && row.fuel_paid) {
-                currentDayEntries.fuelEntries.push({
-                    id: Date.now() + Math.random(),
-                    type: row.fuel_type,
-                    paid: parseFloat(row.fuel_paid) || 0,
-                    price: parseFloat(row.fuel_price) || 0
-                });
-            }
-
-            // Add maintenance entry
-            if (row.maintenance_description && row.maintenance_amount) {
-                 currentDayEntries.maintenanceEntries.push({
-                    id: Date.now() + Math.random(),
-                    description: row.maintenance_description,
-                    amount: parseFloat(row.maintenance_amount) || 0
-                });
-            }
+            groupedByDate.get(dateKey)!.push(row);
         }
-        finalizeDay(); // Finalize the last day
 
-        // Combine new entries with existing ones, replacing by date
-        const workDaysMap = new Map<string, WorkDay>();
-        allWorkDays.forEach(day => workDaysMap.set(format(day.date, 'yyyy-MM-dd'), day));
-        newEntries.forEach(day => workDaysMap.set(format(day.date, 'yyyy-MM-dd'), day));
+        // Process each day's data
+        for (const [dateKey, rows] of groupedByDate.entries()) {
+            const date = parseISO(dateKey);
+            const firstRow = rows[0];
+            const km = parseFloat(firstRow.km.replace(',', '.')) || 0;
+            const hours = parseFloat(firstRow.hours.replace(',', '.')) || 0;
+
+            const earnings: Earning[] = [];
+            const fuelEntries: FuelEntry[] = [];
+            const maintenanceEntries: { id: number; description: string; amount: number }[] = [];
+
+            rows.forEach(row => {
+                if (row.earnings_category && row.earnings_amount) {
+                    earnings.push({
+                        id: Date.now() + Math.random(),
+                        category: row.earnings_category,
+                        trips: parseInt(row.earnings_trips) || 0,
+                        amount: parseFloat(row.earnings_amount.replace(',', '.')) || 0
+                    });
+                }
+                if (row.fuel_type && row.fuel_paid) {
+                    fuelEntries.push({
+                        id: Date.now() + Math.random(),
+                        type: row.fuel_type,
+                        paid: parseFloat(row.fuel_paid.replace(',', '.')) || 0,
+                        price: parseFloat(row.fuel_price.replace(',', '.')) || 0
+                    });
+                }
+                 if (row.maintenance_description && row.maintenance_amount) {
+                    addMaintenance({ 
+                        date: date, 
+                        description: row.maintenance_description,
+                        amount: parseFloat(row.maintenance_amount.replace(',', '.')) || 0
+                    });
+                }
+            });
+            
+            // Create a single WorkDay object for the date
+            workDaysToUpsert.push({
+                id: Date.now().toString() + dateKey,
+                date: date,
+                km: km,
+                hours: hours,
+                earnings,
+                fuelEntries,
+                maintenanceEntries: [], // Maintenance is handled separately now
+                timeEntries: [],
+            });
+        }
         
-        const updatedWorkDays = Array.from(workDaysMap.values());
-        await writeWorkDays(updatedWorkDays);
+        // Upsert logic: remove existing days that are being imported, then add new ones
+        const datesToReplace = new Set(workDaysToUpsert.map(wd => format(wd.date, 'yyyy-MM-dd')));
+        const filteredWorkDays = allWorkDays.filter(wd => !datesToReplace.has(format(wd.date, 'yyyy-MM-dd')));
+        const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
+
+        await writeWorkDays(finalWorkDays);
         
         revalidateAll();
-        return { success: true, count: newEntries.length };
+        return { success: true, count: workDaysToUpsert.length };
 
     } catch(e) {
         console.error("Error adding multiple work days: ", e);
