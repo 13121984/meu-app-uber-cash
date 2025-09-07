@@ -123,7 +123,7 @@ export function DashboardClient() {
       const getChartData = (id: string) => {
         switch (id) {
             case 'earningsComposition': return currentData.profitComposition;
-            case 'profitEvolution': return currentData.profitEvolution;
+            case 'profitEvolution': return (currentData as any).profitEvolution || []; // Add fallback
             case 'earningsByCategory': return currentData.earningsByCategory;
             case 'tripsByCategory': return currentData.tripsByCategory;
             case 'maintenance': return currentData.maintenance;
@@ -160,6 +160,9 @@ export function DashboardClient() {
           {chartsToShow.map(chart => {
               const ChartComponent = chartComponentMap[chart.id];
               if (!ChartComponent) return null;
+              
+              const chartData = getChartData(chart.id);
+              if(!chartData || (Array.isArray(chartData) && chartData.length === 0)) return null;
 
               return (
                   <Card key={chart.id}>
@@ -168,7 +171,7 @@ export function DashboardClient() {
                       <CardDescription>{chart.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ChartComponent key={`${chart.id}-${period}`} data={getChartData(chart.id)} />
+                        <ChartComponent key={`${chart.id}-${period}`} data={chartData} />
                     </CardContent>
                   </Card>
               );
@@ -221,5 +224,3 @@ export function DashboardClient() {
     </div>
   )
 }
-
-    
