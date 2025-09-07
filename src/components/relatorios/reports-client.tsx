@@ -9,7 +9,8 @@ import { StatsCard } from '@/components/dashboard/stats-card';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/auth-context';
 import { updateUser } from '@/services/auth.service';
-import { differenceInDays, parseISO, isBefore, addDays } from 'date-fns';
+import { differenceInDays, parseISO, isBefore, addDays, formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { allStats, mandatoryCards } from '@/lib/dashboard-items';
@@ -30,7 +31,7 @@ const DraggableCard = ({ id, title, children, onMove, isFirst, isLast }: { id: s
             <Card className="w-full">
                 <CardHeader className="pb-2">
                      <CardTitle className="font-headline text-base flex items-center gap-2">
-                        <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
+                        <GripVertical className="h-5 w-5 text-muted-foreground" />
                         {title}
                     </CardTitle>
                 </CardHeader>
@@ -50,12 +51,17 @@ export function ReportsClient() {
   const getInitialCardOrder = () => {
       if (!user) return [];
       const userOrder = user.preferences?.dashboardCardOrder;
+      
       if (user.isPremium) {
+          // Premium users see all cards by default if they haven't customized yet
           return userOrder && userOrder.length > 0 ? userOrder : allStats.map(s => s.id);
       }
-      // Para usuário gratuito, garante que os 3 obrigatórios estejam lá + 1 opcional
+      
+      // Free users: 3 mandatory + 1 optional
       const optionalCard = userOrder?.find(id => !mandatoryCards.includes(id)) || allStats.find(s => !mandatoryCards.includes(s.id))!.id;
-      return [...mandatoryCards, optionalCard];
+      // Ensure mandatory cards are present and at the start if it's the first time
+      const finalOrder = userOrder && userOrder.length === 4 ? userOrder : [...mandatoryCards, optionalCard];
+      return finalOrder;
   }
 
   const [cardOrder, setCardOrder] = useState<string[]>(getInitialCardOrder());
@@ -75,28 +81,34 @@ export function ReportsClient() {
       setCardOrder(newOrder);
   };
   
-  const handleSaveLayout = async () => {
+  const handleSaveLayout = async (isSwappingCard: boolean = false) => {
     startSavingTransition(async () => {
       if(user) {
-        if (!user.isPremium) {
+        if (isSwappingCard && !user.isPremium) {
             const lastChange = user.preferences.lastFreebieChangeDate;
-            if(lastChange && isBefore(new Date(), addDays(new Date(lastChange), 7))){
-                toast({
-                    title: "Aguarde para trocar novamente",
-                    description: "Você só pode alterar seu card opcional uma vez a cada 7 dias.",
-                    variant: "destructive",
-                });
-                return;
+            if (lastChange) {
+                const sevenDaysAgo = sub(new Date(), { days: 7 });
+                if (isAfter(new Date(lastChange), sevenDaysAgo)) {
+                    toast({
+                        title: "Aguarde para trocar novamente",
+                        description: `Você só pode alterar seu card opcional uma vez a cada 7 dias. Próxima troca disponível em ${formatDistanceToNow(addDays(new Date(lastChange), 7), { locale: ptBR, addSuffix: true })}.`,
+                        variant: "destructive",
+                    });
+                    return;
+                }
             }
         }
+        
+        const newPreferences = { 
+            ...user.preferences, 
+            dashboardCardOrder: cardOrder,
+        };
 
-        const result = await updateUser(user.id, { 
-            preferences: { 
-                ...user.preferences, 
-                dashboardCardOrder: cardOrder,
-                lastFreebieChangeDate: !user.isPremium ? new Date().toISOString() : user.preferences.lastFreebieChangeDate,
-            }
-        });
+        if(isSwappingCard && !user.isPremium) {
+            newPreferences.lastFreebieChangeDate = new Date().toISOString();
+        }
+
+        const result = await updateUser(user.id, { preferences: newPreferences });
 
         if (result.success) {
             await refreshUser();
@@ -118,14 +130,24 @@ export function ReportsClient() {
 
   const handleSelectOptionalCard = (cardId: string) => {
     if (user?.isPremium) {
+        let newOrder;
         if (cardOrder.includes(cardId)) {
-            setCardOrder(cardOrder.filter(id => id !== cardId));
+            newOrder = cardOrder.filter(id => id !== cardId);
         } else {
-            setCardOrder([...cardOrder, cardId]);
+            newOrder = [...cardOrder, cardId];
         }
-    } else {
-        const newOrder = [...mandatoryCards, cardId];
         setCardOrder(newOrder);
+    } else {
+        const optionalCardIndex = cardOrder.findIndex(id => !mandatoryCards.includes(id));
+        const newOrder = [...cardOrder];
+        if (optionalCardIndex > -1) {
+            newOrder[optionalCardIndex] = cardId;
+        } else {
+            newOrder.push(cardId);
+        }
+        setCardOrder(newOrder);
+        // Trigger save immediately when swapping
+        handleSaveLayout(true);
     }
   }
 
@@ -144,8 +166,8 @@ export function ReportsClient() {
                     <CardTitle className="font-headline text-xl">Dashboard Cards</CardTitle>
                     <CardDescription>Organize os cards principais que aparecem no seu Dashboard.</CardDescription>
                 </div>
-                <Button onClick={handleSaveLayout} disabled={isSaving}>
-                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Salvar Layout
+                <Button onClick={() => handleSaveLayout(false)} disabled={isSaving}>
+                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Salvar Ordem
                 </Button>
             </CardHeader>
             <CardContent>
@@ -154,12 +176,12 @@ export function ReportsClient() {
                         <Info className="h-4 w-4" />
                         <AlertTitle>Plano Gratuito</AlertTitle>
                         <AlertDescription>
-                            Você pode escolher 1 card opcional para exibir além dos 3 cards padrão. Esta escolha pode ser alterada a cada 7 dias.
+                            Você pode escolher 1 card opcional (além dos 3 padrão) e pode trocá-lo a cada 7 dias. A ordem dos cards pode ser alterada a qualquer momento.
                         </AlertDescription>
                     </Alert>
                 )}
 
-                <h3 className="font-semibold mb-4">Cards Visíveis</h3>
+                <h3 className="font-semibold mb-4">Cards Visíveis no Dashboard</h3>
                 <div className="space-y-4">
                     {visibleCards.map((cardInfo, index) => (
                         <DraggableCard 
@@ -170,7 +192,7 @@ export function ReportsClient() {
                             isFirst={index === 0}
                             isLast={index === visibleCards.length - 1}
                         >
-                            <StatsCard {...cardInfo} />
+                            <StatsCard {...cardInfo} isPreview={true} />
                         </DraggableCard>
                     ))}
                 </div>
@@ -183,18 +205,25 @@ export function ReportsClient() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {optionalCards.map(card => {
                             const isVisible = cardOrder.includes(card.id);
+                            
+                            // Free user can't interact with a card that's already selected
+                            const isButtonDisabled = !user.isPremium && isVisible;
+
                             return (
                                  <Card 
                                     key={card.id} 
-                                    className={`relative p-2 border-2 ${isVisible ? 'border-primary' : 'border-dashed'}`}
+                                    className={`relative p-2 border-2 ${isVisible && !user.isPremium ? 'border-primary' : 'border-dashed'}`}
                                 >
                                     {user.isPremium && isVisible && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1"><Check className="h-3 w-3"/></div>}
-                                    <StatsCard {...card} value={0} />
+                                    
+                                    <StatsCard {...card} isPreview={true} />
+
                                      <Button 
-                                        variant={isVisible ? "secondary" : "default"}
+                                        variant={user.isPremium ? (isVisible ? "secondary" : "default") : "default"}
                                         size="sm"
                                         className="w-full mt-2"
                                         onClick={() => handleSelectOptionalCard(card.id)}
+                                        disabled={isButtonDisabled || isSaving}
                                      >
                                          {user.isPremium ? (isVisible ? 'Ocultar' : 'Mostrar') : 'Substituir'}
                                      </Button>

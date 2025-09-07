@@ -1,4 +1,5 @@
 
+
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -11,16 +12,22 @@ type StatsCardProps = {
   precision?: number
   iconBg?: string
   iconColor?: string
+  isPreview?: boolean // New prop
 }
 
-export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precision = 0, iconBg, iconColor }: StatsCardProps) {
+export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precision = 0, iconBg, iconColor, isPreview = false }: StatsCardProps) {
   const isValidNumber = typeof value === 'number' && !isNaN(value);
 
-  const formattedValue = isValidNumber
-    ? isCurrency
-      ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
-      : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
-    : "—";
+  // If it's a preview, don't show the value. Otherwise, format it.
+  const formattedValue = isPreview 
+    ? title // In preview, show the title in place of the value for clarity
+    : isValidNumber
+      ? isCurrency
+        ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
+        : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
+      : "—";
+
+  const description = isPreview ? '' : title;
 
   return (
     <Card className="p-4">
@@ -30,7 +37,9 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
         </div>
         <div className="flex flex-col">
           <p className="text-xl font-bold">{formattedValue}</p>
-          <p className="text-sm text-muted-foreground">{title}</p>
+          {description && (
+             <p className="text-sm text-muted-foreground">{description}</p>
+          )}
         </div>
       </CardContent>
     </Card>
