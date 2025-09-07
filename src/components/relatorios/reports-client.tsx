@@ -10,6 +10,7 @@ import { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { Reorder, useDragControls } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
