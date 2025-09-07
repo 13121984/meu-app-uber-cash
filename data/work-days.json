@@ -1,15 +1,21 @@
 [
   {
-    "id": "17572153887582025-07-22",
+    "id": "17572157201002025-07-22",
     "date": "2025-07-22T00:00:00.000Z",
     "km": 54.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.605,
+        "id": 1757215720100.4038,
         "category": "99 Pop",
         "trips": 3,
         "amount": 27.12
+      },
+      {
+        "id": 1757215720100.159,
+        "category": "Uber Cash",
+        "trips": 5,
+        "amount": 67.02
       }
     ],
     "fuelEntries": [],
@@ -17,458 +23,910 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887582025-07-20",
+    "id": "17572157201002025-07-20",
     "date": "2025-07-20T00:00:00.000Z",
     "km": 127.8,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.016,
+        "id": 1757215720100.561,
         "category": "99 Pop",
         "trips": 7,
         "amount": 82.05
+      },
+      {
+        "id": 1757215720100.3018,
+        "category": "Uber Cash",
+        "trips": 10,
+        "amount": 132.9
+      },
+      {
+        "id": 1757215720100.854,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 17
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.244,
+        "type": "GNV",
+        "paid": 48.2,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887582025-07-19",
+    "id": "17572157201002025-07-19",
     "date": "2025-07-19T00:00:00.000Z",
     "km": 145.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.278,
+        "id": 1757215720100.1868,
         "category": "99 Pop",
         "trips": 5,
         "amount": 63.43
+      },
+      {
+        "id": 1757215720100.6516,
+        "category": "Uber Cash",
+        "trips": 13,
+        "amount": 191.44
+      },
+      {
+        "id": 1757215720100.673,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 14
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.3252,
+        "type": "GNV",
+        "paid": 49.9,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887582025-07-18",
+    "id": "17572157201002025-07-18",
     "date": "2025-07-18T00:00:00.000Z",
     "km": 146.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.1064,
+        "id": 1757215720100.8145,
         "category": "99 Pop",
         "trips": 13,
         "amount": 141.62
+      },
+      {
+        "id": 1757215720100.6553,
+        "category": "Uber Cash",
+        "trips": 9,
+        "amount": 122.88
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.0374,
+        "type": "GNV",
+        "paid": 54.2,
+        "price": 4.77
+      },
+      {
+        "id": 1757215720100.3577,
+        "type": "Etanol",
+        "paid": 60.32,
+        "price": 4.59
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887582025-07-16",
+    "id": "17572157201002025-07-16",
     "date": "2025-07-16T00:00:00.000Z",
     "km": 115.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.5964,
+        "id": 1757215720100.034,
         "category": "99 Pop",
         "trips": 13,
         "amount": 142.35
+      },
+      {
+        "id": 1757215720100.5308,
+        "category": "Uber Cash",
+        "trips": 4,
+        "amount": 47.45
+      },
+      {
+        "id": 1757215720100.4119,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 25
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.69,
+        "type": "GNV",
+        "paid": 44.3,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887582025-07-15",
+    "id": "17572157201002025-07-15",
     "date": "2025-07-15T00:00:00.000Z",
     "km": 42,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.0024,
+        "id": 1757215720100.8809,
         "category": "99 Pop",
         "trips": 6,
         "amount": 58.84
+      },
+      {
+        "id": 1757215720100.413,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 30
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.9424,
+        "type": "GNV",
+        "paid": 18,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887582025-07-14",
+    "id": "17572157201002025-07-14",
     "date": "2025-07-14T00:00:00.000Z",
     "km": 146,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.0938,
+        "id": 1757215720100.5786,
         "category": "99 Pop",
         "trips": 7,
         "amount": 63.84
+      },
+      {
+        "id": 1757215720100.6396,
+        "category": "Uber Cash",
+        "trips": 13,
+        "amount": 194.26
+      },
+      {
+        "id": 1757215720100.753,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 20
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.69,
+        "type": "GNV",
+        "paid": 50.3,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887582025-07-12",
+    "id": "17572157201002025-07-12",
     "date": "2025-07-12T00:00:00.000Z",
     "km": 117.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.2273,
+        "id": 1757215720100.9648,
         "category": "99 Pop",
         "trips": 9,
         "amount": 88.92
+      },
+      {
+        "id": 1757215720100.1997,
+        "category": "Uber Cash",
+        "trips": 10,
+        "amount": 176.11
+      },
+      {
+        "id": 1757215720100.092,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 20
+      },
+      {
+        "id": 1757215720100.2756,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 5
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.3738,
+        "type": "GNV",
+        "paid": 47.05,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887582025-07-11",
+    "id": "17572157201002025-07-11",
     "date": "2025-07-11T00:00:00.000Z",
     "km": 112.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388758.0073,
+        "id": 1757215720100.4724,
         "category": "99 Pop",
         "trips": 11,
         "amount": 105.6
+      },
+      {
+        "id": 1757215720100.515,
+        "category": "Uber Cash",
+        "trips": 7,
+        "amount": 118.67
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.7412,
+        "type": "GNV",
+        "paid": 42.83,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-07-10",
+    "id": "17572157201002025-07-10",
     "date": "2025-07-10T00:00:00.000Z",
     "km": 113.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.3984,
+        "id": 1757215720100.1553,
         "category": "99 Pop",
         "trips": 9,
         "amount": 93.4
+      },
+      {
+        "id": 1757215720100.4133,
+        "category": "Uber Cash",
+        "trips": 9,
+        "amount": 136.34
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.0737,
+        "type": "GNV",
+        "paid": 42.8,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-07-09",
+    "id": "17572157201002025-07-09",
     "date": "2025-07-09T00:00:00.000Z",
     "km": 44.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.7446,
+        "id": 1757215720100.4316,
         "category": "Uber Cash",
         "trips": 6,
         "amount": 64.32
+      },
+      {
+        "id": 1757215720100.682,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 3
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.5774,
+        "type": "GNV",
+        "paid": 20,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-07-06",
+    "id": "17572157201002025-07-06",
     "date": "2025-07-06T00:00:00.000Z",
     "km": 138.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.7275,
+        "id": 1757215720100.9287,
         "category": "Uber Cash",
         "trips": 11,
         "amount": 255.27
+      },
+      {
+        "id": 1757215720100.7747,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 42
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.4766,
+        "type": "GNV",
+        "paid": 46,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-07-05",
+    "id": "17572157201002025-07-05",
     "date": "2025-07-05T00:00:00.000Z",
     "km": 104.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.7605,
+        "id": 1757215720100.8584,
         "category": "99 Pop",
         "trips": 1,
         "amount": 10.8
+      },
+      {
+        "id": 1757215720100.9253,
+        "category": "Uber Cash",
+        "trips": 9,
+        "amount": 213.14
+      },
+      {
+        "id": 1757215720100.2412,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 35
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.6272,
+        "type": "GNV",
+        "paid": 41.91,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-07-04",
+    "id": "17572157201002025-07-04",
     "date": "2025-07-04T00:00:00.000Z",
     "km": 36,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.6216,
+        "id": 1757215720100.1853,
         "category": "Particular",
         "trips": 1,
         "amount": 50
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.151,
+        "type": "GNV",
+        "paid": 14.9,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-07-03",
+    "id": "17572157201002025-07-03",
     "date": "2025-07-03T00:00:00.000Z",
     "km": 142.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.1995,
+        "id": 1757215720100.9956,
         "category": "99 Pop",
         "trips": 9,
         "amount": 92.2
+      },
+      {
+        "id": 1757215720100.9634,
+        "category": "Uber Cash",
+        "trips": 10,
+        "amount": 139.33
+      },
+      {
+        "id": 1757215720100.571,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 32
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.8213,
+        "type": "GNV",
+        "paid": 52.42,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-07-02",
+    "id": "17572157201002025-07-02",
     "date": "2025-07-02T00:00:00.000Z",
     "km": 113.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.584,
+        "id": 1757215720100.4548,
         "category": "99 Pop",
         "trips": 6,
         "amount": 77.19
+      },
+      {
+        "id": 1757215720100.8418,
+        "category": "Uber Cash",
+        "trips": 8,
+        "amount": 128.06
+      },
+      {
+        "id": 1757215720100.9597,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 10
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.5273,
+        "type": "GNV",
+        "paid": 43.1,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-07-01",
+    "id": "17572157201002025-07-01",
     "date": "2025-07-01T00:00:00.000Z",
     "km": 101.1,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.8042,
+        "id": 1757215720100.4705,
         "category": "99 Pop",
         "trips": 10,
         "amount": 133.51
+      },
+      {
+        "id": 1757215720100.577,
+        "category": "Uber Cash",
+        "trips": 4,
+        "amount": 65.9
+      },
+      {
+        "id": 1757215720100.9583,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 3
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.7395,
+        "type": "GNV",
+        "paid": 40.5,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-30",
+    "id": "17572157201002025-06-30",
     "date": "2025-06-30T00:00:00.000Z",
     "km": 33,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.4863,
+        "id": 1757215720100.4014,
         "category": "99 Pop",
         "trips": 1,
         "amount": 6.9
+      },
+      {
+        "id": 1757215720100.426,
+        "category": "Uber Cash",
+        "trips": 4,
+        "amount": 42.41
+      },
+      {
+        "id": 1757215720100.647,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 10
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.451,
+        "type": "GNV",
+        "paid": 14,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-28",
+    "id": "17572157201002025-06-28",
     "date": "2025-06-28T00:00:00.000Z",
     "km": 64,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.4375,
+        "id": 1757215720100.5168,
         "category": "99 Pop",
         "trips": 1,
         "amount": 14.16
+      },
+      {
+        "id": 1757215720100.0916,
+        "category": "Uber Cash",
+        "trips": 8,
+        "amount": 110.97
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.221,
+        "type": "GNV",
+        "paid": 24.18,
+        "price": 4.77
+      },
+      {
+        "id": 1757215720100.2007,
+        "type": "Etanol",
+        "paid": 95.34,
+        "price": 4.59
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-27",
+    "id": "17572157201002025-06-27",
     "date": "2025-06-27T00:00:00.000Z",
     "km": 105.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.9224,
+        "id": 1757215720100.201,
         "category": "99 Pop",
         "trips": 4,
         "amount": 41.88
+      },
+      {
+        "id": 1757215720100.226,
+        "category": "Uber Cash",
+        "trips": 10,
+        "amount": 151.13
+      },
+      {
+        "id": 1757215720100.038,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 10
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.1167,
+        "type": "GNV",
+        "paid": 38.33,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-26",
+    "id": "17572157201002025-06-26",
     "date": "2025-06-26T00:00:00.000Z",
     "km": 108.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.9685,
+        "id": 1757215720100.687,
         "category": "99 Pop",
         "trips": 4,
         "amount": 35.14
+      },
+      {
+        "id": 1757215720100.1333,
+        "category": "Uber Cash",
+        "trips": 8,
+        "amount": 130.34
+      },
+      {
+        "id": 1757215720100.5947,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 35
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.667,
+        "type": "GNV",
+        "paid": 39,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-25",
+    "id": "17572157201002025-06-25",
     "date": "2025-06-25T00:00:00.000Z",
     "km": 121,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.0918,
+        "id": 1757215720100.2324,
         "category": "99 Pop",
         "trips": 3,
         "amount": 49.68
+      },
+      {
+        "id": 1757215720100.7449,
+        "category": "Uber Cash",
+        "trips": 17,
+        "amount": 172.52
+      },
+      {
+        "id": 1757215720100.0452,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 32
+      },
+      {
+        "id": 1757215720100.928,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 7
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.4927,
+        "type": "GNV",
+        "paid": 46.35,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-24",
+    "id": "17572157201002025-06-24",
     "date": "2025-06-24T00:00:00.000Z",
     "km": 160,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.8442,
+        "id": 1757215720100.6785,
         "category": "99 Pop",
         "trips": 11,
         "amount": 122.55
+      },
+      {
+        "id": 1757215720100.8665,
+        "category": "Uber Cash",
+        "trips": 13,
+        "amount": 177.17
+      },
+      {
+        "id": 1757215720100.714,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 15
+      },
+      {
+        "id": 1757215720100.2898,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 6
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.5603,
+        "type": "GNV",
+        "paid": 68.52,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-23",
+    "id": "17572157201002025-06-23",
     "date": "2025-06-23T00:00:00.000Z",
     "km": 126,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.3984,
+        "id": 1757215720100.6357,
         "category": "99 Pop",
         "trips": 11,
         "amount": 108.23
+      },
+      {
+        "id": 1757215720100.8003,
+        "category": "Uber Cash",
+        "trips": 9,
+        "amount": 121.83
+      },
+      {
+        "id": 1757215720100.865,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 5.7
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.7517,
+        "type": "GNV",
+        "paid": 58.7,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-21",
+    "id": "17572157201002025-06-21",
     "date": "2025-06-21T00:00:00.000Z",
     "km": 105.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.508,
+        "id": 1757215720100.7588,
         "category": "Uber Cash",
         "trips": 13,
         "amount": 240.43
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.232,
+        "type": "GNV",
+        "paid": 44.3,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-20",
+    "id": "17572157201002025-06-20",
     "date": "2025-06-20T00:00:00.000Z",
     "km": 47.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.753,
+        "id": 1757215720100.8137,
         "category": "Uber Cash",
         "trips": 6,
         "amount": 100.13
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.7166,
+        "type": "GNV",
+        "paid": 28.28,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-19",
+    "id": "17572157201002025-06-19",
     "date": "2025-06-19T00:00:00.000Z",
     "km": 55.8,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.0596,
+        "id": 1757215720100.0317,
         "category": "Uber Cash",
         "trips": 9,
         "amount": 112.7
+      },
+      {
+        "id": 1757215720100.3408,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 12
+      },
+      {
+        "id": 1757215720100.7925,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 3
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.0642,
+        "type": "GNV",
+        "paid": 54,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-15",
+    "id": "17572157201002025-06-15",
     "date": "2025-06-15T00:00:00.000Z",
     "km": 69,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.069,
+        "id": 1757215720100.6973,
         "category": "Uber Cash",
         "trips": 10,
         "amount": 151.68
+      },
+      {
+        "id": 1757215720100.5898,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 40
       }
     ],
     "fuelEntries": [],
@@ -476,67 +934,124 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-14",
+    "id": "17572157201002025-06-14",
     "date": "2025-06-14T00:00:00.000Z",
     "km": 200.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.3206,
+        "id": 1757215720100.489,
         "category": "99 Pop",
         "trips": 2,
         "amount": 24.8
+      },
+      {
+        "id": 1757215720100.4172,
+        "category": "Uber Cash",
+        "trips": 18,
+        "amount": 325.17
+      },
+      {
+        "id": 1757215720100.233,
+        "category": "Particular",
+        "trips": 4,
+        "amount": 101
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.8442,
+        "type": "Etanol",
+        "paid": 113.17,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-13",
+    "id": "17572157201002025-06-13",
     "date": "2025-06-13T00:00:00.000Z",
     "km": 97.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.8506,
+        "id": 1757215720100.8362,
         "category": "Uber Cash",
         "trips": 11,
         "amount": 197.22
+      },
+      {
+        "id": 1757215720100.559,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 20
+      },
+      {
+        "id": 1757215720100.564,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 5
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.1711,
+        "type": "Etanol",
+        "paid": 58.01,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-12",
+    "id": "17572157201002025-06-12",
     "date": "2025-06-12T00:00:00.000Z",
     "km": 100.8,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.7434,
+        "id": 1757215720100.8274,
         "category": "Uber Cash",
         "trips": 8,
         "amount": 189.54
+      },
+      {
+        "id": 1757215720100.198,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 50
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.8572,
+        "type": "Etanol",
+        "paid": 58.01,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-07",
+    "id": "17572157201002025-06-07",
     "date": "2025-06-07T00:00:00.000Z",
     "km": 117.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.2217,
+        "id": 1757215720100.019,
         "category": "99 Pop",
         "trips": 2,
         "amount": 121.2
+      },
+      {
+        "id": 1757215720100.253,
+        "category": "Uber Cash",
+        "trips": 14,
+        "amount": 251.4
       }
     ],
     "fuelEntries": [],
@@ -544,166 +1059,307 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-06",
+    "id": "17572157201002025-06-06",
     "date": "2025-06-06T00:00:00.000Z",
     "km": 146.8,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.0735,
+        "id": 1757215720100.7485,
         "category": "Uber Cash",
         "trips": 14,
         "amount": 255.2
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.535,
+        "type": "Etanol",
+        "paid": 70,
+        "price": 4.8
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-05",
+    "id": "17572157201002025-06-05",
     "date": "2025-06-05T00:00:00.000Z",
     "km": 95.5,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.394,
+        "id": 1757215720100.1294,
         "category": "99 Pop",
         "trips": 1,
         "amount": 6.6
+      },
+      {
+        "id": 1757215720100.8403,
+        "category": "Uber Cash",
+        "trips": 13,
+        "amount": 184.43
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720100.643,
+        "type": "GNV",
+        "paid": 45.55,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-06-01",
+    "id": "17572157200992025-06-01",
     "date": "2025-06-01T00:00:00.000Z",
     "km": 76.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.3945,
+        "id": 1757215720099.0176,
         "category": "99 Pop",
         "trips": 4,
         "amount": 66.66
+      },
+      {
+        "id": 1757215720099.9873,
+        "category": "Uber Cash",
+        "trips": 6,
+        "amount": 85.58
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.4177,
+        "type": "Etanol",
+        "paid": 68.92,
+        "price": 4.69
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-31",
+    "id": "17572157200992025-05-31",
     "date": "2025-05-31T00:00:00.000Z",
     "km": 244.5,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.3145,
+        "id": 1757215720099.7405,
         "category": "99 Pop",
         "trips": 1,
         "amount": 13.93
+      },
+      {
+        "id": 1757215720099.3699,
+        "category": "Uber Cash",
+        "trips": 21,
+        "amount": 445.44
+      },
+      {
+        "id": 1757215720099.3398,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 55
+      },
+      {
+        "id": 1757215720099.2268,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 35.68
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.6865,
+        "type": "Etanol",
+        "paid": 112.07,
+        "price": 4.69
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-30",
+    "id": "17572157200992025-05-30",
     "date": "2025-05-30T00:00:00.000Z",
     "km": 162.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.547,
+        "id": 1757215720099.3281,
         "category": "99 Pop",
         "trips": 6,
         "amount": 77.38
+      },
+      {
+        "id": 1757215720099.5242,
+        "category": "Uber Cash",
+        "trips": 12,
+        "amount": 234.72
+      },
+      {
+        "id": 1757215720099.725,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 5
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.6755,
+        "type": "GNV",
+        "paid": 48.03,
+        "price": 4.77
+      },
+      {
+        "id": 1757215720099.6277,
+        "type": "Etanol",
+        "paid": 95.03,
+        "price": 4.67
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-29",
+    "id": "17572157200992025-05-29",
     "date": "2025-05-29T00:00:00.000Z",
     "km": 90,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.3862,
+        "id": 1757215720099.8748,
         "category": "99 Pop",
         "trips": 10,
         "amount": 116.34
+      },
+      {
+        "id": 1757215720099.7173,
+        "category": "Uber Cash",
+        "trips": 6,
+        "amount": 65.35
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.5955,
+        "type": "GNV",
+        "paid": 25,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-23",
+    "id": "17572157200992025-05-23",
     "date": "2025-05-23T00:00:00.000Z",
     "km": 49,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.7104,
+        "id": 1757215720099.7517,
         "category": "99 Pop",
         "trips": 3,
         "amount": 41.21
+      },
+      {
+        "id": 1757215720099.6572,
+        "category": "Uber Cash",
+        "trips": 4,
+        "amount": 89.66
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.2021,
+        "type": "GNV",
+        "paid": 27.7,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-22",
+    "id": "17572157200992025-05-22",
     "date": "2025-05-22T00:00:00.000Z",
     "km": 181.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.2349,
+        "id": 1757215720099.6572,
         "category": "99 Pop",
         "trips": 9,
         "amount": 146.45
+      },
+      {
+        "id": 1757215720099.349,
+        "category": "Uber Cash",
+        "trips": 12,
+        "amount": 193.33
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.4695,
+        "type": "GNV",
+        "paid": 44.5,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-21",
+    "id": "17572157200992025-05-21",
     "date": "2025-05-21T00:00:00.000Z",
     "km": 38.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.499,
+        "id": 1757215720099.2883,
         "category": "99 Pop",
         "trips": 4,
         "amount": 41.91
+      },
+      {
+        "id": 1757215720099.6582,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 9.93
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.507,
+        "type": "GNV",
+        "paid": 21.75,
+        "price": 4.77
+      },
+      {
+        "id": 1757215720099.1797,
+        "type": "Etanol",
+        "paid": 48.07,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-20",
+    "id": "17572157200992025-05-20",
     "date": "2025-05-20T00:00:00.000Z",
     "km": 0,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.6802,
+        "id": 1757215720099.47,
         "category": "Ganhos Extras",
         "trips": 0,
         "amount": 8
@@ -714,421 +1370,307 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-19",
+    "id": "17572157200992025-05-19",
     "date": "2025-05-19T00:00:00.000Z",
     "km": 156.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.243,
+        "id": 1757215720099.871,
         "category": "99 Pop",
         "trips": 11,
         "amount": 132.31
+      },
+      {
+        "id": 1757215720099.3203,
+        "category": "Uber Cash",
+        "trips": 12,
+        "amount": 115.93
+      },
+      {
+        "id": 1757215720099.9336,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 23.76
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.2097,
+        "type": "GNV",
+        "paid": 39,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-18",
+    "id": "17572157200992025-05-18",
     "date": "2025-05-18T00:00:00.000Z",
     "km": 118,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.283,
+        "id": 1757215720099.5056,
         "category": "99 Pop",
         "trips": 6,
         "amount": 82.46
+      },
+      {
+        "id": 1757215720099.9917,
+        "category": "Uber Cash",
+        "trips": 10,
+        "amount": 189.35
+      },
+      {
+        "id": 1757215720099.7974,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 10.97
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.6187,
+        "type": "GNV",
+        "paid": 42.59,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-17",
+    "id": "17572157200992025-05-17",
     "date": "2025-05-17T00:00:00.000Z",
     "km": 195.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.1294,
+        "id": 1757215720099.04,
         "category": "99 Pop",
         "trips": 3,
         "amount": 62.4
+      },
+      {
+        "id": 1757215720099.047,
+        "category": "Uber Cash",
+        "trips": 22,
+        "amount": 308.58
+      },
+      {
+        "id": 1757215720099.7104,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 16
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.9575,
+        "type": "GNV",
+        "paid": 49.17,
+        "price": 4.77
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-16",
+    "id": "17572157200992025-05-16",
     "date": "2025-05-16T00:00:00.000Z",
     "km": 187.5,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.485,
+        "id": 1757215720099.7546,
         "category": "99 Pop",
         "trips": 9,
         "amount": 108.86
+      },
+      {
+        "id": 1757215720099.921,
+        "category": "Uber Cash",
+        "trips": 16,
+        "amount": 245.87
+      },
+      {
+        "id": 1757215720099.8115,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 5.36
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.3782,
+        "type": "Etanol",
+        "paid": 70.11,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-05-15",
+    "id": "17572157200992025-05-15",
     "date": "2025-05-15T00:00:00.000Z",
     "km": 116.4,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.9885,
+        "id": 1757215720099.232,
         "category": "Uber Cash",
         "trips": 10,
         "amount": 202
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.2349,
+        "type": "GNV",
+        "paid": 20.32,
+        "price": 4.77
+      },
+      {
+        "id": 1757215720099.6235,
+        "type": "Etanol",
+        "paid": 170.55,
+        "price": 4.98
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-04-20",
+    "id": "17572157200992025-04-20",
     "date": "2025-04-20T00:00:00.000Z",
     "km": 171.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.5586,
+        "id": 1757215720099.142,
         "category": "Uber Cash",
         "trips": 18,
         "amount": 336.32
+      },
+      {
+        "id": 1757215720099.8965,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 30
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.9956,
+        "type": "GNV",
+        "paid": 52.94,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720099.9773,
+        "type": "Etanol",
+        "paid": 47.87,
+        "price": 4.4
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-04-16",
+    "id": "17572157200992025-04-16",
     "date": "2025-04-16T00:00:00.000Z",
     "km": 188.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.6438,
+        "id": 1757215720099.6199,
         "category": "99 Pop",
         "trips": 6,
         "amount": 93.61
+      },
+      {
+        "id": 1757215720099.686,
+        "category": "Uber Cash",
+        "trips": 11,
+        "amount": 218.21
+      },
+      {
+        "id": 1757215720099.4314,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 55
+      },
+      {
+        "id": 1757215720099.104,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 5
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.7783,
+        "type": "GNV",
+        "paid": 73.3,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-04-14",
+    "id": "17572157200992025-04-14",
     "date": "2025-04-14T00:00:00.000Z",
     "km": 158.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.8872,
+        "id": 1757215720099.5317,
         "category": "99 Pop",
         "trips": 1,
         "amount": 8.9
+      },
+      {
+        "id": 1757215720099.1445,
+        "category": "Uber Cash",
+        "trips": 18,
+        "amount": 232.18
+      },
+      {
+        "id": 1757215720099.4507,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 25
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.976,
+        "type": "GNV",
+        "paid": 77.14,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-04-13",
+    "id": "17572157200992025-04-13",
     "date": "2025-04-13T00:00:00.000Z",
     "km": 134.5,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.8662,
+        "id": 1757215720099.1958,
         "category": "Uber Cash",
         "trips": 15,
         "amount": 226
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-04-12",
-    "date": "2025-04-12T00:00:00.000Z",
-    "km": 191.2,
-    "hours": 0,
-    "earnings": [
+      },
       {
-        "id": 1757215388757.058,
-        "category": "Uber Cash",
-        "trips": 21,
-        "amount": 357.6
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-04-11",
-    "date": "2025-04-11T00:00:00.000Z",
-    "km": 199.1,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.2385,
-        "category": "Uber Cash",
-        "trips": 19,
-        "amount": 302.94
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-30",
-    "date": "2025-03-30T00:00:00.000Z",
-    "km": 83.5,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.1611,
-        "category": "Uber Cash",
-        "trips": 9,
-        "amount": 160
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-29",
-    "date": "2025-03-29T00:00:00.000Z",
-    "km": 135.9,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.6682,
-        "category": "Uber Cash",
-        "trips": 14,
-        "amount": 216.67
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-28",
-    "date": "2025-03-28T00:00:00.000Z",
-    "km": 151.2,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.6687,
-        "category": "99 Pop",
-        "trips": 2,
-        "amount": 13.2
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-24",
-    "date": "2025-03-24T00:00:00.000Z",
-    "km": 46,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.4136,
-        "category": "99 Pop",
-        "trips": 6,
-        "amount": 88.4
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-23",
-    "date": "2025-03-23T00:00:00.000Z",
-    "km": 103.7,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.7117,
-        "category": "99 Pop",
-        "trips": 22,
-        "amount": 249.42
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-22",
-    "date": "2025-03-22T00:00:00.000Z",
-    "km": 147.3,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.3342,
-        "category": "99 Pop",
-        "trips": 9,
-        "amount": 89.82
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-21",
-    "date": "2025-03-21T00:00:00.000Z",
-    "km": 187.4,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.6213,
-        "category": "99 Pop",
-        "trips": 6,
-        "amount": 88.83
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-15",
-    "date": "2025-03-15T00:00:00.000Z",
-    "km": 174.3,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.3323,
-        "category": "99 Pop",
-        "trips": 3,
-        "amount": 33.9
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-14",
-    "date": "2025-03-14T00:00:00.000Z",
-    "km": 143,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.4463,
-        "category": "99 Pop",
-        "trips": 7,
-        "amount": 75.3
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-13",
-    "date": "2025-03-13T00:00:00.000Z",
-    "km": 103.8,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.7373,
-        "category": "99 Pop",
-        "trips": 6,
-        "amount": 51.5
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-11",
-    "date": "2025-03-11T00:00:00.000Z",
-    "km": 36,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.3728,
-        "category": "99 Pop",
-        "trips": 2,
-        "amount": 17.6
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-07",
-    "date": "2025-03-07T00:00:00.000Z",
-    "km": 38.1,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.3186,
-        "category": "99 Pop",
-        "trips": 3,
-        "amount": 28.34
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-06",
-    "date": "2025-03-06T00:00:00.000Z",
-    "km": 51.4,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.6755,
-        "category": "Particular",
-        "trips": 1,
-        "amount": 90
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-03-05",
-    "date": "2025-03-05T00:00:00.000Z",
-    "km": 16.76,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.1294,
+        "id": 1757215720099.8303,
         "category": "Particular",
         "trips": 1,
         "amount": 25
@@ -1139,16 +1681,183 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-03-04",
-    "date": "2025-03-04T00:00:00.000Z",
-    "km": 39.1,
+    "id": "17572157200992025-04-12",
+    "date": "2025-04-12T00:00:00.000Z",
+    "km": 191.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.1448,
+        "id": 1757215720099.6748,
+        "category": "Uber Cash",
+        "trips": 21,
+        "amount": 357.6
+      },
+      {
+        "id": 1757215720099.1064,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 25
+      },
+      {
+        "id": 1757215720099.4194,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 41
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.2827,
+        "type": "Etanol",
+        "paid": 210.46,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200992025-04-11",
+    "date": "2025-04-11T00:00:00.000Z",
+    "km": 199.1,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720099.917,
+        "category": "Uber Cash",
+        "trips": 19,
+        "amount": 302.94
+      },
+      {
+        "id": 1757215720099.5398,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 70
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.9604,
+        "type": "Etanol",
+        "paid": 96.15,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200992025-03-30",
+    "date": "2025-03-30T00:00:00.000Z",
+    "km": 83.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720099.1138,
+        "category": "Uber Cash",
+        "trips": 9,
+        "amount": 160
+      },
+      {
+        "id": 1757215720099.4836,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 9
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200992025-03-29",
+    "date": "2025-03-29T00:00:00.000Z",
+    "km": 135.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720099.5312,
+        "category": "Uber Cash",
+        "trips": 14,
+        "amount": 216.67
+      },
+      {
+        "id": 1757215720099.863,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 40
+      },
+      {
+        "id": 1757215720099.615,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 33
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.9255,
+        "type": "GNV",
+        "paid": 49.8,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200992025-03-28",
+    "date": "2025-03-28T00:00:00.000Z",
+    "km": 151.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720099.2515,
+        "category": "99 Pop",
+        "trips": 2,
+        "amount": 13.2
+      },
+      {
+        "id": 1757215720099.8896,
+        "category": "Uber Cash",
+        "trips": 12,
+        "amount": 229.83
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.4343,
+        "type": "GNV",
+        "paid": 45.25,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720099.0935,
+        "type": "Etanol",
+        "paid": 41.04,
+        "price": 4.84
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200992025-03-24",
+    "date": "2025-03-24T00:00:00.000Z",
+    "km": 46,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720099.2158,
+        "category": "99 Pop",
+        "trips": 6,
+        "amount": 88.4
+      },
+      {
+        "id": 1757215720099.0288,
         "category": "Uber Cash",
         "trips": 1,
-        "amount": 29.16
+        "amount": 6.92
       }
     ],
     "fuelEntries": [],
@@ -1156,16 +1865,28 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-03-02",
-    "date": "2025-03-02T00:00:00.000Z",
-    "km": 30,
+    "id": "17572157200992025-03-23",
+    "date": "2025-03-23T00:00:00.000Z",
+    "km": 103.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.6562,
+        "id": 1757215720099.917,
         "category": "99 Pop",
-        "trips": 4,
-        "amount": 51.75
+        "trips": 22,
+        "amount": 249.42
+      },
+      {
+        "id": 1757215720099.143,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 16.81
+      },
+      {
+        "id": 1757215720099.4314,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 25
       }
     ],
     "fuelEntries": [],
@@ -1173,254 +1894,226 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-03-01",
-    "date": "2025-03-01T00:00:00.000Z",
-    "km": 92.2,
+    "id": "17572157200992025-03-22",
+    "date": "2025-03-22T00:00:00.000Z",
+    "km": 147.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.7922,
-        "category": "99 Pop",
-        "trips": 12,
-        "amount": 143.9
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-28",
-    "date": "2025-02-28T00:00:00.000Z",
-    "km": 204,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.9656,
-        "category": "99 Pop",
-        "trips": 15,
-        "amount": 205.1
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-27",
-    "date": "2025-02-27T00:00:00.000Z",
-    "km": 102.3,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.687,
+        "id": 1757215720099.3623,
         "category": "99 Pop",
         "trips": 9,
-        "amount": 88.99
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-26",
-    "date": "2025-02-26T00:00:00.000Z",
-    "km": 69.3,
-    "hours": 0,
-    "earnings": [
+        "amount": 89.82
+      },
       {
-        "id": 1757215388757.3545,
-        "category": "99 Pop",
-        "trips": 10,
-        "amount": 90.7
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-19",
-    "date": "2025-02-19T00:00:00.000Z",
-    "km": 106.6,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.1309,
-        "category": "99 Pop",
-        "trips": 9,
-        "amount": 114.24
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-18",
-    "date": "2025-02-18T00:00:00.000Z",
-    "km": 115.1,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.6157,
-        "category": "99 Pop",
+        "id": 1757215720099.3354,
+        "category": "Uber Cash",
         "trips": 8,
-        "amount": 126.27
+        "amount": 105.07
+      },
+      {
+        "id": 1757215720099.138,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 25
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720099.9536,
+        "type": "Etanol",
+        "paid": 208.38,
+        "price": 4.9
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-02-17",
-    "date": "2025-02-17T00:00:00.000Z",
-    "km": 147.6,
+    "id": "17572157200962025-03-21",
+    "date": "2025-03-21T00:00:00.000Z",
+    "km": 187.4,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.424,
+        "id": 1757215720096.123,
         "category": "99 Pop",
-        "trips": 10,
-        "amount": 96.2
+        "trips": 6,
+        "amount": 88.83
+      },
+      {
+        "id": 1757215720096.2305,
+        "category": "Uber Cash",
+        "trips": 16,
+        "amount": 251.98
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.159,
+        "type": "GNV",
+        "paid": 53.55,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-02-16",
-    "date": "2025-02-16T00:00:00.000Z",
-    "km": 15,
+    "id": "17572157200962025-03-15",
+    "date": "2025-03-15T00:00:00.000Z",
+    "km": 174.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.1528,
+        "id": 1757215720096.1353,
+        "category": "99 Pop",
+        "trips": 3,
+        "amount": 33.9
+      },
+      {
+        "id": 1757215720096.1567,
+        "category": "Uber Cash",
+        "trips": 13,
+        "amount": 221.71
+      },
+      {
+        "id": 1757215720096.9746,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 60
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.2695,
+        "type": "GNV",
+        "paid": 50,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-03-14",
+    "date": "2025-03-14T00:00:00.000Z",
+    "km": 143,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.3396,
+        "category": "99 Pop",
+        "trips": 7,
+        "amount": 75.3
+      },
+      {
+        "id": 1757215720096.0833,
+        "category": "Uber Cash",
+        "trips": 14,
+        "amount": 180.01
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.8657,
+        "type": "GNV",
+        "paid": 48,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-03-13",
+    "date": "2025-03-13T00:00:00.000Z",
+    "km": 103.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.2192,
+        "category": "99 Pop",
+        "trips": 6,
+        "amount": 51.5
+      },
+      {
+        "id": 1757215720096.0725,
+        "category": "Uber Cash",
+        "trips": 6,
+        "amount": 98.58
+      },
+      {
+        "id": 1757215720096.7888,
+        "category": "Particular",
+        "trips": 4,
+        "amount": 60
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.6392,
+        "type": "GNV",
+        "paid": 42,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-03-11",
+    "date": "2025-03-11T00:00:00.000Z",
+    "km": 36,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.915,
+        "category": "99 Pop",
+        "trips": 2,
+        "amount": 17.6
+      },
+      {
+        "id": 1757215720096.6643,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 7.24
+      },
+      {
+        "id": 1757215720096.6216,
         "category": "Particular",
         "trips": 2,
         "amount": 45
       }
     ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-15",
-    "date": "2025-02-15T00:00:00.000Z",
-    "km": 51.3,
-    "hours": 0,
-    "earnings": [
+    "fuelEntries": [
       {
-        "id": 1757215388757.5273,
-        "category": "99 Pop",
-        "trips": 6,
-        "amount": 59.4
+        "id": 1757215720096.0806,
+        "type": "GNV",
+        "paid": 48.5,
+        "price": 4.99
       }
     ],
-    "fuelEntries": [],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-02-14",
-    "date": "2025-02-14T00:00:00.000Z",
-    "km": 175.3,
+    "id": "17572157200962025-03-07",
+    "date": "2025-03-07T00:00:00.000Z",
+    "km": 38.1,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.122,
+        "id": 1757215720096.014,
         "category": "99 Pop",
-        "trips": 7,
-        "amount": 73.1
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-13",
-    "date": "2025-02-13T00:00:00.000Z",
-    "km": 79,
-    "hours": 0,
-    "earnings": [
+        "trips": 3,
+        "amount": 28.34
+      },
       {
-        "id": 1757215388757.3271,
-        "category": "99 Pop",
-        "trips": 16,
-        "amount": 105.97
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-12",
-    "date": "2025-02-12T00:00:00.000Z",
-    "km": 135.4,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.552,
-        "category": "99 Pop",
-        "trips": 20,
-        "amount": 183.66
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-11",
-    "date": "2025-02-11T00:00:00.000Z",
-    "km": 52.2,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.093,
-        "category": "99 Pop",
-        "trips": 7,
-        "amount": 50.4
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-10",
-    "date": "2025-02-10T00:00:00.000Z",
-    "km": 164.9,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.4622,
-        "category": "99 Pop",
-        "trips": 26,
-        "amount": 243.3
-      }
-    ],
-    "fuelEntries": [],
-    "maintenanceEntries": [],
-    "timeEntries": []
-  },
-  {
-    "id": "17572153887572025-02-09",
-    "date": "2025-02-09T00:00:00.000Z",
-    "km": 26.5,
-    "hours": 0,
-    "earnings": [
-      {
-        "id": 1757215388757.1038,
+        "id": 1757215720096.9353,
         "category": "Particular",
         "trips": 3,
-        "amount": 75
+        "amount": 50
       }
     ],
     "fuelEntries": [],
@@ -1428,16 +2121,92 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-02-08",
-    "date": "2025-02-08T00:00:00.000Z",
-    "km": 142,
+    "id": "17572157200962025-03-06",
+    "date": "2025-03-06T00:00:00.000Z",
+    "km": 51.4,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.925,
+        "id": 1757215720096.5154,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 90
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-03-05",
+    "date": "2025-03-05T00:00:00.000Z",
+    "km": 16.76,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.982,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 25
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.446,
+        "type": "GNV",
+        "paid": 36.72,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720096.1038,
+        "type": "Etanol",
+        "paid": 40.84,
+        "price": 5.09
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-03-04",
+    "date": "2025-03-04T00:00:00.000Z",
+    "km": 39.1,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.1174,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 29.16
+      },
+      {
+        "id": 1757215720096.1462,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 40
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-03-02",
+    "date": "2025-03-02T00:00:00.000Z",
+    "km": 30,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.8765,
         "category": "99 Pop",
-        "trips": 23,
-        "amount": 259.75
+        "trips": 4,
+        "amount": 51.75
+      },
+      {
+        "id": 1757215720096.648,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 60
       }
     ],
     "fuelEntries": [],
@@ -1445,30 +2214,127 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-02-07",
-    "date": "2025-02-07T00:00:00.000Z",
-    "km": 57.8,
+    "id": "17572157200962025-03-01",
+    "date": "2025-03-01T00:00:00.000Z",
+    "km": 92.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.4697,
+        "id": 1757215720096.6897,
         "category": "99 Pop",
-        "trips": 7,
-        "amount": 55.12
+        "trips": 12,
+        "amount": 143.9
+      },
+      {
+        "id": 1757215720096.4,
+        "category": "Uber Cash",
+        "trips": 2,
+        "amount": 32.2
+      },
+      {
+        "id": 1757215720096.3154,
+        "category": "Particular",
+        "trips": 5,
+        "amount": 76.04
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.4402,
+        "type": "GNV",
+        "paid": 54.93,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887572025-02-06",
-    "date": "2025-02-06T00:00:00.000Z",
-    "km": 6,
+    "id": "17572157200962025-02-28",
+    "date": "2025-02-28T00:00:00.000Z",
+    "km": 204,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388757.2407,
+        "id": 1757215720096.376,
+        "category": "99 Pop",
+        "trips": 15,
+        "amount": 205.1
+      },
+      {
+        "id": 1757215720096.0232,
+        "category": "Uber Cash",
+        "trips": 3,
+        "amount": 56.95
+      },
+      {
+        "id": 1757215720096.7146,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 35
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.576,
+        "type": "GNV",
+        "paid": 73.01,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-27",
+    "date": "2025-02-27T00:00:00.000Z",
+    "km": 102.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.636,
+        "category": "99 Pop",
+        "trips": 9,
+        "amount": 88.99
+      },
+      {
+        "id": 1757215720096.7676,
+        "category": "Uber Cash",
+        "trips": 3,
+        "amount": 30.02
+      },
+      {
+        "id": 1757215720096.8628,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 60
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.2593,
+        "type": "GNV",
+        "paid": 44.5,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-26",
+    "date": "2025-02-26T00:00:00.000Z",
+    "km": 69.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.3206,
+        "category": "99 Pop",
+        "trips": 10,
+        "amount": 90.7
+      },
+      {
+        "id": 1757215720096.0564,
         "category": "Particular",
         "trips": 1,
         "amount": 15
@@ -1479,50 +2345,541 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-02-05",
+    "id": "17572157200962025-02-19",
+    "date": "2025-02-19T00:00:00.000Z",
+    "km": 106.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.7085,
+        "category": "99 Pop",
+        "trips": 9,
+        "amount": 114.24
+      },
+      {
+        "id": 1757215720096.3767,
+        "category": "Uber Cash",
+        "trips": 2,
+        "amount": 24.72
+      },
+      {
+        "id": 1757215720096.8577,
+        "category": "Particular",
+        "trips": 4,
+        "amount": 69
+      },
+      {
+        "id": 1757215720096.2617,
+        "category": "MD Driver",
+        "trips": 1,
+        "amount": 23.76
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.2773,
+        "type": "GNV",
+        "paid": 46.4,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-18",
+    "date": "2025-02-18T00:00:00.000Z",
+    "km": 115.1,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.534,
+        "category": "99 Pop",
+        "trips": 8,
+        "amount": 126.27
+      },
+      {
+        "id": 1757215720096.9624,
+        "category": "Uber Cash",
+        "trips": 4,
+        "amount": 53.5
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.2417,
+        "type": "GNV",
+        "paid": 47.05,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-17",
+    "date": "2025-02-17T00:00:00.000Z",
+    "km": 147.6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.3289,
+        "category": "99 Pop",
+        "trips": 10,
+        "amount": 96.2
+      },
+      {
+        "id": 1757215720096.566,
+        "category": "Uber Cash",
+        "trips": 6,
+        "amount": 76.48
+      },
+      {
+        "id": 1757215720096.647,
+        "category": "Particular",
+        "trips": 4,
+        "amount": 80
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.1904,
+        "type": "GNV",
+        "paid": 85.09,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-16",
+    "date": "2025-02-16T00:00:00.000Z",
+    "km": 15,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.2888,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 45
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-15",
+    "date": "2025-02-15T00:00:00.000Z",
+    "km": 51.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.2231,
+        "category": "99 Pop",
+        "trips": 6,
+        "amount": 59.4
+      },
+      {
+        "id": 1757215720096.5142,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 35
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.516,
+        "type": "GNV",
+        "paid": 51.34,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-14",
+    "date": "2025-02-14T00:00:00.000Z",
+    "km": 175.3,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.5557,
+        "category": "99 Pop",
+        "trips": 7,
+        "amount": 73.1
+      },
+      {
+        "id": 1757215720096.535,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 10.28
+      },
+      {
+        "id": 1757215720096.3665,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 215
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.941,
+        "type": "GNV",
+        "paid": 39.42,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-13",
+    "date": "2025-02-13T00:00:00.000Z",
+    "km": 79,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.687,
+        "category": "99 Pop",
+        "trips": 16,
+        "amount": 105.97
+      },
+      {
+        "id": 1757215720096.8293,
+        "category": "Uber Cash",
+        "trips": 2,
+        "amount": 25.24
+      },
+      {
+        "id": 1757215720096.2642,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 50
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.5513,
+        "type": "GNV",
+        "paid": 35,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-12",
+    "date": "2025-02-12T00:00:00.000Z",
+    "km": 135.4,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.143,
+        "category": "99 Pop",
+        "trips": 20,
+        "amount": 183.66
+      },
+      {
+        "id": 1757215720096.0266,
+        "category": "Uber Cash",
+        "trips": 2,
+        "amount": 19.96
+      },
+      {
+        "id": 1757215720096.5442,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 40
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.9272,
+        "type": "GNV",
+        "paid": 39.57,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-11",
+    "date": "2025-02-11T00:00:00.000Z",
+    "km": 52.2,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.9458,
+        "category": "99 Pop",
+        "trips": 7,
+        "amount": 50.4
+      },
+      {
+        "id": 1757215720096.9192,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 15.21
+      },
+      {
+        "id": 1757215720096.6367,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 20
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-10",
+    "date": "2025-02-10T00:00:00.000Z",
+    "km": 164.9,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.5828,
+        "category": "99 Pop",
+        "trips": 26,
+        "amount": 243.3
+      },
+      {
+        "id": 1757215720096.138,
+        "category": "Uber Cash",
+        "trips": 3,
+        "amount": 34.54
+      },
+      {
+        "id": 1757215720096.6567,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 29
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.916,
+        "type": "GNV",
+        "paid": 68.25,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-09",
+    "date": "2025-02-09T00:00:00.000Z",
+    "km": 26.5,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.1711,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 75
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.0654,
+        "type": "GNV",
+        "paid": 52.49,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720096.6902,
+        "type": "Etanol",
+        "paid": 21.73,
+        "price": 5.09
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-08",
+    "date": "2025-02-08T00:00:00.000Z",
+    "km": 142,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.9438,
+        "category": "99 Pop",
+        "trips": 23,
+        "amount": 259.75
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.3794,
+        "type": "GNV",
+        "paid": 33.75,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-07",
+    "date": "2025-02-07T00:00:00.000Z",
+    "km": 57.8,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.774,
+        "category": "99 Pop",
+        "trips": 7,
+        "amount": 55.12
+      },
+      {
+        "id": 1757215720096.099,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 24.4
+      },
+      {
+        "id": 1757215720096.8655,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 15
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.434,
+        "type": "GNV",
+        "paid": 22.5,
+        "price": 4.99
+      }
+    ],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-06",
+    "date": "2025-02-06T00:00:00.000Z",
+    "km": 6,
+    "hours": 0,
+    "earnings": [
+      {
+        "id": 1757215720096.02,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 15
+      }
+    ],
+    "fuelEntries": [],
+    "maintenanceEntries": [],
+    "timeEntries": []
+  },
+  {
+    "id": "17572157200962025-02-05",
     "date": "2025-02-05T00:00:00.000Z",
     "km": 109.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.2046,
+        "id": 1757215720096.0051,
         "category": "99 Pop",
         "trips": 15,
         "amount": 147.49
+      },
+      {
+        "id": 1757215720096.537,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 29
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.4783,
+        "type": "GNV",
+        "paid": 20,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720096.1863,
+        "type": "Etanol",
+        "paid": 156.39,
+        "price": 4.62
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-02-04",
+    "id": "17572157200962025-02-04",
     "date": "2025-02-04T00:00:00.000Z",
     "km": 61.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.836,
+        "id": 1757215720096.8005,
         "category": "99 Pop",
         "trips": 9,
         "amount": 105.1
+      },
+      {
+        "id": 1757215720096.9421,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 29
+      },
+      {
+        "id": 1757215720096.953,
+        "category": "MD Driver",
+        "trips": 0,
+        "amount": 2
+      },
+      {
+        "id": 1757215720096.905,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 2
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720096.726,
+        "type": "GNV",
+        "paid": 30,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-02-03",
+    "id": "17572157200962025-02-03",
     "date": "2025-02-03T00:00:00.000Z",
     "km": 103.8,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.651,
+        "id": 1757215720096.2302,
         "category": "99 Pop",
         "trips": 13,
         "amount": 132.19
+      },
+      {
+        "id": 1757215720096.5378,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 15.85
+      },
+      {
+        "id": 1757215720096.78,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 29
       }
     ],
     "fuelEntries": [],
@@ -1530,13 +2887,13 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-02-02",
+    "id": "17572157200952025-02-02",
     "date": "2025-02-02T00:00:00.000Z",
     "km": 11.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.8152,
+        "id": 1757215720095.8423,
         "category": "99 Pop",
         "trips": 2,
         "amount": 20
@@ -1547,16 +2904,28 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-02-01",
+    "id": "17572157200952025-02-01",
     "date": "2025-02-01T00:00:00.000Z",
     "km": 55.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.4656,
+        "id": 1757215720095.9487,
         "category": "99 Pop",
         "trips": 8,
         "amount": 67.1
+      },
+      {
+        "id": 1757215720095.6292,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 10.63
+      },
+      {
+        "id": 1757215720095.1558,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 35
       }
     ],
     "fuelEntries": [],
@@ -1564,33 +2933,64 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-29",
+    "id": "17572157200952025-01-29",
     "date": "2025-01-29T00:00:00.000Z",
     "km": 106.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.509,
+        "id": 1757215720095.4355,
         "category": "99 Pop",
         "trips": 13,
         "amount": 113.84
+      },
+      {
+        "id": 1757215720095.834,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 22.01
+      },
+      {
+        "id": 1757215720095.6545,
+        "category": "Particular",
+        "trips": 5,
+        "amount": 84
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.663,
+        "type": "GNV",
+        "paid": 42.25,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720095.6904,
+        "type": "Etanol",
+        "paid": 100,
+        "price": 5.09
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-28",
+    "id": "17572157200952025-01-28",
     "date": "2025-01-28T00:00:00.000Z",
     "km": 87,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.1306,
+        "id": 1757215720095.787,
         "category": "99 Pop",
         "trips": 14,
         "amount": 139.4
+      },
+      {
+        "id": 1757215720095.997,
+        "category": "Particular",
+        "trips": 4,
+        "amount": 58
       }
     ],
     "fuelEntries": [],
@@ -1598,13 +2998,13 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-27",
+    "id": "17572157200952025-01-27",
     "date": "2025-01-27T00:00:00.000Z",
     "km": 40,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.668,
+        "id": 1757215720095.4272,
         "category": "99 Pop",
         "trips": 4,
         "amount": 39.6
@@ -1615,285 +3015,505 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-26",
+    "id": "17572157200952025-01-26",
     "date": "2025-01-26T00:00:00.000Z",
     "km": 55.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.0784,
+        "id": 1757215720095.4397,
         "category": "99 Pop",
         "trips": 8,
         "amount": 70.71
+      },
+      {
+        "id": 1757215720095.3848,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 8
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.707,
+        "type": "GNV",
+        "paid": 19.6,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-25",
+    "id": "17572157200952025-01-25",
     "date": "2025-01-25T00:00:00.000Z",
     "km": 122.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.5286,
+        "id": 1757215720095.0652,
         "category": "99 Pop",
         "trips": 22,
         "amount": 190.1
+      },
+      {
+        "id": 1757215720095.0796,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 12
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.4614,
+        "type": "GNV",
+        "paid": 38.2,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-24",
+    "id": "17572157200952025-01-24",
     "date": "2025-01-24T00:00:00.000Z",
     "km": 102.8,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.6526,
+        "id": 1757215720095.3198,
         "category": "99 Pop",
         "trips": 14,
         "amount": 139.4
+      },
+      {
+        "id": 1757215720095.0159,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 25
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.212,
+        "type": "GNV",
+        "paid": 32.43,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-23",
+    "id": "17572157200952025-01-23",
     "date": "2025-01-23T00:00:00.000Z",
     "km": 38.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.6914,
+        "id": 1757215720095.2146,
         "category": "99 Pop",
         "trips": 8,
         "amount": 69.6
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.1028,
+        "type": "GNV",
+        "paid": 20,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-22",
+    "id": "17572157200952025-01-22",
     "date": "2025-01-22T00:00:00.000Z",
     "km": 122.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.8025,
+        "id": 1757215720095.231,
         "category": "99 Pop",
         "trips": 19,
         "amount": 182.02
+      },
+      {
+        "id": 1757215720095.4219,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 50
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.805,
+        "type": "GNV",
+        "paid": 48.05,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720095.9182,
+        "type": "Etanol",
+        "paid": 50.9,
+        "price": 5.09
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-21",
+    "id": "17572157200952025-01-21",
     "date": "2025-01-21T00:00:00.000Z",
     "km": 75.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.1099,
+        "id": 1757215720095.01,
         "category": "99 Pop",
         "trips": 13,
         "amount": 113.2
+      },
+      {
+        "id": 1757215720095.9878,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 20
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.439,
+        "type": "GNV",
+        "paid": 32.5,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-20",
+    "id": "17572157200952025-01-20",
     "date": "2025-01-20T00:00:00.000Z",
     "km": 96.5,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.7202,
+        "id": 1757215720095.968,
         "category": "99 Pop",
         "trips": 16,
         "amount": 160.5
+      },
+      {
+        "id": 1757215720095.0286,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 10
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.8442,
+        "type": "GNV",
+        "paid": 32.4,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-19",
+    "id": "17572157200952025-01-19",
     "date": "2025-01-19T00:00:00.000Z",
     "km": 57.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.2412,
+        "id": 1757215720095.3962,
         "category": "99 Pop",
         "trips": 11,
         "amount": 92.1
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.0737,
+        "type": "GNV",
+        "paid": 27,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-18",
+    "id": "17572157200952025-01-18",
     "date": "2025-01-18T00:00:00.000Z",
     "km": 114.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.3384,
+        "id": 1757215720095.0159,
         "category": "99 Pop",
         "trips": 18,
         "amount": 179.23
+      },
+      {
+        "id": 1757215720095.2942,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 10
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.5962,
+        "type": "GNV",
+        "paid": 29,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-17",
+    "id": "17572157200952025-01-17",
     "date": "2025-01-17T00:00:00.000Z",
     "km": 160.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.0396,
+        "id": 1757215720095.8037,
         "category": "99 Pop",
         "trips": 21,
         "amount": 195.18
+      },
+      {
+        "id": 1757215720095.878,
+        "category": "Particular",
+        "trips": 5,
+        "amount": 103
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.1301,
+        "type": "GNV",
+        "paid": 58.75,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720095.5408,
+        "type": "Etanol",
+        "paid": 50,
+        "price": 5.09
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-16",
+    "id": "17572157200952025-01-16",
     "date": "2025-01-16T00:00:00.000Z",
     "km": 24,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.1106,
+        "id": 1757215720095.929,
         "category": "99 Pop",
         "trips": 4,
         "amount": 30.64
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.595,
+        "type": "Etanol",
+        "paid": 125,
+        "price": 5.19
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-15",
+    "id": "17572157200952025-01-15",
     "date": "2025-01-15T00:00:00.000Z",
     "km": 56,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.1155,
+        "id": 1757215720095.3833,
         "category": "99 Pop",
         "trips": 4,
         "amount": 62.9
+      },
+      {
+        "id": 1757215720095.6755,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 25.16
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.9727,
+        "type": "Etanol",
+        "paid": 60,
+        "price": 5.19
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-14",
+    "id": "17572157200952025-01-14",
     "date": "2025-01-14T00:00:00.000Z",
     "km": 135.7,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.7134,
+        "id": 1757215720095.6428,
         "category": "99 Pop",
         "trips": 16,
         "amount": 147.21
+      },
+      {
+        "id": 1757215720095.0586,
+        "category": "Uber Cash",
+        "trips": 2,
+        "amount": 37.71
+      },
+      {
+        "id": 1757215720095.0342,
+        "category": "Particular",
+        "trips": 2,
+        "amount": 25
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.0642,
+        "type": "GNV",
+        "paid": 11.3,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-11",
+    "id": "17572157200952025-01-11",
     "date": "2025-01-11T00:00:00.000Z",
     "km": 162,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.5557,
+        "id": 1757215720095.349,
         "category": "99 Pop",
         "trips": 30,
         "amount": 284.58
+      },
+      {
+        "id": 1757215720095.7454,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 6.58
+      },
+      {
+        "id": 1757215720095.267,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 29
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.0698,
+        "type": "GNV",
+        "paid": 30,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720095.978,
+        "type": "Etanol",
+        "paid": 100,
+        "price": 5.19
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-10",
+    "id": "17572157200952025-01-10",
     "date": "2025-01-10T00:00:00.000Z",
     "km": 118.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.7197,
+        "id": 1757215720095.572,
         "category": "99 Pop",
         "trips": 22,
         "amount": 205.31
+      },
+      {
+        "id": 1757215720095.1348,
+        "category": "Uber Cash",
+        "trips": 1,
+        "amount": 8.98
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.9421,
+        "type": "GNV",
+        "paid": 20.25,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-08",
+    "id": "17572157200952025-01-08",
     "date": "2025-01-08T00:00:00.000Z",
     "km": 165.9,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.863,
+        "id": 1757215720095.3284,
         "category": "Particular",
         "trips": 1,
         "amount": 358.1
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.0312,
+        "type": "GNV",
+        "paid": 68.5,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720095.9912,
+        "type": "Etanol",
+        "paid": 100,
+        "price": 5.09
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-07",
+    "id": "17572157200952025-01-07",
     "date": "2025-01-07T00:00:00.000Z",
     "km": 56.6,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.3513,
+        "id": 1757215720095.3748,
         "category": "99 Pop",
         "trips": 11,
         "amount": 96.6
@@ -1904,84 +3524,190 @@
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-06",
+    "id": "17572157200952025-01-06",
     "date": "2025-01-06T00:00:00.000Z",
     "km": 75.07,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.8838,
+        "id": 1757215720095.4626,
         "category": "99 Pop",
         "trips": 9,
         "amount": 95.03
+      },
+      {
+        "id": 1757215720095.4614,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 40
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.0872,
+        "type": "GNV",
+        "paid": 35,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-05",
+    "id": "17572157200952025-01-05",
     "date": "2025-01-05T00:00:00.000Z",
     "km": 109.4,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.8276,
+        "id": 1757215720095.4358,
         "category": "99 Pop",
         "trips": 19,
         "amount": 187.06
+      },
+      {
+        "id": 1757215720095.7664,
+        "category": "Particular",
+        "trips": 1,
+        "amount": 15
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.0452,
+        "type": "Etanol",
+        "paid": 50,
+        "price": 5.09
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-04",
+    "id": "17572157200952025-01-04",
     "date": "2025-01-04T00:00:00.000Z",
     "km": 117.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.0286,
+        "id": 1757215720095.2676,
         "category": "99 Pop",
         "trips": 11,
         "amount": 113.7
+      },
+      {
+        "id": 1757215720095.5,
+        "category": "Uber Cash",
+        "trips": 2,
+        "amount": 24.33
+      },
+      {
+        "id": 1757215720095.143,
+        "category": "Particular",
+        "trips": 4,
+        "amount": 60
+      },
+      {
+        "id": 1757215720095.6567,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 12.6
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.405,
+        "type": "GNV",
+        "paid": 36,
+        "price": 4.99
+      },
+      {
+        "id": 1757215720095.6265,
+        "type": "Etanol",
+        "paid": 30,
+        "price": 5.09
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887562025-01-03",
+    "id": "17572157200952025-01-03",
     "date": "2025-01-03T00:00:00.000Z",
     "km": 72.2,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388756.478,
+        "id": 1757215720095.8093,
         "category": "99 Pop",
         "trips": 12,
         "amount": 111.51
+      },
+      {
+        "id": 1757215720095.0608,
+        "category": "Particular",
+        "trips": 3,
+        "amount": 27
+      },
+      {
+        "id": 1757215720095.5464,
+        "category": "In Driver",
+        "trips": 1,
+        "amount": 9.9
+      },
+      {
+        "id": 1757215720095.657,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 16.9
       }
     ],
-    "fuelEntries": [],
+    "fuelEntries": [
+      {
+        "id": 1757215720095.9023,
+        "type": "GNV",
+        "paid": 34,
+        "price": 4.99
+      }
+    ],
     "maintenanceEntries": [],
     "timeEntries": []
   },
   {
-    "id": "17572153887552025-01-02",
+    "id": "17572157200952025-01-02",
     "date": "2025-01-02T00:00:00.000Z",
     "km": 37.3,
     "hours": 0,
     "earnings": [
       {
-        "id": 1757215388755.9307,
+        "id": 1757215720094.868,
         "category": "99 Pop",
         "trips": 3,
         "amount": 23.5
+      },
+      {
+        "id": 1757215720094.636,
+        "category": "Uber Cash",
+        "trips": 2,
+        "amount": 19.46
+      },
+      {
+        "id": 1757215720094.0796,
+        "category": "Particular",
+        "trips": 6,
+        "amount": 13.86
+      },
+      {
+        "id": 1757215720094.6501,
+        "category": "In Driver",
+        "trips": 1,
+        "amount": 13.86
+      },
+      {
+        "id": 1757215720095.9197,
+        "category": "Ganhos Extras",
+        "trips": 0,
+        "amount": 5
       }
     ],
     "fuelEntries": [],

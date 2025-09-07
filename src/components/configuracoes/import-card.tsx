@@ -20,8 +20,8 @@ import {
 
 // Função para converter o formato de tempo HH:mm:ss para horas decimais
 const timeToDecimal = (time: string): number => {
-    if (!time || !/^\d{1,2}:\d{2}(:\d{2})?$/.test(time)) return 0;
-    const parts = time.split(':').map(Number);
+    if (!time || !/^\d{1,2}:\d{2}(:\d{2})?$/.test(time.trim())) return 0;
+    const parts = time.trim().split(':').map(Number);
     const hours = parts[0] || 0;
     const minutes = parts[1] || 0;
     const seconds = parts[2] || 0;
@@ -59,7 +59,9 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
         let currentDate = '';
         if (values[dateIndex]) {
             try {
-                const parsedDate = parse(values[dateIndex], 'yyyy-MM-dd', new Date());
+                // Use a reference date to avoid timezone issues. We only care about the date part.
+                const referenceDate = new Date();
+                const parsedDate = parse(values[dateIndex], 'yyyy-MM-dd', referenceDate);
                 if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
                 currentDate = format(parsedDate, 'yyyy-MM-dd');
                 lastDate = currentDate;
