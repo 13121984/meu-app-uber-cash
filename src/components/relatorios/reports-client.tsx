@@ -9,7 +9,7 @@ import { StatsCard } from '@/components/dashboard/stats-card';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/auth-context';
 import { updateUser } from '@/services/auth.service';
-import { differenceInDays, parseISO, isBefore, addDays, formatDistanceToNow, sub, isAfter } from 'date-fns';
+import { addDays, formatDistanceToNow, isAfter, sub } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
@@ -57,22 +57,31 @@ export function ReportsClient() {
       const userOrder = user.preferences?.[itemType === 'cards' ? 'dashboardCardOrder' : 'reportChartOrder'];
 
       if (user.isPremium) {
+          // If premium, use saved order or default to all items
           return userOrder && userOrder.length > 0 ? userOrder : allItems.map(i => i.id);
       }
       
-      const optionalItem = userOrder?.find(id => !mandatoryItems.includes(id)) || allItems.find(i => !mandatoryItems.includes(i.id))?.id;
-      if (!optionalItem) {
-          // Fallback if for some reason no optional item is found
-          return [...mandatoryItems];
+      // If free, ensure mandatory cards are present, plus one optional
+      const optionalItem = userOrder?.find(id => !mandatoryItems.includes(id)) 
+          || allItems.find(i => !mandatoryItems.includes(i.id))?.id;
+      
+      const visibleItems = [...mandatoryItems];
+      if(optionalItem) {
+          visibleItems.push(optionalItem);
       }
       
-      const finalOrder = userOrder && userOrder.length === (mandatoryItems.length + 1) ? userOrder : [...mandatoryItems, optionalItem];
-      return finalOrder;
+       // Respect user's saved order if it's valid
+      if(userOrder && userOrder.every(id => visibleItems.includes(id)) && userOrder.length === visibleItems.length) {
+          return userOrder;
+      }
+      
+      return visibleItems;
   }
 
   const [cardOrder, setCardOrder] = useState<string[]>(getInitialOrder('cards'));
   const [chartOrder, setChartOrder] = useState<string[]>(getInitialOrder('charts'));
-
+  const [initialCardOptional, setInitialCardOptional] = useState(cardOrder.find(id => !mandatoryCards.includes(id)));
+  const [initialChartOptional, setInitialChartOptional] = useState(chartOrder.find(id => !mandatoryCharts.includes(id)));
 
   const handleMoveItem = (itemId: string, direction: 'up' | 'down', itemType: 'cards' | 'charts') => {
       const order = itemType === 'cards' ? cardOrder : chartOrder;
@@ -89,10 +98,17 @@ export function ReportsClient() {
       setOrder(newOrder);
   };
   
-  const handleSaveLayout = async (isSwapping: boolean = false) => {
+  const handleSaveLayout = async () => {
     startSavingTransition(async () => {
       if(!user) return;
       
+      const newCardOptional = cardOrder.find(id => !mandatoryCards.includes(id));
+      const newChartOptional = chartOrder.find(id => !mandatoryCharts.includes(id));
+
+      const cardSwapped = newCardOptional !== initialCardOptional;
+      const chartSwapped = newChartOptional !== initialChartOptional;
+      const isSwapping = cardSwapped || chartSwapped;
+
       if (isSwapping && !user.isPremium) {
         const lastChange = user.preferences.lastFreebieChangeDate;
         if (lastChange) {
@@ -119,6 +135,8 @@ export function ReportsClient() {
 
       if (result.success) {
           await refreshUser();
+          setInitialCardOptional(newCardOptional);
+          setInitialChartOptional(newChartOptional);
           toast({
               title: <div className="flex items-center gap-2"><Check className="h-5 w-5"/><span>Layout Salvo!</span></div>,
               description: "Suas preferências de visualização foram salvas.",
@@ -135,24 +153,24 @@ export function ReportsClient() {
   }
 
   const handleSelectItem = (itemId: string, itemType: 'cards' | 'charts') => {
-      const order = itemType === 'cards' ? cardOrder : chartOrder;
       const setOrder = itemType === 'cards' ? setCardOrder : setChartOrder;
       const mandatoryItems = itemType === 'cards' ? mandatoryCards : mandatoryCharts;
 
-      if (user?.isPremium) {
-          let newOrder = order.includes(itemId) ? order.filter(id => id !== itemId) : [...order, itemId];
-          setOrder(newOrder);
-      } else {
-          const optionalItemIndex = order.findIndex(id => !mandatoryItems.includes(id));
-          const newOrder = [...order];
-          if (optionalItemIndex > -1) {
-              newOrder[optionalItemIndex] = itemId;
+      setOrder(prevOrder => {
+          if (user?.isPremium) {
+              return prevOrder.includes(itemId) ? prevOrder.filter(id => id !== itemId) : [...prevOrder, itemId];
           } else {
-              newOrder.push(itemId);
+              // For free users, find and replace the single optional item
+              const optionalItemIndex = prevOrder.findIndex(id => !mandatoryItems.includes(id));
+              const newOrder = [...prevOrder];
+              if (optionalItemIndex > -1) {
+                  newOrder[optionalItemIndex] = itemId;
+              } else {
+                  newOrder.push(itemId); // Should not happen if initialized correctly
+              }
+              return newOrder;
           }
-          setOrder(newOrder);
-          handleSaveLayout(true);
-      }
+      });
   }
 
   if (!user) return <div className="flex justify-center items-center h-96"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
@@ -201,8 +219,7 @@ export function ReportsClient() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {optionalItems.map(item => {
                         const isVisible = currentOrder.includes(item.id);
-                        const isButtonDisabled = !user.isPremium && isVisible;
-
+                        
                         return (
                              <Card key={item.id} className={`relative p-2 border-2 ${isVisible && !user.isPremium ? 'border-primary' : 'border-dashed'}`}>
                                 {user.isPremium && isVisible && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1"><Check className="h-3 w-3"/></div>}
@@ -210,13 +227,16 @@ export function ReportsClient() {
                                 <StatsCard {...item} value={0} isPreview={true} />
 
                                 <Button 
-                                    variant={user.isPremium ? (isVisible ? "secondary" : "default") : "default"}
+                                    variant={isVisible ? "secondary" : "default"}
                                     size="sm" className="w-full mt-2"
                                     onClick={() => handleSelectItem(item.id, itemType)}
-                                    disabled={isButtonDisabled || isSaving}
+                                    disabled={isSaving || (isVisible && !user.isPremium)}
                                 >
                                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                    {user.isPremium ? (isVisible ? 'Ocultar' : 'Mostrar') : (isVisible ? 'Selecionado' : 'Selecionar')}
+                                    {isVisible 
+                                        ? (user.isPremium ? 'Ocultar' : 'Selecionado')
+                                        : (user.isPremium ? 'Mostrar' : 'Selecionar')
+                                    }
                                 </Button>
                             </Card>
                         )
@@ -235,7 +255,7 @@ export function ReportsClient() {
                     <CardTitle className="font-headline text-xl">Personalizar Layout</CardTitle>
                     <CardDescription>Organize os cards e gráficos que aparecem no seu Dashboard.</CardDescription>
                 </div>
-                <Button onClick={() => handleSaveLayout(false)} disabled={isSaving}>
+                <Button onClick={() => handleSaveLayout()} disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Salvar Ordem
                 </Button>
             </CardHeader>
