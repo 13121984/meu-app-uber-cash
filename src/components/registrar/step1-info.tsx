@@ -50,19 +50,17 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
   
   // Local state for inputs to allow flexible user typing (e.g., "8,")
   const [kmInput, setKmInput] = useState(data.km > 0 ? String(data.km).replace('.', ',') : '');
-  const [hoursInput, setHoursInput] = useState(data.hours > 0 ? String(data.hours).replace('.', ',') : '');
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   
   const handleFieldChange = (field: keyof State, value: any) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
   };
   
-  const handleNumericInputChange = (field: 'km' | 'hours', rawValue: string) => {
+  const handleNumericInputChange = (field: 'km', rawValue: string) => {
     // Allow user to type comma or dot
     const sanitizedValue = rawValue.replace(/[^0-9,.]/g, '');
     
     if (field === 'km') setKmInput(sanitizedValue);
-    if (field === 'hours') setHoursInput(sanitizedValue);
     
     // Convert to number for state update
     const numericValue = parseFloat(sanitizedValue.replace(',', '.')) || 0;
@@ -73,7 +71,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
       const totalMinutes = timeToMinutes(timeValue);
       const decimalHours = totalMinutes / 60;
       handleFieldChange('hours', decimalHours);
-      setHoursInput(String(decimalHours.toFixed(2)).replace('.', ','));
       setIsTimePickerOpen(false);
   }
   
@@ -100,12 +97,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
   const dateString = data.date && isValid(data.date) ? format(data.date, 'dd/MM/yyyy') : '';
   const hasTimeEntries = useMemo(() => data.timeEntries && data.timeEntries.length > 0, [data.timeEntries]);
   
-  // Sync local input state if global state changes (e.g., from time entries)
-  React.useEffect(() => {
-    const formattedHours = data.hours > 0 ? String(data.hours.toFixed(2)).replace('.', ',') : '';
-    setHoursInput(formattedHours);
-  }, [data.hours]);
-
 
   return (
     <div className="space-y-6">
@@ -150,15 +141,15 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
         </div>
         
         <div>
-            <div className="flex items-center justify-between mb-2">
-                 <Label htmlFor="hours">Total de Horas</Label>
-                 <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+           <div className="flex items-center gap-2 mb-2">
+                <Label htmlFor="hours">Total de Horas</Label>
+                <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
                     <PopoverTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-7 w-7" disabled={hasTimeEntries}>
                             <Clock className="h-4 w-4" />
                         </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2">
+                     <PopoverContent className="w-auto p-2">
                         <Label className="text-xs text-muted-foreground px-1">Definir Horas (HH:MM)</Label>
                         <Input 
                             type="time" 
@@ -166,17 +157,16 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                         />
                     </PopoverContent>
                 </Popover>
-            </div>
+           </div>
            <div className="relative">
              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500" />
             <Input
               id="hours"
               type="text"
-              inputMode="decimal"
-              placeholder="Ex: 8,5"
-              value={hoursInput}
-              onChange={(e) => handleNumericInputChange('hours', e.target.value)}
-              className="pl-10"
+              readOnly
+              placeholder="0,0"
+              value={data.hours > 0 ? String(data.hours.toFixed(2)).replace('.', ',') : '0,0'}
+              className="pl-10 bg-muted/70 focus-visible:ring-0 focus-visible:ring-offset-0 cursor-not-allowed"
               disabled={hasTimeEntries}
             />
             {hasTimeEntries && <p className="text-xs text-muted-foreground mt-1">O total de horas é calculado automaticamente a partir dos períodos.</p>}
