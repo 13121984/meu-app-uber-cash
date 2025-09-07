@@ -4,7 +4,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DollarSign, Clock, TrendingUp, Target, Car } from "lucide-react";
-import type { PeriodData } from "../dashboard/dashboard-client";
+import type { PeriodData } from "@/services/summary.service";
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 

@@ -1,11 +1,10 @@
 
-
 "use client";
 
 import { useMemo, useState, useTransition } from 'react';
-import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Loader2, CalendarDays, Hourglass, Route, Maximize, GripVertical } from 'lucide-react';
+import { BarChart, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Loader2, CalendarDays, Hourglass, Route, GripVertical } from 'lucide-react';
 import { ReportsFilter } from './reports-filter';
-import { getReportData, ReportData } from '@/services/work-day.service';
+import { getReportData, ReportData } from '@/services/summary.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
@@ -21,12 +20,14 @@ const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => 
 const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerHourChart = dynamic(() => import('./average-earning-per-hour-chart').then(mod => mod.AverageEarningPerHourChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
-const DraggableCard = ({ id, title, description, children }: { id: string, title: string, description: string, children: React.ReactNode }) => (
-    <Reorder.Item key={id} value={id} className="bg-transparent" dragListener={false}>
+const DraggableCard = ({ id, title, description, children, onPointerDown }: { id: string, title: string, description: string, children: React.ReactNode, onPointerDown: (e: React.PointerEvent) => void }) => (
+    <Reorder.Item key={id} value={id} className="bg-transparent">
          <Card className="w-full h-full">
             <CardHeader>
                 <div className="flex items-center gap-2">
-                    <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
+                    <button onPointerDown={onPointerDown} className="cursor-grab p-1">
+                        <GripVertical className="h-5 w-5 text-muted-foreground" />
+                    </button>
                     <div className="flex-1">
                         <CardTitle className="font-headline text-lg">{title}</CardTitle>
                         {description && <CardDescription>{description}</CardDescription>}
@@ -40,13 +41,11 @@ const DraggableCard = ({ id, title, description, children }: { id: string, title
     </Reorder.Item>
 );
 
-
 export function ReportsClient() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
   const [isLoading, startTransition] = useTransition();
 
-  // State to manage the order of the charts
   const [chartOrder, setChartOrder] = useState<string[]>([
     'profitEvolution',
     'earningsComposition',
@@ -80,14 +79,14 @@ export function ReportsClient() {
     { title: "Horas Trabalhadas", value: reportData.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
   ] : [], [reportData]);
 
-  const chartComponents: { [key: string]: React.ReactNode } = useMemo(() => (reportData ? {
-        profitEvolution: <DraggableCard id="profitEvolution" title="Evolução do Lucro no Período" description="Desempenho do lucro líquido dia a dia."><ProfitEvolutionChart data={reportData.profitEvolution} /></DraggableCard>,
-        earningsComposition: <DraggableCard id="earningsComposition" title="Composição dos Ganhos" description="Distribuição do seu faturamento bruto."><div className="h-[350px]"><EarningsPieChart data={reportData.profitComposition} /></div></DraggableCard>,
-        profitabilityAnalysis: <DraggableCard id="profitabilityAnalysis" title="Análise de Lucratividade por Categoria" description="Compare a eficiência de cada categoria."><div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4"><div className="space-y-2"><h3 className="font-semibold text-center">Ganho Médio por Viagem</h3><AverageEarningPerTripChart data={reportData.averageEarningPerTrip} /></div><div className="space-y-2"><h3 className="font-semibold text-center">Ganho Médio por Hora</h3><AverageEarningPerHourChart data={reportData.averageEarningPerHour} /></div></div></DraggableCard>,
-        earningsByCategory: <DraggableCard id="earningsByCategory" title="Ganhos por Categoria" description=""><EarningsBarChart data={reportData.earningsByCategory} /></DraggableCard>,
-        tripsByCategory: <DraggableCard id="tripsByCategory" title="Viagens por Categoria" description=""><TripsBarChart data={reportData.tripsByCategory} /></DraggableCard>,
-        dailyTrips: <DraggableCard id="dailyTrips" title="Total de Viagens por Dia" description=""><DailyTripsChart data={reportData.dailyTrips} /></DraggableCard>,
-        fuelExpenses: <DraggableCard id="fuelExpenses" title="Gastos com Combustível" description="Total gasto por tipo de combustível."><FuelBarChart data={reportData.fuelExpenses} /></DraggableCard>,
+  const chartComponents: { [key: string]: (onPointerDown: (e: React.PointerEvent) => void) => React.ReactNode } = useMemo(() => (reportData ? {
+        profitEvolution: (onPointerDown) => <DraggableCard onPointerDown={onPointerDown} id="profitEvolution" title="Evolução do Lucro no Período" description="Desempenho do lucro líquido dia a dia."><ProfitEvolutionChart data={reportData.profitEvolution} /></DraggableCard>,
+        earningsComposition: (onPointerDown) => <DraggableCard onPointerDown={onPointerDown} id="earningsComposition" title="Composição dos Ganhos" description="Distribuição do seu faturamento bruto."><div className="h-[350px]"><EarningsPieChart data={reportData.profitComposition} /></div></DraggableCard>,
+        profitabilityAnalysis: (onPointerDown) => <DraggableCard onPointerDown={onPointerDown} id="profitabilityAnalysis" title="Análise de Lucratividade por Categoria" description="Compare a eficiência de cada categoria."><div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4"><div className="space-y-2"><h3 className="font-semibold text-center">Ganho Médio por Viagem</h3><AverageEarningPerTripChart data={reportData.averageEarningPerTrip} /></div><div className="space-y-2"><h3 className="font-semibold text-center">Ganho Médio por Hora</h3><AverageEarningPerHourChart data={reportData.averageEarningPerHour} /></div></div></DraggableCard>,
+        earningsByCategory: (onPointerDown) => <DraggableCard onPointerDown={onPointerDown} id="earningsByCategory" title="Ganhos por Categoria" description=""><EarningsBarChart data={reportData.earningsByCategory} /></DraggableCard>,
+        tripsByCategory: (onPointerDown) => <DraggableCard onPointerDown={onPointerDown} id="tripsByCategory" title="Viagens por Categoria" description=""><TripsBarChart data={reportData.tripsByCategory} /></DraggableCard>,
+        dailyTrips: (onPointerDown) => <DraggableCard onPointerDown={onPointerDown} id="dailyTrips" title="Total de Viagens por Dia" description=""><DailyTripsChart data={reportData.dailyTrips} /></DraggableCard>,
+        fuelExpenses: (onPointerDown) => <DraggableCard onPointerDown={onPointerDown} id="fuelExpenses" title="Gastos com Combustível" description="Total gasto por tipo de combustível."><FuelBarChart data={reportData.fuelExpenses} /></DraggableCard>,
   } : {}), [reportData]);
 
   const renderContent = () => {
@@ -142,7 +141,7 @@ export function ReportsClient() {
             onReorder={setChartOrder}
             className="space-y-4"
           >
-              {chartOrder.map(id => chartComponents[id])}
+              {chartOrder.map(id => chartComponents[id] ? chartComponents[id](() => {}) : null)}
           </Reorder.Group>
       </div>
     );

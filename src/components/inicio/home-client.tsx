@@ -2,13 +2,12 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { PlusCircle, LineChart, Wrench, Target, Settings, History, Calendar, LayoutDashboard, BarChart, Loader2 } from "lucide-react";
+import { PlusCircle, Wrench, Target, Settings, History, Calendar, LayoutDashboard, BarChart } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { DailySummaryCard } from "./daily-summary-card";
-import type { PeriodData } from "../dashboard/dashboard-client";
 import { ShiftPerformance } from "./shift-performance";
-import { getTodayData } from "@/services/work-day.service";
+import { getTodayData, PeriodData } from "@/services/summary.service";
 import { Skeleton } from "../ui/skeleton";
 
 const mainActions = [
@@ -81,6 +80,14 @@ export function HomeClient() {
              <h2 className="text-2xl font-semibold font-headline">Resumo do Dia</h2>
              {isLoading || !todayData ? (
                  <DailySummarySkeleton />
+             ) : todayData.diasTrabalhados === 0 ? (
+                <Card className="h-full min-h-[400px] flex items-center justify-center border-dashed">
+                    <div className="text-center text-muted-foreground">
+                        <BarChart className="mx-auto h-12 w-12" />
+                        <p className="mt-4 font-semibold">Nenhum dado registrado para hoje.</p>
+                        <p className="text-sm">Clique em "Registrar Hoje" para começar.</p>
+                    </div>
+                </Card>
              ) : (
                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-1">

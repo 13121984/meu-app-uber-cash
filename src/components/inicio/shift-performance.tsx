@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Sun, Moon, Sunrise, Sunset, Trophy } from "lucide-react";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { PerformanceByShift } from "../dashboard/dashboard-client";
+import { PerformanceByShift } from "@/services/summary.service";
 
 const shiftIcons = {
     Madrugada: <Moon className="h-6 w-6 text-indigo-400" />,
