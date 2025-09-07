@@ -18,17 +18,7 @@ import {
 } from "@/components/ui/accordion";
 
 
-// Função para converter o formato de tempo HH:mm:ss para horas decimais
-const timeToDecimal = (time: string): number => {
-    if (!time || !/^\d{1,2}:\d{2}(:\d{2})?$/.test(time.trim())) return 0;
-    const parts = time.trim().split(':').map(Number);
-    const hours = parts[0] || 0;
-    const minutes = parts[1] || 0;
-    const seconds = parts[2] || 0;
-    return hours + minutes / 60 + seconds / 3600;
-};
-
-// Nova função de processamento manual, mais robusta
+// Função de processamento manual, agora corrigida para ler horas decimais diretamente.
 function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
     const lines = rawCsvText.split(/\r?\n/).filter(line => line.trim() !== '');
     if (lines.length < 2) throw new Error("O arquivo CSV está vazio ou contém apenas o cabeçalho.");
@@ -39,7 +29,7 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
     const dataByDate = new Map<string, Partial<ImportedWorkDay>[]>();
     let lastDate = '';
     let lastKm = '';
-    let lastHours = ''; // String from CSV
+    let lastHours = '0'; // String from CSV
 
     const dateIndex = headers.indexOf('date');
     const kmIndex = headers.indexOf('km');
@@ -99,8 +89,8 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
     for (const [date, entries] of dataByDate.entries()) {
         const firstEntry = entries[0];
         
-        // Converte a hora (string) para decimal (número) uma vez por dia
-        const hoursDecimal = timeToDecimal(firstEntry.hours!);
+        // CORREÇÃO: Converte a hora (string decimal) para número decimal uma vez por dia.
+        const hoursDecimal = parseFloat(firstEntry.hours?.replace(',', '.') || '0');
 
         for(const entry of entries) {
             finalDataForImport.push({
