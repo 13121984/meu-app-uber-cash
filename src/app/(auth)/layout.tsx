@@ -12,8 +12,8 @@ export default function AuthLayout({
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
             <Car className="mx-auto h-12 w-12 text-primary" />
-            <h1 className="text-4xl font-bold font-headline mt-4">Rota Certa</h1>
-            <p className="text-muted-foreground">Sua jornada para o sucesso começa aqui.</p>
+            <h1 className="text-4xl font-bold font-headline mt-4">Uber Cash</h1>
+            <p className="text-muted-foreground">Sua rota certa para o sucesso.</p>
         </div>
         {children}
       </div>

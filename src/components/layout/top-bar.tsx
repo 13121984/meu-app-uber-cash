@@ -2,7 +2,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, Car, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -24,11 +24,17 @@ const menuItems = [
 export function TopBar() {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
       setIsClient(true);
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  }
 
 
   return (
@@ -70,7 +76,7 @@ export function TopBar() {
                     })}
                      <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" onClick={logout} className="h-10 w-10 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                            <Button variant="ghost" size="icon" onClick={handleLogout} className="h-10 w-10 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
                                 <LogOut className="h-5 w-5" />
                             </Button>
                         </TooltipTrigger>
