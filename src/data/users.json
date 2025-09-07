@@ -3,7 +3,7 @@
   {
     "id": "Paulo Vitor Tiburcio ",
     "passwordHash": "hashed_Aec081305@",
-    "isPremium": false,
+    "isPremium": true,
     "vehicles": [],
     "securityAnswers": [],
     "preferences": {}
