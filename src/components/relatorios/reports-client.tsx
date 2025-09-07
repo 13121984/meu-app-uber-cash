@@ -26,8 +26,8 @@ const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-t
 
 
 interface ReportsClientProps {
-  initialData: ReportData;
-  initialFilters: ReportFilterValues;
+  initialData?: ReportData;
+  initialFilters?: ReportFilterValues;
 }
 
 const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
@@ -158,7 +158,7 @@ export function ReportsClient({ initialData, initialFilters }: ReportsClientProp
                       <CardDescription>{chart.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ChartComponent key={`${chart.id}-${initialFilters.type}`} data={chartData} />
+                        <ChartComponent key={`${chart.id}-${initialFilters?.type}`} data={chartData} />
                     </CardContent>
                   </Card>
               );
