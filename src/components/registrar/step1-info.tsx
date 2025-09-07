@@ -113,7 +113,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
               id="km"
               type="text"
               inputMode="decimal"
-              step="0.1"
               placeholder="Ex: 150.5"
               value={data.km || ''}
               onChange={(e) => handleFieldChange('km', e.target.value)}
@@ -130,7 +129,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
               id="hours"
               type="text"
               inputMode="decimal"
-              step="0.1"
               placeholder="Ex: 8.5"
               value={data.hours || ''}
               onChange={(e) => handleFieldChange('hours', e.target.value)}
@@ -171,5 +169,3 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     </div>
   );
 }
-
-    
