@@ -9,15 +9,16 @@ import { StatsCard } from '@/components/dashboard/stats-card';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/auth-context';
 import { updateUser } from '@/services/auth.service';
-import { differenceInDays, parseISO, isBefore, addDays, formatDistanceToNow } from 'date-fns';
+import { differenceInDays, parseISO, isBefore, addDays, formatDistanceToNow, sub, isAfter } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { allStats, mandatoryCards } from '@/lib/dashboard-items';
+import { allStats, mandatoryCards, allCharts, mandatoryCharts } from '@/lib/dashboard-items';
 import { Loader2 } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 
-const DraggableCard = ({ id, title, children, onMove, isFirst, isLast }: { id: string; title: string; children: React.ReactNode; onMove: (direction: 'up' | 'down') => void; isFirst: boolean; isLast: boolean; }) => {
+const DraggableItem = ({ id, title, children, onMove, isFirst, isLast }: { id: string; title: string; children: React.ReactNode; onMove: (direction: 'up' | 'down') => void; isFirst: boolean; isLast: boolean; }) => {
     return (
         <div className="flex items-center gap-2">
              <div className="flex flex-col">
@@ -48,193 +49,210 @@ export function ReportsClient() {
   const { user, refreshUser } = useAuth();
   const [isSaving, startSavingTransition] = useTransition();
   
-  const getInitialCardOrder = () => {
+  const getInitialOrder = (itemType: 'cards' | 'charts') => {
       if (!user) return [];
-      const userOrder = user.preferences?.dashboardCardOrder;
-      
+
+      const mandatoryItems = itemType === 'cards' ? mandatoryCards : mandatoryCharts;
+      const allItems = itemType === 'cards' ? allStats : allCharts;
+      const userOrder = user.preferences?.[itemType === 'cards' ? 'dashboardCardOrder' : 'reportChartOrder'];
+
       if (user.isPremium) {
-          // Premium users see all cards by default if they haven't customized yet
-          return userOrder && userOrder.length > 0 ? userOrder : allStats.map(s => s.id);
+          return userOrder && userOrder.length > 0 ? userOrder : allItems.map(i => i.id);
       }
       
-      // Free users: 3 mandatory + 1 optional
-      const optionalCard = userOrder?.find(id => !mandatoryCards.includes(id)) || allStats.find(s => !mandatoryCards.includes(s.id))!.id;
-      // Ensure mandatory cards are present and at the start if it's the first time
-      const finalOrder = userOrder && userOrder.length === 4 ? userOrder : [...mandatoryCards, optionalCard];
+      const optionalItem = userOrder?.find(id => !mandatoryItems.includes(id)) || allItems.find(i => !mandatoryItems.includes(i.id))!.id;
+      const finalOrder = userOrder && userOrder.length === (mandatoryItems.length + 1) ? userOrder : [...mandatoryItems, optionalItem];
       return finalOrder;
   }
 
-  const [cardOrder, setCardOrder] = useState<string[]>(getInitialCardOrder());
+  const [cardOrder, setCardOrder] = useState<string[]>(getInitialOrder('cards'));
+  const [chartOrder, setChartOrder] = useState<string[]>(getInitialOrder('charts'));
 
-  const handleMoveCard = (cardId: string, direction: 'up' | 'down') => {
-      const index = cardOrder.indexOf(cardId);
+
+  const handleMoveItem = (itemId: string, direction: 'up' | 'down', itemType: 'cards' | 'charts') => {
+      const order = itemType === 'cards' ? cardOrder : chartOrder;
+      const setOrder = itemType === 'cards' ? setCardOrder : setChartOrder;
+      const index = order.indexOf(itemId);
       if (index === -1) return;
 
       const newIndex = direction === 'up' ? index - 1 : index + 1;
       
-      if (newIndex < 0 || newIndex >= cardOrder.length) {
-          return;
-      }
+      if (newIndex < 0 || newIndex >= order.length) return;
       
-      const newOrder = [...cardOrder];
-      [newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]];
-      setCardOrder(newOrder);
+      const newOrder = [...order];
+      [newOrder[index], newOrder[newIndex]] = [newOrder[index], newOrder[newIndex]];
+      setOrder(newOrder);
   };
   
-  const handleSaveLayout = async (isSwappingCard: boolean = false) => {
+  const handleSaveLayout = async (isSwapping: boolean = false) => {
     startSavingTransition(async () => {
-      if(user) {
-        if (isSwappingCard && !user.isPremium) {
-            const lastChange = user.preferences.lastFreebieChangeDate;
-            if (lastChange) {
-                const sevenDaysAgo = sub(new Date(), { days: 7 });
-                if (isAfter(new Date(lastChange), sevenDaysAgo)) {
-                    toast({
-                        title: "Aguarde para trocar novamente",
-                        description: `Você só pode alterar seu card opcional uma vez a cada 7 dias. Próxima troca disponível em ${formatDistanceToNow(addDays(new Date(lastChange), 7), { locale: ptBR, addSuffix: true })}.`,
-                        variant: "destructive",
-                    });
-                    return;
-                }
+      if(!user) return;
+      
+      if (isSwapping && !user.isPremium) {
+        const lastChange = user.preferences.lastFreebieChangeDate;
+        if (lastChange) {
+            const sevenDaysAgo = sub(new Date(), { days: 7 });
+            if (isAfter(new Date(lastChange), sevenDaysAgo)) {
+                toast({
+                    title: "Aguarde para trocar novamente",
+                    description: `Você só pode alterar seu item opcional uma vez a cada 7 dias. Próxima troca disponível ${formatDistanceToNow(addDays(new Date(lastChange), 7), { locale: ptBR, addSuffix: true })}.`,
+                    variant: "destructive",
+                });
+                return;
             }
         }
-        
-        const newPreferences = { 
-            ...user.preferences, 
-            dashboardCardOrder: cardOrder,
-        };
+      }
+      
+      const newPreferences = { 
+        ...user.preferences, 
+        dashboardCardOrder: cardOrder,
+        reportChartOrder: chartOrder,
+        lastFreebieChangeDate: (isSwapping && !user.isPremium) ? new Date().toISOString() : user.preferences.lastFreebieChangeDate,
+      };
 
-        if(isSwappingCard && !user.isPremium) {
-            newPreferences.lastFreebieChangeDate = new Date().toISOString();
-        }
+      const result = await updateUser(user.id, { preferences: newPreferences });
 
-        const result = await updateUser(user.id, { preferences: newPreferences });
-
-        if (result.success) {
-            await refreshUser();
-            toast({
-                title: <div className="flex items-center gap-2"><Check className="h-5 w-5"/><span>Layout Salvo!</span></div>,
-                description: "Suas preferências de visualização foram salvas.",
-                variant: 'success'
-            });
-        } else {
-             toast({
-                title: "Erro ao Salvar",
-                description: result.error,
-                variant: "destructive",
-            });
-        }
+      if (result.success) {
+          await refreshUser();
+          toast({
+              title: <div className="flex items-center gap-2"><Check className="h-5 w-5"/><span>Layout Salvo!</span></div>,
+              description: "Suas preferências de visualização foram salvas.",
+              variant: 'success'
+          });
+      } else {
+           toast({
+              title: "Erro ao Salvar",
+              description: result.error,
+              variant: "destructive",
+          });
       }
     });
   }
 
-  const handleSelectOptionalCard = (cardId: string) => {
-    if (user?.isPremium) {
-        let newOrder;
-        if (cardOrder.includes(cardId)) {
-            newOrder = cardOrder.filter(id => id !== cardId);
-        } else {
-            newOrder = [...cardOrder, cardId];
-        }
-        setCardOrder(newOrder);
-    } else {
-        const optionalCardIndex = cardOrder.findIndex(id => !mandatoryCards.includes(id));
-        const newOrder = [...cardOrder];
-        if (optionalCardIndex > -1) {
-            newOrder[optionalCardIndex] = cardId;
-        } else {
-            newOrder.push(cardId);
-        }
-        setCardOrder(newOrder);
-        // Trigger save immediately when swapping
-        handleSaveLayout(true);
-    }
-  }
+  const handleSelectItem = (itemId: string, itemType: 'cards' | 'charts') => {
+      const order = itemType === 'cards' ? cardOrder : chartOrder;
+      const setOrder = itemType === 'cards' ? setCardOrder : setChartOrder;
+      const mandatoryItems = itemType === 'cards' ? mandatoryCards : mandatoryCharts;
 
+      if (user?.isPremium) {
+          let newOrder = order.includes(itemId) ? order.filter(id => id !== itemId) : [...order, itemId];
+          setOrder(newOrder);
+      } else {
+          const optionalItemIndex = order.findIndex(id => !mandatoryItems.includes(id));
+          const newOrder = [...order];
+          if (optionalItemIndex > -1) {
+              newOrder[optionalItemIndex] = itemId;
+          } else {
+              newOrder.push(itemId);
+          }
+          setOrder(newOrder);
+          handleSaveLayout(true);
+      }
+  }
 
   if (!user) return <div className="flex justify-center items-center h-96"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
 
-  const optionalCards = allStats.filter(stat => !mandatoryCards.includes(stat.id));
-  const visibleCards = cardOrder.map(id => allStats.find(s => s.id === id)).filter(Boolean) as typeof allStats;
+  const renderSection = (itemType: 'cards' | 'charts') => {
+      const allItems = itemType === 'cards' ? allStats : allCharts;
+      const mandatoryItems = itemType === 'cards' ? mandatoryCards : mandatoryCharts;
+      const currentOrder = itemType === 'cards' ? cardOrder : chartOrder;
+      
+      const visibleItems = currentOrder.map(id => allItems.find(item => item.id === id)).filter(Boolean) as (typeof allItems);
+      const optionalItems = allItems.filter(item => !mandatoryItems.includes(item.id));
 
+      return (
+          <>
+            {!user.isPremium && (
+                <Alert className="mb-6">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Plano Gratuito</AlertTitle>
+                    <AlertDescription>
+                        Você pode escolher 1 item opcional (além dos obrigatórios) e pode trocá-lo a cada 7 dias. A ordem dos itens pode ser alterada a qualquer momento.
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            <h3 className="font-semibold mb-4">Itens Visíveis no Dashboard</h3>
+            <div className="space-y-4">
+                {visibleItems.map((itemInfo, index) => (
+                    <DraggableItem 
+                        key={itemInfo.id} 
+                        id={itemInfo.id}
+                        title={itemInfo.title}
+                        onMove={(dir) => handleMoveItem(itemInfo.id, dir, itemType)}
+                        isFirst={index === 0}
+                        isLast={index === visibleItems.length - 1}
+                    >
+                        <StatsCard {...itemInfo} value={0} isPreview={true} />
+                    </DraggableItem>
+                ))}
+            </div>
+
+            <div className="mt-8">
+                <h3 className="font-semibold mb-2">Itens Opcionais</h3>
+                 <p className="text-sm text-muted-foreground mb-4">
+                   {user.isPremium ? "Clique para adicionar ou remover do seu dashboard." : "Clique para substituir o seu item opcional."}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {optionalItems.map(item => {
+                        const isVisible = currentOrder.includes(item.id);
+                        const isButtonDisabled = !user.isPremium && isVisible;
+
+                        return (
+                             <Card key={item.id} className={`relative p-2 border-2 ${isVisible && !user.isPremium ? 'border-primary' : 'border-dashed'}`}>
+                                {user.isPremium && isVisible && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1"><Check className="h-3 w-3"/></div>}
+                                
+                                <StatsCard {...item} value={0} isPreview={true} />
+
+                                <Button 
+                                    variant={user.isPremium ? (isVisible ? "secondary" : "default") : "default"}
+                                    size="sm" className="w-full mt-2"
+                                    onClick={() => handleSelectItem(item.id, itemType)}
+                                    disabled={isButtonDisabled || isSaving}
+                                >
+                                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                    {user.isPremium ? (isVisible ? 'Ocultar' : 'Mostrar') : (isVisible ? 'Selecionado' : 'Selecionar')}
+                                </Button>
+                            </Card>
+                        )
+                    })}
+                </div>
+            </div>
+          </>
+      )
+  }
 
   return (
     <div className="space-y-6">
         <Card>
             <CardHeader className="flex-row justify-between items-center">
                 <div>
-                    <CardTitle className="font-headline text-xl">Dashboard Cards</CardTitle>
-                    <CardDescription>Organize os cards principais que aparecem no seu Dashboard.</CardDescription>
+                    <CardTitle className="font-headline text-xl">Personalizar Layout</CardTitle>
+                    <CardDescription>Organize os cards e gráficos que aparecem no seu Dashboard.</CardDescription>
                 </div>
                 <Button onClick={() => handleSaveLayout(false)} disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Salvar Ordem
                 </Button>
             </CardHeader>
-            <CardContent>
-                {!user.isPremium && (
-                    <Alert className="mb-6">
-                        <Info className="h-4 w-4" />
-                        <AlertTitle>Plano Gratuito</AlertTitle>
-                        <AlertDescription>
-                            Você pode escolher 1 card opcional (além dos 3 padrão) e pode trocá-lo a cada 7 dias. A ordem dos cards pode ser alterada a qualquer momento.
-                        </AlertDescription>
-                    </Alert>
-                )}
-
-                <h3 className="font-semibold mb-4">Cards Visíveis no Dashboard</h3>
-                <div className="space-y-4">
-                    {visibleCards.map((cardInfo, index) => (
-                        <DraggableCard 
-                            key={cardInfo.id} 
-                            id={cardInfo.id}
-                            title={cardInfo.title}
-                            onMove={(dir) => handleMoveCard(cardInfo.id, dir)}
-                            isFirst={index === 0}
-                            isLast={index === visibleCards.length - 1}
-                        >
-                            <StatsCard {...cardInfo} isPreview={true} />
-                        </DraggableCard>
-                    ))}
-                </div>
-
-                <div className="mt-8">
-                    <h3 className="font-semibold mb-2">Cards Opcionais</h3>
-                     <p className="text-sm text-muted-foreground mb-4">
-                       {user.isPremium ? "Clique para adicionar ou remover do seu dashboard." : "Clique para substituir o seu card opcional."}
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {optionalCards.map(card => {
-                            const isVisible = cardOrder.includes(card.id);
-                            
-                            // Free user can't interact with a card that's already selected
-                            const isButtonDisabled = !user.isPremium && isVisible;
-
-                            return (
-                                 <Card 
-                                    key={card.id} 
-                                    className={`relative p-2 border-2 ${isVisible && !user.isPremium ? 'border-primary' : 'border-dashed'}`}
-                                >
-                                    {user.isPremium && isVisible && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1"><Check className="h-3 w-3"/></div>}
-                                    
-                                    <StatsCard {...card} isPreview={true} />
-
-                                     <Button 
-                                        variant={user.isPremium ? (isVisible ? "secondary" : "default") : "default"}
-                                        size="sm"
-                                        className="w-full mt-2"
-                                        onClick={() => handleSelectOptionalCard(card.id)}
-                                        disabled={isButtonDisabled || isSaving}
-                                     >
-                                         {user.isPremium ? (isVisible ? 'Ocultar' : 'Mostrar') : 'Substituir'}
-                                     </Button>
-                                </Card>
-                            )
-                        })}
-                    </div>
-                </div>
-
+             <CardContent>
+                <Accordion type="single" collapsible className="w-full" defaultValue="cards">
+                    <AccordionItem value="cards">
+                        <AccordionTrigger className="text-lg font-semibold">Organizar Cards</AccordionTrigger>
+                        <AccordionContent className="pt-4">
+                            {renderSection('cards')}
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="charts">
+                        <AccordionTrigger className="text-lg font-semibold">Organizar Gráficos</AccordionTrigger>
+                        <AccordionContent className="pt-4">
+                            <p className="text-muted-foreground text-sm mb-4">Em breve você poderá personalizar os gráficos também!</p>
+                             {/* {renderSection('charts')} */}
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
             </CardContent>
         </Card>
     </div>
   );
 }
+
