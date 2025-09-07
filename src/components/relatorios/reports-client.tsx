@@ -254,7 +254,7 @@ export function ReportsClient() {
                 </Button>
             </CardHeader>
              <CardContent>
-                <Accordion type="single" collapsible className="w-full" defaultValue="cards">
+                <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="cards">
                         <AccordionTrigger className="text-lg font-semibold">Organizar Cards</AccordionTrigger>
                         <AccordionContent className="pt-4">
@@ -273,3 +273,5 @@ export function ReportsClient() {
     </div>
   );
 }
+
+    

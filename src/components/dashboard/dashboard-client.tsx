@@ -12,12 +12,25 @@ import dynamic from 'next/dynamic';
 import { getSummaryForPeriod, PeriodData, SummaryData } from "@/services/summary.service"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
-import { allStats, mandatoryCards } from '@/lib/dashboard-items';
+import { allStats, mandatoryCards, allCharts } from '@/lib/dashboard-items';
 
 
 const EarningsPieChart = dynamic(() => import('./earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const ProfitEvolutionChart = dynamic(() => import('../relatorios/profit-evolution-chart').then(mod => mod.ProfitEvolutionChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const EarningsBarChart = dynamic(() => import('./earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const TripsBarChart = dynamic(() => import('./trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const MaintenanceSummary = dynamic(() => import('./maintenance-summary').then(mod => mod.MaintenanceSummary), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+
 
 type Period = "hoje" | "semana" | "mes"
+
+const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
+  earningsComposition: EarningsPieChart,
+  profitEvolution: ProfitEvolutionChart,
+  earningsByCategory: EarningsBarChart,
+  tripsByCategory: TripsBarChart,
+  maintenance: MaintenanceSummary,
+};
 
 export function DashboardClient() {
   const { user } = useAuth();
@@ -104,9 +117,23 @@ export function DashboardClient() {
           return { ...cardInfo, value };
       }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
 
+      const userChartOrder = user?.preferences?.reportChartOrder || allCharts.filter(c => c.isMandatory).map(c => c.id);
+      const chartsToShow = userChartOrder.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
+
+      const getChartData = (id: string) => {
+        switch (id) {
+            case 'earningsComposition': return currentData.profitComposition;
+            case 'profitEvolution': return currentData.profitEvolution;
+            case 'earningsByCategory': return currentData.earningsByCategory;
+            case 'tripsByCategory': return currentData.tripsByCategory;
+            case 'maintenance': return currentData.maintenance;
+            default: return [];
+        }
+      }
+
 
       return (
-        <>
+        <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
               {!isPremium && cardsToShow.length < 4 && (
@@ -129,19 +156,26 @@ export function DashboardClient() {
                 <GoalProgress progress={(currentData.meta.target > 0 ? (currentData.totalLucro / currentData.meta.target) * 100 : 0)} target={currentData.meta.target} current={currentData.totalLucro} />
               </CardContent>
           </Card>
+          
+          {chartsToShow.map(chart => {
+              const ChartComponent = chartComponentMap[chart.id];
+              if (!ChartComponent) return null;
 
-          <Card>
-              <CardHeader>
-                  <CardTitle className="font-headline text-lg">Composição dos Ganhos</CardTitle>
-                  <CardDescription>
-                      Distribuição do seu faturamento bruto no período.
-                  </CardDescription>
-              </CardHeader>
-              <CardContent>
-                  <EarningsPieChart key={`pie-${period}`} data={currentData.profitComposition} />
-              </CardContent>
-          </Card>
-          {!isPremium && (
+              return (
+                  <Card key={chart.id}>
+                    <CardHeader>
+                      <CardTitle className="font-headline text-lg">{chart.title}</CardTitle>
+                      <CardDescription>{chart.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ChartComponent key={`${chart.id}-${period}`} data={getChartData(chart.id)} />
+                    </CardContent>
+                  </Card>
+              );
+          })}
+
+
+          {!isPremium && chartsToShow.length < 2 && (
               <Link href="/configuracoes/layout-personalizado" passHref>
                 <Button variant="outline" className="w-full">
                     <PlusCircle className="mr-2 h-4 w-4"/>
@@ -149,7 +183,7 @@ export function DashboardClient() {
                 </Button>
             </Link>
           )}
-          </>
+          </div>
       )
   }
   
@@ -187,3 +221,5 @@ export function DashboardClient() {
     </div>
   )
 }
+
+    

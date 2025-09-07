@@ -1,5 +1,5 @@
 
-import { DollarSign, Fuel, Car, CalendarDays, Hourglass, Route, TrendingUp, Zap, Map, Clock, PieChart, BarChart3, LineChart, CandlestickChart } from "lucide-react";
+import { DollarSign, Fuel, Car, CalendarDays, Hourglass, Route, TrendingUp, Zap, Map, Clock, PieChart, BarChart3, LineChart, CandlestickChart, Wrench } from "lucide-react";
 
 export const allStats = [
     { id: 'lucro', title: "Lucro Líquido", value: 123.45, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
@@ -19,10 +19,13 @@ export const allStats = [
 export const mandatoryCards = ['lucro', 'ganho', 'combustivel'];
 
 export const allCharts = [
-  { id: 'earningsComposition', title: "Composição de Ganhos", icon: PieChart },
-  { id: 'profitEvolution', title: "Evolução do Lucro", icon: LineChart },
-  { id: 'earningsByCategory', title: "Ganhos por Categoria", icon: BarChart3 },
-  { id: 'profitabilityAnalysis', title: "Análise de Rentabilidade", icon: CandlestickChart }
+  { id: 'earningsComposition', title: "Composição de Ganhos", description: "Distribuição do seu faturamento bruto no período.", icon: PieChart, isMandatory: true },
+  { id: 'profitEvolution', title: "Evolução do Lucro", description: "Veja a tendência do seu lucro ao longo do tempo.", icon: LineChart, isMandatory: false },
+  { id: 'earningsByCategory', title: "Ganhos por Categoria", description: "Compare o desempenho de cada app ou serviço.", icon: BarChart3, isMandatory: false },
+  { id: 'tripsByCategory', title: "Viagens por Categoria", description: "Analise a quantidade de viagens por plataforma.", icon: BarChart3, isMandatory: false },
+  { id: 'maintenance', title: "Resumo de Manutenção", description: "Acompanhe seus gastos com manutenção no período.", icon: Wrench, isMandatory: false },
 ];
 
 export const mandatoryCharts = ['earningsComposition'];
+
+    

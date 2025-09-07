@@ -36,7 +36,11 @@
         "eficiencia",
         "combustivel"
       ],
-      "lastFreebieChangeDate": "2025-09-07T16:47:16.592Z"
+      "lastFreebieChangeDate": "2025-09-07T16:47:16.592Z",
+      "reportChartOrder": [
+        "earningsComposition",
+        "profitEvolution"
+      ]
     }
   }
 ]
