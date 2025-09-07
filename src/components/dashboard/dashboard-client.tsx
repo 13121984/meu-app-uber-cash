@@ -158,6 +158,7 @@ export function DashboardClient() {
           </Card>
           
           {chartsToShow.map(chart => {
+              if(!chart) return null;
               const ChartComponent = chartComponentMap[chart.id];
               if (!ChartComponent) return null;
               
