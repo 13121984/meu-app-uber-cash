@@ -35,87 +35,89 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
 
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
     const rows = lines.slice(1);
-    const dataForImport: ImportedWorkDay[] = [];
-
-    // Mapeamento dos possíveis nomes de cabeçalho para os nomes padrão
-    const headerMapping: { [key: string]: keyof ImportedWorkDay } = {
-        'date': 'date',
-        'km': 'km',
-        'hours': 'hours',
-        'earnings_category': 'earnings_category',
-        'earnings_trips': 'earnings_trips',
-        'earnings_amount': 'earnings_amount',
-        'fuel_type': 'fuel_type',
-        'fuel_paid': 'fuel_paid',
-        'fuel_price': 'fuel_price',
-        'maintenance_description': 'maintenance_description',
-        'maintenance_amount': 'maintenance_amount',
-    };
     
-    const mappedHeaders = headers.map(h => {
-        for (const key in headerMapping) {
-            if (h.includes(key)) return headerMapping[key];
-        }
-        return h; // Keep original if no match
-    });
+    const dataByDate = new Map<string, Partial<ImportedWorkDay>[]>();
+    let lastDate = '';
+    let lastKm = '';
+    let lastHours = '';
 
+    const dateIndex = headers.indexOf('date');
+    const kmIndex = headers.indexOf('km');
+    const hoursIndex = headers.indexOf('hours');
+
+    // Agrupa todos os dados por data
     for (const row of rows) {
         const values = row.split(',');
-        if (values.length === 0 || values.every(v => v.trim() === '')) continue; // Pula linhas vazias
+        const rowData: Partial<ImportedWorkDay> = {};
 
-        const rowData: { [key: string]: string } = {};
-        mappedHeaders.forEach((header, index) => {
+        headers.forEach((header, index) => {
             if (values[index]) {
-                rowData[header] = values[index].trim();
+                (rowData as any)[header] = values[index].trim();
             }
         });
-        
-        const dateRaw = rowData['date'];
-        let workDayDate = '';
-        if (dateRaw) {
-             try {
-                const parsedDate = dateRaw.includes('-') ? parse(dateRaw, 'yyyy-MM-dd', new Date()) : parse(dateRaw, 'dd/MM/yy', new Date());
-                if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
-                workDayDate = format(parsedDate, 'yyyy-MM-dd');
-            } catch (e) {
-                // Tenta analisar o próximo formato
-                try {
-                    const parsedDate = parse(dateRaw, 'dd/MM/yyyy', new Date());
-                    if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
-                     workDayDate = format(parsedDate, 'yyyy-MM-dd');
-                } catch (e2) {
-                     continue; // Pula para a próxima linha se a data for inválida
-                }
-            }
-        }
-       
-        const km = (rowData['km'] || '0').replace(',', '.');
-        const hoursRaw = rowData['hours'] || '0';
-        const hours = timeToDecimal(hoursRaw).toString();
 
-        // Cria uma única entrada base para o dia
-        const baseEntry: ImportedWorkDay = {
-            date: workDayDate,
-            km: km,
-            hours: hours,
-            earnings_category: rowData['earnings_category'] || '',
-            earnings_trips: rowData['earnings_trips'] || '',
-            earnings_amount: rowData['earnings_amount'] || '',
-            fuel_type: rowData['fuel_type'] || '',
-            fuel_paid: rowData['fuel_paid'] || '',
-            fuel_price: rowData['fuel_price'] || '',
-            maintenance_description: rowData['maintenance_description'] || '',
-            maintenance_amount: rowData['maintenance_amount'] || '',
+        let currentDate = '';
+        if (values[dateIndex]) {
+            try {
+                const parsedDate = parse(values[dateIndex], 'yyyy-MM-dd', new Date());
+                if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
+                currentDate = format(parsedDate, 'yyyy-MM-dd');
+                lastDate = currentDate;
+                lastKm = values[kmIndex] || '0';
+                lastHours = values[hoursIndex] || '0';
+            } catch (e) {
+                continue; 
+            }
+        } else {
+            currentDate = lastDate;
+        }
+
+        if (!currentDate) continue;
+
+        if (!dataByDate.has(currentDate)) {
+            dataByDate.set(currentDate, []);
+        }
+        
+        const dataForThisDate = dataByDate.get(currentDate)!;
+        
+        // Atribui a data, km e horas a cada linha de dados
+        const fullRowData = {
+          ...rowData,
+          date: currentDate,
+          km: lastKm,
+          hours: lastHours
         };
 
-        dataForImport.push(baseEntry);
+        dataForThisDate.push(fullRowData);
     }
     
-    if (dataForImport.length === 0) {
+    // Transforma os dados agrupados no formato final
+    const finalDataForImport: ImportedWorkDay[] = [];
+    for (const [date, entries] of dataByDate.entries()) {
+        const firstEntry = entries[0];
+        
+        for(const entry of entries) {
+            finalDataForImport.push({
+                date: entry.date!,
+                km: firstEntry.km || '0',
+                hours: timeToDecimal(firstEntry.hours!).toString(), // Converte horas aqui
+                earnings_category: entry.earnings_category || '',
+                earnings_trips: entry.earnings_trips || '',
+                earnings_amount: entry.earnings_amount || '',
+                fuel_type: entry.fuel_type || '',
+                fuel_paid: entry.fuel_paid || '',
+                fuel_price: entry.fuel_price || '',
+                maintenance_description: entry.maintenance_description || '',
+                maintenance_amount: entry.maintenance_amount || ''
+            });
+        }
+    }
+    
+    if (finalDataForImport.length === 0) {
         throw new Error("Nenhum dado válido foi encontrado na planilha. Verifique se os cabeçalhos e formatos de dados estão corretos.");
     }
     
-    return dataForImport;
+    return finalDataForImport;
 }
 
 const promptToCopy = `Você é um especialista em processamento de dados e sua tarefa é transformar um CSV de um formato "largo" para um formato "longo", seguindo regras específicas.
