@@ -1,4 +1,5 @@
 
+
 "use server";
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isSameDay } from 'date-fns';
@@ -67,6 +68,12 @@ export interface DailyTripsData {
     viagens: number;
 }
 
+export interface AverageEarningByCategory {
+    name: string;
+    average: number;
+}
+
+
 export interface ReportData {
   totalGanho: number;
   totalLucro: number;
@@ -87,6 +94,8 @@ export interface ReportData {
   eficiencia: number;
   profitEvolution: ProfitEvolutionData[];
   dailyTrips: DailyTripsData[];
+  averageEarningPerTrip: AverageEarningByCategory[];
+  averageEarningPerHour: AverageEarningByCategory[];
   rawWorkDays: WorkDay[]; // Adicionado para exportação
 }
 
@@ -177,7 +186,7 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
             const date = parseISO(dateKey);
             const firstRow = rows[0];
             const km = parseFloat(firstRow.km.replace(',', '.')) || 0;
-            const hours = parseFloat(firstRow.hours?.toString().replace(',', '.')) || 0;
+            const hours = parseFloat(firstRow.hours?.toString().replace(',', '.') || 0);
 
             const earnings: Earning[] = [];
             const fuelEntries: FuelEntry[] = [];
@@ -658,15 +667,14 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
 
   const earningsByCategoryMap = new Map<string, number>();
   const tripsByCategoryMap = new Map<string, number>();
+  const hoursByCategoryMap = new Map<string, number>(); // To calculate Ganho/Hora
   const fuelExpensesMap = new Map<string, number>();
   const dailyDataMap = new Map<string, { lucro: number, viagens: number }>();
 
   let totalGanho = 0, totalCombustivel = 0, totalKm = 0, totalHoras = 0, totalViagens = 0, totalLitros = 0;
   const diasTrabalhados = new Set(filteredDays.map(d => d.date.toDateString())).size;
   
-  // As despesas de manutenção agora são calculadas com base nos registros do serviço de manutenção
   const totalManutencaoFinal = filteredMaintenance.reduce((sum, m) => sum + m.amount, 0);
-
 
   filteredDays.forEach(day => {
     const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
@@ -689,6 +697,12 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
     day.earnings.forEach(earning => {
         earningsByCategoryMap.set(earning.category, (earningsByCategoryMap.get(earning.category) || 0) + earning.amount);
         tripsByCategoryMap.set(earning.category, (tripsByCategoryMap.get(earning.category) || 0) + earning.trips);
+        
+        // Prorate hours for each earning category
+        if (dailyEarnings > 0 && day.hours > 0) {
+            const hoursForEarning = (earning.amount / dailyEarnings) * day.hours;
+            hoursByCategoryMap.set(earning.category, (hoursByCategoryMap.get(earning.category) || 0) + hoursForEarning);
+        }
     });
 
     const dateKey = format(new Date(day.date), 'yyyy-MM-dd');
@@ -706,6 +720,16 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
   const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
   const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
   const fuelExpenses: FuelExpense[] = Array.from(fuelExpensesMap, ([type, total]) => ({ type, total }));
+
+  const averageEarningPerTrip: AverageEarningByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => {
+      const trips = tripsByCategoryMap.get(name) || 0;
+      return { name, average: trips > 0 ? total / trips : 0 };
+  }).filter(item => item.average > 0);
+
+  const averageEarningPerHour: AverageEarningByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => {
+      const hours = hoursByCategoryMap.get(name) || 0;
+      return { name, average: hours > 0 ? total / hours : 0 };
+  }).filter(item => item.average > 0);
 
   const profitComposition = [
     { name: 'Lucro Líquido', value: totalLucro, fill: 'hsl(var(--chart-1))', totalGanho },
@@ -755,6 +779,8 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
     eficiencia,
     profitEvolution,
     dailyTrips,
+    averageEarningPerTrip,
+    averageEarningPerHour,
     rawWorkDays: filteredDays,
   };
 }

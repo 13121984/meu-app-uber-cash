@@ -1,8 +1,9 @@
 
+
 "use client";
 
 import { useMemo, useState, useTransition } from 'react';
-import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench, Loader2, CalendarDays, Hourglass, Route } from 'lucide-react';
+import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Loader2, CalendarDays, Hourglass, Route, Maximize } from 'lucide-react';
 import { ReportsFilter } from './reports-filter';
 import { getReportData, ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,6 +18,9 @@ const TripsBarChart = dynamic(() => import('@/components/dashboard/trips-bar-cha
 const FuelBarChart = dynamic(() => import('./fuel-bar-chart').then(mod => mod.FuelBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const ProfitEvolutionChart = dynamic(() => import('./profit-evolution-chart').then(mod => mod.ProfitEvolutionChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const AverageEarningPerHourChart = dynamic(() => import('./average-earning-per-hour-chart').then(mod => mod.AverageEarningPerHourChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+
 
 export function ReportsClient() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
@@ -41,7 +45,6 @@ export function ReportsClient() {
     { title: "Ganho/Hora", value: reportData.ganhoPorHora, icon: TrendingUp, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
     { title: "Ganho/KM", value: reportData.ganhoPorKm, icon: TrendingUp, isCurrency: true, iconBg: "bg-blue-500/20", iconColor: "text-blue-400", precision: 2 },
     { title: "Eficiência Média", value: reportData.eficiencia, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
-    { title: "Manutenção", value: reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0, icon: Wrench, isCurrency: true, iconBg: "bg-orange-500/20", iconColor: "text-orange-400" },
     { title: "Combustível", value: reportData.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
     { title: "KM Rodados", value: reportData.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
     { title: "Horas Trabalhadas", value: reportData.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
@@ -149,6 +152,27 @@ export function ReportsClient() {
                 </CardContent>
             </Card>
           </div>
+          <Card>
+              <CardHeader>
+                  <CardTitle className="font-headline text-lg flex items-center gap-2">
+                    <Maximize className="w-5 h-5 text-primary" />
+                    Análise de Lucratividade por Categoria
+                  </CardTitle>
+                   <CardDescription>
+                      Compare a eficiência de cada categoria para ver qual é mais rentável.
+                  </CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+                 <div className="space-y-2">
+                    <h3 className="font-semibold text-center">Ganho Médio por Viagem</h3>
+                    <AverageEarningPerTripChart data={reportData.averageEarningPerTrip} />
+                </div>
+                <div className="space-y-2">
+                    <h3 className="font-semibold text-center">Ganho Médio por Hora</h3>
+                    <AverageEarningPerHourChart data={reportData.averageEarningPerHour} />
+                </div>
+              </CardContent>
+          </Card>
           <Card>
               <CardHeader>
                   <CardTitle className="font-headline text-lg">Total de Viagens por Dia</CardTitle>
