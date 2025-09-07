@@ -8,16 +8,22 @@ import { BackupCard } from './backup-card';
 import { UserProfileCard } from './user-profile-card';
 import { VehicleManagerCard } from './vehicle-manager-card';
 import { DemoDataCard } from './demo-data-card';
+import { LayoutCustomizationCard } from './layout-customization-card';
+import { useAuth } from '@/contexts/auth-context';
 
 export function ConfiguracoesClient() {
+    const { user } = useAuth();
+    const isPremium = user?.isPremium || false;
+
     return (
         <div className="space-y-8">
             <UserProfileCard />
             <VehicleManagerCard />
             <SettingsForm />
+            <LayoutCustomizationCard />
             <DemoDataCard />
             <BackupCard />
-            <CatalogManagerCard />
+            <CatalogManagerCard isPremium={isPremium} />
             <ImportCard />
         </div>
     )

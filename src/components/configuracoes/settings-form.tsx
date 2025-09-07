@@ -15,9 +15,10 @@ import { toast } from "@/hooks/use-toast";
 import { saveSettings, getSettings } from '@/services/settings.service';
 import { getCatalog, Catalog } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
-import { Paintbrush, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun, Send } from 'lucide-react';
+import { Paintbrush, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun, Lock } from 'lucide-react';
 import type { Settings, AppTheme } from '@/types/settings';
 import { Skeleton } from '../ui/skeleton';
+import { useAuth } from '@/contexts/auth-context';
 
 // Schema continua o mesmo
 const settingsSchema = z.object({
@@ -33,6 +34,8 @@ const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
 
 function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings: Settings, fuelTypes: string[] }) {
   const router = useRouter();
+  const { user } = useAuth();
+  const isPremium = user?.isPremium || false;
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { control, handleSubmit, watch, formState: { errors } } = useForm<Omit<Settings, 'weeklyBackup' | 'backupEmail'>>({
@@ -136,10 +139,19 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
                      {/* Notificações */}
                     <div className="flex items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                            <Label>Habilitar Notificações de Manutenção</Label>
-                            <p className="text-xs text-muted-foreground">Funcionalidade em desenvolvimento.</p>
+                            <Label className="flex items-center gap-2">
+                                Habilitar Notificações de Manutenção
+                                {!isPremium && <Lock className="h-4 w-4 text-amber-500" />}
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                                {isPremium ? 'Funcionalidade em desenvolvimento.' : 'Exclusivo para assinantes Premium.'}
+                            </p>
                         </div>
-                        <Controller name="maintenanceNotifications" control={control} render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange}/>} />
+                        <Controller 
+                            name="maintenanceNotifications" 
+                            control={control} 
+                            render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!isPremium}/>} 
+                        />
                     </div>
                 </div>
             </CardContent>

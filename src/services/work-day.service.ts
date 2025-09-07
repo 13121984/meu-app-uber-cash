@@ -1,7 +1,7 @@
 
 "use server";
 
-import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isSameDay } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import fs from 'fs/promises';
 import path from 'path';
@@ -234,8 +234,20 @@ export async function deleteWorkDaysByFilter(filters: { query?: string, from?: s
 
 export async function loadDemoData(): Promise<{ success: boolean; error?: string }> {
     try {
-        // Carrega os dados de demonstração do arquivo JSON importado
-        await writeWorkDays(demoData as unknown as WorkDay[]);
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+
+        const adjustedDemoData = demoData.map(day => {
+            const originalDate = parseISO(day.date);
+            const newDate = setMonth(setYear(originalDate, currentYear), currentMonth);
+            return {
+                ...day,
+                date: newDate.toISOString() // Store as ISO string
+            };
+        });
+
+        await writeWorkDays(adjustedDemoData as unknown as WorkDay[]);
         await updateAllSummaries();
         revalidateAll();
         return { success: true };

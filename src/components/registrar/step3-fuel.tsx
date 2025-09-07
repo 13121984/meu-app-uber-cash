@@ -104,7 +104,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                 <CardContent className="p-4 text-center">
                     <p className="text-sm font-semibold text-primary">
                         <Lock className="inline-block h-4 w-4 mr-2"/>
-                        Assine o Premium para categorizar seus combustíveis (GNV, Etanol, Gasolina) e otimizar sua eficiência.
+                       Assine o Premium para categorizar combustíveis (GNV, Etanol) e otimizar sua eficiência.
                     </p>
                 </CardContent>
             </Card>

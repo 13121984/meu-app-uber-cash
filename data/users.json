@@ -1,4 +1,3 @@
-
 [
   {
     "id": "Paulo Vitor Tiburcio ",
@@ -20,7 +19,15 @@
     "id": "Teste 2",
     "passwordHash": "hashed_123456",
     "isPremium": false,
-    "vehicles": [],
+    "vehicles": [
+      {
+        "brand": "Fiat",
+        "model": "Mobi ",
+        "color": "Branco ",
+        "plate": "",
+        "id": "1757258849759"
+      }
+    ],
     "securityAnswers": [],
     "preferences": {}
   }

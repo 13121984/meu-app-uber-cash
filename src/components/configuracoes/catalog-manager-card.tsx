@@ -4,25 +4,34 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookCopy, ArrowRight } from "lucide-react";
+import { BookCopy, ArrowRight, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function CatalogManagerCard() {
+interface CatalogManagerCardProps {
+    isPremium: boolean;
+}
+
+export function CatalogManagerCard({ isPremium }: CatalogManagerCardProps) {
     return (
-        <Card>
+        <Card className={cn(!isPremium && "bg-secondary/50")}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <BookCopy className="h-6 w-6 text-primary" />
                     Gerenciar Catálogos
+                    {!isPremium && <Lock className="h-5 w-5 text-amber-500" />}
                 </CardTitle>
                 <CardDescription>
-                    Personalize as categorias de ganhos e tipos de combustível para adequar o aplicativo às suas necessidades.
+                    {isPremium 
+                        ? "Personalize as categorias de ganhos e tipos de combustível para adequar o aplicativo às suas necessidades."
+                        : "Assine o plano Premium para criar, editar e organizar suas próprias categorias de ganhos e despesas."
+                    }
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Link href="/configuracoes/catalogos" passHref>
-                    <Button>
-                        <span>Editar Catálogos</span>
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button disabled={!isPremium}>
+                        <span>{isPremium ? "Editar Catálogos" : "Exclusivo para Premium"}</span>
+                        {isPremium && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
                 </Link>
             </CardContent>

@@ -23,7 +23,7 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
   const { user } = useAuth();
   const isPremium = user?.isPremium || false;
 
-  const earningCategories = isPremium ? categories : ["Aplicativo"];
+  const earningCategories = isPremium ? categories : ["Ganhos Gerais"];
   
   const handleEarningsChange = (newEarnings: Earning[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: newEarnings } });
