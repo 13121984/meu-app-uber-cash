@@ -2,15 +2,14 @@
 
 "use client";
 
-import React, { Dispatch, useCallback, useMemo, useState } from 'react';
+import React, { Dispatch, useCallback, useMemo, useState, useEffect } from 'react';
 import { CalendarIcon, Clock, Milestone, PlusCircle, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { format, isValid } from 'date-fns';
+import { format, isValid, setDate, setMonth, setYear, getDate, getMonth, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { State, TimeEntry } from './registration-wizard';
 import { Card, CardContent } from '../ui/card';
@@ -48,21 +47,53 @@ const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<
 
 export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1InfoProps) {
   
-  // Local state for inputs to allow flexible user typing (e.g., "8,")
   const [kmInput, setKmInput] = useState(data.km > 0 ? String(data.km).replace('.', ',') : '');
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+
+  // State for individual date fields
+  const [day, setDay] = useState(data.date ? getDate(data.date).toString() : '');
+  const [month, setMonth] = useState(data.date ? (getMonth(data.date) + 1).toString() : '');
+  const [year, setYearState] = useState(data.date ? getYear(data.date).toString() : '');
   
+  // Update local date fields when data.date changes from parent
+  useEffect(() => {
+    if (data.date && isValid(data.date)) {
+        setDay(getDate(data.date).toString());
+        setMonth((getMonth(data.date) + 1).toString());
+        setYearState(getYear(data.date).toString());
+    }
+  }, [data.date]);
+
   const handleFieldChange = (field: keyof State, value: any) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
   };
+
+  const handleDateChange = (part: 'day' | 'month' | 'year', value: string) => {
+    const numericValue = value.replace(/[^0-9]/g, '');
+
+    let newDay = part === 'day' ? numericValue : day;
+    let newMonth = part === 'month' ? numericValue : month;
+    let newYear = part === 'year' ? numericValue : year;
+
+    if (part === 'day') setDay(newDay);
+    if (part === 'month') setMonth(newMonth);
+    if (part === 'year') setYearState(newYear);
+
+    const dayInt = parseInt(newDay, 10);
+    const monthInt = parseInt(newMonth, 10) - 1; // month is 0-indexed
+    const yearInt = parseInt(newYear, 10);
+
+    if (!isNaN(dayInt) && !isNaN(monthInt) && !isNaN(yearInt) && newYear.length === 4) {
+      const newDate = new Date(yearInt, monthInt, dayInt);
+      if (isValid(newDate)) {
+        handleFieldChange('date', newDate);
+      }
+    }
+  };
   
   const handleNumericInputChange = (field: 'km', rawValue: string) => {
-    // Allow user to type comma or dot
     const sanitizedValue = rawValue.replace(/[^0-9,.]/g, '');
-    
     if (field === 'km') setKmInput(sanitizedValue);
-    
-    // Convert to number for state update
     const numericValue = parseFloat(sanitizedValue.replace(',', '.')) || 0;
     handleFieldChange(field, numericValue);
   }
@@ -94,7 +125,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
   };
   
   const isDateDisabled = registrationType === 'today' && !isEditing;
-  const dateString = data.date && isValid(data.date) ? format(data.date, 'dd/MM/yyyy') : '';
   const hasTimeEntries = useMemo(() => data.timeEntries && data.timeEntries.length > 0, [data.timeEntries]);
   
 
@@ -102,27 +132,33 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     <div className="space-y-6">
       <div className="space-y-4">
         <div>
-          <Label htmlFor="date">Data do Trabalho</Label>
-            <div className="flex items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button 
-                        variant="outline" 
-                        className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !data.date && "text-muted-foreground"
-                        )}
-                        disabled={isDateDisabled}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                      {dateString ? dateString : <span>Selecione uma data</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={data.date} onSelect={(d) => d && handleFieldChange('date', d)} initialFocus locale={ptBR} disabled={(date) => date > new Date() || isDateDisabled}/>
-                  </PopoverContent>
-                </Popover>
-            </div>
+          <Label>Data do Trabalho</Label>
+           <div className="grid grid-cols-3 gap-2">
+            <Input 
+                placeholder="Dia" 
+                value={day} 
+                onChange={(e) => handleDateChange('day', e.target.value)} 
+                maxLength={2}
+                disabled={isDateDisabled}
+                inputMode="numeric"
+            />
+            <Input 
+                placeholder="Mês" 
+                value={month} 
+                onChange={(e) => handleDateChange('month', e.target.value)} 
+                maxLength={2}
+                disabled={isDateDisabled}
+                inputMode="numeric"
+            />
+            <Input 
+                placeholder="Ano" 
+                value={year} 
+                onChange={(e) => handleDateChange('year', e.target.value)} 
+                maxLength={4}
+                disabled={isDateDisabled}
+                inputMode="numeric"
+            />
+           </div>
         </div>
         <div>
           <Label htmlFor="km">KM Rodados</Label>
@@ -141,35 +177,34 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
         </div>
         
         <div>
-            <Label htmlFor="hours">Total de Horas</Label>
-             <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-                <PopoverTrigger asChild disabled={hasTimeEntries}>
-                    <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500 pointer-events-none" />
-                        <Input
-                            id="hours"
-                            type="text"
-                            readOnly
-                            placeholder="0,00"
-                            value={data.hours > 0 ? String(data.hours.toFixed(2)).replace('.', ',') : '0,00'}
-                            className={cn(
-                                "pl-10 bg-muted/70 focus-visible:ring-0 focus-visible:ring-offset-0",
-                                !hasTimeEntries ? "cursor-pointer" : "cursor-not-allowed opacity-50"
-                            )}
+            <Label>Total de Horas</Label>
+            <div className="relative">
+                <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+                    <PopoverTrigger asChild disabled={hasTimeEntries}>
+                         <div className="relative">
+                             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500 pointer-events-none" />
+                             <Input
+                                id="hours"
+                                type="text"
+                                readOnly
+                                value={data.hours > 0 ? String(data.hours.toFixed(2)).replace('.', ',') : '0,00'}
+                                className={cn(
+                                    "pl-10 bg-muted/70 focus-visible:ring-0 focus-visible:ring-offset-0",
+                                    !hasTimeEntries ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+                                )}
+                             />
+                         </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-2">
+                        <Label className="text-xs text-muted-foreground px-1">Definir Horas (HH:MM)</Label>
+                        <Input 
+                            type="time" 
+                            onChange={(e) => handleTimePickerChange(e.target.value)}
                         />
-                    </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-2">
-                    <Label className="text-xs text-muted-foreground px-1">Definir Horas (HH:MM)</Label>
-                    <Input 
-                        type="time" 
-                        onChange={(e) => handleTimePickerChange(e.target.value)}
-                    />
-                </PopoverContent>
-            </Popover>
-            <p className="text-xs text-muted-foreground mt-1">
-                O total de horas é convertido para decimal para os cálculos.
-            </p>
+                    </PopoverContent>
+                </Popover>
+            </div>
+             <p className="text-xs text-muted-foreground mt-1">O total de horas é convertido para decimal para os cálculos.</p>
         </div>
 
         <Separator />
@@ -202,5 +237,6 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     </div>
   );
 }
+
 
 
