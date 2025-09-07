@@ -131,7 +131,7 @@ export function ReportsClient() {
              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
                  {!isPremium && cardsToShow.length < 4 && (
-                   <Link href="/configuracoes/layout-personalizado" passHref>
+                   <Link href="/premium" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
                             <PlusCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
@@ -162,7 +162,7 @@ export function ReportsClient() {
               );
             })}
              {!isPremium && chartsToShow.length < 2 && (
-              <Link href="/configuracoes/layout-personalizado" passHref>
+              <Link href="/premium" passHref>
                 <Button variant="outline" className="w-full">
                     <PlusCircle className="mr-2 h-4 w-4"/>
                     Adicionar outro Gráfico
@@ -184,5 +184,3 @@ export function ReportsClient() {
     </div>
   );
 }
-
-    

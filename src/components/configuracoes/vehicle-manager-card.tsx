@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Car, PlusCircle, Trash2, Loader2, Lock } from "lucide-react";
+import { Car, PlusCircle, Trash2, Loader2, Lock, ArrowRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from "../ui/input";
 import { toast } from "@/hooks/use-toast";
 import { addVehicle, deleteVehicle, Vehicle } from "@/services/auth.service";
+import Link from "next/link";
+
 
 const vehicleSchema = z.object({
   brand: z.string().min(2, "Marca é obrigatória."),
@@ -100,6 +102,28 @@ export function VehicleManagerCard() {
     
     const canAddVehicle = user?.isPremium || (user && user.vehicles.length < 1);
 
+    const AddVehicleButton = () => {
+        if(canAddVehicle) {
+            return (
+                <DialogTrigger asChild>
+                    <Button>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Adicionar
+                    </Button>
+                </DialogTrigger>
+            )
+        }
+        return (
+            <Link href="/premium" passHref>
+                <Button>
+                    <Lock className="mr-2 h-4 w-4" />
+                    <span>Adicionar Mais</span>
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+            </Link>
+        )
+    }
+
     return (
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <Card>
@@ -113,12 +137,7 @@ export function VehicleManagerCard() {
                         Adicione ou remova os veículos que você utiliza.
                     </CardDescription>
                 </div>
-                <DialogTrigger asChild>
-                     <Button disabled={!canAddVehicle}>
-                        {canAddVehicle ? <PlusCircle className="mr-2 h-4 w-4" /> : <Lock className="mr-2 h-4 w-4" />}
-                        Adicionar
-                    </Button>
-                </DialogTrigger>
+                <AddVehicleButton />
             </CardHeader>
             <CardContent className="space-y-4">
                 {user?.vehicles.length === 0 ? (

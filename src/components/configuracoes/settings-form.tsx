@@ -19,6 +19,7 @@ import { Paintbrush, Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun,
 import type { Settings, AppTheme } from '@/types/settings';
 import { Skeleton } from '../ui/skeleton';
 import { useAuth } from '@/contexts/auth-context';
+import Link from 'next/link';
 
 // Schema continua o mesmo
 const settingsSchema = z.object({
@@ -144,7 +145,7 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
                                 {!isPremium && <Lock className="h-4 w-4 text-amber-500" />}
                             </Label>
                             <p className="text-xs text-muted-foreground">
-                                {isPremium ? 'Funcionalidade em desenvolvimento.' : 'Exclusivo para assinantes Premium.'}
+                                {isPremium ? 'Funcionalidade em desenvolvimento.' : <Link href="/premium" className="underline hover:text-primary">Exclusivo para assinantes Premium.</Link>}
                             </p>
                         </div>
                         <Controller 
