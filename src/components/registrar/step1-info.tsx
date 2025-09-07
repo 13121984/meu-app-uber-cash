@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { Dispatch, useCallback, useMemo } from 'react';
+import React, { Dispatch, useCallback, useMemo, useState } from 'react';
 import { CalendarIcon, Clock, Milestone, PlusCircle, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -47,14 +47,26 @@ const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<
 };
 
 export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1InfoProps) {
-
+  
+  // Local state for inputs to allow flexible user typing (e.g., "8,")
+  const [kmInput, setKmInput] = useState(data.km > 0 ? String(data.km).replace('.', ',') : '');
+  const [hoursInput, setHoursInput] = useState(data.hours > 0 ? String(data.hours).replace('.', ',') : '');
+  
   const handleFieldChange = (field: keyof State, value: any) => {
-      let processedValue = value;
-      if (field === 'km' || field === 'hours') {
-        processedValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) || 0 : value;
-      }
-      dispatch({ type: 'UPDATE_FIELD', payload: { field, value: processedValue } });
+      dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
   };
+  
+  const handleNumericInputChange = (field: 'km' | 'hours', rawValue: string) => {
+    // Allow user to type comma or dot
+    const sanitizedValue = rawValue.replace(/[^0-9,.]/g, '');
+    
+    if (field === 'km') setKmInput(sanitizedValue);
+    if (field === 'hours') setHoursInput(sanitizedValue);
+    
+    // Convert to number for state update
+    const numericValue = parseFloat(sanitizedValue.replace(',', '.')) || 0;
+    handleFieldChange(field, numericValue);
+  }
   
   const handleTimeEntriesChange = useCallback((newTimeEntries: TimeEntry[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'timeEntries', value: newTimeEntries }});
@@ -78,6 +90,13 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
   const isDateDisabled = registrationType === 'today' && !isEditing;
   const dateString = data.date && isValid(data.date) ? format(data.date, 'dd/MM/yyyy') : '';
   const hasTimeEntries = useMemo(() => data.timeEntries && data.timeEntries.length > 0, [data.timeEntries]);
+  
+  // Sync local input state if global state changes (e.g., from time entries)
+  React.useEffect(() => {
+    const formattedHours = data.hours > 0 ? String(data.hours).replace('.', ',') : '';
+    setHoursInput(formattedHours);
+  }, [data.hours]);
+
 
   return (
     <div className="space-y-6">
@@ -113,9 +132,9 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
               id="km"
               type="text"
               inputMode="decimal"
-              placeholder="Ex: 150.5"
-              value={data.km || ''}
-              onChange={(e) => handleFieldChange('km', e.target.value)}
+              placeholder="Ex: 150,5"
+              value={kmInput}
+              onChange={(e) => handleNumericInputChange('km', e.target.value)}
               className="pl-10"
             />
           </div>
@@ -129,9 +148,9 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
               id="hours"
               type="text"
               inputMode="decimal"
-              placeholder="Ex: 8.5"
-              value={data.hours || ''}
-              onChange={(e) => handleFieldChange('hours', e.target.value)}
+              placeholder="Ex: 8,5"
+              value={hoursInput}
+              onChange={(e) => handleNumericInputChange('hours', e.target.value)}
               className="pl-10"
               disabled={hasTimeEntries}
             />
