@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An intelligent CSV importer flow.
@@ -34,48 +35,51 @@ const intelligentImportPrompt = ai.definePrompt({
     name: 'intelligentImportPrompt',
     input: { schema: IntelligentImporterInputSchema },
     output: { schema: IntelligentImporterOutputSchema },
-    prompt: `You are an expert data processor. Your task is to transform a raw CSV file from a user into a standardized format.
+    prompt: `Você é um especialista em processamento de dados e sua tarefa é transformar um CSV de um formato "largo" para um formato "longo", seguindo regras específicas.
 
-    The user's CSV has a "wide" format, with earnings and fuel expenses spread across multiple columns. The target format is a "long" format, where each earning and fuel entry is on its own row, sharing a common date.
+**Formato do CSV de Entrada (exemplo):**
+O CSV de entrada tem uma linha por data. As colunas de ganhos e gastos são separadas por categoria. Por exemplo:
+- **Ganhos:** Colunas como "99 Pop", "Ubex", "Particular", cada uma seguida por uma coluna "Viagens".
+- **Gastos:** Colunas como "GNV", "Etanol", cada uma com uma coluna de preço ao lado ("Valor por M3" ou "valor por litro").
+- **Outros Dados:** Colunas "Kms Percorridos" e "Horas Trabalhadas".
 
-    **User's CSV Format (Example):**
-    - Data: Date of the workday (DD/MM/YY).
-    - Ganhos (Earnings): Columns like "99Pop R$", "Ubex R$", "Particular R$" with monetary values. Each might have an adjacent "Viagens" (Trips) column.
-    - Gastos (Expenses): Columns like "GNV", "Etanol" for the amount paid. Each might have an adjacent price column like "R$ Mt3" or "R$ Lt".
-    - Informações (Info): Columns like "Kms Percorridos" and "Horas Trabalhadas".
+**Formato do CSV de Saída (REQUERIDO):**
+O resultado final DEVE SER um CSV com os seguintes cabeçalhos, nesta ordem exata:
+\`date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount\`
 
-    **Target CSV Format (Required):**
-    The output MUST be a CSV string with the following exact headers in the first line:
-    'date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount'
+**Regras de Transformação:**
+1.  **Estrutura "Longa":** Para cada linha do CSV de entrada, você criará múltiplas linhas no CSV de saída. Uma linha para cada registro de ganho e uma para cada registro de abastecimento.
+2.  **Agrupamento por Data:** As colunas \`date\`, \`km\`, e \`hours\` só devem aparecer na primeira linha de um determinado dia. As linhas subsequentes para o mesmo dia devem ter essas colunas em branco.
+3.  **Processamento de Ganhos:** Para cada coluna de ganho (ex: "99 Pop", "Ubex") que tiver um valor, crie uma nova linha:
+    *   \`earnings_category\`: O nome da categoria (ex: "99 Pop").
+    *   \`earnings_trips\`: O valor da coluna "Viagens" adjacente. Se não houver, use \`0\`.
+    *   \`earnings_amount\`: O valor do ganho.
+4.  **Processamento de Combustível:** Para cada coluna de combustível (ex: "GNV", "Etanol") que tiver um valor, crie uma nova linha:
+    *   \`fuel_type\`: O nome do combustível (ex: "GNV").
+    *   \`fuel_paid\`: O valor total pago pelo abastecimento.
+    *   \`fuel_price\`: O preço por litro/m³, encontrado na coluna adjacente.
+5.  **Conversão de Dados:**
+    *   **Data:** Converta de \`DD/MM/YY\` para \`YYYY-MM-DD\`.
+    *   **Horas:** Converta o formato \`HH:MM:SS\` ou \`HH:MM\` para um número decimal (ex: \`4:30:00\` se torna \`4.5\`).
+    *   **Valores Numéricos:** Remova símbolos de moeda e use ponto (\`.\`) como separador decimal.
+6.  **Colunas de Manutenção:** As colunas \`maintenance_description\` e \`maintenance_amount\` devem ser deixadas em branco, pois não existem no CSV de entrada.
 
-    **Transformation Rules:**
-    1.  **Date:** Convert the date from DD/MM/YY to YYYY-MM-DD.
-    2.  **Combine Rows:** For each date in the input, create multiple rows in the output. The first row for a given date contains the main info (date, km, hours). Subsequent rows for the same date will have these fields empty.
-    3.  **Earnings:** For each earning column in a user's row (e.g., "99Pop R$"), create a new row in the output.
-        -   'earnings_category': The name of the category (e.g., "99 Pop"). Clean up the name from the header (remove "R$").
-        -   'earnings_trips': The value from the corresponding "Viagens" column. If none, use 0.
-        -   'earnings_amount': The monetary value.
-    4.  **Fuel:** For each fuel column (e.g., "GNV"), create a new row in the output.
-        -   'fuel_type': The name of the fuel (e.g., "GNV").
-        -   'fuel_paid': The monetary value.
-        -   'fuel_price': The value from the corresponding price column (e.g., "R$ Mt3").
-    5.  **KM and Hours:**
-        -   'km': The value from "Kms Percorridos".
-        -   'hours': Convert time format (like "6:20:00" or "8:55") into a decimal number (e.g., "6:30" becomes 6.5).
-    6.  **Data Cleaning:**
-        -   Remove "R$" symbols.
-        -   Convert comma decimal separators (e.g., "77,19") to dots ("77.19").
-        -   If a value is empty, leave the corresponding cell in the output CSV empty.
-    7.  **Maintenance:** The user's format doesn't have maintenance. Leave 'maintenance_description' and 'maintenance_amount' columns empty.
-    8.  **Structure:** Create one row for each earning and each fuel entry for a given day. The 'date', 'km', and 'hours' fields should only appear on the first entry for that day.
+**Exemplo de Transformação:**
+Se a entrada for:
+\`Data,99 Pop,Viagens,Etanol,valor por litro,Kms Percorridos,Horas Trabalhadas\`
+\`01/01/25,111.51,12,50,5.09,72.2,4:30:00\`
 
-    Here is the user's CSV content to process:
-    \`\`\`csv
-    {{{csvContent}}}
-    \`\`\`
+A saída deve ser:
+\`date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount\`
+\`2025-01-01,72.2,4.5,99 Pop,12,111.51,,,,,,\`
+\`"""""",,Etanol,50,5.09,,,\`
 
-    Process the entire CSV and return the result in the 'processedCsv' field.
-    `,
+Agora, processe o seguinte CSV e gere a saída formatada:
+
+\`\`\`csv
+{{{csvContent}}}
+\`\`\`
+`,
 });
 
 
