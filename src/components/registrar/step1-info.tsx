@@ -51,6 +51,7 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
   // Local state for inputs to allow flexible user typing (e.g., "8,")
   const [kmInput, setKmInput] = useState(data.km > 0 ? String(data.km).replace('.', ',') : '');
   const [hoursInput, setHoursInput] = useState(data.hours > 0 ? String(data.hours).replace('.', ',') : '');
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   
   const handleFieldChange = (field: keyof State, value: any) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
@@ -66,6 +67,14 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     // Convert to number for state update
     const numericValue = parseFloat(sanitizedValue.replace(',', '.')) || 0;
     handleFieldChange(field, numericValue);
+  }
+
+  const handleTimePickerChange = (timeValue: string) => {
+      const totalMinutes = timeToMinutes(timeValue);
+      const decimalHours = totalMinutes / 60;
+      handleFieldChange('hours', decimalHours);
+      setHoursInput(String(decimalHours.toFixed(2)).replace('.', ','));
+      setIsTimePickerOpen(false);
   }
   
   const handleTimeEntriesChange = useCallback((newTimeEntries: TimeEntry[]) => {
@@ -93,7 +102,7 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
   
   // Sync local input state if global state changes (e.g., from time entries)
   React.useEffect(() => {
-    const formattedHours = data.hours > 0 ? String(data.hours).replace('.', ',') : '';
+    const formattedHours = data.hours > 0 ? String(data.hours.toFixed(2)).replace('.', ',') : '';
     setHoursInput(formattedHours);
   }, [data.hours]);
 
@@ -141,7 +150,23 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
         </div>
         
         <div>
-          <Label htmlFor="hours">Total de Horas</Label>
+            <div className="flex items-center justify-between mb-2">
+                 <Label htmlFor="hours">Total de Horas</Label>
+                 <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+                    <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" disabled={hasTimeEntries}>
+                            <Clock className="h-4 w-4" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-2">
+                        <Label className="text-xs text-muted-foreground px-1">Definir Horas (HH:MM)</Label>
+                        <Input 
+                            type="time" 
+                            onChange={(e) => handleTimePickerChange(e.target.value)}
+                        />
+                    </PopoverContent>
+                </Popover>
+            </div>
            <div className="relative">
              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500" />
             <Input
