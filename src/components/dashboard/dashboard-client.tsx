@@ -66,9 +66,23 @@ export function DashboardClient() {
   };
   
   const currentData = data;
-  const currentPeriodName = periodMap[period];
   
   const isPremium = user?.isPremium || false;
+
+  const getChartData = (reportData: ReportData, chartId: string) => {
+    switch (chartId) {
+        case 'earningsComposition': return reportData.profitComposition;
+        case 'profitEvolution': return reportData.profitEvolution;
+        case 'earningsByCategory': return reportData.earningsByCategory;
+        case 'tripsByCategory': return reportData.tripsByCategory;
+        case 'maintenance': return reportData.maintenance;
+        case 'fuelExpenses': return reportData.fuelExpenses;
+        case 'dailyTrips': return reportData.dailyTrips;
+        case 'averageEarningPerHour': return reportData.averageEarningPerHour;
+        case 'averageEarningPerTrip': return reportData.averageEarningPerTrip;
+        default: return [];
+    }
+  }
 
   const renderContent = () => {
       if(isLoading && !currentData) {
@@ -129,22 +143,6 @@ export function DashboardClient() {
       const userChartOrder = user?.preferences?.reportChartOrder || allCharts.filter(c => c.isMandatory).map(c => c.id);
       const chartsToShow = userChartOrder.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
-      const getChartData = (chartId: string) => {
-        switch (chartId) {
-            case 'earningsComposition': return currentData.profitComposition;
-            case 'profitEvolution': return currentData.profitEvolution;
-            case 'earningsByCategory': return currentData.earningsByCategory;
-            case 'tripsByCategory': return currentData.tripsByCategory;
-            case 'maintenance': return currentData.maintenance;
-            case 'fuelExpenses': return currentData.fuelExpenses;
-            case 'dailyTrips': return currentData.dailyTrips;
-            case 'averageEarningPerHour': return currentData.averageEarningPerHour;
-            case 'averageEarningPerTrip': return currentData.averageEarningPerTrip;
-            default: return [];
-        }
-      }
-
-
       return (
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -175,7 +173,7 @@ export function DashboardClient() {
               const ChartComponent = chartComponentMap[chart.id];
               if (!ChartComponent) return null;
               
-              const chartData = getChartData(chart.id);
+              const chartData = getChartData(currentData, chart.id);
               if(!chartData || (Array.isArray(chartData) && chartData.length === 0)) return null;
 
               return (
@@ -238,5 +236,3 @@ export function DashboardClient() {
     </div>
   )
 }
-
-    

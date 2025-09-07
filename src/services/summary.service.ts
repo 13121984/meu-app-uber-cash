@@ -45,7 +45,7 @@ export interface SummaryData {
     mes: PeriodData;
 }
 
-export interface ReportData extends Omit<PeriodData, 'meta' | 'performanceByShift'> {
+export interface ReportData extends Omit<PeriodData, 'performanceByShift'> {
   totalGastos: number;
   fuelExpenses: FuelExpense[];
   profitEvolution: ProfitEvolutionData[];
@@ -150,7 +150,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         });
 
         if (day.timeEntries && day.timeEntries.length > 0) {
-            const totalDayHours = day.timeEntries.reduce((sum, entry) => {
+             const totalDayHours = day.timeEntries.reduce((sum, entry) => {
                 const startMinutes = timeToMinutes(entry.start);
                 const endMinutes = timeToMinutes(entry.end);
                 return sum + (endMinutes > startMinutes ? (endMinutes - startMinutes) / 60 : 0);
@@ -208,6 +208,7 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
   let filteredDays: WorkDay[] = [];
   let interval: { start: Date; end: Date } | null = null;
   const allWorkDays = await getWorkDays();
+  const goals = await getGoals();
 
   switch (filters.type) {
     case 'all': filteredDays = allWorkDays; break;
@@ -274,6 +275,16 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
   
   const sortedDailyEntries = Array.from(dailyDataMap.entries()).sort((a, b) => parseISO(a[0]).getTime() - parseISO(b[0]).getTime());
 
+  const getTargetGoal = () => {
+    switch (filters.type) {
+        case 'today': return goals.daily;
+        case 'thisWeek': return goals.weekly;
+        case 'thisMonth': return goals.monthly;
+        case 'specificMonth': return goals.monthly;
+        default: return 0;
+    }
+  }
+
   return {
     totalGanho, totalLucro, totalCombustivel, totalExtras: 0, diasTrabalhados, totalKm, totalHoras,
     totalGastos: totalCombustivel + totalManutencaoFinal,
@@ -296,5 +307,9 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
     averageEarningPerTrip: Array.from(earningsByCategoryMap, ([name, total]) => ({ name, average: (tripsByCategoryMap.get(name) || 0) > 0 ? total / (tripsByCategoryMap.get(name) || 1) : 0 })).filter(item => item.average > 0),
     averageEarningPerHour: Array.from(earningsByCategoryMap, ([name, total]) => ({ name, average: (hoursByCategoryMap.get(name) || 0) > 0 ? total / (hoursByCategoryMap.get(name) || 1) : 0 })).filter(item => item.average > 0),
     rawWorkDays: filteredDays,
+    meta: {
+      target: getTargetGoal(),
+      period: filters.type,
+    }
   };
 }
