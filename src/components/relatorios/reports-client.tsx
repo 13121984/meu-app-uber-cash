@@ -1,59 +1,47 @@
 
+
 "use client";
 
 import { useMemo, useState, useTransition } from 'react';
-import { BarChart, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Loader2, CalendarDays, Hourglass, Route, GripVertical, Lock, Info, Check } from 'lucide-react';
-import { ReportsFilter } from './reports-filter';
-import { getReportData, ReportData } from '@/services/summary.service';
+import { GripVertical, Lock, Info, Check, ArrowUp, ArrowDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ReportFilterValues } from '@/app/relatorios/actions';
-import dynamic from 'next/dynamic';
 import { StatsCard } from '@/components/dashboard/stats-card';
-import { Reorder, useDragControls } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/auth-context';
 import { updateUser } from '@/services/auth.service';
 import { differenceInDays, parseISO, isBefore, addDays } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { allStats, mandatoryCards } from '@/lib/dashboard-items';
+import { Loader2 } from 'lucide-react';
 
-const DraggableCard = ({ id, title, description, children, onPointerDown, ...props }: { id: string, title: string, description: string, children: React.ReactNode, onPointerDown: (e: React.PointerEvent) => void }) => {
+
+const DraggableCard = ({ id, title, children, onMove, isFirst, isLast }: { id: string; title: string; children: React.ReactNode; onMove: (direction: 'up' | 'down') => void; isFirst: boolean; isLast: boolean; }) => {
     return (
-        <Reorder.Item value={id} dragListener={false} {...props}>
-             <Card className="w-full h-full cursor-grab active:cursor-grabbing" onPointerDown={onPointerDown}>
-                <CardHeader>
-                    <div className="flex items-center gap-2">
-                         <GripVertical className="h-5 w-5 text-muted-foreground" />
-                        <div className="flex-1">
-                            <CardTitle className="font-headline text-lg">{title}</CardTitle>
-                            {description && <CardDescription>{description}</CardDescription>}
-                        </div>
-                    </div>
+        <div className="flex items-center gap-2">
+             <div className="flex flex-col">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onMove('up')} disabled={isFirst}>
+                    <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onMove('down')} disabled={isLast}>
+                    <ArrowDown className="h-4 w-4" />
+                </Button>
+            </div>
+            <Card className="w-full">
+                <CardHeader className="pb-2">
+                     <CardTitle className="font-headline text-base flex items-center gap-2">
+                        <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
+                        {title}
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
                     {children}
                 </CardContent>
             </Card>
-        </Reorder.Item>
+        </div>
     );
 };
 
-const allStats = [
-    { id: 'lucro', title: "Lucro Líquido", value: 123.45, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
-    { id: 'ganho', title: "Ganhos Brutos", value: 234.56, icon: DollarSign, isCurrency: true, iconBg: "bg-primary/20", iconColor: "text-primary" },
-    { id: 'combustivel', title: "Combustível", value: 56.78, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
-    { id: 'viagens', title: "Viagens", value: 15, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
-    { id: 'dias', title: "Dias Trabalhados", value: 1, icon: CalendarDays, iconBg: "bg-sky-500/20", iconColor: "text-sky-400" },
-    { id: 'mediaHoras', title: "Média de Horas/Dia", value: 8.5, icon: Hourglass, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
-    { id: 'mediaKm', title: "Média de KM/Dia", value: 150, icon: Route, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
-    { id: 'ganhoHora', title: "Ganho/Hora", value: 27.60, isCurrency: true, icon: TrendingUp, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
-    { id: 'ganhoKm', title: "Ganho/KM", value: 1.56, isCurrency: true, icon: TrendingUp, iconBg: "bg-blue-500/20", iconColor: "text-blue-400", precision: 2 },
-    { id: 'eficiencia', title: "Eficiência Média", value: 10.5, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
-    { id: 'kmRodados', title: "KM Rodados", value: 150.5, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
-    { id: 'horasTrabalhadas', title: "Horas Trabalhadas", value: 8.5, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
-];
-
-const mandatoryCards = ['lucro', 'ganho', 'combustivel'];
 
 export function ReportsClient() {
   const { user, refreshUser } = useAuth();
@@ -63,12 +51,30 @@ export function ReportsClient() {
     user?.preferences?.dashboardCardOrder || [...mandatoryCards, allStats.find(s => !mandatoryCards.includes(s.id))!.id]
   );
   
-  const controls = useDragControls();
+  const handleMoveCard = (cardId: string, direction: 'up' | 'down') => {
+      const index = cardOrder.indexOf(cardId);
+      if (index === -1) return;
 
+      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      
+      // Prevent mandatory cards from being moved out of their block
+      const isMandatory = mandatoryCards.includes(cardId);
+      if (isMandatory && (newIndex < 0 || newIndex >= mandatoryCards.length)) {
+          return;
+      }
+      if(!isMandatory && (newIndex < mandatoryCards.length || newIndex >= cardOrder.length)) {
+          return;
+      }
+      
+      const newOrder = [...cardOrder];
+      // Simple swap
+      [newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]];
+      setCardOrder(newOrder);
+  };
+  
   const handleSaveLayout = async () => {
     startSavingTransition(async () => {
       if(user) {
-        // Lógica de restrição para plano gratuito
         if (!user.isPremium) {
             const lastChange = user.preferences.lastFreebieChangeDate;
             if(lastChange && isBefore(new Date(), addDays(new Date(lastChange), 7))){
@@ -100,18 +106,26 @@ export function ReportsClient() {
   }
 
   const handleSelectOptionalCard = (cardId: string) => {
-    if (user?.isPremium) return; // Não se aplica a premium
-    
-    // Mantém os 3 obrigatórios e substitui o opcional
-    const newOrder = [...mandatoryCards, cardId];
-    setCardOrder(newOrder);
+    if (user?.isPremium) {
+        // Premium user toggles visibility
+        if (cardOrder.includes(cardId)) {
+            setCardOrder(cardOrder.filter(id => id !== cardId));
+        } else {
+            setCardOrder([...cardOrder, cardId]);
+        }
+    } else {
+        // Free user swaps the optional card
+        const newOrder = [...mandatoryCards, cardId];
+        setCardOrder(newOrder);
+    }
   }
 
 
   if (!user) return <div className="flex justify-center items-center h-96"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
 
   const optionalCards = allStats.filter(stat => !mandatoryCards.includes(stat.id));
-  const currentOptionalCardId = cardOrder.find(id => !mandatoryCards.includes(id));
+  const visibleOptionalCards = cardOrder.filter(id => !mandatoryCards.includes(id));
+  const visibleMandatoryCards = cardOrder.filter(id => mandatoryCards.includes(id));
 
   return (
     <div className="space-y-6">
@@ -136,49 +150,59 @@ export function ReportsClient() {
                     </Alert>
                 )}
 
-                <h3 className="font-semibold mb-2">Cards Visíveis</h3>
-                <Reorder.Group
-                    as="div"
-                    axis="y"
-                    values={cardOrder}
-                    onReorder={setCardOrder}
-                    className="space-y-4"
-                >
-                    {cardOrder.map(id => {
+                <h3 className="font-semibold mb-4">Cards Visíveis</h3>
+                <div className="space-y-4">
+                    {visibleMandatoryCards.map((id, index) => {
                         const cardInfo = allStats.find(c => c.id === id);
                         return cardInfo ? (
                             <DraggableCard 
                                 key={id} 
                                 id={id}
                                 title={cardInfo.title}
-                                description=""
-                                onPointerDown={(e) => controls.start(e)}
+                                onMove={(dir) => handleMoveCard(id, dir)}
+                                isFirst={index === 0}
+                                isLast={index === visibleMandatoryCards.length - 1}
                             >
                                 <StatsCard {...cardInfo} />
                             </DraggableCard>
                         ) : null
                     })}
-                </Reorder.Group>
+                     {visibleOptionalCards.map((id, index) => {
+                        const cardInfo = allStats.find(c => c.id === id);
+                        return cardInfo ? (
+                             <DraggableCard 
+                                key={id} 
+                                id={id}
+                                title={cardInfo.title}
+                                onMove={(dir) => handleMoveCard(id, dir)}
+                                isFirst={index === 0}
+                                isLast={index === visibleOptionalCards.length - 1}
+                            >
+                                <StatsCard {...cardInfo} />
+                            </DraggableCard>
+                        ) : null
+                    })}
+                </div>
 
                 <div className="mt-8">
                     <h3 className="font-semibold mb-2">Cards Opcionais</h3>
+                     <p className="text-sm text-muted-foreground mb-4">
+                       {user.isPremium ? "Clique para adicionar ou remover do seu dashboard." : "Clique para substituir o seu card opcional."}
+                    </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {optionalCards.map(card => (
-                            <Card key={card.id} className={`relative p-2 border-2 ${currentOptionalCardId === card.id ? 'border-primary' : 'border-dashed'}`}>
-                                {!user.isPremium && currentOptionalCardId !== card.id && <div className="absolute inset-0 bg-secondary/80 z-10 flex items-center justify-center rounded-lg"><Lock className="h-6 w-6 text-foreground/50"/></div>}
-                                <StatsCard {...card} />
-                                {currentOptionalCardId !== card.id && (
-                                     <Button 
-                                        size="sm" 
-                                        className="absolute bottom-2 right-2 z-20"
-                                        onClick={() => handleSelectOptionalCard(card.id)}
-                                        disabled={!user.isPremium && currentOptionalCardId !== undefined && currentOptionalCardId !== card.id}
-                                    >
-                                        {!user.isPremium ? 'Escolher este' : 'Adicionar'}
-                                    </Button>
-                                )}
-                            </Card>
-                        ))}
+                        {optionalCards.map(card => {
+                            const isVisible = cardOrder.includes(card.id);
+                            return (
+                                <Card 
+                                    key={card.id} 
+                                    className={`relative p-2 border-2 cursor-pointer ${isVisible ? 'border-primary' : 'border-dashed hover:border-primary/50'}`}
+                                    onClick={() => handleSelectOptionalCard(card.id)}
+                                >
+                                    {isVisible && user.isPremium && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1"><Check className="h-3 w-3"/></div>}
+                                    <StatsCard {...card} value={0} />
+                                </Card>
+                            )
+                        })}
                     </div>
                 </div>
 
