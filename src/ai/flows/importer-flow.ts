@@ -92,7 +92,7 @@ export const intelligentImporterFlow = ai.defineFlow(
   },
   async (input) => {
     // Call the AI model with the defined prompt and the input CSV content.
-    const { output } = await intelligentImportPrompt(input);
+    const { output } = await intelligentImportPrompt(input, { apiKey: process.env.GEMINI_API_KEY });
     
     // The output will be automatically validated against the IntelligentImporterOutputSchema.
     // We can be confident that output.processedCsv is a string.
