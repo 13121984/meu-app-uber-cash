@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import { Label } from '@/components/ui/label';
 
 const premiumFeatures = [
   { text: 'Cards e gráficos ilimitados no Dashboard e Relatórios.', icon: Sparkles },
