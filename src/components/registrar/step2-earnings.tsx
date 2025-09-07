@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import type { Earning, State } from './registration-wizard';
 import { useAuth } from '@/contexts/auth-context';
+import Link from 'next/link';
 
 type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
 
@@ -66,14 +67,16 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
       </div>
 
       {!isPremium && (
-        <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-4 text-center">
-                <p className="text-sm font-semibold text-primary">
-                    <Lock className="inline-block h-4 w-4 mr-2"/>
-                    Assine o Premium para categorizar seus ganhos (Uber, 99, Particular) e obter relatórios detalhados.
-                </p>
-            </CardContent>
-        </Card>
+        <Link href="/premium" passHref>
+          <Card className="border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+              <CardContent className="p-4 text-center">
+                  <p className="text-sm font-semibold text-primary">
+                      <Lock className="inline-block h-4 w-4 mr-2"/>
+                      Assine o Premium para categorizar seus ganhos (Uber, 99, Particular) e obter relatórios detalhados.
+                  </p>
+              </CardContent>
+          </Card>
+        </Link>
       )}
 
       {earningCategories.length === 0 ? (
