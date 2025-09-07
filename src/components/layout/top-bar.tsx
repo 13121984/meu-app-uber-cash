@@ -40,7 +40,7 @@ export function TopBar() {
                 </Link>
             </div>
             {isClient && (
-                <nav className="hidden sm:flex items-center gap-1">
+                <nav className="flex items-center gap-1">
                     {menuItems.map((item) => {
                         const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
                         return (
