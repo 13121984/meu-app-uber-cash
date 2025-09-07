@@ -19,10 +19,17 @@ export interface Vehicle {
   plate?: string; // Placa é opcional, diferencial para premium
 }
 
+export interface TaximeterRates {
+    ratePerKm: number;
+    ratePerMinute: number;
+}
+
 export interface UserPreferences {
     reportChartOrder: string[];
     dashboardCardOrder: string[];
     lastFreebieChangeDate?: string; // Data da última troca de card/gráfico gratuito
+    taximeterRates?: TaximeterRates;
+    lastTaximeterUse?: string; // Data do último uso do taxímetro para usuários gratuitos
 }
 
 export interface User {
@@ -85,6 +92,8 @@ export async function signup(userId: string, password: string, securityAnswers: 
             reportChartOrder: ['profitEvolution', 'earningsComposition', 'profitabilityAnalysis', 'earningsByCategory', 'tripsByCategory', 'dailyTrips', 'fuelExpenses'],
             dashboardCardOrder: [],
             lastFreebieChangeDate: undefined,
+            taximeterRates: { ratePerKm: 2.5, ratePerMinute: 0.4 },
+            lastTaximeterUse: undefined
         },
     };
 
@@ -130,6 +139,15 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
     await saveUsers(users);
 
     return { success: true, user: users[userIndex] };
+}
+
+export async function updateUserPreferences(userId: string, updatedPreferences: Partial<UserPreferences>): Promise<{ success: boolean, user?: User, error?: string }> {
+    const user = await getUserById(userId);
+    if (!user) return { success: false, error: "Usuário não encontrado." };
+
+    const newPreferences = { ...user.preferences, ...updatedPreferences };
+    
+    return await updateUser(userId, { preferences: newPreferences });
 }
 
 

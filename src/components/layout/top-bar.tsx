@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, Car, LogOut } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, Car, LogOut, Calculator } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
@@ -18,6 +18,7 @@ const menuItems = [
   { href: "/metas", label: "Metas", icon: Target },
   { href: "/relatorios", label: "Relatórios", icon: BarChart },
   { href: "/manutencao", label: "Manutenção", icon: Wrench },
+  { href: "/taximetro", label: "Taxímetro", icon: Calculator },
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ]
 
