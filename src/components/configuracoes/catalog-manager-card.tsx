@@ -29,9 +29,11 @@ export function CatalogManagerCard({ isPremium }: CatalogManagerCardProps) {
             </CardHeader>
             <CardContent>
                 <Link href={isPremium ? "/configuracoes/catalogos" : "/premium"} passHref>
-                    <Button>
-                        <span>{isPremium ? "Editar Catálogos" : "Desbloquear com Premium"}</span>
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button asChild>
+                       <a>
+                         <span>{isPremium ? "Editar Catálogos" : "Desbloquear com Premium"}</span>
+                         <ArrowRight className="ml-2 h-4 w-4" />
+                       </a>
                     </Button>
                 </Link>
             </CardContent>
