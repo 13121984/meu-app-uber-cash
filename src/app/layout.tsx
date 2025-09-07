@@ -4,12 +4,13 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
-import { TopBar } from '@/components/layout/top-bar';
+import { AuthProvider } from '@/contexts/auth-context';
+import { AppContent } from './app-content';
 
 
-const APP_NAME = "Uber Cash";
-const APP_DEFAULT_TITLE = "Uber Cash";
-const APP_TITLE_TEMPLATE = "%s - Uber Cash";
+const APP_NAME = "Rota Certa";
+const APP_DEFAULT_TITLE = "Rota Certa";
+const APP_TITLE_TEMPLATE = "%s - Rota Certa";
 const APP_DESCRIPTION = "Seu app para gestão de ganhos como motorista de aplicativo.";
 
 export const metadata: Metadata = {
@@ -52,12 +53,11 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
       <body className="font-body antialiased h-full">
-        <div className="relative flex min-h-screen w-full flex-col">
-            <TopBar />
-            <main className="flex-1 p-4 sm:p-6 lg:p-8 pt-20">
-                {children}
-            </main>
-        </div>
+        <AuthProvider>
+            <AppContent>
+              {children}
+            </AppContent>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

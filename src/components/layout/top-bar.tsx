@@ -3,10 +3,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, Car } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, Car, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
+import { useAuth } from "@/contexts/auth-context"
+import { Button } from "../ui/button"
 
 const menuItems = [
   { href: "/", label: "Início", icon: Home },
@@ -21,6 +23,7 @@ const menuItems = [
 
 export function TopBar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -65,6 +68,16 @@ export function TopBar() {
                         </Tooltip>
                         )
                     })}
+                     <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={logout} className="h-10 w-10 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                                <LogOut className="h-5 w-5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Sair</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </nav>
             )}
         </header>
