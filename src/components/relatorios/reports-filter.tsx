@@ -7,18 +7,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Download, Loader2, AlertTriangle, Filter, Check } from 'lucide-react';
+import { Calendar as CalendarIcon, Download, Loader2, AlertTriangle, Filter, Check, FileDown } from 'lucide-react';
 import { format, getYear, parseISO, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 
 interface ReportsFilterProps {
   onApplyFilters: (filters: ReportFilterValues) => void;
   isPending: boolean;
+  reportContentRef: React.RefObject<HTMLDivElement>;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -27,7 +30,7 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
 }));
 
-export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps) {
+export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: ReportsFilterProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -103,7 +106,7 @@ export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps)
     onApplyFilters(filters);
   };
   
-  const handleDownload = () => {
+  const handleDownloadCSV = () => {
       const filtersToExport = {
         type: searchParams.get('type') as ReportFilterValues['type'] | null,
         year: parseInt(searchParams.get('year') || '0'),
@@ -155,6 +158,64 @@ export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps)
         }
       });
   }
+
+  const handleDownloadPDF = async () => {
+    const reportElement = reportContentRef.current;
+    if (!reportElement) {
+        toast({ title: "Erro", description: "Não foi possível encontrar o conteúdo do relatório para exportar.", variant: "destructive" });
+        return;
+    }
+
+    startExportTransition(async () => {
+        try {
+            const canvas = await html2canvas(reportElement, {
+                scale: 2, // Aumenta a resolução para melhor qualidade
+                backgroundColor: null, // Usa o fundo do elemento
+                useCORS: true,
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            
+            // A4 page dimensions in mm: 210 x 297
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            const ratio = imgWidth / imgHeight;
+
+            let finalImgWidth = pdfWidth - 20; // com margens
+            let finalImgHeight = finalImgWidth / ratio;
+            
+            if (finalImgHeight > pdfHeight - 20) {
+                 finalImgHeight = pdfHeight - 20;
+                 finalImgWidth = finalImgHeight * ratio;
+            }
+
+            const x = (pdfWidth - finalImgWidth) / 2;
+            const y = 10;
+
+            pdf.addImage(imgData, 'PNG', x, y, finalImgWidth, finalImgHeight);
+            
+            const fileName = `Relatorio_UberCash_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+            pdf.save(fileName);
+            
+            toast({
+                title: "Exportação PDF Iniciada",
+                description: `O arquivo ${fileName} será baixado.`,
+            });
+        } catch (error) {
+            console.error(error);
+            const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro inesperado ao gerar o PDF.";
+            toast({
+                title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span className="font-bold">Erro na Exportação</span></div>,
+                description: errorMessage,
+                variant: "destructive",
+            });
+        }
+    });
+};
 
   if (!isClient) {
       return (
@@ -265,7 +326,12 @@ export function ReportsFilter({ onApplyFilters, isPending }: ReportsFilterProps)
 
       <div className="flex-grow"></div>
       
-      <Button onClick={handleDownload} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !searchParams.get('type')}>
+       <Button onClick={handleDownloadPDF} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !searchParams.get('type')}>
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+          {isExporting ? 'Exportando...' : 'Baixar PDF'}
+      </Button>
+
+      <Button onClick={handleDownloadCSV} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !searchParams.get('type')}>
           {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
           {isExporting ? 'Exportando...' : 'Baixar CSV'}
       </Button>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useTransition, useMemo, useCallback } from 'react';
+import React, { useState, useTransition, useMemo, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { ReportsFilter } from './reports-filter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -42,6 +42,8 @@ export function ReportsClient() {
   const [data, setData] = useState<ReportData | null>(null);
   const [filters, setFilters] = useState<ReportFilterValues | null>(null);
   const [isPending, startTransition] = useTransition();
+  const reportContentRef = useRef<HTMLDivElement>(null);
+
 
   const handleApplyFilters = useCallback((newFilters: ReportFilterValues) => {
     setFilters(newFilters);
@@ -127,7 +129,7 @@ export function ReportsClient() {
     const chartsToShow = userChartOrder.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
     return (
-        <div className="space-y-6 mt-6">
+        <div ref={reportContentRef} className="space-y-6 mt-6 bg-background p-4 rounded-lg">
              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
                  {!isPremium && (
@@ -177,7 +179,11 @@ export function ReportsClient() {
     <div className="space-y-6">
       <Card>
         <CardContent className="p-4">
-          <ReportsFilter onApplyFilters={handleApplyFilters} isPending={isPending} />
+          <ReportsFilter 
+            onApplyFilters={handleApplyFilters} 
+            isPending={isPending}
+            reportContentRef={reportContentRef}
+          />
         </CardContent>
       </Card>
       {renderContent()}
