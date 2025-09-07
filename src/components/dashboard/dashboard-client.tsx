@@ -147,7 +147,7 @@ export function DashboardClient() {
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
-              {!isPremium && cardsToShow.length < 4 && (
+              {!isPremium && (
                    <Link href="/premium" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
@@ -190,7 +190,7 @@ export function DashboardClient() {
           })}
 
 
-          {!isPremium && chartsToShow.length < 2 && (
+          {!isPremium && (
               <Link href="/premium" passHref>
                 <Button variant="outline" className="w-full">
                     <PlusCircle className="mr-2 h-4 w-4"/>
