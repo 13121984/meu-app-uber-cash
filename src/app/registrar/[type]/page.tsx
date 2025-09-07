@@ -4,6 +4,13 @@ import { getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
 import { startOfDay } from 'date-fns';
 import { notFound } from 'next/navigation';
 
+export async function generateStaticParams() {
+  return [
+    { type: 'today' },
+    { type: 'other-day' },
+  ]
+}
+
 export default async function RegistrarPage({ params }: { params: { type: string } }) {
   const registrationType = params.type;
 
