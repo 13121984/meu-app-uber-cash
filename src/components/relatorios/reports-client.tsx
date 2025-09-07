@@ -49,7 +49,7 @@ export function ReportsClient() {
   const { user, refreshUser } = useAuth();
   const [isSaving, startSavingTransition] = useTransition();
   
-  const getInitialOrder = (itemType: 'cards' | 'charts') => {
+  const getInitialOrder = (itemType: 'cards' | 'charts'): string[] => {
       if (!user) return [];
 
       const mandatoryItems = itemType === 'cards' ? mandatoryCards : mandatoryCharts;
@@ -57,31 +57,22 @@ export function ReportsClient() {
       const userOrder = user.preferences?.[itemType === 'cards' ? 'dashboardCardOrder' : 'reportChartOrder'];
 
       if (user.isPremium) {
-          // If premium, use saved order or default to all items
           return userOrder && userOrder.length > 0 ? userOrder : allItems.map(i => i.id);
       }
       
-      // If free, ensure mandatory cards are present, plus one optional
-      const optionalItem = userOrder?.find(id => !mandatoryItems.includes(id)) 
-          || allItems.find(i => !mandatoryItems.includes(i.id))?.id;
+      const defaultOptional = allItems.find(i => !mandatoryItems.includes(i.id))!.id;
+      const optionalItem = userOrder?.find(id => !mandatoryItems.includes(id)) || defaultOptional;
       
-      const visibleItems = [...mandatoryItems];
-      if(optionalItem) {
-          visibleItems.push(optionalItem);
-      }
-      
-       // Respect user's saved order if it's valid
-      if(userOrder && userOrder.every(id => visibleItems.includes(id)) && userOrder.length === visibleItems.length) {
-          return userOrder;
-      }
-      
-      return visibleItems;
-  }
+      return userOrder && userOrder.length === (mandatoryItems.length + (optionalItem ? 1 : 0)) ? userOrder : [...mandatoryItems, optionalItem];
+  };
 
-  const [cardOrder, setCardOrder] = useState<string[]>(getInitialOrder('cards'));
-  const [chartOrder, setChartOrder] = useState<string[]>(getInitialOrder('charts'));
-  const [initialCardOptional, setInitialCardOptional] = useState(cardOrder.find(id => !mandatoryCards.includes(id)));
-  const [initialChartOptional, setInitialChartOptional] = useState(chartOrder.find(id => !mandatoryCharts.includes(id)));
+  const [cardOrder, setCardOrder] = useState<string[]>(() => getInitialOrder('cards'));
+  const [chartOrder, setChartOrder] = useState<string[]>(() => getInitialOrder('charts'));
+  
+  // State to track the *originally saved* optional item
+  const [savedOptionalCard, setSavedOptionalCard] = useState(() => cardOrder.find(id => !mandatoryCards.includes(id)));
+  const [savedOptionalChart, setSavedOptionalChart] = useState(() => chartOrder.find(id => !mandatoryCharts.includes(id)));
+
 
   const handleMoveItem = (itemId: string, direction: 'up' | 'down', itemType: 'cards' | 'charts') => {
       const order = itemType === 'cards' ? cardOrder : chartOrder;
@@ -102,11 +93,11 @@ export function ReportsClient() {
     startSavingTransition(async () => {
       if(!user) return;
       
-      const newCardOptional = cardOrder.find(id => !mandatoryCards.includes(id));
-      const newChartOptional = chartOrder.find(id => !mandatoryCharts.includes(id));
+      const newOptionalCard = cardOrder.find(id => !mandatoryCards.includes(id));
+      const newOptionalChart = chartOrder.find(id => !mandatoryCharts.includes(id));
 
-      const cardSwapped = newCardOptional !== initialCardOptional;
-      const chartSwapped = newChartOptional !== initialChartOptional;
+      const cardSwapped = newOptionalCard !== savedOptionalCard;
+      const chartSwapped = newOptionalChart !== savedOptionalChart;
       const isSwapping = cardSwapped || chartSwapped;
 
       if (isSwapping && !user.isPremium) {
@@ -116,9 +107,12 @@ export function ReportsClient() {
             if (isAfter(new Date(lastChange), sevenDaysAgo)) {
                 toast({
                     title: "Aguarde para trocar novamente",
-                    description: `Você só pode alterar seu item opcional uma vez a cada 7 dias. Próxima troca disponível ${formatDistanceToNow(addDays(new Date(lastChange), 7), { locale: ptBR, addSuffix: true })}.`,
+                    description: `Você só pode alterar seu item opcional a cada 7 dias. Próxima troca disponível ${formatDistanceToNow(addDays(new Date(lastChange), 7), { locale: ptBR, addSuffix: true })}.`,
                     variant: "destructive",
                 });
+                // Revert the visual state to the saved state
+                setCardOrder(getInitialOrder('cards'));
+                setChartOrder(getInitialOrder('charts'));
                 return;
             }
         }
@@ -135,8 +129,9 @@ export function ReportsClient() {
 
       if (result.success) {
           await refreshUser();
-          setInitialCardOptional(newCardOptional);
-          setInitialChartOptional(newChartOptional);
+          // Update the "saved" state after successful save
+          setSavedOptionalCard(newOptionalCard);
+          setSavedOptionalChart(newOptionalChart);
           toast({
               title: <div className="flex items-center gap-2"><Check className="h-5 w-5"/><span>Layout Salvo!</span></div>,
               description: "Suas preferências de visualização foram salvas.",
@@ -160,13 +155,12 @@ export function ReportsClient() {
           if (user?.isPremium) {
               return prevOrder.includes(itemId) ? prevOrder.filter(id => id !== itemId) : [...prevOrder, itemId];
           } else {
-              // For free users, find and replace the single optional item
               const optionalItemIndex = prevOrder.findIndex(id => !mandatoryItems.includes(id));
               const newOrder = [...prevOrder];
               if (optionalItemIndex > -1) {
                   newOrder[optionalItemIndex] = itemId;
               } else {
-                  newOrder.push(itemId); // Should not happen if initialized correctly
+                  newOrder.push(itemId);
               }
               return newOrder;
           }
@@ -190,7 +184,7 @@ export function ReportsClient() {
                     <Info className="h-4 w-4" />
                     <AlertTitle>Plano Gratuito</AlertTitle>
                     <AlertDescription>
-                        Você pode escolher 1 item opcional (além dos obrigatórios) e pode trocá-lo a cada 7 dias. A ordem dos itens pode ser alterada a qualquer momento.
+                        Você pode escolher 1 item opcional e trocá-lo a cada 7 dias. A ordem de todos os itens visíveis pode ser alterada a qualquer momento.
                     </AlertDescription>
                 </Alert>
             )}

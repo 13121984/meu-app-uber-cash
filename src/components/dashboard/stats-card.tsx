@@ -38,7 +38,7 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
             </div>
         }
         <div className="flex flex-col">
-          <p className="text-lg font-bold">{formattedValue}</p>
+          <p className="text-lg font-bold truncate">{formattedValue}</p>
           {description && (
              <p className="text-sm text-muted-foreground">{description}</p>
           )}
