@@ -1,10 +1,10 @@
 
-import { LayoutDashboard, Lock } from 'lucide-react';
-import { ReportsClient } from '@/components/relatorios/reports-client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { LayoutDashboard } from 'lucide-react';
+import { LayoutCustomizationClient } from '@/components/configuracoes/layout-customization-client';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+
 
 export default async function LayoutPersonalizadoPage() {
 
@@ -21,11 +21,11 @@ export default async function LayoutPersonalizadoPage() {
             <LayoutDashboard className="w-8 h-8 text-primary" />
             Personalizar Layout
           </h1>
-           <p className="text-muted-foreground">Arraste os cards para reordenar como eles aparecem na sua tela.</p>
+           <p className="text-muted-foreground">Arraste os cards e gráficos para reordenar como eles aparecem na sua tela.</p>
         </div>
       </div>
       
-      <ReportsClient />
+      <LayoutCustomizationClient />
     </div>
   );
 }

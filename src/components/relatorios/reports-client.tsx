@@ -25,11 +25,6 @@ const AverageEarningPerHourChart = dynamic(() => import('./average-earning-per-h
 const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
 
-interface ReportsClientProps {
-  initialData?: ReportData;
-  initialFilters?: ReportFilterValues;
-}
-
 const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
   earningsComposition: EarningsPieChart,
   profitEvolution: ProfitEvolutionChart,
@@ -42,19 +37,36 @@ const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
   averageEarningPerTrip: AverageEarningPerTripChart,
 };
 
-export function ReportsClient({ initialData, initialFilters }: ReportsClientProps) {
+export function ReportsClient() {
   const { user } = useAuth();
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState<ReportData | null>(null);
+  const [filters, setFilters] = useState<ReportFilterValues | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
+  const handleApplyFilters = useCallback((newFilters: ReportFilterValues) => {
+    setFilters(newFilters);
     startTransition(async () => {
-      const reportData = await getReportData(filters);
+      const reportData = await getReportData(newFilters);
       setData(reportData);
     });
   }, []);
   
   const isPremium = user?.isPremium || false;
+
+  const getChartData = (reportData: ReportData, chartId: string) => {
+    switch (chartId) {
+        case 'earningsComposition': return reportData.profitComposition;
+        case 'profitEvolution': return reportData.profitEvolution;
+        case 'earningsByCategory': return reportData.earningsByCategory;
+        case 'tripsByCategory': return reportData.tripsByCategory;
+        case 'maintenance': return reportData.maintenance;
+        case 'fuelExpenses': return reportData.fuelExpenses;
+        case 'dailyTrips': return reportData.dailyTrips;
+        case 'averageEarningPerHour': return reportData.averageEarningPerHour;
+        case 'averageEarningPerTrip': return reportData.averageEarningPerTrip;
+        default: return [];
+    }
+  }
 
   const renderContent = () => {
     if (isPending) {
@@ -114,21 +126,6 @@ export function ReportsClient({ initialData, initialFilters }: ReportsClientProp
     const userChartOrder = user?.preferences?.reportChartOrder || allCharts.filter(c => c.isMandatory).map(c => c.id);
     const chartsToShow = userChartOrder.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
-    const getChartData = (id: string) => {
-        switch (id) {
-            case 'earningsComposition': return data.profitComposition;
-            case 'profitEvolution': return data.profitEvolution;
-            case 'earningsByCategory': return data.earningsByCategory;
-            case 'tripsByCategory': return data.tripsByCategory;
-            case 'maintenance': return data.maintenance;
-            case 'fuelExpenses': return data.fuelExpenses;
-            case 'dailyTrips': return data.dailyTrips;
-            case 'averageEarningPerHour': return data.averageEarningPerHour;
-            case 'averageEarningPerTrip': return data.averageEarningPerTrip;
-            default: return [];
-        }
-      }
-
     return (
         <div className="space-y-6 mt-6">
              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -145,10 +142,11 @@ export function ReportsClient({ initialData, initialFilters }: ReportsClientProp
               )}
             </div>
             {chartsToShow.map(chart => {
+              if (!chart) return null;
               const ChartComponent = chartComponentMap[chart.id];
               if (!ChartComponent) return null;
               
-              const chartData = getChartData(chart.id);
+              const chartData = getChartData(data, chart.id);
               if(!chartData || (Array.isArray(chartData) && chartData.length === 0)) return null;
 
               return (
@@ -158,7 +156,7 @@ export function ReportsClient({ initialData, initialFilters }: ReportsClientProp
                       <CardDescription>{chart.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ChartComponent key={`${chart.id}-${initialFilters?.type}`} data={chartData} />
+                        <ChartComponent key={`${chart.id}-${filters?.type}`} data={chartData} />
                     </CardContent>
                   </Card>
               );
