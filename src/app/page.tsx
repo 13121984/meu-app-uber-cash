@@ -28,7 +28,7 @@ export default function PageRouter() {
     }
 
     // Se o usuário está logado mas não tem veículo, mostra o setup do veículo
-    if (user && user.vehicles.length === 0) {
+    if (user && user.vehicles && user.vehicles.length === 0) {
         return <VehicleSetup />;
     }
     
