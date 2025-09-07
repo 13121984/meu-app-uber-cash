@@ -2,13 +2,13 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { login as loginService, signup as signupService, User } from '@/services/auth.service';
+import { login as loginService, signup as signupService, User, SecurityAnswer } from '@/services/auth.service';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (userId: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (userId: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (userId: string, password: string, securityAnswers: SecurityAnswer[]) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -36,8 +36,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { success: result.success, error: result.error };
   };
   
-  const signup = async (userId: string, password: string) => {
-      const result = await signupService(userId, password);
+  const signup = async (userId: string, password: string, securityAnswers: SecurityAnswer[]) => {
+      const result = await signupService(userId, password, securityAnswers);
       return { success: result.success, error: result.error };
   };
 

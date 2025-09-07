@@ -3,5 +3,10 @@
     "id": "Paulo Vitor Tiburcio ",
     "passwordHash": "hashed_Aec081305@",
     "isPremium": false
+  },
+  {
+    "id": "Teste 1",
+    "passwordHash": "hashed_123456",
+    "isPremium": false
   }
 ]

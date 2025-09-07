@@ -14,10 +14,15 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
 import { AlertTriangle, Loader2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const signupSchema = z.object({
   userId: z.string().min(3, 'O usuário deve ter pelo menos 3 caracteres.'),
   password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres.'),
+  securityQuestion1: z.string().min(1, 'A pergunta de segurança é obrigatória.'),
+  securityAnswer1: z.string().min(1, 'A resposta de segurança é obrigatória.'),
+  securityQuestion2: z.string().min(1, 'A pergunta de segurança é obrigatória.'),
+  securityAnswer2: z.string().min(1, 'A resposta de segurança é obrigatória.'),
 });
 
 type SignupFormData = z.infer<typeof signupSchema>;
@@ -33,7 +38,14 @@ export default function SignupPage() {
 
   const onSubmit = async (data: SignupFormData) => {
     setIsSubmitting(true);
-    const result = await signup(data.userId, data.password);
+    const { userId, password, securityQuestion1, securityAnswer1, securityQuestion2, securityAnswer2 } = data;
+    
+    const securityAnswers = [
+      { question: securityQuestion1, answer: securityAnswer1 },
+      { question: securityQuestion2, answer: securityAnswer2 },
+    ];
+    
+    const result = await signup(userId, password, securityAnswers);
     
     if (result.success) {
       toast({
@@ -75,6 +87,36 @@ export default function SignupPage() {
             <Input id="password" type="password" {...register('password')} placeholder="Crie uma senha segura" />
             {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
+
+          <Separator className="my-6" />
+
+           <div className="space-y-1">
+             <h3 className="font-semibold">Perguntas de Segurança</h3>
+             <p className="text-sm text-muted-foreground">Isso ajudará a recuperar sua conta se você esquecer a senha.</p>
+           </div>
+          
+           <div className="space-y-2">
+            <Label htmlFor="securityQuestion1">Pergunta 1</Label>
+            <Input id="securityQuestion1" {...register('securityQuestion1')} placeholder="Ex: Nome do seu primeiro animal?" />
+            {errors.securityQuestion1 && <p className="text-sm text-destructive">{errors.securityQuestion1.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="securityAnswer1">Resposta 1</Label>
+            <Input id="securityAnswer1" type="text" {...register('securityAnswer1')} placeholder="Sua resposta secreta" />
+            {errors.securityAnswer1 && <p className="text-sm text-destructive">{errors.securityAnswer1.message}</p>}
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <Label htmlFor="securityQuestion2">Pergunta 2</Label>
+            <Input id="securityQuestion2" {...register('securityQuestion2')} placeholder="Ex: Cidade onde seus pais se conheceram?" />
+            {errors.securityQuestion2 && <p className="text-sm text-destructive">{errors.securityQuestion2.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="securityAnswer2">Resposta 2</Label>
+            <Input id="securityAnswer2" type="text" {...register('securityAnswer2')} placeholder="Sua outra resposta secreta" />
+            {errors.securityAnswer2 && <p className="text-sm text-destructive">{errors.securityAnswer2.message}</p>}
+          </div>
+
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button type="submit" className="w-full" disabled={isSubmitting}>

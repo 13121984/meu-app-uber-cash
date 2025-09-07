@@ -71,6 +71,11 @@ export default function LoginPage() {
             <Input id="password" type="password" {...register('password')} placeholder="Sua senha" />
             {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
+           <div className="text-right">
+              <Link href="/recuperar" className="text-sm text-muted-foreground hover:text-primary">
+                  Esqueceu a senha?
+              </Link>
+           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button type="submit" className="w-full" disabled={isSubmitting}>

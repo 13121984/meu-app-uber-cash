@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
 import { StatsCard } from '@/components/dashboard/stats-card';
-import { Reorder, useDragControls } from "framer-motion";
+import { Reorder, useDragControls, useMotionValue, ReorderContext } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
 const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -32,7 +32,7 @@ const DraggableCard = ({ id, title, description, children }: { id: string, title
                             variant="ghost"
                             size="icon"
                             onPointerDown={(e) => controls.start(e)}
-                            className="cursor-grab p-1 h-8 w-8"
+                            className="cursor-grab active:cursor-grabbing p-1 h-8 w-8"
                         >
                             <GripVertical className="h-5 w-5 text-muted-foreground" />
                         </Button>
