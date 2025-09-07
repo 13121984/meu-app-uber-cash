@@ -82,13 +82,33 @@ export function DashboardClient() {
          }
       }
       
-      const cardsToShow = orderedCardIds.map(id => allStats.find(s => s.id === id)).filter(Boolean) as typeof allStats;
+      const cardsToShow = orderedCardIds.map(id => {
+          const cardInfo = allStats.find(s => s.id === id);
+          if (!cardInfo) return null;
+          
+          let value: any = 0;
+          if (id === 'lucro') value = currentData.totalLucro;
+          else if (id === 'ganho') value = currentData.totalGanho;
+          else if (id === 'combustivel') value = currentData.totalCombustivel;
+          else if (id === 'viagens') value = currentData.totalViagens;
+          else if (id === 'dias') value = currentData.diasTrabalhados;
+          else if (id === 'mediaHoras') value = currentData.mediaHorasPorDia;
+          else if (id === 'mediaKm') value = currentData.mediaKmPorDia;
+          else if (id === 'ganhoHora') value = currentData.ganhoPorHora;
+          else if (id === 'ganhoKm') value = currentData.ganhoPorKm;
+          else if (id === 'eficiencia') value = currentData.eficiencia;
+          else if (id === 'kmRodados') value = currentData.totalKm;
+          else if (id === 'horasTrabalhadas') value = currentData.totalHoras;
+          else value = (currentData as any)[id] ?? currentData.maintenance[id as keyof typeof currentData.maintenance] ?? 0;
+
+          return { ...cardInfo, value };
+      }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
 
 
       return (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} value={(currentData as any)[stat.id] ?? currentData.maintenance[stat.id as keyof typeof currentData.maintenance] ?? 0} />)}
+              {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
               {!isPremium && cardsToShow.length < 4 && (
                    <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">

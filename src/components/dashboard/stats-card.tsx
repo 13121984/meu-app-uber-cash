@@ -18,14 +18,14 @@ type StatsCardProps = {
 export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precision = 0, iconBg, iconColor, isPreview = false }: StatsCardProps) {
   const isValidNumber = typeof value === 'number' && !isNaN(value);
 
-  // If it's a preview, don't show the value. Otherwise, format it.
   const formattedValue = isPreview 
     ? title 
     : isValidNumber
       ? isCurrency
         ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
         : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
-      : isCurrency ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : "—";
+      : isCurrency ? (0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : "—";
+
 
   const description = isPreview ? '' : title;
 
