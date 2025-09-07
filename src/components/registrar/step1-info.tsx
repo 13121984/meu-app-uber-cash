@@ -141,33 +141,32 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
         </div>
         
         <div>
-           <Label htmlFor="hours" className="mb-2 block">Total de Horas</Label>
-            <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500 z-10" />
-                <PopoverTrigger asChild disabled={hasTimeEntries}>
-                    <Input
-                        id="hours"
-                        type="text"
-                        readOnly
-                        placeholder="0,0"
-                        value={data.hours > 0 ? String(data.hours.toFixed(2)).replace('.', ',') : '0,0'}
-                        className={cn(
-                          "pl-10 bg-muted/70 focus-visible:ring-0 focus-visible:ring-offset-0",
-                          !hasTimeEntries ? "cursor-pointer hover:bg-muted" : "cursor-not-allowed"
-                        )}
-                      />
-                </PopoverTrigger>
-              </div>
-              <PopoverContent className="w-auto p-2">
-                  <Label className="text-xs text-muted-foreground px-1">Definir Horas (HH:MM)</Label>
-                  <Input 
-                      type="time" 
-                      onChange={(e) => handleTimePickerChange(e.target.value)}
-                  />
-              </PopoverContent>
-            </Popover>
-            {hasTimeEntries && <p className="text-xs text-muted-foreground mt-1">O total de horas é calculado automaticamente a partir dos períodos.</p>}
+           <div className="flex items-center gap-2 mb-2">
+                <Label htmlFor="hours">Total de Horas</Label>
+                <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+                    <PopoverTrigger asChild disabled={hasTimeEntries}>
+                       <Clock className={cn("h-5 w-5 text-amber-500", !hasTimeEntries ? "cursor-pointer" : "cursor-not-allowed opacity-50")} />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-2">
+                        <Label className="text-xs text-muted-foreground px-1">Definir Horas (HH:MM)</Label>
+                        <Input 
+                            type="time" 
+                            onChange={(e) => handleTimePickerChange(e.target.value)}
+                        />
+                    </PopoverContent>
+                </Popover>
+           </div>
+            <Input
+                id="hours"
+                type="text"
+                readOnly
+                placeholder="0,00"
+                value={data.hours > 0 ? String(data.hours.toFixed(2)).replace('.', ',') : '0,00'}
+                className="bg-muted/70 focus-visible:ring-0 focus-visible:ring-offset-0 cursor-not-allowed"
+                />
+            <p className="text-xs text-muted-foreground mt-1">
+                Horas convertidas em decimal para os cálculos.
+            </p>
         </div>
 
         <Separator />
