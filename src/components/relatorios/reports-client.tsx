@@ -3,14 +3,14 @@
 "use client";
 
 import { useMemo, useState, useTransition } from 'react';
-import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Loader2, CalendarDays, Hourglass, Route, Maximize } from 'lucide-react';
+import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Loader2, CalendarDays, Hourglass, Route, Maximize, GripVertical } from 'lucide-react';
 import { ReportsFilter } from './reports-filter';
 import { getReportData, ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
 import { StatsCard } from '@/components/dashboard/stats-card';
-import { Button } from '../ui/button';
+import { Reorder } from "framer-motion";
 
 const EarningsPieChart = dynamic(() => import('@/components/dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const EarningsBarChart = dynamic(() => import('@/components/dashboard/earnings-bar-chart').then(mod => mod.EarningsBarChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -21,11 +21,41 @@ const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => 
 const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerHourChart = dynamic(() => import('./average-earning-per-hour-chart').then(mod => mod.AverageEarningPerHourChart), { ssr: false, loading: () => <div className="h-[300px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
+const DraggableCard = ({ id, title, description, children }: { id: string, title: string, description: string, children: React.ReactNode }) => (
+    <Reorder.Item key={id} value={id} className="bg-transparent" dragListener={false}>
+         <Card className="w-full h-full">
+            <CardHeader>
+                <div className="flex items-center gap-2">
+                    <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
+                    <div className="flex-1">
+                        <CardTitle className="font-headline text-lg">{title}</CardTitle>
+                        {description && <CardDescription>{description}</CardDescription>}
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                {children}
+            </CardContent>
+        </Card>
+    </Reorder.Item>
+);
+
 
 export function ReportsClient() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
   const [isLoading, startTransition] = useTransition();
+
+  // State to manage the order of the charts
+  const [chartOrder, setChartOrder] = useState<string[]>([
+    'profitEvolution',
+    'earningsComposition',
+    'profitabilityAnalysis',
+    'earningsByCategory',
+    'tripsByCategory',
+    'dailyTrips',
+    'fuelExpenses',
+  ]);
 
   const handleApplyFilters = (filters: ReportFilterValues) => {
     setCurrentFilters(filters);
@@ -49,6 +79,16 @@ export function ReportsClient() {
     { title: "KM Rodados", value: reportData.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
     { title: "Horas Trabalhadas", value: reportData.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
   ] : [], [reportData]);
+
+  const chartComponents: { [key: string]: React.ReactNode } = useMemo(() => (reportData ? {
+        profitEvolution: <DraggableCard id="profitEvolution" title="Evolução do Lucro no Período" description="Desempenho do lucro líquido dia a dia."><ProfitEvolutionChart data={reportData.profitEvolution} /></DraggableCard>,
+        earningsComposition: <DraggableCard id="earningsComposition" title="Composição dos Ganhos" description="Distribuição do seu faturamento bruto."><div className="h-[350px]"><EarningsPieChart data={reportData.profitComposition} /></div></DraggableCard>,
+        profitabilityAnalysis: <DraggableCard id="profitabilityAnalysis" title="Análise de Lucratividade por Categoria" description="Compare a eficiência de cada categoria."><div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4"><div className="space-y-2"><h3 className="font-semibold text-center">Ganho Médio por Viagem</h3><AverageEarningPerTripChart data={reportData.averageEarningPerTrip} /></div><div className="space-y-2"><h3 className="font-semibold text-center">Ganho Médio por Hora</h3><AverageEarningPerHourChart data={reportData.averageEarningPerHour} /></div></div></DraggableCard>,
+        earningsByCategory: <DraggableCard id="earningsByCategory" title="Ganhos por Categoria" description=""><EarningsBarChart data={reportData.earningsByCategory} /></DraggableCard>,
+        tripsByCategory: <DraggableCard id="tripsByCategory" title="Viagens por Categoria" description=""><TripsBarChart data={reportData.tripsByCategory} /></DraggableCard>,
+        dailyTrips: <DraggableCard id="dailyTrips" title="Total de Viagens por Dia" description=""><DailyTripsChart data={reportData.dailyTrips} /></DraggableCard>,
+        fuelExpenses: <DraggableCard id="fuelExpenses" title="Gastos com Combustível" description="Total gasto por tipo de combustível."><FuelBarChart data={reportData.fuelExpenses} /></DraggableCard>,
+  } : {}), [reportData]);
 
   const renderContent = () => {
     if (isLoading) {
@@ -94,93 +134,16 @@ export function ReportsClient() {
                  ))}
               </CardContent>
           </Card>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg flex items-center gap-2">
-                        <PieChartIcon className="w-5 h-5 text-primary" />
-                        Composição dos Ganhos
-                    </CardTitle>
-                    <CardDescription>
-                        Distribuição do seu faturamento bruto.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="h-[350px]">
-                        <EarningsPieChart data={reportData.profitComposition} />
-                    </div>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Gastos com Combustível</CardTitle>
-                    <CardDescription>
-                        Total gasto por tipo de combustível.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <FuelBarChart data={reportData.fuelExpenses} />
-                </CardContent>
-            </Card>
-          </div>
-          <Card>
-              <CardHeader>
-                  <CardTitle className="font-headline text-lg">Evolução do Lucro no Período</CardTitle>
-                   <CardDescription>
-                      Desempenho do lucro líquido dia a dia.
-                  </CardDescription>
-              </CardHeader>
-              <CardContent>
-                  <ProfitEvolutionChart data={reportData.profitEvolution} />
-              </CardContent>
-          </Card>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Ganhos por Categoria</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <EarningsBarChart data={reportData.earningsByCategory} />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Viagens por Categoria</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <TripsBarChart data={reportData.tripsByCategory} />
-                </CardContent>
-            </Card>
-          </div>
-          <Card>
-              <CardHeader>
-                  <CardTitle className="font-headline text-lg flex items-center gap-2">
-                    <Maximize className="w-5 h-5 text-primary" />
-                    Análise de Lucratividade por Categoria
-                  </CardTitle>
-                   <CardDescription>
-                      Compare a eficiência de cada categoria para ver qual é mais rentável.
-                  </CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
-                 <div className="space-y-2">
-                    <h3 className="font-semibold text-center">Ganho Médio por Viagem</h3>
-                    <AverageEarningPerTripChart data={reportData.averageEarningPerTrip} />
-                </div>
-                <div className="space-y-2">
-                    <h3 className="font-semibold text-center">Ganho Médio por Hora</h3>
-                    <AverageEarningPerHourChart data={reportData.averageEarningPerHour} />
-                </div>
-              </CardContent>
-          </Card>
-          <Card>
-              <CardHeader>
-                  <CardTitle className="font-headline text-lg">Total de Viagens por Dia</CardTitle>
-              </CardHeader>
-              <CardContent>
-                  <DailyTripsChart data={reportData.dailyTrips} />
-              </CardContent>
-          </Card>
+          
+          <Reorder.Group
+            as="div"
+            axis="y"
+            values={chartOrder}
+            onReorder={setChartOrder}
+            className="space-y-4"
+          >
+              {chartOrder.map(id => chartComponents[id])}
+          </Reorder.Group>
       </div>
     );
   }
