@@ -36,6 +36,7 @@ export function TopBar() {
     router.push('/login');
   }
 
+  const showNavButtons = pathname !== '/';
 
   return (
     <TooltipProvider>
@@ -50,7 +51,7 @@ export function TopBar() {
             </div>
             {isClient && (
                 <nav className="flex items-center gap-1">
-                    {menuItems.map((item) => {
+                    {showNavButtons && menuItems.map((item) => {
                         const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
                         return (
                         <Tooltip key={item.href}>
