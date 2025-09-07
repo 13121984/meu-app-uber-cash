@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen, Sparkles } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen, Sparkles, Copy } from 'lucide-react';
 import { addMultipleWorkDays, type ImportedWorkDay } from '@/services/work-day.service';
 import { useRouter } from 'next/navigation';
 import { format, parse } from 'date-fns';
@@ -16,13 +17,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-// Cabeçalhos que o app espera no final do processo.
-const TARGET_CSV_HEADERS = [
-    'date', 'km', 'hours', 
-    'earnings_category', 'earnings_trips', 'earnings_amount',
-    'fuel_type', 'fuel_paid', 'fuel_price',
-    'maintenance_description', 'maintenance_amount'
-];
 
 // Função para converter o formato de tempo HH:mm:ss para horas decimais
 const timeToDecimal = (time: string): number => {
@@ -34,99 +28,151 @@ const timeToDecimal = (time: string): number => {
     return hours + minutes / 60 + seconds / 3600;
 };
 
-// Função para processar manualmente o CSV do usuário
+// Nova função de processamento manual, mais robusta
 function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
     const lines = rawCsvText.split(/\r?\n/).filter(line => line.trim() !== '');
     if (lines.length < 2) throw new Error("O arquivo CSV está vazio ou contém apenas o cabeçalho.");
 
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
     const rows = lines.slice(1);
-
     const dataForImport: ImportedWorkDay[] = [];
+
+    const knownDataColumns = ['data', 'date'];
+    const knownKmColumns = ['kms percorridos', 'km'];
+    const knownHoursColumns = ['horas trabalhadas', 'hours', 'horas'];
+    const knownFuelTypes = ['gnv', 'etanol', 'gasolina'];
 
     for (const row of rows) {
         const values = row.split(',');
+        if (values.length < headers.length) continue; // Pula linhas malformadas
+
         const rowData: { [key: string]: string } = {};
         headers.forEach((header, index) => {
-            rowData[header] = values[index]?.trim();
+            rowData[header] = values[index]?.trim() || '';
         });
 
         // 1. Extrair dados base (Data, KM, Horas)
-        const dateRaw = rowData['data'] || '';
+        const dateHeader = headers.find(h => knownDataColumns.includes(h));
+        const kmHeader = headers.find(h => knownKmColumns.includes(h));
+        const hoursHeader = headers.find(h => knownHoursColumns.includes(h));
+
+        if (!dateHeader) continue; // Pula linha se não tiver data
+
+        const dateRaw = rowData[dateHeader];
         let formattedDate = '';
         try {
-            // Tenta parsear formatos como DD/MM/YY ou DD/MM/YYYY
             const parsedDate = parse(dateRaw, 'dd/MM/yy', new Date());
-            if (isNaN(parsedDate.getTime())) throw new Error();
+            if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
             formattedDate = format(parsedDate, 'yyyy-MM-dd');
         } catch (e) {
-            console.warn(`Data inválida encontrada: "${dateRaw}". Pulando linha.`);
             continue; // Pula para a próxima linha se a data for inválida
         }
-
-        const km = (rowData['kms percorridos'] || rowData['km'] || '0').replace(',', '.');
-        const hoursRaw = rowData['horas trabalhadas'] || rowData['hours'] || '0';
+        
+        const km = (kmHeader ? rowData[kmHeader] : '0').replace(',', '.');
+        const hoursRaw = hoursHeader ? rowData[hoursHeader] : '0';
         const hours = timeToDecimal(hoursRaw).toString();
         
-        let isFirstEntryForDate = true;
+        let entriesForThisDay: ImportedWorkDay[] = [];
 
-        // 2. Processar Ganhos (iterar por todas as colunas)
-        for (const header of headers) {
-            if (header.includes('viagens') || header.includes('valor por')) continue; // Ignora colunas auxiliares
-
+        // 2. Processar Ganhos e Combustíveis
+        headers.forEach((header, index) => {
             const amountRaw = rowData[header];
-            const amount = parseFloat(amountRaw?.replace(/[^0-9,.]/g, '').replace(',', '.') || '0');
+            if (!amountRaw || parseFloat(amountRaw.replace(/[^0-9,.]/g, '').replace(',', '.') || '0') <= 0) return;
 
-            if (amount > 0) {
-                 // Assumindo que a categoria de ganho não é uma dessas palavras-chave
-                if (!['data', 'kms percorridos', 'km', 'horas trabalhadas', 'gnv', 'etanol', 'gasolina'].some(kw => header.includes(kw))) {
-                     const tripsHeader = headers.find(h => h.startsWith(header) && h.includes('viagens')) || 'viagens';
-                     const trips = rowData[tripsHeader] || '0';
-                     
-                     dataForImport.push({
-                        date: isFirstEntryForDate ? formattedDate : '',
-                        km: isFirstEntryForDate ? km : '',
-                        hours: isFirstEntryForDate ? hours : '',
-                        earnings_category: header,
-                        earnings_trips: trips,
-                        earnings_amount: amount.toString(),
-                        fuel_type: '', fuel_paid: '', fuel_price: '',
-                        maintenance_description: '', maintenance_amount: ''
-                    });
-                    isFirstEntryForDate = false;
-                }
+            const amount = parseFloat(amountRaw.replace(/[^0-9,.]/g, '').replace(',', '.') || '0').toString();
+            
+            // É um ganho?
+            const isEarning = !knownDataColumns.concat(knownKmColumns, knownHoursColumns, knownFuelTypes).some(kw => header.includes(kw)) && !header.includes('viagens') && !header.includes('valor por');
+            
+            if (isEarning) {
+                 const tripsHeader = headers[index + 1];
+                 const trips = (tripsHeader && tripsHeader.includes('viagens')) ? (rowData[tripsHeader] || '0') : '0';
+                 entriesForThisDay.push({
+                    date: '', km: '', hours: '',
+                    earnings_category: header,
+                    earnings_trips: trips,
+                    earnings_amount: amount,
+                    fuel_type: '', fuel_paid: '', fuel_price: '',
+                    maintenance_description: '', maintenance_amount: ''
+                });
             }
-        }
 
-        // 3. Processar Combustíveis
-        for (const header of headers) {
-             const amountRaw = rowData[header];
-             const amount = parseFloat(amountRaw?.replace(/[^0-9,.]/g, '').replace(',', '.') || '0');
-
-            if (amount > 0) {
-                if (['gnv', 'etanol', 'gasolina'].some(kw => header.includes(kw))) {
-                     // Encontra a coluna de preço correspondente
-                    const priceHeader = headers.find(h => h.includes('valor por') && h.includes(header.split(' ')[0])) || '';
-                    const price = (rowData[priceHeader] || '0').replace(',', '.');
-
-                    dataForImport.push({
-                        date: isFirstEntryForDate ? formattedDate : '',
-                        km: isFirstEntryForDate ? km : '',
-                        hours: isFirstEntryForDate ? hours : '',
-                        earnings_category: '', earnings_trips: '', earnings_amount: '',
-                        fuel_type: header,
-                        fuel_paid: amount.toString(),
-                        fuel_price: price,
-                        maintenance_description: '', maintenance_amount: ''
-                    });
-                    isFirstEntryForDate = false;
-                }
+            // É um combustível?
+            const isFuel = knownFuelTypes.some(ft => header.includes(ft));
+            if (isFuel) {
+                const priceHeader = headers.find(h => h.includes('valor por') && knownFuelTypes.some(ft => h.includes(ft) && header.includes(ft)));
+                const price = priceHeader ? (rowData[priceHeader] || '0').replace(',', '.') : '0';
+                 entriesForThisDay.push({
+                    date: '', km: '', hours: '',
+                    earnings_category: '', earnings_trips: '', earnings_amount: '',
+                    fuel_type: header,
+                    fuel_paid: amount,
+                    fuel_price: price,
+                    maintenance_description: '', maintenance_amount: ''
+                });
             }
+        });
+        
+        // Atribui os dados do dia (data, km, horas) à primeira entrada
+        if(entriesForThisDay.length > 0) {
+            entriesForThisDay[0].date = formattedDate;
+            entriesForThisDay[0].km = km;
+            entriesForThisDay[0].hours = hours;
+            dataForImport.push(...entriesForThisDay);
+        } else if (parseFloat(km) > 0 || parseFloat(hours) > 0) {
+            // Adiciona a linha mesmo que não tenha ganhos ou abastecimentos
+            dataForImport.push({
+                date: formattedDate, km, hours,
+                earnings_category: '', earnings_trips: '', earnings_amount: '',
+                fuel_type: '', fuel_paid: '', fuel_price: '',
+                maintenance_description: '', maintenance_amount: ''
+            });
         }
     }
-
     return dataForImport;
 }
+
+const promptToCopy = `Você é um especialista em processamento de dados e sua tarefa é transformar um CSV de um formato "largo" para um formato "longo", seguindo regras específicas.
+
+**Formato do CSV de Entrada (exemplo):**
+O CSV de entrada tem uma linha por data. As colunas de ganhos e gastos são separadas por categoria. Por exemplo:
+- **Ganhos:** Colunas como "99 Pop", "Ubex", "Particular", cada uma seguida por uma coluna "Viagens".
+- **Gastos:** Colunas como "GNV", "Etanol", cada uma com uma coluna de preço ao lado ("Valor por M3" ou "valor por litro").
+- **Outros Dados:** Colunas "Kms Percorridos" e "Horas Trabalhadas".
+
+**Formato do CSV de Saída (REQUERIDO):**
+O resultado final DEVE SER um CSV com os seguintes cabeçalhos, nesta ordem exata:
+\`date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount\`
+
+**Regras de Transformação:**
+1.  **Estrutura "Longa":** Para cada linha do CSV de entrada, você criará múltiplas linhas no CSV de saída. Uma linha para cada registro de ganho e uma para cada registro de abastecimento.
+2.  **Agrupamento por Data:** As colunas \`date\`, \`km\`, e \`hours\` só devem aparecer na primeira linha de um determinado dia. As linhas subsequentes para o mesmo dia devem ter essas colunas em branco.
+3.  **Processamento de Ganhos:** Para cada coluna de ganho (ex: "99 Pop", "Ubex") que tiver um valor, crie uma nova linha:
+    *   \`earnings_category\`: O nome da categoria (ex: "99 Pop").
+    *   \`earnings_trips\`: O valor da coluna "Viagens" adjacente. Se não houver, use \`0\`.
+    *   \`earnings_amount\`: O valor do ganho.
+4.  **Processamento de Combustível:** Para cada coluna de combustível (ex: "GNV", "Etanol") que tiver um valor, crie uma nova linha:
+    *   \`fuel_type\`: O nome do combustível (ex: "GNV").
+    *   \`fuel_paid\`: O valor total pago pelo abastecimento.
+    *   \`fuel_price\`: O preço por litro/m³, encontrado na coluna adjacente.
+5.  **Conversão de Dados:**
+    *   **Data:** Converta de \`DD/MM/YY\` para \`YYYY-MM-DD\`.
+    *   **Horas:** Converta o formato \`HH:MM:SS\` ou \`HH:MM\` para um número decimal (ex: \`4:30:00\` se torna \`4.5\`).
+    *   **Valores Numéricos:** Remova símbolos de moeda e use ponto (\`.\`) como separador decimal.
+6.  **Colunas de Manutenção:** As colunas \`maintenance_description\` e \`maintenance_amount\` devem ser deixadas em branco, pois não existem no CSV de entrada.
+
+**Exemplo de Transformação:**
+Se a entrada for:
+\`Data,99 Pop,Viagens,Etanol,valor por litro,Kms Percorridos,Horas Trabalhadas\`
+\`01/01/25,111.51,12,50,5.09,72.2,4:30:00\`
+
+A saída deve ser:
+\`date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount\`
+\`2025-01-01,72.2,4.5,99 Pop,12,111.51,,,,,,\`
+\`,,,,,,Etanol,50,5.09,,\`
+
+Agora, processe o seguinte CSV e gere a saída formatada:
+`;
 
 
 export function ImportCard() {
@@ -143,6 +189,23 @@ export function ImportCard() {
             setFileName('');
         }
     };
+    
+    const handleCopyPrompt = () => {
+        navigator.clipboard.writeText(promptToCopy)
+            .then(() => {
+                toast({
+                    title: "Prompt Copiado!",
+                    description: "Cole em uma IA junto com seu CSV para formatá-lo.",
+                });
+            })
+            .catch(err => {
+                toast({
+                    title: "Erro ao copiar",
+                    description: "Não foi possível copiar o prompt.",
+                    variant: "destructive"
+                });
+            });
+    }
 
     const handleFileImport = async () => {
         if (!fileInputRef.current?.files?.length) {
@@ -172,14 +235,12 @@ export function ImportCard() {
                     description: "Analisando e formatando seu arquivo. Isso pode levar um momento.",
                 });
 
-                // ETAPA 1: Processar o CSV manualmente
                 const processedData = processManualCsv(rawCsvText);
                 
                 if (processedData.length === 0) {
                     throw new Error("Nenhum dado válido encontrado na planilha. Verifique o formato e os cabeçalhos.");
                 }
 
-                // ETAPA 2: Importar os dados estruturados
                 const result = await addMultipleWorkDays(processedData);
                 
                 if (result.success) {
@@ -206,7 +267,7 @@ export function ImportCard() {
             }
         };
 
-        reader.readAsText(file, 'ISO-8859-1'); // Use um encoding comum para arquivos CSV do Excel
+        reader.readAsText(file, 'ISO-8859-1'); 
     };
 
     return (
@@ -265,6 +326,10 @@ export function ImportCard() {
                              **Datas:** Formato `DD/MM/YY` ou `DD/MM/YYYY`.
                            </li>
                       </ul>
+                       <Button onClick={handleCopyPrompt} variant="ghost" className="mt-4 w-full">
+                            <Copy className="mr-2 h-4 w-4" />
+                            Copiar Prompt para IA (Formatação Externa)
+                        </Button>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -287,3 +352,4 @@ export function ImportCard() {
         </Card>
     );
 }
+
