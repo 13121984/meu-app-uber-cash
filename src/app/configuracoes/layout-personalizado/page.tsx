@@ -19,9 +19,9 @@ export default async function LayoutPersonalizadoPage() {
         <div>
           <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
             <LayoutDashboard className="w-8 h-8 text-primary" />
-            Personalizar Relatórios
+            Personalizar Layout
           </h1>
-           <p className="text-muted-foreground">Arraste os cards para reordenar como eles aparecem na página de Relatórios.</p>
+           <p className="text-muted-foreground">Arraste os cards para reordenar como eles aparecem na sua tela.</p>
         </div>
       </div>
       
