@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Check, Copy, Crown, Lock, PartyPopper, Sparkles, Star } from 'lucide-react';
+import { Check, Copy, Crown, PartyPopper, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
