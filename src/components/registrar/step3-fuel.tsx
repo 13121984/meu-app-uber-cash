@@ -2,7 +2,7 @@
 "use client";
 
 import { Dispatch, useCallback } from 'react';
-import { PlusCircle, Trash2, Fuel, DollarSign, Wrench } from 'lucide-react';
+import { PlusCircle, Trash2, Fuel, DollarSign, Wrench, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { FuelEntry, MaintenanceEntry, State } from './registration-wizard';
 import { Separator } from '../ui/separator';
 import { Textarea } from '../ui/textarea';
+import { useAuth } from '@/contexts/auth-context';
 
 
 type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
@@ -23,6 +24,10 @@ interface Step3FuelProps {
 }
 
 export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
+  const { user } = useAuth();
+  const isPremium = user?.isPremium || false;
+
+  const availableFuelTypes = isPremium ? fuelTypes : ["Combustível"];
 
   const handleFuelEntriesChange = useCallback((newEntries: FuelEntry[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'fuelEntries', value: newEntries } });
@@ -33,7 +38,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
   }, [dispatch]);
 
   const handleAddFuelEntry = () => {
-    const defaultFuelType = fuelTypes.length > 0 ? fuelTypes[0] : '';
+    const defaultFuelType = availableFuelTypes.length > 0 ? availableFuelTypes[0] : '';
     const newEntry: FuelEntry = { id: Date.now(), type: defaultFuelType, paid: 0, price: 0 };
     handleFuelEntriesChange([...data.fuelEntries, newEntry]);
   };
@@ -89,12 +94,23 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                 <Fuel className="h-6 w-6 text-red-600"/>
                 <span>Abastecimentos</span>
             </h2>
-            <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline" disabled={fuelTypes.length === 0}>
+            <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline" disabled={availableFuelTypes.length === 0}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
             </Button>
         </div>
+
+        {!isPremium && (
+             <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-4 text-center">
+                    <p className="text-sm font-semibold text-primary">
+                        <Lock className="inline-block h-4 w-4 mr-2"/>
+                        Assine o Premium para categorizar seus combustíveis (GNV, Etanol, Gasolina) e otimizar sua eficiência.
+                    </p>
+                </CardContent>
+            </Card>
+        )}
         
-        {fuelTypes.length === 0 ? (
+        {availableFuelTypes.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">Nenhum tipo de combustível ativo. Adicione ou ative um em Configurações &gt; Gerenciar Catálogos.</p>
         ) : data.fuelEntries.length === 0 && (
             <p className="text-muted-foreground text-center py-4">Clique em "Adicionar" se abasteceu hoje.</p>
@@ -114,12 +130,13 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                         <Select
                         value={entry.type}
                         onValueChange={(value) => handleFuelChange(entry.id, 'type', value)}
+                        disabled={!isPremium}
                         >
                         <SelectTrigger id={`fuel-type-${index}`}>
                             <SelectValue placeholder="Selecione..." />
                         </SelectTrigger>
                         <SelectContent>
-                            {fuelTypes.map((type) => (
+                            {availableFuelTypes.map((type) => (
                             <SelectItem key={type} value={type}>{type}</SelectItem>
                             ))}
                         </SelectContent>

@@ -8,5 +8,10 @@
     "id": "Teste 1",
     "passwordHash": "hashed_123456",
     "isPremium": false
+  },
+  {
+    "id": "Teste 2",
+    "passwordHash": "hashed_123456",
+    "isPremium": false
   }
 ]

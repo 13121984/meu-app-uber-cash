@@ -24,7 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
@@ -35,8 +35,13 @@ export default function LoginPage() {
     setIsSubmitting(true);
     const result = await login(data.userId, data.password);
     
-    if (result.success) {
-      router.push('/');
+    if (result.success && result.user) {
+      // Verifica se o usuário tem veículos cadastrados
+      if (result.user.vehicles.length === 0) {
+        router.push('/configuracoes?setup=true'); // Redireciona para o setup inicial
+      } else {
+        router.push('/');
+      }
       router.refresh();
     } else {
       toast({

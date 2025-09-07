@@ -2,13 +2,14 @@
 "use client";
 
 import { Dispatch } from 'react';
-import { PlusCircle, Trash2, Car, DollarSign, CircleDollarSign } from 'lucide-react';
+import { PlusCircle, Trash2, Car, DollarSign, CircleDollarSign, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Earning, State } from './registration-wizard';
+import { useAuth } from '@/contexts/auth-context';
 
 type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
 
@@ -19,13 +20,17 @@ interface Step2EarningsProps {
 }
 
 export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps) {
+  const { user } = useAuth();
+  const isPremium = user?.isPremium || false;
+
+  const earningCategories = isPremium ? categories : ["Aplicativo"];
+  
   const handleEarningsChange = (newEarnings: Earning[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: newEarnings } });
   };
 
   const handleAddEarning = () => {
-    // Adiciona a primeira categoria ativa como padrão, ou a primeira da lista se nenhuma estiver ativa.
-    const defaultCategory = categories.length > 0 ? categories[0] : '';
+    const defaultCategory = earningCategories.length > 0 ? earningCategories[0] : '';
     const newEarning: Earning = { id: Date.now(), category: defaultCategory, trips: 0, amount: 0 };
     handleEarningsChange([...data.earnings, newEarning]);
   };
@@ -55,12 +60,23 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
             <CircleDollarSign className="h-6 w-6 text-green-600"/>
             <span>Ganhos do Dia</span>
         </h2>
-        <Button size="sm" onClick={handleAddEarning} type="button" disabled={categories.length === 0}>
+        <Button size="sm" onClick={handleAddEarning} type="button" disabled={earningCategories.length === 0}>
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Ganho
         </Button>
       </div>
 
-      {categories.length === 0 ? (
+      {!isPremium && (
+        <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-4 text-center">
+                <p className="text-sm font-semibold text-primary">
+                    <Lock className="inline-block h-4 w-4 mr-2"/>
+                    Assine o Premium para categorizar seus ganhos (Uber, 99, Particular) e obter relatórios detalhados.
+                </p>
+            </CardContent>
+        </Card>
+      )}
+
+      {earningCategories.length === 0 ? (
         <p className="text-muted-foreground text-center py-4">Nenhuma categoria de ganho ativa. Adicione ou ative uma em Configurações &gt; Gerenciar Catálogos.</p>
       ) : data.earnings.length === 0 && (
         <p className="text-muted-foreground text-center py-4">Clique em "Adicionar Ganho" para começar.</p>
@@ -76,12 +92,13 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
                   <Select
                     value={earning.category}
                     onValueChange={(value) => handleEarningChange(earning.id, 'category', value)}
+                    disabled={!isPremium}
                   >
                     <SelectTrigger id={`category-${index}`}>
                       <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
+                      {earningCategories.map((cat) => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
                     </SelectContent>

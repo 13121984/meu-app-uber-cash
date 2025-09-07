@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { HomeClient } from '@/components/inicio/home-client';
+import { VehicleSetup } from '@/components/configuracoes/vehicle-setup';
 
-export default function InicioPage() {
+
+export default function PageRouter() {
     const { user, loading } = useAuth();
     const router = useRouter();
 
@@ -24,6 +26,12 @@ export default function InicioPage() {
             </div>
         );
     }
+
+    // Se o usuário está logado mas não tem veículo, mostra o setup do veículo
+    if (user && user.vehicles.length === 0) {
+        return <VehicleSetup />;
+    }
     
+    // Se tudo estiver ok, mostra a página inicial
     return <HomeClient />;
 }

@@ -1,10 +1,9 @@
-import { Settings, BookCopy } from 'lucide-react';
+
+import { Settings, Car, Palette, Trash2, User } from 'lucide-react';
 import { ConfiguracoesClient } from '@/components/configuracoes/configuracoes-client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 export default async function ConfiguracoesPage() {
+  
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -13,7 +12,7 @@ export default async function ConfiguracoesPage() {
                 <Settings className="w-8 h-8 text-primary" />
                 Configurações
             </h1>
-            <p className="text-muted-foreground">Ajuste as preferências e catálogos do aplicativo.</p>
+            <p className="text-muted-foreground">Ajuste as preferências, gerencie seus veículos e dados do aplicativo.</p>
         </div>
       </div>
       

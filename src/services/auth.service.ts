@@ -4,17 +4,41 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-// In a real application, passwords should NEVER be stored in plain text.
-// We would use libraries like 'bcrypt' to hash passwords.
-// For this project, we'll keep it simple but be aware of the vulnerability.
+// --- Tipos e Interfaces ---
 
-export interface User {
-  id: string;
-  passwordHash: string; // We will store a simple "hash" (id + password)
-  isPremium?: boolean;
+export interface SecurityAnswer {
+  question: string;
+  answer: string;
 }
 
+export interface Vehicle {
+  id: string;
+  brand: string;
+  model: string;
+  color: string;
+  plate?: string; // Placa é opcional, diferencial para premium
+}
+
+export interface UserPreferences {
+    reportChartOrder: string[];
+    dashboardCardOrder: string[];
+    lastFreebieChangeDate?: string; // Data da última troca de card/gráfico gratuito
+}
+
+export interface User {
+  id: string; // Nome de usuário
+  passwordHash: string; 
+  isPremium: boolean;
+  securityAnswers: SecurityAnswer[];
+  vehicles: Vehicle[];
+  preferences: UserPreferences;
+}
+
+// --- Caminho do Arquivo ---
+
 const usersFilePath = path.join(process.cwd(), 'data', 'users.json');
+
+// --- Funções de Leitura/Escrita ---
 
 async function getUsers(): Promise<User[]> {
   try {
@@ -22,7 +46,6 @@ async function getUsers(): Promise<User[]> {
     const fileContent = await fs.readFile(usersFilePath, 'utf8');
     return JSON.parse(fileContent);
   } catch {
-    // If the file doesn't exist, create it with an empty array
     await fs.mkdir(path.dirname(usersFilePath), { recursive: true });
     await fs.writeFile(usersFilePath, JSON.stringify([], null, 2), 'utf8');
     return [];
@@ -34,22 +57,35 @@ async function saveUsers(users: User[]): Promise<void> {
     await fs.writeFile(usersFilePath, JSON.stringify(users, null, 2), 'utf8');
 }
 
-// Simulates a simple "hash". DO NOT USE IN PRODUCTION.
+// --- Funções Auxiliares de Criptografia (Simulada) ---
+
 const createHash = (password: string) => `hashed_${password}`;
 const verifyPassword = (password: string, hash: string) => createHash(password) === hash;
 
+// --- Funções de Serviço ---
 
-export async function signup(userId: string, password: string): Promise<{ success: boolean, error?: string }> {
+export async function signup(userId: string, password: string, securityAnswers: SecurityAnswer[]): Promise<{ success: boolean, error?: string }> {
     const users = await getUsers();
 
     if (users.find(u => u.id.toLowerCase() === userId.toLowerCase())) {
         return { success: false, error: 'Este nome de usuário já está em uso.' };
     }
+    
+    if (securityAnswers.length < 2 || !securityAnswers[0].question || !securityAnswers[0].answer || !securityAnswers[1].question || !securityAnswers[1].answer) {
+        return { success: false, error: 'É necessário fornecer duas perguntas e respostas de segurança.' };
+    }
 
     const newUser: User = {
         id: userId,
         passwordHash: createHash(password),
-        isPremium: false, // Every new user starts as non-premium
+        isPremium: false, // Todo novo usuário começa como não-premium
+        securityAnswers,
+        vehicles: [],
+        preferences: { // Preferências padrão
+            reportChartOrder: ['profitEvolution', 'earningsComposition', 'profitabilityAnalysis', 'earningsByCategory', 'tripsByCategory', 'dailyTrips', 'fuelExpenses'],
+            dashboardCardOrder: [],
+            lastFreebieChangeDate: undefined,
+        },
     };
 
     users.push(newUser);
@@ -58,7 +94,7 @@ export async function signup(userId: string, password: string): Promise<{ succes
     return { success: true };
 }
 
-export async function login(userId: string, password: string): Promise<{ success: boolean; user?: Omit<User, 'passwordHash'>, error?: string }> {
+export async function login(userId: string, password: string): Promise<{ success: boolean; user?: User, error?: string }> {
     const users = await getUsers();
     const user = users.find(u => u.id.toLowerCase() === userId.toLowerCase());
 
@@ -71,7 +107,103 @@ export async function login(userId: string, password: string): Promise<{ success
     if (!isPasswordCorrect) {
         return { success: false, error: 'Usuário ou senha inválidos.' };
     }
+    
+    // Retorna o objeto de usuário completo no login
+    return { success: true, user: user };
+}
 
-    const { passwordHash, ...userToReturn } = user;
-    return { success: true, user: userToReturn };
+
+export async function getUserById(userId: string): Promise<User | null> {
+    const users = await getUsers();
+    return users.find(u => u.id.toLowerCase() === userId.toLowerCase()) || null;
+}
+
+export async function updateUser(userId: string, updatedData: Partial<User>): Promise<{ success: boolean, user?: User, error?: string }> {
+    const users = await getUsers();
+    const userIndex = users.findIndex(u => u.id.toLowerCase() === userId.toLowerCase());
+
+    if (userIndex === -1) {
+        return { success: false, error: 'Usuário não encontrado.' };
+    }
+
+    users[userIndex] = { ...users[userIndex], ...updatedData };
+    await saveUsers(users);
+
+    return { success: true, user: users[userIndex] };
+}
+
+
+// --- Funções de Recuperação de Senha ---
+
+export async function getUserSecurityQuestions(userId: string): Promise<{ success: boolean, questions?: string[], error?: string }> {
+    const user = await getUserById(userId);
+    if (!user || !user.securityAnswers || user.securityAnswers.length < 2) {
+        return { success: false, error: 'Usuário não encontrado ou sem perguntas de segurança.' };
+    }
+    return { success: true, questions: user.securityAnswers.map(sa => sa.question) };
+}
+
+export async function verifySecurityAnswers(userId: string, answers: string[]): Promise<{ success: boolean, error?: string }> {
+    const user = await getUserById(userId);
+    if (!user) return { success: false, error: 'Usuário não encontrado.' };
+    
+    const storedAnswers = user.securityAnswers.map(sa => sa.answer.toLowerCase().trim());
+    const providedAnswers = answers.map(a => a.toLowerCase().trim());
+
+    if (storedAnswers.length !== providedAnswers.length || !storedAnswers.every((val, index) => val === providedAnswers[index])) {
+        return { success: false, error: 'Uma ou mais respostas estão incorretas.' };
+    }
+    
+    return { success: true };
+}
+
+export async function resetPassword(userId: string, newPassword: string): Promise<{ success: boolean, error?: string }> {
+    const users = await getUsers();
+    const userIndex = users.findIndex(u => u.id.toLowerCase() === userId.toLowerCase());
+    
+    if (userIndex === -1) {
+        return { success: false, error: 'Usuário não encontrado.' };
+    }
+
+    users[userIndex].passwordHash = createHash(newPassword);
+    await saveUsers(users);
+
+    return { success: true };
+}
+
+// --- Funções de Gerenciamento de Veículo ---
+
+export async function addVehicle(userId: string, vehicle: Omit<Vehicle, 'id'>): Promise<{ success: boolean; user?: User; error?: string }> {
+    const user = await getUserById(userId);
+    if (!user) return { success: false, error: "Usuário não encontrado." };
+
+    if (!user.isPremium && user.vehicles.length >= 1) {
+        return { success: false, error: "Usuários gratuitos podem cadastrar apenas um veículo." };
+    }
+
+    const newVehicle: Vehicle = {
+        ...vehicle,
+        id: Date.now().toString(),
+    };
+
+    const updatedUser = {
+        ...user,
+        vehicles: [...user.vehicles, newVehicle]
+    };
+    
+    return await updateUser(userId, updatedUser);
+}
+
+export async function deleteVehicle(userId: string, vehicleId: string): Promise<{ success: boolean; user?: User; error?: string }> {
+    const user = await getUserById(userId);
+    if (!user) return { success: false, error: "Usuário não encontrado." };
+
+    const updatedVehicles = user.vehicles.filter(v => v.id !== vehicleId);
+
+     const updatedUser = {
+        ...user,
+        vehicles: updatedVehicles
+    };
+    
+    return await updateUser(userId, updatedUser);
 }

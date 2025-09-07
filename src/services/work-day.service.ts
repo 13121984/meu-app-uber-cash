@@ -3,23 +3,19 @@
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isSameDay } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import { getMaintenanceRecords, Maintenance } from './maintenance.service';
 import fs from 'fs/promises';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
 import { updateAllSummaries } from './summary.service';
+import demoData from '../../data/work-days.json'; // Importa os dados de demonstração
+
+// --- Tipos e Interfaces ---
 
 export type Earning = { id: number; category: string; trips: number; amount: number };
 export type FuelEntry = { id:number; type: string; paid: number; price: number };
-
-export type TimeEntry = {
-    id: number;
-    start: string;
-    end:string;
-}
-
+export type TimeEntry = { id: number; start: string; end:string; };
 export interface WorkDay {
-  id: string; // ID is now mandatory
+  id: string;
   date: Date;
   km: number;
   hours: number;
@@ -28,7 +24,6 @@ export interface WorkDay {
   fuelEntries: FuelEntry[];
   maintenanceEntries: { id: number, description: string, amount: number }[];
 }
-
 export interface GroupedWorkDay {
   date: Date;
   totalProfit: number;
@@ -36,7 +31,6 @@ export interface GroupedWorkDay {
   totalKm: number;
   entries: WorkDay[];
 }
-
 export interface ImportedWorkDay {
     date: string;
     km: string;
@@ -53,11 +47,12 @@ export interface ImportedWorkDay {
 
 const workDaysFilePath = path.join(process.cwd(), 'data', 'work-days.json');
 
+// --- Funções de Leitura/Escrita ---
+
 async function readWorkDays(): Promise<WorkDay[]> {
   try {
     await fs.access(workDaysFilePath);
     const fileContent = await fs.readFile(workDaysFilePath, 'utf8');
-    // Important: Re-hydrate dates using parseISO to handle timezone correctly
     return (JSON.parse(fileContent) as any[]).map(day => ({
         ...day,
         date: parseISO(day.date),
@@ -65,7 +60,7 @@ async function readWorkDays(): Promise<WorkDay[]> {
     }));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        await writeWorkDays([]); // Create the file if it doesn't exist
+        await writeWorkDays([]);
         return [];
     }
     console.error("Failed to read work-days.json", error);
@@ -79,6 +74,11 @@ async function writeWorkDays(data: WorkDay[]): Promise<void> {
     await fs.writeFile(workDaysFilePath, JSON.stringify(sortedData, null, 2), 'utf8');
 }
 
+const revalidateAll = () => {
+    revalidatePath('/', 'layout');
+};
+
+// --- Funções CRUD ---
 
 export async function addOrUpdateWorkDay(data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
   try {
@@ -110,7 +110,6 @@ export async function addOrUpdateWorkDay(data: WorkDay): Promise<{ success: bool
     return { success: false, error: errorMessage, operation: 'created' };
   }
 }
-
 
 export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     try {
@@ -182,7 +181,6 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     }
 }
 
-
 export async function deleteWorkDayEntry(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     let allWorkDays = await readWorkDays();
@@ -232,9 +230,34 @@ export async function deleteWorkDaysByFilter(filters: { query?: string, from?: s
     }
 }
 
-const revalidateAll = () => {
-    revalidatePath('/', 'layout');
+// --- Funções de Gerenciamento de Dados ---
+
+export async function loadDemoData(): Promise<{ success: boolean; error?: string }> {
+    try {
+        // Carrega os dados de demonstração do arquivo JSON importado
+        await writeWorkDays(demoData as unknown as WorkDay[]);
+        await updateAllSummaries();
+        revalidateAll();
+        return { success: true };
+    } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : "Failed to load demo data.";
+        return { success: false, error: errorMessage };
+    }
 }
+
+export async function clearAllData(): Promise<{ success: boolean; error?: string }> {
+     try {
+        await writeWorkDays([]);
+        await updateAllSummaries();
+        revalidateAll();
+        return { success: true };
+    } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : "Failed to clear data.";
+        return { success: false, error: errorMessage };
+    }
+}
+
+// --- Funções de Leitura ---
 
 export async function getWorkDays(): Promise<WorkDay[]> {
     return await readWorkDays();
@@ -250,6 +273,8 @@ export async function getFilteredWorkDays(
 ): Promise<GroupedWorkDay[]> {
   const allWorkDays = await readWorkDays();
   let filteredEntries: WorkDay[] = [];
+
+  if (allWorkDays.length === 0) return [];
 
   const now = new Date();
   let interval: { start: Date; end: Date } | null = null;
