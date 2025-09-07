@@ -12,6 +12,8 @@ import dynamic from 'next/dynamic';
 import { getSummaryForPeriod, PeriodData, SummaryData } from "@/services/summary.service"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
+import { allStats, mandatoryCards } from '@/lib/dashboard-items';
+
 
 const EarningsPieChart = dynamic(() => import('./earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
@@ -65,38 +67,30 @@ export function DashboardClient() {
           )
       }
 
-      const allStats = [
-        { id: 'lucro', title: "Lucro Líquido", value: currentData.totalLucro, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
-        { id: 'ganho', title: "Ganhos Brutos", value: currentData.totalGanho, icon: DollarSign, isCurrency: true, iconBg: "bg-primary/20", iconColor: "text-primary" },
-        { id: 'combustivel', title: "Combustível", value: currentData.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
-        { id: 'viagens', title: "Viagens", value: currentData.totalViagens, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
-        { id: 'dias', title: "Dias Trabalhados", value: currentData.diasTrabalhados, icon: CalendarDays, iconBg: "bg-sky-500/20", iconColor: "text-sky-400" },
-        { id: 'mediaHoras', title: "Média de Horas/Dia", value: currentData.mediaHorasPorDia, icon: Hourglass, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
-        { id: 'mediaKm', title: "Média de KM/Dia", value: currentData.mediaKmPorDia, icon: Route, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
-        { id: 'ganhoHora', title: "Ganho/Hora", value: currentData.ganhoPorHora, isCurrency: true, icon: TrendingUp, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
-        { id: 'ganhoKm', title: "Ganho/KM", value: currentData.ganhoPorKm, isCurrency: true, icon: TrendingUp, iconBg: "bg-blue-500/20", iconColor: "text-blue-400", precision: 2 },
-        { id: 'eficiencia', title: "Eficiência Média", value: currentData.eficiencia, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
-        { id: 'kmRodados', title: "KM Rodados", value: currentData.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
-        { id: 'horasTrabalhadas', title: "Horas Trabalhadas", value: currentData.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 1 },
-      ];
+      // Determine the card order based on user preferences
+      const userCardOrder = user?.preferences?.dashboardCardOrder;
+      let orderedCardIds: string[] = [];
+      
+      if (userCardOrder && userCardOrder.length > 0) {
+        orderedCardIds = userCardOrder;
+      } else {
+         if (isPremium) {
+           orderedCardIds = allStats.map(s => s.id);
+         } else {
+           const optionalCard = allStats.find(s => !mandatoryCards.includes(s.id))!.id;
+           orderedCardIds = [...mandatoryCards, optionalCard];
+         }
+      }
+      
+      const cardsToShow = orderedCardIds.map(id => allStats.find(s => s.id === id)).filter(Boolean) as typeof allStats;
 
-      const mandatoryCards = ['lucro', 'ganho', 'combustivel'];
-      const freeUserOptionalCardId = user?.preferences.dashboardCardOrder?.[0] || 'viagens';
-      const freeUserCardIds = [...mandatoryCards, freeUserOptionalCardId];
-
-      const cardsToShow = isPremium 
-        ? allStats 
-        : allStats.filter(stat => freeUserCardIds.includes(stat.id));
 
       return (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {isPremium ? (
-                 cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} />)
-              ) : (
-                <>
-                  {allStats.filter(s => mandatoryCards.includes(s.id)).map(stat => <StatsCard key={stat.id} {...stat} />)}
-                  <Link href="/configuracoes/layout-personalizado" passHref>
+              {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} value={(currentData as any)[stat.id] ?? currentData.maintenance[stat.id as keyof typeof currentData.maintenance] ?? 0} />)}
+              {!isPremium && cardsToShow.length < 4 && (
+                   <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
                             <PlusCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
@@ -104,7 +98,6 @@ export function DashboardClient() {
                         </CardContent>
                       </Card>
                   </Link>
-                </>
               )}
           </div>
 

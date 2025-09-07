@@ -20,12 +20,12 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
 
   // If it's a preview, don't show the value. Otherwise, format it.
   const formattedValue = isPreview 
-    ? title // In preview, show the title in place of the value for clarity
+    ? title 
     : isValidNumber
       ? isCurrency
         ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
         : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
-      : "—";
+      : isCurrency ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : "—";
 
   const description = isPreview ? '' : title;
 
