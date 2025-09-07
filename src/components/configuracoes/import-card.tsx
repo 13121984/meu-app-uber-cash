@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from 'react';
@@ -6,71 +5,129 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen, Sparkles, Copy } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen, Sparkles } from 'lucide-react';
 import { addMultipleWorkDays, type ImportedWorkDay } from '@/services/work-day.service';
 import { useRouter } from 'next/navigation';
-import { runIntelligentImportAction } from '@/ai/flows/importer-flow';
+import { format, parse } from 'date-fns';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 
-
-// This remains the same, as it's the target format
-const CSV_HEADERS = [
+// Cabeçalhos que o app espera no final do processo.
+const TARGET_CSV_HEADERS = [
     'date', 'km', 'hours', 
     'earnings_category', 'earnings_trips', 'earnings_amount',
     'fuel_type', 'fuel_paid', 'fuel_price',
     'maintenance_description', 'maintenance_amount'
 ];
 
-const PROMPT_FOR_AI = `Você é um especialista em processamento de dados e sua tarefa é transformar um CSV de um formato "largo" para um formato "longo", seguindo regras específicas.
+// Função para converter o formato de tempo HH:mm:ss para horas decimais
+const timeToDecimal = (time: string): number => {
+    if (!time || !/^\d{1,2}:\d{2}(:\d{2})?$/.test(time)) return 0;
+    const parts = time.split(':').map(Number);
+    const hours = parts[0] || 0;
+    const minutes = parts[1] || 0;
+    const seconds = parts[2] || 0;
+    return hours + minutes / 60 + seconds / 3600;
+};
 
-**Formato do CSV de Entrada (exemplo):**
-O CSV de entrada tem uma linha por data. As colunas de ganhos e gastos são separadas por categoria. Por exemplo:
-- **Ganhos:** Colunas como "99 Pop", "Ubex", "Particular", cada uma seguida por uma coluna "Viagens".
-- **Gastos:** Colunas como "GNV", "Etanol", cada uma com uma coluna de preço ao lado ("Valor por M3" ou "valor por litro").
-- **Outros Dados:** Colunas "Kms Percorridos" e "Horas Trabalhadas".
+// Função para processar manualmente o CSV do usuário
+function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
+    const lines = rawCsvText.split(/\r?\n/).filter(line => line.trim() !== '');
+    if (lines.length < 2) throw new Error("O arquivo CSV está vazio ou contém apenas o cabeçalho.");
 
-**Formato do CSV de Saída (REQUERIDO):**
-O resultado final DEVE SER um CSV com os seguintes cabeçalhos, nesta ordem exata:
-\`date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount\`
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const rows = lines.slice(1);
 
-**Regras de Transformação:**
-1.  **Estrutura "Longa":** Para cada linha do CSV de entrada, você criará múltiplas linhas no CSV de saída. Uma linha para cada registro de ganho e uma para cada registro de abastecimento.
-2.  **Agrupamento por Data:** As colunas \`date\`, \`km\`, e \`hours\` só devem aparecer na primeira linha de um determinado dia. As linhas subsequentes para o mesmo dia devem ter essas colunas em branco.
-3.  **Processamento de Ganhos:** Para cada coluna de ganho (ex: "99 Pop", "Ubex") que tiver um valor, crie uma nova linha:
-    *   \`earnings_category\`: O nome da categoria (ex: "99 Pop").
-    *   \`earnings_trips\`: O valor da coluna "Viagens" adjacente. Se não houver, use \`0\`.
-    *   \`earnings_amount\`: O valor do ganho.
-4.  **Processamento de Combustível:** Para cada coluna de combustível (ex: "GNV", "Etanol") que tiver um valor, crie uma nova linha:
-    *   \`fuel_type\`: O nome do combustível (ex: "GNV").
-    *   \`fuel_paid\`: O valor total pago pelo abastecimento.
-    *   \`fuel_price\`: O preço por litro/m³, encontrado na coluna adjacente.
-5.  **Conversão de Dados:**
-    *   **Data:** Converta de \`DD/MM/YY\` para \`YYYY-MM-DD\`.
-    *   **Horas:** Converta o formato \`HH:MM:SS\` ou \`HH:MM\` para um número decimal (ex: \`4:30:00\` se torna \`4.5\`).
-    *   **Valores Numéricos:** Remova símbolos de moeda e use ponto (\`.\`) como separador decimal.
-6.  **Colunas de Manutenção:** As colunas \`maintenance_description\` e \`maintenance_amount\` devem ser deixadas em branco, pois não existem no CSV de entrada.
+    const dataForImport: ImportedWorkDay[] = [];
 
-**Exemplo de Transformação:**
-Se a entrada for:
-\`Data,99 Pop,Viagens,Etanol,valor por litro,Kms Percorridos,Horas Trabalhadas\`
-\`01/01/25,111.51,12,50,5.09,72.2,4:30:00\`
+    for (const row of rows) {
+        const values = row.split(',');
+        const rowData: { [key: string]: string } = {};
+        headers.forEach((header, index) => {
+            rowData[header] = values[index]?.trim();
+        });
 
-A saída deve ser:
-\`date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount\`
-\`2025-01-01,72.2,4.5,99 Pop,12,111.51,,,,,,\`
-\`"""""",,Etanol,50,5.09,,,\`
+        // 1. Extrair dados base (Data, KM, Horas)
+        const dateRaw = rowData['data'] || '';
+        let formattedDate = '';
+        try {
+            // Tenta parsear formatos como DD/MM/YY ou DD/MM/YYYY
+            const parsedDate = parse(dateRaw, 'dd/MM/yy', new Date());
+            if (isNaN(parsedDate.getTime())) throw new Error();
+            formattedDate = format(parsedDate, 'yyyy-MM-dd');
+        } catch (e) {
+            console.warn(`Data inválida encontrada: "${dateRaw}". Pulando linha.`);
+            continue; // Pula para a próxima linha se a data for inválida
+        }
 
-Agora, processe o seguinte CSV e gere a saída formatada:
+        const km = (rowData['kms percorridos'] || rowData['km'] || '0').replace(',', '.');
+        const hoursRaw = rowData['horas trabalhadas'] || rowData['hours'] || '0';
+        const hours = timeToDecimal(hoursRaw).toString();
+        
+        let isFirstEntryForDate = true;
 
-\`\`\`csv
-[COLE SEU CSV AQUI]
-\`\`\`
-`;
+        // 2. Processar Ganhos (iterar por todas as colunas)
+        for (const header of headers) {
+            if (header.includes('viagens') || header.includes('valor por')) continue; // Ignora colunas auxiliares
+
+            const amountRaw = rowData[header];
+            const amount = parseFloat(amountRaw?.replace(/[^0-9,.]/g, '').replace(',', '.') || '0');
+
+            if (amount > 0) {
+                 // Assumindo que a categoria de ganho não é uma dessas palavras-chave
+                if (!['data', 'kms percorridos', 'km', 'horas trabalhadas', 'gnv', 'etanol', 'gasolina'].some(kw => header.includes(kw))) {
+                     const tripsHeader = headers.find(h => h.startsWith(header) && h.includes('viagens')) || 'viagens';
+                     const trips = rowData[tripsHeader] || '0';
+                     
+                     dataForImport.push({
+                        date: isFirstEntryForDate ? formattedDate : '',
+                        km: isFirstEntryForDate ? km : '',
+                        hours: isFirstEntryForDate ? hours : '',
+                        earnings_category: header,
+                        earnings_trips: trips,
+                        earnings_amount: amount.toString(),
+                        fuel_type: '', fuel_paid: '', fuel_price: '',
+                        maintenance_description: '', maintenance_amount: ''
+                    });
+                    isFirstEntryForDate = false;
+                }
+            }
+        }
+
+        // 3. Processar Combustíveis
+        for (const header of headers) {
+             const amountRaw = rowData[header];
+             const amount = parseFloat(amountRaw?.replace(/[^0-9,.]/g, '').replace(',', '.') || '0');
+
+            if (amount > 0) {
+                if (['gnv', 'etanol', 'gasolina'].some(kw => header.includes(kw))) {
+                     // Encontra a coluna de preço correspondente
+                    const priceHeader = headers.find(h => h.includes('valor por') && h.includes(header.split(' ')[0])) || '';
+                    const price = (rowData[priceHeader] || '0').replace(',', '.');
+
+                    dataForImport.push({
+                        date: isFirstEntryForDate ? formattedDate : '',
+                        km: isFirstEntryForDate ? km : '',
+                        hours: isFirstEntryForDate ? hours : '',
+                        earnings_category: '', earnings_trips: '', earnings_amount: '',
+                        fuel_type: header,
+                        fuel_paid: amount.toString(),
+                        fuel_price: price,
+                        maintenance_description: '', maintenance_amount: ''
+                    });
+                    isFirstEntryForDate = false;
+                }
+            }
+        }
+    }
+
+    return dataForImport;
+}
+
 
 export function ImportCard() {
     const router = useRouter();
@@ -85,14 +142,6 @@ export function ImportCard() {
         } else {
             setFileName('');
         }
-    };
-
-    const handleCopyPrompt = () => {
-        navigator.clipboard.writeText(PROMPT_FOR_AI);
-        toast({
-            title: "Prompt Copiado!",
-            description: "O prompt foi copiado para sua área de transferência.",
-        });
     };
 
     const handleFileImport = async () => {
@@ -118,45 +167,25 @@ export function ImportCard() {
             }
 
             try {
-                // Step 1: Send the raw CSV to the AI for processing
                 toast({
                     title: "Processando Planilha...",
-                    description: "A IA está analisando e formatando seu arquivo. Isso pode levar um momento.",
+                    description: "Analisando e formatando seu arquivo. Isso pode levar um momento.",
                 });
 
-                const importResult = await runIntelligentImportAction({ csvContent: rawCsvText });
-                const processedCsv = importResult.processedCsv;
+                // ETAPA 1: Processar o CSV manualmente
+                const processedData = processManualCsv(rawCsvText);
                 
-                // Step 2: Parse the processed CSV from the AI
-                const lines = processedCsv.split(/\r?\n/).filter(line => line.trim() !== '');
-                if (lines.length < 2) {
-                    throw new Error("A IA não conseguiu processar o arquivo. Verifique o formato.");
+                if (processedData.length === 0) {
+                    throw new Error("Nenhum dado válido encontrado na planilha. Verifique o formato e os cabeçalhos.");
                 }
 
-                const header = lines[0].split(',').map(h => h.trim().toLowerCase());
-                const expectedHeader = CSV_HEADERS.map(h => h.toLowerCase());
-
-                if (JSON.stringify(header) !== JSON.stringify(expectedHeader)) {
-                     console.error("Cabeçalho esperado:", expectedHeader);
-                     console.error("Cabeçalho recebido da IA:", header);
-                    throw new Error("A IA retornou um formato de cabeçalho inesperado. A importação foi cancelada.");
-                }
-                
-                const data: Record<string, string>[] = lines.slice(1).map(line => {
-                    const values = line.split(',');
-                    return CSV_HEADERS.reduce((obj, nextKey, index) => {
-                        obj[nextKey] = values[index]?.trim() || '';
-                        return obj;
-                    }, {} as Record<string, string>);
-                });
-
-                // Step 3: Import the structured data
-                const result = await addMultipleWorkDays(data as ImportedWorkDay[]);
+                // ETAPA 2: Importar os dados estruturados
+                const result = await addMultipleWorkDays(processedData);
                 
                 if (result.success) {
                     toast({
                         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Importação Concluída!</span></div>,
-                        description: `${result.count} dias de trabalho foram importados com sucesso.`,
+                        description: `${result.count} registros de dias foram importados/atualizados com sucesso.`,
                     });
                     router.refresh();
                 } else {
@@ -177,7 +206,7 @@ export function ImportCard() {
             }
         };
 
-        reader.readAsText(file);
+        reader.readAsText(file, 'ISO-8859-1'); // Use um encoding comum para arquivos CSV do Excel
     };
 
     return (
@@ -185,10 +214,10 @@ export function ImportCard() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <Sparkles className="h-6 w-6 text-primary" />
-                    Importador Inteligente (CSV)
+                    Importador de Planilhas (CSV)
                 </CardTitle>
                 <CardDescription>
-                    Faça o upload do seu arquivo CSV. Se a importação automática falhar, copie o prompt abaixo e use uma IA externa para formatar seus dados.
+                    Faça o upload do seu arquivo CSV com seus registros. O sistema tentará organizar os dados para importação.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -213,24 +242,27 @@ export function ImportCard() {
                     <AccordionTrigger>
                         <div className="flex items-center gap-2">
                             <BookOpen className="h-4 w-4" />
-                            <span>Ver estrutura recomendada do arquivo</span>
+                            <span>Ver estrutura de arquivo recomendada</span>
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-md">
-                      <p className='mb-4'>O importador inteligente tentará entender sua planilha, mas seguir esta estrutura garante os melhores resultados.</p>
+                      <p className='mb-4'>O importador tentará entender sua planilha, mas usar estes nomes de coluna (em qualquer ordem) garante os melhores resultados.</p>
                       <ul className="space-y-2 list-disc pl-5">
                           <li>O arquivo deve estar no formato <strong>CSV</strong> (valores separados por vírgula).</li>
                           <li>A primeira linha do arquivo deve ser o <strong>cabeçalho</strong>.</li>
-                           <li>As colunas-chave que a IA procura são: 
+                           <li>Colunas-chave que o sistema procura: 
                             <code className="block bg-muted text-foreground p-2 rounded-md my-2 text-xs">
-                                Data, Kms Percorridos, Horas Trabalhadas, [Nome da Categoria de Ganho], Viagens, [Nome do Combustível], [Preço do Combustível]
+                                Data, Kms Percorridos, Horas Trabalhadas, [Nome da Categoria de Ganho], Viagens, [Nome do Combustível], [Valor por litro/m³]
                             </code>
                           </li>
                           <li>
-                            **Ganhos:** Colunas separadas para cada categoria (ex: "99Pop R$", "Uber R$").
+                            **Ganhos:** Colunas separadas para cada categoria (ex: "99 Pop", "Uber Cash").
                           </li>
                            <li>
                              **Valores Monetários:** Podem usar "R$" e vírgula como decimal (ex: `R$ 120,50`).
+                           </li>
+                           <li>
+                             **Datas:** Formato `DD/MM/YY` ou `DD/MM/YYYY`.
                            </li>
                       </ul>
                     </AccordionContent>
@@ -249,10 +281,6 @@ export function ImportCard() {
                                 Importar Arquivo
                             </>
                         )}
-                    </Button>
-                     <Button onClick={handleCopyPrompt} variant="secondary" className="w-full sm:w-auto">
-                        <Copy className="mr-2 h-4 w-4" />
-                        Copiar Prompt para IA
                     </Button>
                 </div>
             </CardContent>
