@@ -144,9 +144,16 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
                                 Habilitar Notificações de Manutenção
                                 {!isPremium && <Lock className="h-4 w-4 text-amber-500" />}
                             </Label>
-                            <p className="text-xs text-muted-foreground">
-                                {isPremium ? 'Funcionalidade em desenvolvimento.' : (<Link href="/premium" className="underline hover:text-primary">Exclusivo para assinantes Premium.</Link>)}
-                            </p>
+                             <div className="text-xs text-muted-foreground">
+                                {isPremium 
+                                    ? 'Funcionalidade em desenvolvimento.' 
+                                    : (
+                                        <Link href="/premium" className="underline hover:text-primary">
+                                            Exclusivo para assinantes Premium.
+                                        </Link>
+                                    )
+                                }
+                            </div>
                         </div>
                         <Controller 
                             name="maintenanceNotifications" 
