@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen, Sparkles } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen, Sparkles, Copy } from 'lucide-react';
 import { addMultipleWorkDays, type ImportedWorkDay } from '@/services/work-day.service';
 import { useRouter } from 'next/navigation';
 import { runIntelligentImportAction } from '@/ai/flows/importer-flow';
@@ -25,6 +26,52 @@ const CSV_HEADERS = [
     'maintenance_description', 'maintenance_amount'
 ];
 
+const PROMPT_FOR_AI = `Você é um especialista em processamento de dados e sua tarefa é transformar um CSV de um formato "largo" para um formato "longo", seguindo regras específicas.
+
+**Formato do CSV de Entrada (exemplo):**
+O CSV de entrada tem uma linha por data. As colunas de ganhos e gastos são separadas por categoria. Por exemplo:
+- **Ganhos:** Colunas como "99 Pop", "Ubex", "Particular", cada uma seguida por uma coluna "Viagens".
+- **Gastos:** Colunas como "GNV", "Etanol", cada uma com uma coluna de preço ao lado ("Valor por M3" ou "valor por litro").
+- **Outros Dados:** Colunas "Kms Percorridos" e "Horas Trabalhadas".
+
+**Formato do CSV de Saída (REQUERIDO):**
+O resultado final DEVE SER um CSV com os seguintes cabeçalhos, nesta ordem exata:
+\`date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount\`
+
+**Regras de Transformação:**
+1.  **Estrutura "Longa":** Para cada linha do CSV de entrada, você criará múltiplas linhas no CSV de saída. Uma linha para cada registro de ganho e uma para cada registro de abastecimento.
+2.  **Agrupamento por Data:** As colunas \`date\`, \`km\`, e \`hours\` só devem aparecer na primeira linha de um determinado dia. As linhas subsequentes para o mesmo dia devem ter essas colunas em branco.
+3.  **Processamento de Ganhos:** Para cada coluna de ganho (ex: "99 Pop", "Ubex") que tiver um valor, crie uma nova linha:
+    *   \`earnings_category\`: O nome da categoria (ex: "99 Pop").
+    *   \`earnings_trips\`: O valor da coluna "Viagens" adjacente. Se não houver, use \`0\`.
+    *   \`earnings_amount\`: O valor do ganho.
+4.  **Processamento de Combustível:** Para cada coluna de combustível (ex: "GNV", "Etanol") que tiver um valor, crie uma nova linha:
+    *   \`fuel_type\`: O nome do combustível (ex: "GNV").
+    *   \`fuel_paid\`: O valor total pago pelo abastecimento.
+    *   \`fuel_price\`: O preço por litro/m³, encontrado na coluna adjacente.
+5.  **Conversão de Dados:**
+    *   **Data:** Converta de \`DD/MM/YY\` para \`YYYY-MM-DD\`.
+    *   **Horas:** Converta o formato \`HH:MM:SS\` ou \`HH:MM\` para um número decimal (ex: \`4:30:00\` se torna \`4.5\`).
+    *   **Valores Numéricos:** Remova símbolos de moeda e use ponto (\`.\`) como separador decimal.
+6.  **Colunas de Manutenção:** As colunas \`maintenance_description\` e \`maintenance_amount\` devem ser deixadas em branco, pois não existem no CSV de entrada.
+
+**Exemplo de Transformação:**
+Se a entrada for:
+\`Data,99 Pop,Viagens,Etanol,valor por litro,Kms Percorridos,Horas Trabalhadas\`
+\`01/01/25,111.51,12,50,5.09,72.2,4:30:00\`
+
+A saída deve ser:
+\`date,km,hours,earnings_category,earnings_trips,earnings_amount,fuel_type,fuel_paid,fuel_price,maintenance_description,maintenance_amount\`
+\`2025-01-01,72.2,4.5,99 Pop,12,111.51,,,,,,\`
+\`"""""",,Etanol,50,5.09,,,\`
+
+Agora, processe o seguinte CSV e gere a saída formatada:
+
+\`\`\`csv
+[COLE SEU CSV AQUI]
+\`\`\`
+`;
+
 export function ImportCard() {
     const router = useRouter();
     const [isImporting, setIsImporting] = useState(false);
@@ -38,6 +85,14 @@ export function ImportCard() {
         } else {
             setFileName('');
         }
+    };
+
+    const handleCopyPrompt = () => {
+        navigator.clipboard.writeText(PROMPT_FOR_AI);
+        toast({
+            title: "Prompt Copiado!",
+            description: "O prompt foi copiado para sua área de transferência.",
+        });
     };
 
     const handleFileImport = async () => {
@@ -133,7 +188,7 @@ export function ImportCard() {
                     Importador Inteligente (CSV)
                 </CardTitle>
                 <CardDescription>
-                    Faça o upload do seu arquivo CSV. A IA irá analisá-lo e formatá-lo para importação, mesmo que as colunas estejam em ordens diferentes.
+                    Faça o upload do seu arquivo CSV. Se a importação automática falhar, copie o prompt abaixo e use uma IA externa para formatar seus dados.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -181,16 +236,25 @@ export function ImportCard() {
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
-                <Button onClick={handleFileImport} disabled={isImporting || !fileName} className="w-full">
-                    {isImporting ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Importando com IA...
-                        </>
-                    ) : (
-                        "Importar Arquivo"
-                    )}
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <Button onClick={handleFileImport} disabled={isImporting || !fileName} className="w-full flex-1">
+                        {isImporting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Importando...
+                            </>
+                        ) : (
+                            <>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Importar Arquivo
+                            </>
+                        )}
+                    </Button>
+                     <Button onClick={handleCopyPrompt} variant="secondary" className="w-full sm:w-auto">
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copiar Prompt para IA
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     );
