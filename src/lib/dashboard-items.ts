@@ -1,5 +1,5 @@
 
-import { DollarSign, Fuel, Car, CalendarDays, Hourglass, Route, TrendingUp, Zap, Map, Clock } from "lucide-react";
+import { DollarSign, Fuel, Car, CalendarDays, Hourglass, Route, TrendingUp, Zap, Map, Clock, PieChart, BarChart3, LineChart, CandlestickChart } from "lucide-react";
 
 export const allStats = [
     { id: 'lucro', title: "Lucro Líquido", value: 123.45, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400" },
@@ -17,3 +17,12 @@ export const allStats = [
 ];
 
 export const mandatoryCards = ['lucro', 'ganho', 'combustivel'];
+
+export const allCharts = [
+  { id: 'earningsComposition', title: "Composição de Ganhos", icon: PieChart },
+  { id: 'profitEvolution', title: "Evolução do Lucro", icon: LineChart },
+  { id: 'earningsByCategory', title: "Ganhos por Categoria", icon: BarChart3 },
+  { id: 'profitabilityAnalysis', title: "Análise de Rentabilidade", icon: CandlestickChart }
+];
+
+export const mandatoryCharts = ['earningsComposition'];

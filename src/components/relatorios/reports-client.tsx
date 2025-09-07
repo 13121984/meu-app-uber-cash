@@ -60,7 +60,12 @@ export function ReportsClient() {
           return userOrder && userOrder.length > 0 ? userOrder : allItems.map(i => i.id);
       }
       
-      const optionalItem = userOrder?.find(id => !mandatoryItems.includes(id)) || allItems.find(i => !mandatoryItems.includes(i.id))!.id;
+      const optionalItem = userOrder?.find(id => !mandatoryItems.includes(id)) || allItems.find(i => !mandatoryItems.includes(i.id))?.id;
+      if (!optionalItem) {
+          // Fallback if for some reason no optional item is found
+          return [...mandatoryItems];
+      }
+      
       const finalOrder = userOrder && userOrder.length === (mandatoryItems.length + 1) ? userOrder : [...mandatoryItems, optionalItem];
       return finalOrder;
   }
@@ -245,8 +250,7 @@ export function ReportsClient() {
                     <AccordionItem value="charts">
                         <AccordionTrigger className="text-lg font-semibold">Organizar Gráficos</AccordionTrigger>
                         <AccordionContent className="pt-4">
-                            <p className="text-muted-foreground text-sm mb-4">Em breve você poderá personalizar os gráficos também!</p>
-                             {/* {renderSection('charts')} */}
+                            {renderSection('charts')}
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
@@ -255,4 +259,3 @@ export function ReportsClient() {
     </div>
   );
 }
-
