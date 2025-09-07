@@ -3,7 +3,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from 'react';
-import { GripVertical, Lock, Info, Check, ArrowUp, ArrowDown } from 'lucide-react';
+import { GripVertical, Lock, Info, Check, ArrowUp, ArrowDown, PlusCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { Button } from "@/components/ui/button";
@@ -46,28 +46,31 @@ const DraggableCard = ({ id, title, children, onMove, isFirst, isLast }: { id: s
 export function ReportsClient() {
   const { user, refreshUser } = useAuth();
   const [isSaving, startSavingTransition] = useTransition();
-
-  const [cardOrder, setCardOrder] = useState<string[]>(
-    user?.preferences?.dashboardCardOrder || [...mandatoryCards, allStats.find(s => !mandatoryCards.includes(s.id))!.id]
-  );
   
+  const getInitialCardOrder = () => {
+      if (!user) return [];
+      const userOrder = user.preferences?.dashboardCardOrder;
+      if (user.isPremium) {
+          return userOrder && userOrder.length > 0 ? userOrder : allStats.map(s => s.id);
+      }
+      // Para usuário gratuito, garante que os 3 obrigatórios estejam lá + 1 opcional
+      const optionalCard = userOrder?.find(id => !mandatoryCards.includes(id)) || allStats.find(s => !mandatoryCards.includes(s.id))!.id;
+      return [...mandatoryCards, optionalCard];
+  }
+
+  const [cardOrder, setCardOrder] = useState<string[]>(getInitialCardOrder());
+
   const handleMoveCard = (cardId: string, direction: 'up' | 'down') => {
       const index = cardOrder.indexOf(cardId);
       if (index === -1) return;
 
       const newIndex = direction === 'up' ? index - 1 : index + 1;
       
-      // Prevent mandatory cards from being moved out of their block
-      const isMandatory = mandatoryCards.includes(cardId);
-      if (isMandatory && (newIndex < 0 || newIndex >= mandatoryCards.length)) {
-          return;
-      }
-      if(!isMandatory && (newIndex < mandatoryCards.length || newIndex >= cardOrder.length)) {
+      if (newIndex < 0 || newIndex >= cardOrder.length) {
           return;
       }
       
       const newOrder = [...cardOrder];
-      // Simple swap
       [newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]];
       setCardOrder(newOrder);
   };
@@ -87,34 +90,40 @@ export function ReportsClient() {
             }
         }
 
-        await updateUser(user.id, { 
-            ...user, 
+        const result = await updateUser(user.id, { 
             preferences: { 
                 ...user.preferences, 
                 dashboardCardOrder: cardOrder,
                 lastFreebieChangeDate: !user.isPremium ? new Date().toISOString() : user.preferences.lastFreebieChangeDate,
             }
         });
-        await refreshUser();
-        toast({
-            title: <div className="flex items-center gap-2"><Check className="h-5 w-5"/><span>Layout Salvo!</span></div>,
-            description: "Suas preferências de visualização foram salvas.",
-            variant: 'success'
-        });
+
+        if (result.success) {
+            await refreshUser();
+            toast({
+                title: <div className="flex items-center gap-2"><Check className="h-5 w-5"/><span>Layout Salvo!</span></div>,
+                description: "Suas preferências de visualização foram salvas.",
+                variant: 'success'
+            });
+        } else {
+             toast({
+                title: "Erro ao Salvar",
+                description: result.error,
+                variant: "destructive",
+            });
+        }
       }
     });
   }
 
   const handleSelectOptionalCard = (cardId: string) => {
     if (user?.isPremium) {
-        // Premium user toggles visibility
         if (cardOrder.includes(cardId)) {
             setCardOrder(cardOrder.filter(id => id !== cardId));
         } else {
             setCardOrder([...cardOrder, cardId]);
         }
     } else {
-        // Free user swaps the optional card
         const newOrder = [...mandatoryCards, cardId];
         setCardOrder(newOrder);
     }
@@ -124,8 +133,8 @@ export function ReportsClient() {
   if (!user) return <div className="flex justify-center items-center h-96"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
 
   const optionalCards = allStats.filter(stat => !mandatoryCards.includes(stat.id));
-  const visibleOptionalCards = cardOrder.filter(id => !mandatoryCards.includes(id));
-  const visibleMandatoryCards = cardOrder.filter(id => mandatoryCards.includes(id));
+  const visibleCards = cardOrder.map(id => allStats.find(s => s.id === id)).filter(Boolean) as typeof allStats;
+
 
   return (
     <div className="space-y-6">
@@ -152,36 +161,18 @@ export function ReportsClient() {
 
                 <h3 className="font-semibold mb-4">Cards Visíveis</h3>
                 <div className="space-y-4">
-                    {visibleMandatoryCards.map((id, index) => {
-                        const cardInfo = allStats.find(c => c.id === id);
-                        return cardInfo ? (
-                            <DraggableCard 
-                                key={id} 
-                                id={id}
-                                title={cardInfo.title}
-                                onMove={(dir) => handleMoveCard(id, dir)}
-                                isFirst={index === 0}
-                                isLast={index === visibleMandatoryCards.length - 1}
-                            >
-                                <StatsCard {...cardInfo} />
-                            </DraggableCard>
-                        ) : null
-                    })}
-                     {visibleOptionalCards.map((id, index) => {
-                        const cardInfo = allStats.find(c => c.id === id);
-                        return cardInfo ? (
-                             <DraggableCard 
-                                key={id} 
-                                id={id}
-                                title={cardInfo.title}
-                                onMove={(dir) => handleMoveCard(id, dir)}
-                                isFirst={index === 0}
-                                isLast={index === visibleOptionalCards.length - 1}
-                            >
-                                <StatsCard {...cardInfo} />
-                            </DraggableCard>
-                        ) : null
-                    })}
+                    {visibleCards.map((cardInfo, index) => (
+                        <DraggableCard 
+                            key={cardInfo.id} 
+                            id={cardInfo.id}
+                            title={cardInfo.title}
+                            onMove={(dir) => handleMoveCard(cardInfo.id, dir)}
+                            isFirst={index === 0}
+                            isLast={index === visibleCards.length - 1}
+                        >
+                            <StatsCard {...cardInfo} />
+                        </DraggableCard>
+                    ))}
                 </div>
 
                 <div className="mt-8">
@@ -193,13 +184,20 @@ export function ReportsClient() {
                         {optionalCards.map(card => {
                             const isVisible = cardOrder.includes(card.id);
                             return (
-                                <Card 
+                                 <Card 
                                     key={card.id} 
-                                    className={`relative p-2 border-2 cursor-pointer ${isVisible ? 'border-primary' : 'border-dashed hover:border-primary/50'}`}
-                                    onClick={() => handleSelectOptionalCard(card.id)}
+                                    className={`relative p-2 border-2 ${isVisible ? 'border-primary' : 'border-dashed'}`}
                                 >
-                                    {isVisible && user.isPremium && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1"><Check className="h-3 w-3"/></div>}
+                                    {user.isPremium && isVisible && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1"><Check className="h-3 w-3"/></div>}
                                     <StatsCard {...card} value={0} />
+                                     <Button 
+                                        variant={isVisible ? "secondary" : "default"}
+                                        size="sm"
+                                        className="w-full mt-2"
+                                        onClick={() => handleSelectOptionalCard(card.id)}
+                                     >
+                                         {user.isPremium ? (isVisible ? 'Ocultar' : 'Mostrar') : 'Substituir'}
+                                     </Button>
                                 </Card>
                             )
                         })}

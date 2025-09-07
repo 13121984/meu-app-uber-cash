@@ -29,6 +29,14 @@
       }
     ],
     "securityAnswers": [],
-    "preferences": {}
+    "preferences": {
+      "dashboardCardOrder": [
+        "lucro",
+        "ganho",
+        "combustivel",
+        "eficiencia"
+      ],
+      "lastFreebieChangeDate": "2025-09-07T16:47:16.592Z"
+    }
   }
 ]
