@@ -4,13 +4,13 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-// Em uma aplicação real, as senhas NUNCA devem ser armazenadas em texto plano.
-// Usaríamos bibliotecas como 'bcrypt' para criar um hash da senha.
-// Para este projeto, vamos manter a simplicidade, mas cientes da vulnerabilidade.
+// In a real application, passwords should NEVER be stored in plain text.
+// We would use libraries like 'bcrypt' to hash passwords.
+// For this project, we'll keep it simple but be aware of the vulnerability.
 
 export interface User {
   id: string;
-  passwordHash: string; // Armazenaremos um "hash" simples (id + senha)
+  passwordHash: string; // We will store a simple "hash" (id + password)
   isPremium?: boolean;
 }
 
@@ -22,6 +22,9 @@ async function getUsers(): Promise<User[]> {
     const fileContent = await fs.readFile(usersFilePath, 'utf8');
     return JSON.parse(fileContent);
   } catch {
+    // If the file doesn't exist, create it with an empty array
+    await fs.mkdir(path.dirname(usersFilePath), { recursive: true });
+    await fs.writeFile(usersFilePath, JSON.stringify([], null, 2), 'utf8');
     return [];
   }
 }
@@ -31,7 +34,7 @@ async function saveUsers(users: User[]): Promise<void> {
     await fs.writeFile(usersFilePath, JSON.stringify(users, null, 2), 'utf8');
 }
 
-// Simula um "hash" simples. NÃO USE EM PRODUÇÃO.
+// Simulates a simple "hash". DO NOT USE IN PRODUCTION.
 const createHash = (password: string) => `hashed_${password}`;
 const verifyPassword = (password: string, hash: string) => createHash(password) === hash;
 
@@ -46,7 +49,7 @@ export async function signup(userId: string, password: string): Promise<{ succes
     const newUser: User = {
         id: userId,
         passwordHash: createHash(password),
-        isPremium: false, // Todo novo usuário começa como não-premium
+        isPremium: false, // Every new user starts as non-premium
     };
 
     users.push(newUser);
