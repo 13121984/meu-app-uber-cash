@@ -39,7 +39,7 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
     const dataByDate = new Map<string, Partial<ImportedWorkDay>[]>();
     let lastDate = '';
     let lastKm = '';
-    let lastHours = '';
+    let lastHours = ''; // String from CSV
 
     const dateIndex = headers.indexOf('date');
     const kmIndex = headers.indexOf('km');
@@ -57,17 +57,18 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
         });
 
         let currentDate = '';
-        if (values[dateIndex]) {
+        if (values[dateIndex] && values[dateIndex].trim()) {
             try {
                 // Use a reference date to avoid timezone issues. We only care about the date part.
                 const referenceDate = new Date();
                 const parsedDate = parse(values[dateIndex], 'yyyy-MM-dd', referenceDate);
-                if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
+                if (isNaN(parsedDate.getTime())) throw new Error(`Data inválida: ${values[dateIndex]}`);
                 currentDate = format(parsedDate, 'yyyy-MM-dd');
                 lastDate = currentDate;
                 lastKm = values[kmIndex] || '0';
-                lastHours = values[hoursIndex] || '0';
+                lastHours = values[hoursIndex] || '0'; // Update lastHours here
             } catch (e) {
+                console.warn("Skipping row due to invalid date", e);
                 continue; 
             }
         } else {
@@ -82,7 +83,7 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
         
         const dataForThisDate = dataByDate.get(currentDate)!;
         
-        // Atribui a data, km e horas a cada linha de dados
+        // Atribui a data, km e horas (como string) a cada linha de dados
         const fullRowData = {
           ...rowData,
           date: currentDate,
@@ -98,11 +99,14 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
     for (const [date, entries] of dataByDate.entries()) {
         const firstEntry = entries[0];
         
+        // Converte a hora (string) para decimal (número) uma vez por dia
+        const hoursDecimal = timeToDecimal(firstEntry.hours!);
+
         for(const entry of entries) {
             finalDataForImport.push({
                 date: entry.date!,
                 km: firstEntry.km || '0',
-                hours: timeToDecimal(firstEntry.hours!).toString(), // Converte horas aqui
+                hours: hoursDecimal.toString(), // Usa o valor decimal convertido
                 earnings_category: entry.earnings_category || '',
                 earnings_trips: entry.earnings_trips || '',
                 earnings_amount: entry.earnings_amount || '',
