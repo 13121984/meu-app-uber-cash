@@ -91,16 +91,20 @@ export function DashboardClient() {
       return (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} />)}
-              {!isPremium && (
-                <Link href="/configuracoes/layout-personalizado" passHref>
-                  <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
-                    <CardContent className="p-0 text-center">
-                        <PlusCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
-                        <p className="text-sm font-semibold">Adicionar Card</p>
-                    </CardContent>
-                  </Card>
-                </Link>
+              {isPremium ? (
+                 cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} />)
+              ) : (
+                <>
+                  {allStats.filter(s => mandatoryCards.includes(s.id)).map(stat => <StatsCard key={stat.id} {...stat} />)}
+                  <Link href="/configuracoes/layout-personalizado" passHref>
+                      <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
+                        <CardContent className="p-0 text-center">
+                            <PlusCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
+                            <p className="text-sm font-semibold">Adicionar Card</p>
+                        </CardContent>
+                      </Card>
+                  </Link>
+                </>
               )}
           </div>
 
@@ -139,8 +143,8 @@ export function DashboardClient() {
   return (
     <div className="space-y-8">
       <div className="text-center w-full">
-        <h1 className="text-4xl font-bold font-headline">Painel de Performance</h1>
-        <p className="text-muted-foreground">Resumo de {currentPeriodName}</p>
+        <h1 className="text-4xl font-bold font-headline">Uber Cash</h1>
+        <p className="text-muted-foreground">Sua rota certa para o sucesso.</p>
       </div>
 
        <Card>
