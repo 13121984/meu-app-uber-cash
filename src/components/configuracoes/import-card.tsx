@@ -61,7 +61,8 @@ function processManualCsv(rawCsvText: string): ImportedWorkDay[] {
         const dateRaw = rowData[dateHeader];
         let formattedDate = '';
         try {
-            const parsedDate = parse(dateRaw, 'dd/MM/yy', new Date());
+            // Tenta parsear formatos DD/MM/YY e YYYY-MM-DD
+            const parsedDate = dateRaw.includes('-') ? parse(dateRaw, 'yyyy-MM-dd', new Date()) : parse(dateRaw, 'dd/MM/yy', new Date());
             if (isNaN(parsedDate.getTime())) throw new Error('Data inválida');
             formattedDate = format(parsedDate, 'yyyy-MM-dd');
         } catch (e) {
@@ -352,4 +353,3 @@ export function ImportCard() {
         </Card>
     );
 }
-
