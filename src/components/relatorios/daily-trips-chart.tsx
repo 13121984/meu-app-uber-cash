@@ -23,7 +23,6 @@ export function DailyTripsChart({ data }: DailyTripsChartProps) {
         <BarChart 
             data={data} 
             margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-            barCategoryGap="20%"
         >
           <XAxis 
             dataKey="date" 
@@ -39,7 +38,7 @@ export function DailyTripsChart({ data }: DailyTripsChartProps) {
             tickMargin={10}
             allowDecimals={false}
             fontSize={12}
-            width={80}
+            width={30}
           />
           <Tooltip 
             cursor={{ fill: 'hsl(var(--muted))' }}
@@ -48,7 +47,7 @@ export function DailyTripsChart({ data }: DailyTripsChartProps) {
                 labelFormatter={(label) => `Data: ${label}`}
             />} 
           />
-          <Bar dataKey="viagens" fill="var(--color-viagens)" radius={[4, 4, 0, 0]} barSize={16} />
+          <Bar dataKey="viagens" fill="var(--color-viagens)" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

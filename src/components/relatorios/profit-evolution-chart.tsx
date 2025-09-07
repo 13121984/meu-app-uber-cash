@@ -23,7 +23,6 @@ export function ProfitEvolutionChart({ data }: ProfitEvolutionChartProps) {
         <BarChart 
             data={data}
             margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
-            barCategoryGap="20%"
         >
           <XAxis 
             dataKey="date" 
@@ -55,7 +54,6 @@ export function ProfitEvolutionChart({ data }: ProfitEvolutionChartProps) {
             dataKey="lucro" 
             fill="var(--color-lucro)" 
             radius={[4, 4, 0, 0]}
-            barSize={16}
             />
         </BarChart>
       </ResponsiveContainer>

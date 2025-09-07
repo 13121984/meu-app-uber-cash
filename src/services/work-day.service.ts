@@ -737,27 +737,20 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
     { name: 'Manutenção', value: totalManutencaoFinal, fill: 'hsl(var(--chart-3))', totalGanho },
   ].filter(item => item.value > 0);
   
-  const profitEvolution: ProfitEvolutionData[] = [];
-  const dailyTrips: DailyTripsData[] = [];
-  if (interval) {
-      const daysInInterval = eachDayOfInterval(interval);
-      const step = Math.ceil(daysInInterval.length / 31);
-      for (let i = 0; i < daysInInterval.length; i += step) {
-          const date = daysInInterval[i];
-          const dateKey = format(date, 'yyyy-MM-dd');
-          const data = dailyDataMap.get(dateKey);
-          profitEvolution.push({ date: format(date, 'dd/MM'), lucro: (data?.lucro ?? 0) });
-          dailyTrips.push({ date: format(date, 'dd/MM'), viagens: data?.viagens ?? 0 });
-      }
-  } else if (dailyDataMap.size > 0) {
-      const sortedEntries = [...dailyDataMap.entries()].sort();
-       const step = Math.ceil(sortedEntries.length / 31);
-       for (let i = 0; i < sortedEntries.length; i+= step) {
-           const [dateKey, data] = sortedEntries[i];
-           profitEvolution.push({ date: format(parseISO(dateKey), 'dd/MM'), lucro: data.lucro });
-           dailyTrips.push({ date: format(parseISO(dateKey), 'dd/MM'), viagens: data.viagens });
-       }
-  }
+  // Sort entries by date to ensure chronological order in charts
+  const sortedDailyEntries = Array.from(dailyDataMap.entries()).sort(
+    (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
+  );
+
+  const profitEvolution: ProfitEvolutionData[] = sortedDailyEntries.map(([dateKey, data]) => ({
+      date: format(parseISO(dateKey), 'dd/MM'),
+      lucro: data.lucro
+  }));
+
+  const dailyTrips: DailyTripsData[] = sortedDailyEntries.map(([dateKey, data]) => ({
+      date: format(parseISO(dateKey), 'dd/MM'),
+      viagens: data.viagens
+  }));
   
   return {
     totalGanho,
