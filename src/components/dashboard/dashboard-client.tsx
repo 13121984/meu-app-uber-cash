@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useTransition, useEffect } from "react"
-import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Wrench, BarChart3, GripVertical, Loader2, BarChart } from "lucide-react"
+import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Wrench, BarChart3, GripVertical, Loader2, BarChart, Hourglass, Route } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatsCard } from "./stats-card"
@@ -47,6 +47,8 @@ export interface PeriodData {
   diasTrabalhados: number;
   totalKm: number;
   totalHoras: number;
+  mediaHorasPorDia: number;
+  mediaKmPorDia: number;
   ganhoPorHora: number;
   ganhoPorKm: number;
   totalViagens: number;
@@ -114,17 +116,19 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       
       return (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <StatsCard title="Lucro Líquido" value={currentData.totalLucro} icon={DollarSign} isCurrency iconBg="bg-green-500/20" iconColor="text-green-400" />
               <StatsCard title="Ganhos Brutos" value={currentData.totalGanho} icon={DollarSign} isCurrency iconBg="bg-primary/20" iconColor="text-primary" />
               <StatsCard title="Viagens" value={currentData.totalViagens} icon={Car} iconBg="bg-blue-500/20" iconColor="text-blue-400" />
               <StatsCard title="Dias Trabalhados" value={currentData.diasTrabalhados} icon={CalendarDays} iconBg="bg-sky-500/20" iconColor="text-sky-400" />
-              <StatsCard title="KM Rodados" value={currentData.totalKm} icon={Map} unit="km" iconBg="bg-purple-500/20" iconColor="text-purple-400" />
-              <StatsCard title="Horas" value={currentData.totalHoras} icon={Clock} unit="h" iconBg="bg-orange-500/20" iconColor="text-orange-400" precision={1} />
+              <StatsCard title="Média de Horas/Dia" value={currentData.mediaHorasPorDia} icon={Hourglass} unit="h" iconBg="bg-orange-500/20" iconColor="text-orange-400" precision={1} />
+              <StatsCard title="Média de KM/Dia" value={currentData.mediaKmPorDia} icon={Route} unit="km" iconBg="bg-purple-500/20" iconColor="text-purple-400" />
               <StatsCard title="Ganho/Hora" value={currentData.ganhoPorHora} isCurrency icon={TrendingUp} iconBg="bg-green-500/20" iconColor="text-green-400" precision={2} />
               <StatsCard title="Ganho/KM" value={currentData.ganhoPorKm} isCurrency icon={TrendingUp} iconBg="bg-blue-500/20" iconColor="text-blue-400" precision={2} />
               <StatsCard title="Eficiência Média" value={currentData.eficiencia} icon={Zap} unit="km/L" iconBg="bg-yellow-500/20" iconColor="text-yellow-400" precision={2} />
               <StatsCard title="Combustível" value={currentData.totalCombustivel} icon={Fuel} isCurrency iconBg="bg-red-500/20" iconColor="text-red-400" />
+              <StatsCard title="KM Rodados" value={currentData.totalKm} icon={Map} unit="km" iconBg="bg-purple-500/20" iconColor="text-purple-400" />
+              <StatsCard title="Horas Trabalhadas" value={currentData.totalHoras} icon={Clock} unit="h" iconBg="bg-orange-500/20" iconColor="text-orange-400" precision={1} />
           </div>
 
           <Card>

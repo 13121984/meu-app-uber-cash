@@ -73,6 +73,8 @@ export interface ReportData {
   totalGastos: number;
   totalCombustivel: number;
   diasTrabalhados: number;
+  mediaHorasPorDia: number;
+  mediaKmPorDia: number;
   profitComposition: { name: string; value: number; fill: string; totalGanho: number; }[];
   earningsByCategory: EarningsByCategory[];
   tripsByCategory: TripsByCategory[];
@@ -175,7 +177,7 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
             const date = parseISO(dateKey);
             const firstRow = rows[0];
             const km = parseFloat(firstRow.km.replace(',', '.')) || 0;
-            const hours = parseFloat(firstRow.hours.replace(',', '.')) || 0;
+            const hours = parseFloat(firstRow.hours?.toString().replace(',', '.')) || 0;
 
             const earnings: Earning[] = [];
             const fuelEntries: FuelEntry[] = [];
@@ -527,6 +529,8 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
 
     return {
         ...data,
+        mediaHorasPorDia: data.diasTrabalhados > 0 ? data.totalHoras / data.diasTrabalhados : 0,
+        mediaKmPorDia: data.diasTrabalhados > 0 ? data.totalKm / data.diasTrabalhados : 0,
         ganhoPorHora: data.totalHoras > 0 ? data.totalGanho / data.totalHoras : 0,
         ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.totalKm : 0,
         eficiencia: data.totalKm > 0 && data.totalLitros > 0 ? data.totalKm / data.totalLitros : 0,
@@ -658,6 +662,7 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
   const dailyDataMap = new Map<string, { lucro: number, viagens: number }>();
 
   let totalGanho = 0, totalCombustivel = 0, totalKm = 0, totalHoras = 0, totalViagens = 0, totalLitros = 0;
+  const diasTrabalhados = new Set(filteredDays.map(d => d.date.toDateString())).size;
   
   // As despesas de manutenção agora são calculadas com base nos registros do serviço de manutenção
   const totalManutencaoFinal = filteredMaintenance.reduce((sum, m) => sum + m.amount, 0);
@@ -735,7 +740,9 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
     totalLucro,
     totalGastos,
     totalCombustivel,
-    diasTrabalhados: new Set(filteredDays.map(d => new Date(d.date).toDateString())).size,
+    diasTrabalhados,
+    mediaHorasPorDia: diasTrabalhados > 0 ? totalHoras / diasTrabalhados : 0,
+    mediaKmPorDia: diasTrabalhados > 0 ? totalKm / diasTrabalhados : 0,
     profitComposition,
     earningsByCategory,
     tripsByCategory,

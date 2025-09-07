@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from 'react';
-import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench, Loader2, CalendarDays } from 'lucide-react';
+import { BarChart, PieChartIcon, Fuel, Car, DollarSign, Map, TrendingUp, Clock, Zap, Wrench, Loader2, CalendarDays, Hourglass, Route } from 'lucide-react';
 import { ReportsFilter } from './reports-filter';
 import { getReportData, ReportData } from '@/services/work-day.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -36,13 +36,14 @@ export function ReportsClient() {
     { title: "Ganhos Brutos", value: reportData.totalGanho, icon: DollarSign, isCurrency: true, iconBg: "bg-primary/20", iconColor: "text-primary" },
     { title: "Viagens", value: reportData.totalViagens, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-400" },
     { title: "Dias Trabalhados", value: reportData.diasTrabalhados, icon: CalendarDays, iconBg: "bg-sky-500/20", iconColor: "text-sky-400" },
-    { title: "KM Rodados", value: reportData.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
-    { title: "Horas", value: reportData.totalHoras, icon: Clock, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 2 },
+    { title: "Média de Horas/Dia", value: reportData.mediaHorasPorDia, icon: Hourglass, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-400", precision: 2 },
+    { title: "Média de KM/Dia", value: reportData.mediaKmPorDia, icon: Route, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
     { title: "Ganho/Hora", value: reportData.ganhoPorHora, icon: TrendingUp, isCurrency: true, iconBg: "bg-green-500/20", iconColor: "text-green-400", precision: 2 },
     { title: "Ganho/KM", value: reportData.ganhoPorKm, icon: TrendingUp, isCurrency: true, iconBg: "bg-blue-500/20", iconColor: "text-blue-400", precision: 2 },
     { title: "Eficiência Média", value: reportData.eficiencia, icon: Zap, unit: "km/L", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-400", precision: 2 },
     { title: "Manutenção", value: reportData.profitComposition.find(c => c.name === 'Manutenção')?.value || 0, icon: Wrench, isCurrency: true, iconBg: "bg-orange-500/20", iconColor: "text-orange-400" },
     { title: "Combustível", value: reportData.totalCombustivel, icon: Fuel, isCurrency: true, iconBg: "bg-red-500/20", iconColor: "text-red-400" },
+    { title: "KM Rodados", value: reportData.totalKm, icon: Map, unit: "km", iconBg: "bg-purple-500/20", iconColor: "text-purple-400" },
   ] : [], [reportData]);
 
   const renderContent = () => {
@@ -83,7 +84,7 @@ export function ReportsClient() {
                       {reportData.diasTrabalhados} {reportData.diasTrabalhados === 1 ? 'dia trabalhado' : 'dias trabalhados'} no período selecionado.
                   </CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                  {stats.map((stat) => (
                     <StatsCard key={stat.title} {...stat} />
                  ))}
