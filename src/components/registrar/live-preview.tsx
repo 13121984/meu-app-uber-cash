@@ -29,8 +29,10 @@ export function LivePreview({ data }: LivePreviewProps) {
     const totalViagens = data.earnings.reduce((sum, e) => sum + e.trips, 0);
     const totalLitros = data.fuelEntries.reduce((sum, f) => sum + (f.price > 0 ? f.paid / f.price : 0), 0);
     const eficiencia = data.km > 0 && totalLitros > 0 ? data.km / totalLitros : 0;
-    const ganhoPorHora = data.hours > 0 ? lucroLiquido / data.hours : 0;
-    const ganhoPorKm = data.km > 0 ? lucroLiquido / data.km : 0;
+    const ganhoBrutoPorHora = data.hours > 0 ? totalGanhos / data.hours : 0;
+    const ganhoLiquidoPorHora = data.hours > 0 ? lucroLiquido / data.hours : 0;
+    const ganhoBrutoPorKm = data.km > 0 ? totalGanhos / data.km : 0;
+    const ganhoLiquidoPorKm = data.km > 0 ? lucroLiquido / data.km : 0;
     
     return {
       totalGanhos,
@@ -39,8 +41,10 @@ export function LivePreview({ data }: LivePreviewProps) {
       lucroLiquido,
       totalViagens,
       eficiencia,
-      ganhoPorHora,
-      ganhoPorKm,
+      ganhoBrutoPorHora,
+      ganhoLiquidoPorHora,
+      ganhoBrutoPorKm,
+      ganhoLiquidoPorKm,
     };
   }, [data]);
 
@@ -71,8 +75,10 @@ export function LivePreview({ data }: LivePreviewProps) {
         <Separator />
         
         <div className="grid grid-cols-2 gap-3">
-            <StatItem label="R$/Hora" value={formatCurrency(calculations.ganhoPorHora)} />
-            <StatItem label="R$/KM" value={formatCurrency(calculations.ganhoPorKm)} />
+            <StatItem label="R$/Hora (Bruto)" value={formatCurrency(calculations.ganhoBrutoPorHora)} />
+            <StatItem label="R$/KM (Bruto)" value={formatCurrency(calculations.ganhoBrutoPorKm)} />
+            <StatItem label="R$/Hora (Líquido)" value={formatCurrency(calculations.ganhoLiquidoPorHora)} />
+            <StatItem label="R$/KM (Líquido)" value={formatCurrency(calculations.ganhoLiquidoPorKm)} />
             <StatItem label="Eficiência" value={`${calculations.eficiencia.toFixed(2)} km/L`} />
             <StatItem label="Viagens" value={calculations.totalViagens.toString()} />
         </div>
@@ -80,5 +86,3 @@ export function LivePreview({ data }: LivePreviewProps) {
     </Card>
   );
 }
-
-    

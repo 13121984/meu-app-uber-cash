@@ -23,6 +23,7 @@ const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style:
 export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
     const bestShift = useMemo(() => {
         if (!performance || performance.length === 0) return null;
+        // A lógica de melhor turno agora se baseia no ganho bruto por hora, não no lucro.
         return performance.reduce((best, current) => current.profitPerHour > best.profitPerHour ? current : best);
     }, [performance]);
 
@@ -42,15 +43,15 @@ export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
         <Card className="h-full">
             <CardHeader>
                 <CardTitle className="font-headline text-lg">Análise por Turno</CardTitle>
-                <CardDescription>Veja qual período do dia foi mais lucrativo para você hoje.</CardDescription>
+                <CardDescription>Veja qual período do dia foi mais rentável para você hoje.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 {bestShift && bestShift.profit > 0 && (
                     <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
                         <Trophy className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                        <p className="font-bold text-green-600 dark:text-green-400">Seu turno mais lucrativo foi a {bestShift.shift.toLowerCase()}!</p>
+                        <p className="font-bold text-green-600 dark:text-green-400">Seu turno mais rentável foi a {bestShift.shift.toLowerCase()}!</p>
                         <p className="text-sm text-muted-foreground">
-                            Com uma média de <span className="font-semibold">{formatCurrency(bestShift.profitPerHour)}</span> por hora.
+                            Com uma média de <span className="font-semibold">{formatCurrency(bestShift.profitPerHour)}/h (Bruto)</span>.
                         </p>
                     </div>
                 )}
@@ -65,13 +66,13 @@ export function ShiftPerformance({ performance }: ShiftPerformanceProps) {
                             </div>
                             <div className="flex-1">
                                 <p className="font-bold text-base">{p.shift}</p>
-                                <p className="text-sm text-green-500 font-semibold">{formatCurrency(p.profit)}</p>
+                                <p className="text-sm text-green-500 font-semibold">{formatCurrency(p.profit)} (Lucro)</p>
                                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                    <span>
                                      {p.hours.toFixed(1)}h
                                    </span>
                                    <span className="font-mono">
-                                     {formatCurrency(p.profitPerHour)}/h
+                                     {formatCurrency(p.profitPerHour)}/h (Bruto)
                                    </span>
                                 </div>
                             </div>

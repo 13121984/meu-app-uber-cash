@@ -6,7 +6,7 @@ import { useWorkDayColumns } from "./columns";
 import { DataTable } from "./data-table";
 import { ReportsFilter } from "@/components/relatorios/reports-filter";
 import { Button } from "../ui/button";
-import { Loader2, Trash2, History } from "lucide-react";
+import { Loader2, Trash2, History, BarChart3, Smartphone } from "lucide-react";
 import { deleteFilteredWorkDaysAction, ActiveFilters } from "./actions";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
@@ -14,6 +14,9 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { getFilteredWorkDays, type WorkDay } from '@/services/work-day.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
 
 export interface GroupedWorkDay {
   date: Date;
@@ -117,9 +120,17 @@ export function GerenciamentoClient() {
       <Card>
         <CardHeader>
           <CardTitle>Seus Registros</CardTitle>
-          <CardDescription>
-            Use os filtros para encontrar e gerenciar seus dias de trabalho.
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row gap-2 justify-between">
+            <CardDescription>
+                Use os filtros para encontrar e gerenciar seus dias de trabalho.
+            </CardDescription>
+             <Link href="/relatorios">
+                <Button variant="outline">
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    Ver Relatórios
+                </Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
           <ReportsFilter 
@@ -127,6 +138,26 @@ export function GerenciamentoClient() {
             isPending={isPending}
           />
           {renderContent()}
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Smartphone className="h-5 w-5 text-primary" />
+            Histórico de Chamadas
+          </CardTitle>
+           <CardDescription>
+                Acesse o histórico de corridas capturadas automaticamente (Em breve).
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+           <Link href="/historico-chamadas" passHref>
+             <Button variant="secondary">
+                <span>Acessar Histórico</span>
+                <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+           </Link>
         </CardContent>
       </Card>
 

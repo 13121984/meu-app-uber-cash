@@ -16,12 +16,9 @@ const menuItems = [
   { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
   { href: "/registrar", label: "Registrar", icon: PlusCircle },
   { href: "/gerenciamento", label: "Gerenciar", icon: History },
-  { href: "/relatorios", label: "Relatórios", icon: BarChart },
   { href: "/taximetro", label: "Taxímetro", icon: Calculator },
-  { href: "/historico-chamadas", label: "Chamadas", icon: Smartphone },
   { href: "/manutencao", label: "Manutenção", icon: Wrench },
   { href: "/metas", label: "Metas", icon: Target },
-  { href: "/ajuda", label: "Ajuda", icon: LifeBuoy },
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ]
 

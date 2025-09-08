@@ -1,21 +1,31 @@
 {
   "hoje": {
-    "totalGanho": 0,
-    "totalLucro": 0,
-    "totalCombustivel": 0,
+    "totalGanho": 256,
+    "totalLucro": 191,
+    "totalCombustivel": 65,
     "totalExtras": 0,
-    "diasTrabalhados": 0,
-    "totalKm": 0,
-    "totalHoras": 0,
-    "totalViagens": 0,
-    "totalLitros": 0,
-    "mediaHorasPorDia": 0,
-    "mediaKmPorDia": 0,
-    "ganhoPorHora": 0,
-    "ganhoPorKm": 0,
-    "eficiencia": 0,
-    "earningsByCategory": [],
-    "tripsByCategory": [],
+    "diasTrabalhados": 1,
+    "totalKm": 122,
+    "totalHoras": 8.666666666666666,
+    "totalViagens": 51,
+    "totalLitros": 13.626834381551364,
+    "mediaHorasPorDia": 8.666666666666666,
+    "mediaKmPorDia": 122,
+    "ganhoPorHora": 29.53846153846154,
+    "ganhoPorKm": 2.098360655737705,
+    "eficiencia": 8.952923076923076,
+    "earningsByCategory": [
+      {
+        "name": "Aplicativo",
+        "total": 256
+      }
+    ],
+    "tripsByCategory": [
+      {
+        "name": "Aplicativo",
+        "total": 51
+      }
+    ],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
@@ -24,26 +34,62 @@
       "target": 200,
       "period": "diária"
     },
-    "profitComposition": [],
-    "performanceByShift": []
+    "profitComposition": [
+      {
+        "name": "Lucro Líquido",
+        "value": 191,
+        "fill": "hsl(var(--chart-1))",
+        "totalGanho": 256
+      },
+      {
+        "name": "Combustível",
+        "value": 65,
+        "fill": "hsl(var(--chart-2))",
+        "totalGanho": 256
+      }
+    ],
+    "performanceByShift": [
+      {
+        "shift": "Manhã",
+        "profit": 60,
+        "hours": 2.6666666666666665,
+        "profitPerHour": 22.5
+      },
+      {
+        "shift": "Tarde",
+        "profit": 131,
+        "hours": 6,
+        "profitPerHour": 21.833333333333332
+      }
+    ]
   },
   "semana": {
-    "totalGanho": 0,
-    "totalLucro": 0,
-    "totalCombustivel": 0,
+    "totalGanho": 256,
+    "totalLucro": 191,
+    "totalCombustivel": 65,
     "totalExtras": 0,
-    "diasTrabalhados": 0,
-    "totalKm": 0,
-    "totalHoras": 0,
-    "totalViagens": 0,
-    "totalLitros": 0,
-    "mediaHorasPorDia": 0,
-    "mediaKmPorDia": 0,
-    "ganhoPorHora": 0,
-    "ganhoPorKm": 0,
-    "eficiencia": 0,
-    "earningsByCategory": [],
-    "tripsByCategory": [],
+    "diasTrabalhados": 1,
+    "totalKm": 122,
+    "totalHoras": 8.666666666666666,
+    "totalViagens": 51,
+    "totalLitros": 13.626834381551364,
+    "mediaHorasPorDia": 8.666666666666666,
+    "mediaKmPorDia": 122,
+    "ganhoPorHora": 29.53846153846154,
+    "ganhoPorKm": 2.098360655737705,
+    "eficiencia": 8.952923076923076,
+    "earningsByCategory": [
+      {
+        "name": "Aplicativo",
+        "total": 256
+      }
+    ],
+    "tripsByCategory": [
+      {
+        "name": "Aplicativo",
+        "total": 51
+      }
+    ],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
@@ -52,26 +98,62 @@
       "target": 1000,
       "period": "semanal"
     },
-    "profitComposition": [],
-    "performanceByShift": []
+    "profitComposition": [
+      {
+        "name": "Lucro Líquido",
+        "value": 191,
+        "fill": "hsl(var(--chart-1))",
+        "totalGanho": 256
+      },
+      {
+        "name": "Combustível",
+        "value": 65,
+        "fill": "hsl(var(--chart-2))",
+        "totalGanho": 256
+      }
+    ],
+    "performanceByShift": [
+      {
+        "shift": "Manhã",
+        "profit": 60,
+        "hours": 2.6666666666666665,
+        "profitPerHour": 22.5
+      },
+      {
+        "shift": "Tarde",
+        "profit": 131,
+        "hours": 6,
+        "profitPerHour": 21.833333333333332
+      }
+    ]
   },
   "mes": {
-    "totalGanho": 0,
-    "totalLucro": 0,
-    "totalCombustivel": 0,
+    "totalGanho": 256,
+    "totalLucro": 191,
+    "totalCombustivel": 65,
     "totalExtras": 0,
-    "diasTrabalhados": 0,
-    "totalKm": 0,
-    "totalHoras": 0,
-    "totalViagens": 0,
-    "totalLitros": 0,
-    "mediaHorasPorDia": 0,
-    "mediaKmPorDia": 0,
-    "ganhoPorHora": 0,
-    "ganhoPorKm": 0,
-    "eficiencia": 0,
-    "earningsByCategory": [],
-    "tripsByCategory": [],
+    "diasTrabalhados": 1,
+    "totalKm": 122,
+    "totalHoras": 8.666666666666666,
+    "totalViagens": 51,
+    "totalLitros": 13.626834381551364,
+    "mediaHorasPorDia": 8.666666666666666,
+    "mediaKmPorDia": 122,
+    "ganhoPorHora": 29.53846153846154,
+    "ganhoPorKm": 2.098360655737705,
+    "eficiencia": 8.952923076923076,
+    "earningsByCategory": [
+      {
+        "name": "Aplicativo",
+        "total": 256
+      }
+    ],
+    "tripsByCategory": [
+      {
+        "name": "Aplicativo",
+        "total": 51
+      }
+    ],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
@@ -80,7 +162,33 @@
       "target": 4000,
       "period": "mensal"
     },
-    "profitComposition": [],
-    "performanceByShift": []
+    "profitComposition": [
+      {
+        "name": "Lucro Líquido",
+        "value": 191,
+        "fill": "hsl(var(--chart-1))",
+        "totalGanho": 256
+      },
+      {
+        "name": "Combustível",
+        "value": 65,
+        "fill": "hsl(var(--chart-2))",
+        "totalGanho": 256
+      }
+    ],
+    "performanceByShift": [
+      {
+        "shift": "Manhã",
+        "profit": 60,
+        "hours": 2.6666666666666665,
+        "profitPerHour": 22.5
+      },
+      {
+        "shift": "Tarde",
+        "profit": 131,
+        "hours": 6,
+        "profitPerHour": 21.833333333333332
+      }
+    ]
   }
 }

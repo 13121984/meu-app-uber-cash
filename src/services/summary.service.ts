@@ -117,7 +117,7 @@ const getShift = (startTime: string): PerformanceByShift['shift'] => {
 function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
-    const shiftPerformanceMap = new Map<PerformanceByShift['shift'], { profit: number; hours: number }>();
+    const shiftPerformanceMap = new Map<PerformanceByShift['shift'], { profit: number; hours: number, rawEarnings: number }>();
 
     const data = {
         totalGanho: 0, totalLucro: 0, totalCombustivel: 0, totalExtras: 0,
@@ -161,8 +161,10 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
                     const entryHours = (timeToMinutes(entry.end) - timeToMinutes(entry.start)) / 60;
                     if (entryHours > 0) {
                         const shift = getShift(entry.start);
-                        const shiftData = shiftPerformanceMap.get(shift) || { profit: 0, hours: 0 };
+                        const shiftData = shiftPerformanceMap.get(shift) || { profit: 0, hours: 0, rawEarnings: 0 };
+                        // Pro-rata allocation of daily profit/earnings to shifts based on hours worked
                         shiftData.profit += dailyProfit * (entryHours / totalDayHours);
+                        shiftData.rawEarnings += dailyEarnings * (entryHours / totalDayHours);
                         shiftData.hours += entryHours;
                         shiftPerformanceMap.set(shift, shiftData);
                     }
@@ -176,7 +178,11 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
     const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
     const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
     const performanceByShift: PerformanceByShift[] = Array.from(shiftPerformanceMap, ([shift, data]) => ({
-        shift, ...data, profitPerHour: data.hours > 0 ? data.profit / data.hours : 0
+        shift, 
+        profit: data.profit, 
+        hours: data.hours,
+        // Use rawEarnings for profitPerHour calculation
+        profitPerHour: data.hours > 0 ? data.rawEarnings / data.hours : 0
     })).sort((a,b) => a.shift.localeCompare(b.shift));
 
     const profitComposition = [
@@ -187,8 +193,8 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
 
     let targetGoal = 0;
     if (period === 'diária') targetGoal = goals.daily;
-    if (period === 'semanal') targetGoal = goals.weekly;
-    if (period === 'mensal') targetGoal = goals.monthly;
+    else if (period === 'semanal') targetGoal = goals.weekly;
+    else if (period === 'mensal') targetGoal = goals.monthly;
 
     return {
         ...data,
@@ -309,7 +315,7 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
     rawWorkDays: filteredDays,
     meta: {
       target: getTargetGoal(),
-      period: filters.type,
+      period: filters.type || 'all',
     }
   };
 }
