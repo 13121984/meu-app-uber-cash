@@ -1,14 +1,14 @@
 
 "use client";
 
-import { LifeBuoy, BookOpen, PlusCircle, BarChart3, History, Target, Calculator, Smartphone, LayoutDashboard, Youtube } from "lucide-react";
+import { LifeBuoy, BookOpen, PlusCircle, BarChart3, History, Target, Calculator, Smartphone, LayoutDashboard, Youtube, Gem, Sparkles } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -42,13 +42,25 @@ const helpTopics = [
     value: "taximetro",
     icon: Calculator,
     title: "Para que serve o Taxímetro?",
-    content: "O Taxímetro Inteligente é ideal para corridas particulares. Configure suas tarifas (bandeirada, preço por km e por minuto) e inicie uma corrida. O app usará o GPS para calcular a distância e o tempo, mostrando o valor final em tempo real. Ao finalizar, a corrida é salva automaticamente no seu histórico."
+    content: "O Taxímetro Inteligente é ideal para corridas particulares. Configure suas tarifas (bandeirada, preço por km e por minuto) e inicie uma corrida. O app usará o GPS para calcular a distância e o tempo, mostrando o valor final em tempo real. Ao finalizar e confirmar, a corrida é salva automaticamente no seu histórico do dia como um ganho 'Particular'."
   },
    {
     value: "layout",
     icon: LayoutDashboard,
-    title: "Posso personalizar a aparência do app?",
-    content: "Sim! Você pode organizar o layout do seu Dashboard e da tela de Relatórios. No plano gratuito, é possível exibir 1 gráfico e 1 card de estatística opcional, além dos itens padrão, e reordená-los como preferir. Assinando o plano Premium, você desbloqueia todos os 8 tipos de gráficos e 12 cards de estatísticas para montar a visualização que melhor se adapta às suas necessidades."
+    title: "Posso organizar o layout do aplicativo?",
+    content: "Sim! No plano gratuito, você pode escolher 1 card de estatística e 1 gráfico opcional para exibir, além dos itens padrão, e reordená-los como preferir em 'Configurações > Personalizar Layout'. O plano Premium desbloqueia todos os 12 cards e 8 tipos de gráficos, permitindo que você monte um painel com as métricas que mais importam para você, na ordem que quiser."
+  },
+  {
+    value: "estatisticas_categoria",
+    icon: Sparkles,
+    title: "Consigo ver o lucro por cada aplicativo (Uber, 99)?",
+    content: "O plano gratuito oferece um resumo geral da sua performance. Para uma análise profunda e detalhada, o plano Premium é a solução. Com ele, você tem acesso a gráficos que mostram o ganho médio por hora e por viagem para cada uma das suas categorias de ganhos, permitindo que você descubra qual plataforma é mais rentável para o seu tempo."
+  },
+  {
+    value: "vantagens_premium",
+    icon: Gem,
+    title: "Quais são as vantagens do plano Premium?",
+    content: "O plano Premium transforma o Rota Certa em uma ferramenta de gestão financeira completa. Além de todas as funcionalidades gratuitas, você desbloqueia: 1) Cards e gráficos ilimitados no Dashboard e Relatórios. 2) Personalização total da ordem de todos os itens visuais. 3) Gerenciamento de múltiplos veículos. 4) Criação de categorias de ganhos e combustíveis totalmente personalizáveis. 5) Uso ilimitado do Taxímetro. 6) Acesso a todas as futuras funcionalidades e suporte prioritário. É o upgrade ideal para o motorista que leva a sério a sua performance."
   },
    {
     value: "chamadas",
@@ -98,6 +110,14 @@ export default function AjudaPage() {
                                                     ></iframe>
                                                 </div>
                                             </div>
+                                        )}
+                                         {topic.value.includes('premium') && (
+                                            <Link href="/premium" passHref>
+                                                <Button className="mt-2 animate-pulse" variant="default" size="sm">
+                                                    <Gem className="mr-2 h-4 w-4" />
+                                                    Conheça o Plano Premium
+                                                </Button>
+                                            </Link>
                                         )}
                                     </div>
                                 </AccordionContent>

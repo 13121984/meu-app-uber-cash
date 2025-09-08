@@ -393,15 +393,18 @@ export function TaximeterClient() {
         <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                <AlertDialogTitle>Finalizar Corrida</AlertDialogTitle>
+                <AlertDialogTitle>Finalizar e Registrar Corrida?</AlertDialogTitle>
                 <AlertDialogDescription>
                     O valor final da corrida foi: 
                     <span className="block text-2xl font-bold text-primary my-2">{formatCurrency(finalRideData?.cost || 0)}</span>
-                    Deseja salvar este registro no seu histórico?
+                    Deseja salvar este registro no seu histórico do dia?
                 </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setStatus('paused')}>Não, continuar corrida</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => {
+                    setIsConfirmOpen(false);
+                    resumeRide(); // Retoma a corrida se o usuário cancelar
+                }}>Não, voltar para a corrida</AlertDialogCancel>
                 <AlertDialogAction onClick={confirmAndSaveRide}>
                     <Check className="mr-2 h-4 w-4" />
                     Sim, registrar corrida
