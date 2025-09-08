@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/auth-context';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
+import type { CatalogItem } from '@/services/catalog.service';
 
 
 type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
@@ -20,7 +21,7 @@ type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any 
 interface Step2EarningsProps {
   data: State;
   dispatch: Dispatch<Action>;
-  categories: string[];
+  categories: CatalogItem[];
 }
 
 export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps) {
@@ -31,10 +32,15 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
       data.earnings.length > 0 ? data.earnings.map(e => e.category) : []
   );
 
-  const handleCategoryToggle = (category: string) => {
-    const newSelected = selectedCategories.includes(category)
-      ? selectedCategories.filter(c => c !== category)
-      : [...selectedCategories, category];
+  const handleCategoryToggle = (categoryName: string, isDefault: boolean) => {
+    if (!isPremium && !isDefault) {
+        // Here you could trigger a modal or a toast to upsell
+        return;
+    }
+
+    const newSelected = selectedCategories.includes(categoryName)
+      ? selectedCategories.filter(c => c !== categoryName)
+      : [...selectedCategories, categoryName];
     
     setSelectedCategories(newSelected);
 
@@ -71,21 +77,27 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
                 <Label>Categorias de Trabalho</Label>
                 <p className="text-xs text-muted-foreground mb-2">Selecione todas as plataformas em que trabalhou.</p>
                 <div className="grid grid-cols-2 gap-2">
-                    {categories.map(cat => (
-                         <div key={cat} onClick={() => handleCategoryToggle(cat)}
+                    {categories.map(cat => {
+                        const isSelectable = isPremium || cat.isDefault;
+                        const isSelected = selectedCategories.includes(cat.name);
+                        return (
+                         <div key={cat.name} onClick={() => handleCategoryToggle(cat.name, cat.isDefault)}
                            className={cn(
-                            "flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all",
-                            selectedCategories.includes(cat) ? "border-primary bg-primary/10" : "border-transparent bg-secondary"
+                            "flex items-center gap-2 p-3 rounded-lg border-2 transition-all",
+                             isSelectable ? "cursor-pointer" : "cursor-not-allowed bg-secondary/50",
+                             isSelected ? "border-primary bg-primary/10" : "border-transparent bg-secondary"
                            )}
                          >
                             <Checkbox 
-                                checked={selectedCategories.includes(cat)}
-                                onCheckedChange={() => handleCategoryToggle(cat)}
-                                id={`check-${cat}`}
+                                checked={isSelected}
+                                onCheckedChange={() => handleCategoryToggle(cat.name, cat.isDefault)}
+                                id={`check-${cat.name}`}
+                                disabled={!isSelectable}
                             />
-                            <Label htmlFor={`check-${cat}`} className="cursor-pointer">{cat}</Label>
+                            <Label htmlFor={`check-${cat.name}`} className={cn("flex-1", isSelectable ? "cursor-pointer" : "cursor-not-allowed")}>{cat.name}</Label>
+                            {!isSelectable && <Lock className="h-4 w-4 text-amber-500" />}
                          </div>
-                    ))}
+                    )})}
                 </div>
             </div>
 
@@ -101,7 +113,7 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
                                     <div>
                                         <Label htmlFor={`trips-${cat}`}>Viagens</Label>
                                         <div className="relative">
-                                            <Car className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Car className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-500" />
                                             <Input
                                             id={`trips-${cat}`} type="number" placeholder="Ex: 10"
                                             value={earning?.trips || ''}
@@ -113,7 +125,7 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
                                     <div>
                                         <Label htmlFor={`amount-${cat}`}>Valor (R$)</Label>
                                         <div className="relative">
-                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                                             <Input
                                             id={`amount-${cat}`} type="number" step="0.01" placeholder="Ex: 150,50"
                                             value={earning?.amount || ''}

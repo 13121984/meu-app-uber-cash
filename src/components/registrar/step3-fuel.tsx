@@ -12,6 +12,7 @@ import type { FuelEntry, MaintenanceEntry, State } from './registration-wizard';
 import { Separator } from '../ui/separator';
 import { Textarea } from '../ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
+import type { CatalogItem } from '@/services/catalog.service';
 
 
 type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
@@ -20,14 +21,12 @@ type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any 
 interface Step3FuelProps {
   data: State;
   dispatch: Dispatch<Action>;
-  fuelTypes: string[];
+  fuelTypes: CatalogItem[];
 }
 
 export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
   const { user } = useAuth();
   const isPremium = user?.isPremium || false;
-
-  const availableFuelTypes = isPremium ? fuelTypes : ["Combustível"];
 
   const handleFuelEntriesChange = useCallback((newEntries: FuelEntry[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'fuelEntries', value: newEntries } });
@@ -38,7 +37,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
   }, [dispatch]);
 
   const handleAddFuelEntry = () => {
-    const defaultFuelType = availableFuelTypes.length > 0 ? availableFuelTypes[0] : '';
+    const defaultFuelType = fuelTypes.length > 0 ? fuelTypes[0].name : '';
     const newEntry: FuelEntry = { id: Date.now(), type: defaultFuelType, paid: 0, price: 0 };
     handleFuelEntriesChange([...data.fuelEntries, newEntry]);
   };
@@ -94,7 +93,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                 <Fuel className="h-5 w-5 text-primary"/>
                 Abastecimentos
             </CardTitle>
-            <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline" disabled={availableFuelTypes.length === 0}>
+            <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline" disabled={fuelTypes.length === 0}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
             </Button>
         </CardHeader>
@@ -116,8 +115,13 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                                                 <SelectValue placeholder="Selecione..." />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {availableFuelTypes.map((type) => (
-                                                <SelectItem key={type} value={type}>{type}</SelectItem>
+                                                {fuelTypes.map((type) => (
+                                                  <SelectItem key={type.name} value={type.name} disabled={!isPremium && !type.isDefault}>
+                                                    <div className="flex items-center gap-2">
+                                                        {type.name}
+                                                        {!isPremium && !type.isDefault && <Lock className="h-4 w-4 text-amber-500" />}
+                                                    </div>
+                                                  </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>

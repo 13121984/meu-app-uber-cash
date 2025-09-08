@@ -140,6 +140,8 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
    useEffect(() => {
     if (entryBeingEdited) {
         dispatch({ type: 'SET_STATE', payload: getInitialState(entryBeingEdited, registrationType) });
+    } else if (propsInitialData) {
+        dispatch({ type: 'SET_STATE', payload: getInitialState(propsInitialData, registrationType) });
     } else {
         dispatch({ type: 'RESET_STATE', payload: { registrationType }});
     }
@@ -237,8 +239,8 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       return <WizardSkeleton />;
   }
 
-  const activeEarningCategories = catalog.earnings.filter(c => c.active).map(c => c.name);
-  const activeFuelCategories = catalog.fuel.filter(c => c.active).map(c => c.name);
+  const activeEarningCategories = catalog.earnings.filter(c => c.active);
+  const activeFuelCategories = catalog.fuel.filter(c => c.active);
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -349,5 +351,3 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     </div>
   );
 }
-
-    

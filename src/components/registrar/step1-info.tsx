@@ -153,7 +153,7 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
             <div>
               <Label htmlFor="km">KM Rodados</Label>
               <div className="relative">
-                <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-500" />
                 <Input
                   id="km" type="text" inputMode="decimal" placeholder="Ex: 150,5"
                   value={kmInput}
@@ -194,7 +194,7 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                  <div className="pt-2">
                     <Label>Total de Horas</Label>
                      <div className="relative">
-                         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-500 pointer-events-none" />
                          <Input
                             id="hours" type="text" readOnly
                             value={`${data.hours.toFixed(2).replace('.',',')}h`}
