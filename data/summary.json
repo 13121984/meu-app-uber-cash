@@ -1,39 +1,21 @@
 {
   "hoje": {
-    "totalGanho": 624.1,
-    "totalLucro": 421.85,
-    "totalCombustivel": 202.25,
+    "totalGanho": 0,
+    "totalLucro": 0,
+    "totalCombustivel": 0,
     "totalExtras": 0,
-    "diasTrabalhados": 1,
-    "totalKm": 307.9,
-    "totalHoras": 19.504166666666666,
-    "totalViagens": 26,
-    "totalLitros": 40.13734738632471,
-    "mediaHorasPorDia": 19.504166666666666,
-    "mediaKmPorDia": 307.9,
-    "ganhoPorHora": 31.998290963469344,
-    "ganhoPorKm": 2.026956804157194,
-    "eficiencia": 7.671159656776553,
-    "earningsByCategory": [
-      {
-        "name": "Particular",
-        "total": 364.35
-      },
-      {
-        "name": "99 Pop",
-        "total": 259.75
-      }
-    ],
-    "tripsByCategory": [
-      {
-        "name": "Particular",
-        "total": 3
-      },
-      {
-        "name": "99 Pop",
-        "total": 23
-      }
-    ],
+    "diasTrabalhados": 0,
+    "totalKm": 0,
+    "totalHoras": 0,
+    "totalViagens": 0,
+    "totalLitros": 0,
+    "mediaHorasPorDia": 0,
+    "mediaKmPorDia": 0,
+    "ganhoPorHora": 0,
+    "ganhoPorKm": 0,
+    "eficiencia": 0,
+    "earningsByCategory": [],
+    "tripsByCategory": [],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
@@ -42,73 +24,26 @@
       "target": 200,
       "period": "diária"
     },
-    "profitComposition": [
-      {
-        "name": "Lucro Líquido",
-        "value": 421.85,
-        "fill": "hsl(var(--chart-1))",
-        "totalGanho": 624.1
-      },
-      {
-        "name": "Combustível",
-        "value": 202.25,
-        "fill": "hsl(var(--chart-2))",
-        "totalGanho": 624.1
-      }
-    ],
+    "profitComposition": [],
     "performanceByShift": []
   },
   "semana": {
-    "totalGanho": 5570.060000000001,
-    "totalLucro": 4243.630000000002,
-    "totalCombustivel": 1326.43,
+    "totalGanho": 0,
+    "totalLucro": 0,
+    "totalCombustivel": 0,
     "totalExtras": 0,
-    "diasTrabalhados": 7,
-    "totalKm": 2760.9999999999995,
-    "totalHoras": 172.67416666666665,
-    "totalViagens": 401,
-    "totalLitros": 265.9773002512338,
-    "mediaHorasPorDia": 24.667738095238093,
-    "mediaKmPorDia": 394.4285714285714,
-    "ganhoPorHora": 32.25763359699628,
-    "ganhoPorKm": 2.017406736689606,
-    "eficiencia": 10.380585100277525,
-    "earningsByCategory": [
-      {
-        "name": "Uber Cash",
-        "total": 2405.6800000000007
-      },
-      {
-        "name": "Particular",
-        "total": 980.35
-      },
-      {
-        "name": "Ganhos Extras",
-        "total": 90
-      },
-      {
-        "name": "99 Pop",
-        "total": 2094.0299999999997
-      }
-    ],
-    "tripsByCategory": [
-      {
-        "name": "Uber Cash",
-        "total": 149
-      },
-      {
-        "name": "Particular",
-        "total": 34
-      },
-      {
-        "name": "Ganhos Extras",
-        "total": 0
-      },
-      {
-        "name": "99 Pop",
-        "total": 218
-      }
-    ],
+    "diasTrabalhados": 0,
+    "totalKm": 0,
+    "totalHoras": 0,
+    "totalViagens": 0,
+    "totalLitros": 0,
+    "mediaHorasPorDia": 0,
+    "mediaKmPorDia": 0,
+    "ganhoPorHora": 0,
+    "ganhoPorKm": 0,
+    "eficiencia": 0,
+    "earningsByCategory": [],
+    "tripsByCategory": [],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
@@ -117,89 +52,26 @@
       "target": 1000,
       "period": "semanal"
     },
-    "profitComposition": [
-      {
-        "name": "Lucro Líquido",
-        "value": 4243.630000000002,
-        "fill": "hsl(var(--chart-1))",
-        "totalGanho": 5570.060000000001
-      },
-      {
-        "name": "Combustível",
-        "value": 1326.43,
-        "fill": "hsl(var(--chart-2))",
-        "totalGanho": 5570.060000000001
-      }
-    ],
+    "profitComposition": [],
     "performanceByShift": []
   },
   "mes": {
-    "totalGanho": 26059.149999999998,
-    "totalLucro": 19586.239999999994,
-    "totalCombustivel": 6472.910000000003,
+    "totalGanho": 0,
+    "totalLucro": 0,
+    "totalCombustivel": 0,
     "totalExtras": 0,
-    "diasTrabalhados": 30,
-    "totalKm": 13385.530000000002,
-    "totalHoras": 817.0108333333335,
-    "totalViagens": 1909,
-    "totalLitros": 1317.6108671647112,
-    "mediaHorasPorDia": 27.23369444444445,
-    "mediaKmPorDia": 446.1843333333334,
-    "ganhoPorHora": 31.895721496960967,
-    "ganhoPorKm": 1.9468149561504096,
-    "eficiencia": 10.158940195145425,
-    "earningsByCategory": [
-      {
-        "name": "99 Pop",
-        "total": 11145.600000000004
-      },
-      {
-        "name": "Uber Cash",
-        "total": 11124.809999999998
-      },
-      {
-        "name": "Particular",
-        "total": 3288.25
-      },
-      {
-        "name": "Ganhos Extras",
-        "total": 450.97
-      },
-      {
-        "name": "MD Driver",
-        "total": 25.76
-      },
-      {
-        "name": "In Driver",
-        "total": 23.759999999999998
-      }
-    ],
-    "tripsByCategory": [
-      {
-        "name": "99 Pop",
-        "total": 1049
-      },
-      {
-        "name": "Uber Cash",
-        "total": 700
-      },
-      {
-        "name": "Particular",
-        "total": 157
-      },
-      {
-        "name": "Ganhos Extras",
-        "total": 0
-      },
-      {
-        "name": "MD Driver",
-        "total": 1
-      },
-      {
-        "name": "In Driver",
-        "total": 2
-      }
-    ],
+    "diasTrabalhados": 0,
+    "totalKm": 0,
+    "totalHoras": 0,
+    "totalViagens": 0,
+    "totalLitros": 0,
+    "mediaHorasPorDia": 0,
+    "mediaKmPorDia": 0,
+    "ganhoPorHora": 0,
+    "ganhoPorKm": 0,
+    "eficiencia": 0,
+    "earningsByCategory": [],
+    "tripsByCategory": [],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
@@ -208,20 +80,7 @@
       "target": 4000,
       "period": "mensal"
     },
-    "profitComposition": [
-      {
-        "name": "Lucro Líquido",
-        "value": 19586.239999999994,
-        "fill": "hsl(var(--chart-1))",
-        "totalGanho": 26059.149999999998
-      },
-      {
-        "name": "Combustível",
-        "value": 6472.910000000003,
-        "fill": "hsl(var(--chart-2))",
-        "totalGanho": 26059.149999999998
-      }
-    ],
+    "profitComposition": [],
     "performanceByShift": []
   }
 }

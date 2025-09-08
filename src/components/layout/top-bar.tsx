@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
@@ -21,6 +21,7 @@ const menuItems = [
   { href: "/historico-chamadas", label: "Chamadas", icon: Smartphone },
   { href: "/manutencao", label: "Manutenção", icon: Wrench },
   { href: "/metas", label: "Metas", icon: Target },
+  { href: "/ajuda", label: "Ajuda", icon: LifeBuoy },
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ]
 
