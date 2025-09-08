@@ -3,12 +3,13 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, Car, LogOut, Calculator } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "../ui/button"
+import { AppLogo } from "../ui/app-logo"
 
 const menuItems = [
   { href: "/", label: "Início", icon: Home },
@@ -44,8 +45,8 @@ export function TopBar() {
         <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
-                    <Car className="h-8 w-8 text-primary" />
-                    <span className="sr-only">Uber Cash</span>
+                    <AppLogo className="h-10 w-10" />
+                    <span className="sr-only">Rota Certa</span>
                 </Link>
             </div>
             {isClient && (
