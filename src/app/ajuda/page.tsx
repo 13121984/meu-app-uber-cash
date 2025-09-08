@@ -1,4 +1,3 @@
-
 "use client";
 
 import { LifeBuoy, BookOpen, PlusCircle, BarChart3, History, Target, Calculator, Smartphone, LayoutDashboard, Youtube, Gem, Sparkles } from "lucide-react";
@@ -60,7 +59,7 @@ const helpTopics = [
     value: "vantagens_premium",
     icon: Gem,
     title: "Quais são as vantagens do plano Premium?",
-    content: "O plano Premium transforma o Rota Certa em uma ferramenta de gestão financeira completa. Além de todas as funcionalidades gratuitas, você desbloqueia: 1) Cards e gráficos ilimitados no Dashboard e Relatórios. 2) Personalização total da ordem de todos os itens visuais. 3) Gerenciamento de múltiplos veículos. 4) Criação de categorias de ganhos e combustíveis totalmente personalizáveis. 5) Uso ilimitado do Taxímetro. 6) Acesso a todas as futuras funcionalidades e suporte prioritário. É o upgrade ideal para o motorista que leva a sério a sua performance."
+    content: "O plano Premium transforma o Uber Cash em uma ferramenta de gestão financeira completa. Além de todas as funcionalidades gratuitas, você desbloqueia: 1) Cards e gráficos ilimitados no Dashboard e Relatórios. 2) Personalização total da ordem de todos os itens visuais. 3) Gerenciamento de múltiplos veículos. 4) Criação de categorias de ganhos e combustíveis totalmente personalizáveis. 5) Uso ilimitado do Taxímetro. 6) Acesso a todas as futuras funcionalidades e suporte prioritário. É o upgrade ideal para o motorista que leva a sério a sua performance."
   },
    {
     value: "chamadas",
