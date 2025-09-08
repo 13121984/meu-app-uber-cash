@@ -100,7 +100,7 @@ export function VehicleManagerCard() {
         setIsDeleting(null);
     };
     
-    const canAddVehicle = user?.isPremium || (user && user.vehicles.length < 1);
+    const canAddVehicle = user?.isPremium || (user?.vehicles && user.vehicles.length < 1);
 
     const AddVehicleButton = () => {
         if(canAddVehicle) {
@@ -140,10 +140,10 @@ export function VehicleManagerCard() {
                 <AddVehicleButton />
             </CardHeader>
             <CardContent className="space-y-4">
-                {user?.vehicles.length === 0 ? (
+                {user?.vehicles?.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">Nenhum veículo cadastrado.</p>
                 ) : (
-                    user?.vehicles.map((v: Vehicle) => (
+                    user?.vehicles?.map((v: Vehicle) => (
                         <Card key={v.id} className="p-4 flex items-center justify-between bg-secondary/50">
                             <div className="flex items-center gap-4">
                                 <div className="w-4 h-8 rounded-sm" style={{ backgroundColor: v.color.toLowerCase() }} />
