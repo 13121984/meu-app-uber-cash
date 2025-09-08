@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Dispatch, useState } from 'react';
+import { Dispatch, useState, useEffect } from 'react';
 import { PlusCircle, Trash2, Car, DollarSign, CircleDollarSign, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,9 +28,31 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
   const { user } = useAuth();
   const isPremium = user?.isPremium || false;
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-      data.earnings.length > 0 ? data.earnings.map(e => e.category) : []
-  );
+  const getInitialSelectedCategories = () => {
+    if (data.earnings.length > 0) {
+      return data.earnings.map(e => e.category);
+    }
+    // For new entries, select "Aplicativo" by default for free users
+    if (!isPremium) {
+      return ['Aplicativo'];
+    }
+    return [];
+  };
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(getInitialSelectedCategories);
+  
+  // Effect to sync the main state when the component initializes with a default category
+  useEffect(() => {
+    if (data.earnings.length === 0 && !isPremium) {
+      const defaultEarnings: Earning[] = [{
+        id: Date.now(),
+        category: 'Aplicativo',
+        trips: 0,
+        amount: 0,
+      }];
+      dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: defaultEarnings } });
+    }
+  }, []); // Run only once on mount for new entries
 
   const handleCategoryToggle = (categoryName: string, isDefault: boolean) => {
     if (!isPremium && !isDefault) {

@@ -176,7 +176,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                 <Wrench className="h-5 w-5 text-primary"/>
                 Despesas Extras
             </CardTitle>
-            <Button size="sm" type="button" onClick={handleAddMaintenanceEntry} variant="outline">
+            <Button size="sm" type="button" onClick={handleAddMaintenanceEntry} variant="destructive">
                 <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
             </Button>
         </CardHeader>
