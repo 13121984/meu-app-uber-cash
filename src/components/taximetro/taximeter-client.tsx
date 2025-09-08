@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, AlertTriangle, Settings, Lock, CalculatorIcon } from 'lucide-react';
+import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, Settings, Lock, CalculatorIcon, Target, Clock, Calendar } from 'lucide-react';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { toast } from '@/hooks/use-toast';
 import { updateUserPreferences, TaximeterRates, UserPreferences } from '@/services/auth.service';
@@ -18,6 +18,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Label } from '../ui/label';
+import { addOrUpdateWorkDay } from '@/services/work-day.service';
+
 
 // Helper para calcular a distância (fórmula de Haversine)
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -55,6 +57,9 @@ function FareEstimator({ rates }: { rates: TaximeterRates }) {
 
     return (
         <div className="space-y-4">
+             <p className="text-sm text-muted-foreground">
+                Insira a distância e a duração para estimar o valor de uma corrida com base nas suas tarifas.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div>
                     <Label htmlFor="estDistance">Distância Estimada (KM)</Label>
@@ -73,6 +78,83 @@ function FareEstimator({ rates }: { rates: TaximeterRates }) {
     )
 }
 
+function HourlyGoalSimulator() {
+    const [targetEarning, setTargetEarning] = useState(0);
+    const [hourlyRate, setHourlyRate] = useState(30);
+
+    const requiredHours = useMemo(() => {
+        if (targetEarning <= 0 || hourlyRate <= 0) return 0;
+        return targetEarning / hourlyRate;
+    }, [targetEarning, hourlyRate]);
+    
+    return (
+        <div className="space-y-4">
+             <p className="text-sm text-muted-foreground">
+               Descubra quantas horas você precisa trabalhar para atingir um objetivo de ganho específico com base no seu rendimento por hora.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <Label htmlFor="targetEarning">Meta de Ganho (R$)</Label>
+                    <Input id="targetEarning" type="number" placeholder="Ex: 240" value={targetEarning || ''} onChange={(e) => setTargetEarning(parseFloat(e.target.value) || 0)} />
+                </div>
+                <div>
+                    <Label htmlFor="hourlyRate">Seu Ganho Médio/Hora (R$)</Label>
+                    <Input id="hourlyRate" type="number" placeholder="Ex: 30" value={hourlyRate || ''} onChange={(e) => setHourlyRate(parseFloat(e.target.value) || 0)} />
+                </div>
+            </div>
+            <Card className="text-center p-4 bg-background">
+                <p className="text-sm text-muted-foreground">Horas de Trabalho Necessárias</p>
+                <p className="text-2xl font-bold text-primary">{requiredHours.toFixed(1)} horas</p>
+            </Card>
+        </div>
+    );
+}
+
+function DailyGoalSimulator() {
+    const [monthlyGoal, setMonthlyGoal] = useState(4000);
+    const [hoursPerDay, setHoursPerDay] = useState(8);
+    const [daysPerWeek, setDaysPerWeek] = useState(6);
+
+    const {dailyGoal, weeklyGoal, workDaysInMonth} = useMemo(() => {
+        if (monthlyGoal <= 0 || hoursPerDay <= 0 || daysPerWeek <= 0) return {dailyGoal: 0, weeklyGoal:0, workDaysInMonth: 0};
+        const workDaysInMonth = daysPerWeek * 4; // Aproximação de 4 semanas no mês
+        const daily = monthlyGoal / workDaysInMonth;
+        const weekly = daily * daysPerWeek;
+        return {dailyGoal: daily, weeklyGoal: weekly, workDaysInMonth};
+    }, [monthlyGoal, hoursPerDay, daysPerWeek]);
+    
+    return (
+         <div className="space-y-4">
+             <p className="text-sm text-muted-foreground">
+               Calcule quanto você precisa ganhar por dia para alcançar sua meta mensal, com base na sua jornada de trabalho.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <Label htmlFor="monthlyGoal">Meta Mensal (R$)</Label>
+                    <Input id="monthlyGoal" type="number" placeholder="Ex: 4000" value={monthlyGoal || ''} onChange={(e) => setMonthlyGoal(parseFloat(e.target.value) || 0)} />
+                </div>
+                <div>
+                    <Label htmlFor="hoursPerDay">Horas por Dia</Label>
+                    <Input id="hoursPerDay" type="number" placeholder="Ex: 8" value={hoursPerDay || ''} onChange={(e) => setHoursPerDay(parseFloat(e.target.value) || 0)} />
+                </div>
+                 <div>
+                    <Label htmlFor="daysPerWeek">Dias por Semana</Label>
+                    <Input id="daysPerWeek" type="number" placeholder="Ex: 6" value={daysPerWeek || ''} onChange={(e) => setDaysPerWeek(parseFloat(e.target.value) || 0)} />
+                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="text-center p-4 bg-background">
+                    <p className="text-sm text-muted-foreground">Sua Meta Diária de Ganhos</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(dailyGoal)}</p>
+                </Card>
+                <Card className="text-center p-4 bg-background">
+                    <p className="text-sm text-muted-foreground">Sua Meta Semanal de Ganhos</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(weeklyGoal)}</p>
+                </Card>
+            </div>
+        </div>
+    );
+}
 
 export function TaximeterClient() {
     const { user, refreshUser } = useAuth();
@@ -89,11 +171,7 @@ export function TaximeterClient() {
 
     useEffect(() => {
         if (user?.preferences.taximeterRates) {
-            setRates({
-                startingFare: user.preferences.taximeterRates.startingFare || 3.0,
-                ratePerKm: user.preferences.taximeterRates.ratePerKm || 2.5,
-                ratePerMinute: user.preferences.taximeterRates.ratePerMinute || 0.4,
-            });
+            setRates(user.preferences.taximeterRates);
         }
     }, [user]);
 
@@ -179,10 +257,34 @@ export function TaximeterClient() {
         }, 1000);
     };
 
+    const totalCost = rates.startingFare + (distance * rates.ratePerKm) + ((time / 60) * rates.ratePerMinute);
+    
     const finishRide = async () => {
         if (timerRef.current) clearInterval(timerRef.current);
         stopTracking();
         setStatus('idle');
+        
+        // Salvar a corrida
+         await addOrUpdateWorkDay({
+            id: '',
+            date: new Date(),
+            km: distance,
+            hours: time / 3600, // Converte segundos para horas
+            timeEntries: [],
+            earnings: [{
+                id: Date.now(),
+                category: 'Particular', // Salva como 'Particular'
+                trips: 1,
+                amount: totalCost
+            }],
+            fuelEntries: [],
+            maintenanceEntries: [],
+        });
+        
+        toast({
+            title: "Corrida Salva!",
+            description: `A corrida de ${formatCurrency(totalCost)} foi salva no seu histórico.`
+        });
         
         if (user && !user.isPremium) {
             await updateUserPreferences(user.id, { lastTaximeterUse: new Date().toISOString() });
@@ -213,8 +315,6 @@ export function TaximeterClient() {
         }
         setIsSaving(false);
     }
-
-    const totalCost = rates.startingFare + (distance * rates.ratePerKm) + ((time / 60) * rates.ratePerMinute);
 
     if (!canUseTaximeter) {
         return (
@@ -257,7 +357,7 @@ export function TaximeterClient() {
                                 <Pause className="mr-2 h-6 w-6" /> Pausar
                             </Button>
                             <Button size="lg" className="h-16 text-lg col-span-2" variant="destructive" onClick={finishRide}>
-                                <Square className="mr-2 h-6 w-6" /> Finalizar Corrida
+                                <Square className="mr-2 h-6 w-6" /> Finalizar e Salvar
                             </Button>
                         </>
                     )}
@@ -267,15 +367,14 @@ export function TaximeterClient() {
                                 <Play className="mr-2 h-6 w-6" /> Retomar
                             </Button>
                             <Button size="lg" className="h-16 text-lg col-span-2" variant="destructive" onClick={finishRide}>
-                                <Square className="mr-2 h-6 w-6" /> Finalizar Corrida
+                                <Square className="mr-2 h-6 w-6" /> Finalizar e Salvar
                             </Button>
                         </>
                     )}
                 </CardContent>
             </Card>
             
-            {/* Configuração de Tarifas */}
-            <Accordion type="single" collapsible className="w-full space-y-4">
+            <Accordion type="multiple" className="w-full space-y-4">
                 <AccordionItem value="rates">
                     <Card>
                         <AccordionTrigger className="p-6 [&[data-state=open]>svg]:text-primary">
@@ -286,7 +385,7 @@ export function TaximeterClient() {
                         </AccordionTrigger>
                         <AccordionContent className="p-6 pt-0">
                             <div className="space-y-4">
-                                <div>
+                                 <div>
                                     <Label htmlFor="startingFare">Taxa de Partida (Bandeirada)</Label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -330,7 +429,35 @@ export function TaximeterClient() {
                         </AccordionContent>
                     </Card>
                 </AccordionItem>
+                 <AccordionItem value="hourly-planner">
+                    <Card>
+                        <AccordionTrigger className="p-6 [&[data-state=open]>svg]:text-primary">
+                             <CardTitle className="font-headline flex items-center gap-2">
+                                <Target className="w-5 h-5"/>
+                                Planejador de Ganhos por Hora
+                            </CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent className="p-6 pt-0">
+                           <HourlyGoalSimulator />
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+                 <AccordionItem value="daily-planner">
+                    <Card>
+                        <AccordionTrigger className="p-6 [&[data-state=open]>svg]:text-primary">
+                             <CardTitle className="font-headline flex items-center gap-2">
+                                <Calendar className="w-5 h-5"/>
+                                Planejador de Meta Diária
+                            </CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent className="p-6 pt-0">
+                           <DailyGoalSimulator />
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
             </Accordion>
         </div>
     );
 }
+
+    
