@@ -2,8 +2,8 @@
 "use client"
 
 import React from 'react';
-import { Target } from "lucide-react";
-import { AppLogo } from '../ui/app-logo'; // Usando o novo logo
+import { Flag } from "lucide-react";
+import { AppLogo } from '../ui/app-logo';
 
 type GoalProgressProps = {
   progress: number;
@@ -20,57 +20,49 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const remaining = target - current;
 
   return (
-    <div className="relative flex items-center justify-center space-x-8 p-4 min-h-[200px]">
+    <div className="space-y-4 p-4">
+        <div className="flex justify-between items-end">
+            <div className="text-left">
+                <p className="font-semibold text-2xl text-foreground">{clampedProgress.toFixed(0)}%</p>
+                <p className="text-sm text-muted-foreground">
+                {formatCurrency(current)} de {formatCurrency(target)}
+                </p>
+            </div>
+            {isComplete ? (
+                 <p className="text-sm text-green-500 dark:text-green-400 font-semibold">Parabéns, meta concluída!</p>
+            ) : (
+                 remaining > 0 && <p className="text-sm text-yellow-500 dark:text-yellow-400 font-semibold">Faltam {formatCurrency(remaining)}</p>
+            )}
+           
+        </div>
       
       {/* A "Estrada" da Meta */}
-      <div className="relative w-1.5 h-48 bg-secondary rounded-full">
-         {/* Linha pontilhada para o caminho a percorrer */}
-        <div 
-            className="absolute left-1/2 -translate-x-1/2 w-px h-full"
-            style={{
-                background: `linear-gradient(to bottom, transparent 0%, transparent 50%, hsl(var(--primary)) 50%, hsl(var(--primary)) 100%)`,
-                backgroundSize: '1px 10px',
-                top: 0
-            }}
-        ></div>
-
-        {/* Progresso preenchido */}
-        <div 
-          className="absolute bottom-0 left-0 w-full rounded-full bg-primary transition-all duration-500"
-          style={{ height: `${clampedProgress}%`}}
-        />
-        
-        {/* Ponto de partida */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-green-500 rounded-full border-2 border-card" />
-
-        {/* Ponto de chegada */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-card rounded-full border-2 border-foreground flex items-center justify-center">
-            <Target className="h-2.5 w-2.5 text-foreground" />
+      <div className="relative w-full flex items-center h-16">
+        {/* A Linha da Estrada */}
+        <div className="relative w-full h-1.5 bg-secondary rounded-full">
+            <div 
+            className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all duration-500"
+            style={{ width: `${clampedProgress}%`}}
+            />
         </div>
-
+        
         {/* O Carro */}
         <div
-            className="absolute left-1/2 -translate-x-1/2 transition-all duration-500"
-            style={{ bottom: `calc(${clampedProgress}% - 16px)` }}
+            className="absolute top-1/2 transition-all duration-500"
+            style={{ 
+                left: `calc(${clampedProgress}% - 24px)`, // Ajusta a posição do carro
+                transform: 'translateY(-50%)'
+            }}
         >
-            <div className="w-10 h-10 rounded-full bg-primary/30 flex items-center justify-center backdrop-blur-sm">
-                <AppLogo className="h-6 w-6 text-primary" />
+            <div className="w-12 h-12 rounded-full bg-primary/30 flex items-center justify-center p-1">
+                <AppLogo className="h-10 w-10 text-primary drop-shadow-lg" />
             </div>
         </div>
-      </div>
 
-      {/* Informações da Meta */}
-      <div className="text-left flex-1">
-        <p className="font-semibold text-xl text-foreground">{clampedProgress.toFixed(0)}% da meta</p>
-        <p className="text-sm text-muted-foreground">
-          {formatCurrency(current)} de {formatCurrency(target)}
-        </p>
-         {remaining > 0 && !isComplete && (
-          <p className="text-sm text-yellow-500 dark:text-yellow-400 mt-2 font-semibold">Faltam {formatCurrency(remaining)} para sua meta</p>
-        )}
-        {isComplete && (
-            <p className="text-sm text-green-500 dark:text-green-400 font-semibold mt-2">Parabéns, meta concluída!</p>
-        )}
+        {/* Linha de Chegada */}
+         <div className="absolute right-0 top-1/2 -translate-y-1/2">
+            <Flag className="h-6 w-6 text-foreground" />
+        </div>
       </div>
     </div>
   );
