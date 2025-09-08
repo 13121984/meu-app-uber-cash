@@ -2,7 +2,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Wrench, Target, Settings, History, Calendar, LayoutDashboard, BarChart, Calculator, ArrowRight } from "lucide-react";
+import { PlusCircle, Wrench, Target, Settings, History, Calendar, LayoutDashboard, BarChart, Calculator, ArrowRight, DollarSign } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { DailySummaryCard } from "./daily-summary-card";
@@ -78,17 +78,23 @@ export function HomeClient() {
             <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex-1">
                     <h2 className="text-2xl font-semibold font-headline flex items-center gap-2">
-                        <PlusCircle className="h-6 w-6 text-primary" />
-                        Registrar Ganhos
+                        <DollarSign className="h-6 w-6 text-green-500" />
+                        Registrar Receitas
                     </h2>
                     <p className="text-muted-foreground">Adicione seus ganhos e despesas para acompanhar sua performance.</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <Link href="/registrar/today" className="w-full">
-                        <Button className="w-full" variant="secondary">Registrar Hoje</Button>
+                        <Button className="w-full" variant="secondary">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Registrar Hoje
+                        </Button>
                     </Link>
                      <Link href="/registrar/other-day" className="w-full">
-                        <Button className="w-full">Outro Dia</Button>
+                        <Button className="w-full">
+                            <PlusCircle className="mr-2 h-4 w-4"/>
+                            Outro Dia
+                        </Button>
                     </Link>
                 </div>
             </CardContent>
