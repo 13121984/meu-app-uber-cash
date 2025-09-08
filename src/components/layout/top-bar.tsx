@@ -9,12 +9,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "../ui/button"
-import { Car } from "lucide-react"
+import { AppLogo } from "../ui/app-logo"
 
 const menuItems = [
   { href: "/", label: "Início", icon: Home },
   { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
-  { href: "/registrar", label: "Registrar", icon: PlusCircle },
+  { href: "/registrar/today", label: "Registrar", icon: PlusCircle },
   { href: "/gerenciamento", label: "Gerenciar", icon: History },
   { href: "/taximetro", label: "Taxímetro", icon: Calculator },
   { href: "/manutencao", label: "Manutenção", icon: Wrench },
@@ -45,7 +45,7 @@ export function TopBar() {
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
                     <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center border-2 border-primary-foreground/50 shadow-md">
-                       <Car className="h-6 w-6 text-primary-foreground" />
+                       <AppLogo className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <span className="sr-only">Rota Certa</span>
                 </Link>

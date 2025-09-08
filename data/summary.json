@@ -31,7 +31,7 @@
       "servicesPerformed": 0
     },
     "meta": {
-      "target": 200,
+      "target": 166.66666666666666,
       "period": "diária"
     },
     "profitComposition": [
@@ -53,13 +53,13 @@
         "shift": "Manhã",
         "profit": 60,
         "hours": 2.6666666666666665,
-        "profitPerHour": 22.5
+        "profitPerHour": 30
       },
       {
         "shift": "Tarde",
         "profit": 131,
         "hours": 6,
-        "profitPerHour": 21.833333333333332
+        "profitPerHour": 29.333333333333332
       }
     ]
   },
@@ -117,13 +117,13 @@
         "shift": "Manhã",
         "profit": 60,
         "hours": 2.6666666666666665,
-        "profitPerHour": 22.5
+        "profitPerHour": 30
       },
       {
         "shift": "Tarde",
         "profit": 131,
         "hours": 6,
-        "profitPerHour": 21.833333333333332
+        "profitPerHour": 29.333333333333332
       }
     ]
   },
@@ -181,13 +181,13 @@
         "shift": "Manhã",
         "profit": 60,
         "hours": 2.6666666666666665,
-        "profitPerHour": 22.5
+        "profitPerHour": 30
       },
       {
         "shift": "Tarde",
         "profit": 131,
         "hours": 6,
-        "profitPerHour": 21.833333333333332
+        "profitPerHour": 29.333333333333332
       }
     ]
   }
