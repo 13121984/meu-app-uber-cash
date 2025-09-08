@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { allCharts, mandatoryCharts, allStats, mandatoryCards } from '@/lib/dashboard-items';
+import { motion } from 'framer-motion';
 
 const StatsCard = dynamic(() => import('../dashboard/stats-card').then(mod => mod.StatsCard), { ssr: false });
 const EarningsPieChart = dynamic(() => import('../dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -20,7 +21,7 @@ const EarningsBarChart = dynamic(() => import('../dashboard/earnings-bar-chart')
 const TripsBarChart = dynamic(() => import('../dashboard/trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const MaintenanceSummary = dynamic(() => import('../dashboard/maintenance-summary').then(mod => mod.MaintenanceSummary), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const FuelBarChart = dynamic(() => import('./fuel-bar-chart').then(mod => mod.FuelBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
-const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr-false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerHourChart = dynamic(() => import('./average-earning-per-hour-chart').then(mod => mod.AverageEarningPerHourChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
@@ -129,7 +130,13 @@ export function ReportsClient() {
     const chartsToShow = userChartOrder.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
     return (
-        <div ref={reportContentRef} className="space-y-6 mt-6 bg-background p-4 rounded-lg">
+        <motion.div 
+            ref={reportContentRef} 
+            className="space-y-6 mt-6 bg-background p-4 rounded-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
                  {!isPremium && (
@@ -152,15 +159,22 @@ export function ReportsClient() {
               if(!chartData || (Array.isArray(chartData) && chartData.length === 0)) return null;
 
               return (
-                  <Card key={chart.id}>
-                    <CardHeader>
-                      <CardTitle className="font-headline text-lg">{chart.title}</CardTitle>
-                      <CardDescription>{chart.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ChartComponent key={`${chart.id}-${filters?.type}`} data={chartData} />
-                    </CardContent>
-                  </Card>
+                  <motion.div
+                    key={chart.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                  >
+                    <Card>
+                        <CardHeader>
+                        <CardTitle className="font-headline text-lg">{chart.title}</CardTitle>
+                        <CardDescription>{chart.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartComponent key={`${chart.id}-${filters?.type}`} data={chartData} />
+                        </CardContent>
+                    </Card>
+                  </motion.div>
               );
             })}
              {!isPremium && (
@@ -171,7 +185,7 @@ export function ReportsClient() {
                 </Button>
             </Link>
           )}
-        </div>
+        </motion.div>
     );
   };
 

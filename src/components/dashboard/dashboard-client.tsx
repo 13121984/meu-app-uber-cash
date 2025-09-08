@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { allStats, mandatoryCards, allCharts } from '@/lib/dashboard-items';
 import { ReportFilterValues } from "@/app/relatorios/actions"
+import { motion } from "framer-motion";
 
 
 const EarningsPieChart = dynamic(() => import('../dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -144,7 +145,12 @@ export function DashboardClient() {
       const chartsToShow = userChartOrder.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
       return (
-        <div className="space-y-6">
+        <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
               {!isPremium && (
@@ -168,7 +174,7 @@ export function DashboardClient() {
               </CardContent>
           </Card>
           
-          {chartsToShow.map(chart => {
+          {chartsToShow.map((chart, index) => {
               if(!chart) return null;
               const ChartComponent = chartComponentMap[chart.id];
               if (!ChartComponent) return null;
@@ -177,15 +183,22 @@ export function DashboardClient() {
               if(!chartData || (Array.isArray(chartData) && chartData.length === 0)) return null;
 
               return (
-                  <Card key={chart.id}>
-                    <CardHeader>
-                      <CardTitle className="font-headline text-lg">{chart.title}</CardTitle>
-                      <CardDescription>{chart.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ChartComponent key={`${chart.id}-${period}`} data={chartData} />
-                    </CardContent>
-                  </Card>
+                  <motion.div
+                    key={chart.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <Card>
+                        <CardHeader>
+                        <CardTitle className="font-headline text-lg">{chart.title}</CardTitle>
+                        <CardDescription>{chart.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartComponent key={`${chart.id}-${period}`} data={chartData} />
+                        </CardContent>
+                    </Card>
+                  </motion.div>
               );
           })}
 
@@ -198,7 +211,7 @@ export function DashboardClient() {
                 </Button>
             </Link>
           )}
-          </div>
+          </motion.div>
       )
   }
   

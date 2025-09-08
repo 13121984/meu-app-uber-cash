@@ -45,9 +45,9 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
             className="absolute top-1/2 -translate-y-1/2 transition-all duration-500"
             style={{ left: `calc(${clampedProgress}% - 16px)` }}
           >
-            <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-primary/30 flex items-center justify-center">
               <Car
-                className="h-5 w-5 text-primary"
+                className="h-6 w-6 text-primary"
                 fill="currentColor"
               />
             </div>

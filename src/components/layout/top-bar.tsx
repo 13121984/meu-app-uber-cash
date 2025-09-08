@@ -44,10 +44,8 @@ export function TopBar() {
         <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
-                    <Car className="h-7 w-7 text-primary" />
-                    <div className="flex flex-col items-start">
-                      <span className="font-headline text-lg leading-tight">Uber Cash</span>
-                    </div>
+                    <Car className="h-8 w-8 text-primary" />
+                    <span className="sr-only">Uber Cash</span>
                 </Link>
             </div>
             {isClient && (

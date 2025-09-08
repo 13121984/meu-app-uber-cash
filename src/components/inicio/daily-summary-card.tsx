@@ -82,7 +82,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                     className="absolute top-1/2 -translate-y-1/2 transition-all duration-500"
                     style={{ left: `calc(${clampedProgress}% - 12px)` }}
                   >
-                     <Car className="h-6 w-6 text-primary" fill="currentColor" />
+                     <Car className="h-8 w-8 text-primary" fill="currentColor" />
                   </div>
                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
                    <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-card rounded-full border-2 border-foreground" />

@@ -9,6 +9,7 @@ import { DailySummaryCard } from "./daily-summary-card";
 import { ShiftPerformance } from "./shift-performance";
 import { getTodayData, PeriodData } from "@/services/summary.service";
 import { Skeleton } from "../ui/skeleton";
+import { motion } from "framer-motion";
 
 const mainActions = [
   { href: "/registrar/today", label: "Registrar Hoje", icon: PlusCircle, iconColor: "text-blue-500" },
@@ -23,10 +24,16 @@ const mainActions = [
 
 const ActionButton = ({ href, label, icon: Icon, iconColor }: typeof mainActions[0]) => (
     <Link href={href} passHref>
-        <Card className="group w-full h-32 flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-primary">
-            <Icon className={`h-8 w-8 ${iconColor} transition-colors group-hover:text-primary-foreground`} />
-            <span className="font-semibold text-center text-foreground transition-colors group-hover:text-primary-foreground">{label}</span>
-        </Card>
+        <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-full h-full"
+        >
+            <Card className="group w-full h-32 flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-in-out hover:shadow-lg hover:bg-primary">
+                <Icon className={`h-8 w-8 ${iconColor} transition-colors group-hover:text-primary-foreground`} />
+                <span className="font-semibold text-center text-foreground transition-colors group-hover:text-primary-foreground">{label}</span>
+            </Card>
+        </motion.div>
     </Link>
 )
 
@@ -89,14 +96,19 @@ export function HomeClient() {
                     </div>
                 </Card>
              ) : (
-                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 <motion.div 
+                    className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
                     <div className="lg:col-span-1">
                         <DailySummaryCard data={todayData} />
                     </div>
                     <div className="lg:col-span-2">
                         <ShiftPerformance performance={todayData.performanceByShift} />
                     </div>
-                 </div>
+                 </motion.div>
              )}
         </div>
     </div>
