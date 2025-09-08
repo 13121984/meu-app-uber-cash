@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, Settings, Lock, CalculatorIcon } from 'lucide-react';
+import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, Settings, Lock, CalculatorIcon, Check } from 'lucide-react';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { toast } from '@/hooks/use-toast';
 import { updateUserPreferences, TaximeterRates, UserPreferences } from '@/services/auth.service';
@@ -17,6 +17,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from '../ui/label';
 import { addOrUpdateWorkDay } from '@/services/work-day.service';
 
@@ -94,6 +104,10 @@ export function TaximeterClient() {
 
     const [rates, setRates] = useState<TaximeterRates>({ startingFare: 3.0, ratePerKm: 2.5, ratePerMinute: 0.4 });
     const [totalCost, setTotalCost] = useState(0);
+    
+    // State for the confirmation dialog
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [finalRideData, setFinalRideData] = useState<{distance: number, time: number, cost: number} | null>(null);
 
     
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -195,20 +209,26 @@ export function TaximeterClient() {
     
     const finishRide = async () => {
         stopTracking();
+        setFinalRideData({ distance, time, cost: totalCost });
+        setIsConfirmOpen(true);
+    };
+
+    const confirmAndSaveRide = async () => {
+        if (!finalRideData) return;
+
         setStatus('idle');
         
-        // Salvar a corrida
-         await addOrUpdateWorkDay({
+        await addOrUpdateWorkDay({
             id: '',
             date: new Date(),
-            km: distance,
-            hours: time / 3600, // Converte segundos para horas
+            km: finalRideData.distance,
+            hours: finalRideData.time / 3600, // Converte segundos para horas
             timeEntries: [],
             earnings: [{
                 id: Date.now(),
                 category: 'Particular', // Salva como 'Particular'
                 trips: 1,
-                amount: totalCost
+                amount: finalRideData.cost
             }],
             fuelEntries: [],
             maintenanceEntries: [],
@@ -216,14 +236,18 @@ export function TaximeterClient() {
         
         toast({
             title: "Corrida Salva!",
-            description: `A corrida de ${formatCurrency(totalCost)} foi salva no seu histórico.`
+            description: `A corrida de ${formatCurrency(finalRideData.cost)} foi salva no seu histórico.`
         });
         
         if (user && !user.isPremium) {
             await updateUserPreferences(user.id, { lastTaximeterUse: new Date().toISOString() });
             await refreshUser();
         }
-    };
+
+        resetState();
+        setFinalRideData(null);
+        setIsConfirmOpen(false);
+    }
     
     const resetState = () => {
         setTime(0);
@@ -263,6 +287,7 @@ export function TaximeterClient() {
     }
 
     return (
+        <>
         <div className="space-y-6">
             {/* Display */}
             <Card className="bg-card shadow-lg">
@@ -364,5 +389,26 @@ export function TaximeterClient() {
                 </AccordionItem>
             </Accordion>
         </div>
+
+        <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Finalizar Corrida</AlertDialogTitle>
+                <AlertDialogDescription>
+                    O valor final da corrida foi: 
+                    <span className="block text-2xl font-bold text-primary my-2">{formatCurrency(finalRideData?.cost || 0)}</span>
+                    Deseja salvar este registro no seu histórico?
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setStatus('paused')}>Não, continuar corrida</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmAndSaveRide}>
+                    <Check className="mr-2 h-4 w-4" />
+                    Sim, registrar corrida
+                </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     );
 }

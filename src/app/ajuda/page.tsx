@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LifeBuoy, BookOpen, PlusCircle, BarChart3, History, Target, Calculator, Smartphone, FileQuestion, DatabaseZap, UserCog, CodeXml, Youtube } from "lucide-react";
+import { LifeBuoy, BookOpen, PlusCircle, BarChart3, History, Target, Calculator, Smartphone, LayoutDashboard, Youtube } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -30,7 +30,7 @@ const helpTopics = [
     value: "relatorios",
     icon: BarChart3,
     title: "Como funcionam os relatórios?",
-    content: "Acesse os 'Relatórios Detalhados' através do botão na tela 'Gerenciar'. Use os filtros de período para gerar análises aprofundadas da sua performance. Você pode ver gráficos de composição de ganhos, evolução do lucro e muito mais. Também é possível exportar os dados filtrados em CSV ou PDF."
+    content: "Acesse os 'Relatórios Detalhados' através do botão na tela 'Gerenciar'. Use os filtros de período para gerar análises aprofundadas da sua performance. Você pode ver gráficos de composição de ganhos, evolução do lucro e muito mais. Também é possível exportar os dados filtrados para PDF ou CSV a qualquer momento."
   },
    {
     value: "metas",
@@ -43,6 +43,12 @@ const helpTopics = [
     icon: Calculator,
     title: "Para que serve o Taxímetro?",
     content: "O Taxímetro Inteligente é ideal para corridas particulares. Configure suas tarifas (bandeirada, preço por km e por minuto) e inicie uma corrida. O app usará o GPS para calcular a distância e o tempo, mostrando o valor final em tempo real. Ao finalizar, a corrida é salva automaticamente no seu histórico."
+  },
+   {
+    value: "layout",
+    icon: LayoutDashboard,
+    title: "Posso personalizar a aparência do app?",
+    content: "Sim! Você pode organizar o layout do seu Dashboard e da tela de Relatórios. No plano gratuito, é possível exibir 1 gráfico e 1 card de estatística opcional, além dos itens padrão, e reordená-los como preferir. Assinando o plano Premium, você desbloqueia todos os 8 tipos de gráficos e 12 cards de estatísticas para montar a visualização que melhor se adapta às suas necessidades."
   },
    {
     value: "chamadas",
