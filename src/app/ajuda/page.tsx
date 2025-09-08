@@ -1,14 +1,14 @@
 
 "use client";
 
-import { LifeBuoy, BookOpen, PlusCircle, BarChart3, History, Target, Calculator, Smartphone, FileQuestion } from "lucide-react";
+import { LifeBuoy, BookOpen, PlusCircle, BarChart3, History, Target, Calculator, Smartphone, FileQuestion, DatabaseZap, UserCog, CodeXml, Youtube } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -17,20 +17,20 @@ const helpTopics = [
     value: "registrar",
     icon: PlusCircle,
     title: "Como registrar meus ganhos e despesas?",
-    content: "Na tela inicial, clique no card 'Registrar Receitas' para escolher entre 'Hoje' ou 'Outro Dia'. Você também pode usar o botão de '+' no menu superior. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real.",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ" // Exemplo de URL de vídeo
+    content: "Na tela inicial, use os botões 'Registrar Hoje' ou 'Outro Dia'. Você também pode usar o botão de '+' no menu superior. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real.",
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
   },
   {
     value: "gerenciar",
     icon: History,
     title: "Como editar ou apagar um registro antigo?",
-    content: "Na tela 'Gerenciar', você pode visualizar todos os seus dias de trabalho. Use os filtros para encontrar um dia específico. Clique em um dia na lista para ver os detalhes e editar cada período de trabalho individualmente ou apagar todos os registros daquele dia."
+    content: "Na tela 'Gerenciar', você pode visualizar todos os seus dias de trabalho. Use os filtros para encontrar um dia específico. Clique em um dia na lista para ver os detalhes, editar cada período de trabalho individualmente ou apagar todos os registros daquele dia."
   },
   {
     value: "relatorios",
     icon: BarChart3,
     title: "Como funcionam os relatórios?",
-    content: "Acesse os 'Relatórios Detalhados' através do botão na tela 'Gerenciar'. Use os filtros de período (semana, mês, personalizado) para gerar análises aprofundadas da sua performance. Você pode ver gráficos de composição de ganhos, evolução do lucro e muito mais. Também é possível exportar os dados em CSV ou PDF."
+    content: "Acesse os 'Relatórios Detalhados' através do botão na tela 'Gerenciar'. Use os filtros de período para gerar análises aprofundadas da sua performance. Você pode ver gráficos de composição de ganhos, evolução do lucro e muito mais. Também é possível exportar os dados filtrados em CSV ou PDF."
   },
    {
     value: "metas",
@@ -54,60 +54,68 @@ const helpTopics = [
 
 
 export default function AjudaPage() {
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-            <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
-                <LifeBuoy className="w-8 h-8 text-primary" />
-                Central de Ajuda
-            </h1>
-            <p className="text-muted-foreground">Encontre respostas para suas dúvidas e aprenda a usar o app ao máximo.</p>
-        </div>
-      </div>
-      
-      <Card>
-        <CardContent className="p-6">
-            <Accordion type="single" collapsible className="w-full">
-                {helpTopics.map((topic) => (
-                    <AccordionItem key={topic.value} value={topic.value}>
-                        <AccordionTrigger>
-                           <div className="flex items-center gap-3 text-left">
-                             <topic.icon className="h-5 w-5 text-primary" />
-                             <span>{topic.title}</span>
-                           </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="text-base space-y-4">
-                            <p>{topic.content}</p>
-                            {topic.videoUrl && (
-                                <div className="mt-4 aspect-video w-full rounded-lg overflow-hidden border">
-                                    <iframe
-                                        className="w-full h-full"
-                                        src={topic.videoUrl}
-                                        title={`Tutorial: ${topic.title}`}
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                    ></iframe>
-                                </div>
-                            )}
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-        </CardContent>
-      </Card>
+    return (
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
+                    <LifeBuoy className="w-8 h-8 text-primary" />
+                    Central de Ajuda
+                </h1>
+                <p className="text-muted-foreground">Tire suas dúvidas sobre as funcionalidades do aplicativo.</p>
+            </div>
 
-      <Card>
-        <CardContent className="p-6 text-center">
-            <FileQuestion className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold">Não encontrou o que procurava?</h2>
-            <p className="text-muted-foreground mt-2 mb-4">
-                Envie sua dúvida, sugestão ou reclamação. Sua opinião é importante para nós! (Funcionalidade de Tickets em breve).
-            </p>
-            <Button disabled>Abrir um Ticket de Suporte</Button>
-        </CardContent>
-      </Card>
-    </div>
-  );
+            <Card>
+                <CardContent className="p-6">
+                    <Accordion type="single" collapsible className="w-full">
+                        {helpTopics.map((topic) => (
+                             <AccordionItem value={topic.value} key={topic.value}>
+                                <AccordionTrigger>
+                                    <div className="flex items-center gap-3">
+                                        <topic.icon className="h-5 w-5 text-primary" />
+                                        <span className="font-semibold text-left">{topic.title}</span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="space-y-4">
+                                        <p className="text-foreground/90">{topic.content}</p>
+                                        {topic.videoUrl && (
+                                            <div className="mt-4">
+                                                <h4 className="font-semibold mb-2">Tutorial em Vídeo:</h4>
+                                                <div className="aspect-video w-full rounded-lg overflow-hidden border">
+                                                    <iframe
+                                                        className="w-full h-full"
+                                                        src={topic.videoUrl}
+                                                        title={topic.title}
+                                                        frameBorder="0"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                        allowFullScreen
+                                                    ></iframe>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <h2 className="text-2xl font-bold font-headline">Ainda precisa de ajuda?</h2>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                        Se você não encontrou a resposta para sua dúvida, entre em contato com nosso suporte.
+                    </p>
+                    <Link href="mailto:pvitormc@gmail.com">
+                      <Button>
+                        Entrar em Contato
+                      </Button>
+                    </Link>
+                </CardContent>
+            </Card>
+        </div>
+    )
 }

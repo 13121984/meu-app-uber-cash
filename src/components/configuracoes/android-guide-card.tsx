@@ -1,10 +1,11 @@
 
-"use client"
+"use client";
 
-import { BookOpenCheck, UserCog, DatabaseZap, Youtube, CodeXml } from "lucide-react"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { BookOpenCheck, DatabaseZap, UserCog, CodeXml, Youtube } from "lucide-react";
 
+// Exemplos de código como strings para evitar erros de compilação
 const xmlExample = `<changes>
   <description>[Resumo das mudanças]</description>
   <change>
