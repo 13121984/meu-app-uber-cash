@@ -13,6 +13,7 @@ import { Separator } from '../ui/separator';
 import { Textarea } from '../ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
 import type { CatalogItem } from '@/services/catalog.service';
+import Link from 'next/link';
 
 
 type Action = { type: 'UPDATE_FIELD'; payload: { field: keyof State; value: any } };
@@ -117,9 +118,13 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                                             <SelectContent>
                                                 {fuelTypes.map((type) => (
                                                   <SelectItem key={type.name} value={type.name} disabled={!isPremium && !type.isDefault}>
-                                                    <div className="flex items-center gap-2">
-                                                        {type.name}
-                                                        {!isPremium && !type.isDefault && <Lock className="h-4 w-4 text-amber-500" />}
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <span>{type.name}</span>
+                                                        {!isPremium && !type.isDefault && 
+                                                            <Link href="/premium" passHref>
+                                                                <Lock className="h-4 w-4 text-amber-500 hover:text-amber-400" />
+                                                            </Link>
+                                                        }
                                                     </div>
                                                   </SelectItem>
                                                 ))}
@@ -210,5 +215,3 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
     </div>
   );
 }
-
-    

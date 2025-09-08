@@ -34,7 +34,6 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
 
   const handleCategoryToggle = (categoryName: string, isDefault: boolean) => {
     if (!isPremium && !isDefault) {
-        // Here you could trigger a modal or a toast to upsell
         return;
     }
 
@@ -95,7 +94,11 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
                                 disabled={!isSelectable}
                             />
                             <Label htmlFor={`check-${cat.name}`} className={cn("flex-1", isSelectable ? "cursor-pointer" : "cursor-not-allowed")}>{cat.name}</Label>
-                            {!isSelectable && <Lock className="h-4 w-4 text-amber-500" />}
+                            {!isSelectable && 
+                                <Link href="/premium" passHref>
+                                    <Lock className="h-4 w-4 text-amber-500 hover:text-amber-400" />
+                                </Link>
+                            }
                          </div>
                     )})}
                 </div>

@@ -25,10 +25,21 @@ interface Step1InfoProps {
 const timeToMinutes = (time: string): number => {
     if(!time || !time.includes(':')) return 0;
     const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
+    return (hours || 0) * 60 + (minutes || 0);
 };
 
-// This function now only calculates and dispatches the new hours total
+const minutesToDecimal = (minutes: number): number => {
+    return minutes / 60;
+}
+
+const decimalToTime = (decimalHours: number): string => {
+    if (isNaN(decimalHours) || decimalHours < 0) return '';
+    const totalMinutes = Math.round(decimalHours * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
 const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<Action>) => {
     let totalMinutes = 0;
     timeEntries.forEach(entry => {
@@ -38,14 +49,14 @@ const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<
             totalMinutes += endMinutes - startMinutes;
         }
     });
-    const totalHours = totalMinutes / 60;
+    const totalHours = minutesToDecimal(totalMinutes);
     dispatch({ type: 'UPDATE_FIELD', payload: { field: 'hours', value: totalHours }});
 };
 
 export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1InfoProps) {
   
   const [kmInput, setKmInput] = useState(data.km > 0 ? String(data.km).replace('.', ',') : '');
-  const [hoursInput, setHoursInput] = useState(data.hours > 0 ? String(data.hours).replace('.', ',') : '');
+  const [hoursInput, setHoursInput] = useState(decimalToTime(data.hours));
   
   const [day, setDay] = useState(data.date ? getDate(data.date).toString() : '');
   const [month, setMonth] = useState(data.date ? (getMonth(data.date) + 1).toString() : '');
@@ -58,6 +69,10 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
         setYearState(getYear(data.date).toString());
     }
   }, [data.date]);
+
+  useEffect(() => {
+      setHoursInput(decimalToTime(data.hours))
+  }, [data.hours])
 
   const handleFieldChange = (field: keyof State, value: any) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field, value } });
@@ -85,13 +100,17 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     }
   };
   
-  const handleNumericInputChange = (field: 'km' | 'hours', rawValue: string) => {
+  const handleKmInputChange = (rawValue: string) => {
     const sanitizedValue = rawValue.replace(/[^0-9,.]/g, '');
-    if (field === 'km') setKmInput(sanitizedValue);
-    if (field === 'hours') setHoursInput(sanitizedValue);
-    
+    setKmInput(sanitizedValue);
     const numericValue = parseFloat(sanitizedValue.replace(',', '.')) || 0;
-    handleFieldChange(field, numericValue);
+    handleFieldChange('km', numericValue);
+  }
+  
+  const handleHoursInputChange = (timeValue: string) => {
+      setHoursInput(timeValue);
+      const totalMinutes = timeToMinutes(timeValue);
+      handleFieldChange('hours', minutesToDecimal(totalMinutes));
   }
   
   const handleTimeEntriesChange = useCallback((newTimeEntries: TimeEntry[]) => {
@@ -161,7 +180,7 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                     <Input
                       id="km" type="text" inputMode="decimal" placeholder="Ex: 150,5"
                       value={kmInput}
-                      onChange={(e) => handleNumericInputChange('km', e.target.value)}
+                      onChange={(e) => handleKmInputChange(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -171,13 +190,13 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                      <div className="relative">
                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-500" />
                          <Input
-                            id="hours" type="text" inputMode="decimal" placeholder="Ex: 10,5"
+                            id="hours" type="time"
                             value={hoursInput}
-                            onChange={(e) => handleNumericInputChange('hours', e.target.value)}
+                            onChange={(e) => handleHoursInputChange(e.target.value)}
                             className="pl-10"
                          />
                      </div>
-                     <p className="text-xs text-muted-foreground mt-1">Use ponto ou vírgula para decimais (Ex: 8.5 ou 8,5 para 8h30min).</p>
+                     <p className="text-xs text-muted-foreground mt-1">O formato decimal (Ex: 8.5h) é usado nos cálculos.</p>
                  </div>
             </div>
             
