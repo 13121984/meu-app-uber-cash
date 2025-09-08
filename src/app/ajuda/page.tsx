@@ -17,7 +17,8 @@ const helpTopics = [
     value: "registrar",
     icon: PlusCircle,
     title: "Como registrar meus ganhos e despesas?",
-    content: "Na tela inicial, clique no card 'Registrar Receitas' para escolher entre 'Hoje' ou 'Outro Dia'. Você também pode usar o botão de '+' no menu superior. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real."
+    content: "Na tela inicial, clique no card 'Registrar Receitas' para escolher entre 'Hoje' ou 'Outro Dia'. Você também pode usar o botão de '+' no menu superior. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real.",
+    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ" // Exemplo de URL de vídeo
   },
   {
     value: "gerenciar",
@@ -76,8 +77,20 @@ export default function AjudaPage() {
                              <span>{topic.title}</span>
                            </div>
                         </AccordionTrigger>
-                        <AccordionContent className="text-base">
-                            {topic.content}
+                        <AccordionContent className="text-base space-y-4">
+                            <p>{topic.content}</p>
+                            {topic.videoUrl && (
+                                <div className="mt-4 aspect-video w-full rounded-lg overflow-hidden border">
+                                    <iframe
+                                        className="w-full h-full"
+                                        src={topic.videoUrl}
+                                        title={`Tutorial: ${topic.title}`}
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen
+                                    ></iframe>
+                                </div>
+                            )}
                         </AccordionContent>
                     </AccordionItem>
                 ))}
@@ -98,5 +111,3 @@ export default function AjudaPage() {
     </div>
   );
 }
-
-
