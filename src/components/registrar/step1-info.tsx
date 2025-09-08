@@ -207,5 +207,3 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     </Card>
   );
 }
-
-    
