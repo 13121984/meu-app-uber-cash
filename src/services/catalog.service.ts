@@ -18,23 +18,21 @@ export interface Catalog {
 
 const dataFilePath = path.join(process.cwd(), 'data', 'catalog.json');
 
-// CORREÇÃO: Ajustado para refletir a regra de negócio do plano gratuito.
-// Apenas as categorias mais essenciais são marcadas como 'isDefault'.
+// CORREÇÃO: Apenas "Aplicativo" e "Combustível" são padrão para o plano gratuito.
 const defaultCatalog: Catalog = {
   earnings: [
-    { name: "99 Pop", active: true, isDefault: true },
-    { name: "Uber Cash", active: true, isDefault: true },
+    { name: "Aplicativo", active: true, isDefault: true },
+    { name: "99 Pop", active: true, isDefault: false },
+    { name: "Uber Cash", active: true, isDefault: false },
     { name: "Particular", active: true, isDefault: false },
     { name: "Ganhos Extras", active: true, isDefault: false },
     { name: "MD Drivers", active: true, isDefault: false },
     { name: "In Driver", active: true, isDefault: false },
-    { name: "Outros", active: true, isDefault: false },
-    { name: "Uber Confort", active: false, isDefault: false },
-    { name: "Uber Black", active: false, isDefault: false },
   ],
   fuel: [
-    { name: "GNV", active: true, isDefault: true },
-    { name: "Etanol", active: true, isDefault: true },
+    { name: "Combustível", active: true, isDefault: true },
+    { name: "GNV", active: true, isDefault: false },
+    { name: "Etanol", active: true, isDefault: false },
     { name: "Gasolina Aditivada", active: true, isDefault: false },
     { name: "Gasolina Comum", active: true, isDefault: false },
   ]

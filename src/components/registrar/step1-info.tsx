@@ -45,6 +45,7 @@ const calculateAndDispatchHours = (timeEntries: TimeEntry[], dispatch: Dispatch<
 export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1InfoProps) {
   
   const [kmInput, setKmInput] = useState(data.km > 0 ? String(data.km).replace('.', ',') : '');
+  const [hoursInput, setHoursInput] = useState(data.hours > 0 ? String(data.hours).replace('.', ',') : '');
   
   const [day, setDay] = useState(data.date ? getDate(data.date).toString() : '');
   const [month, setMonth] = useState(data.date ? (getMonth(data.date) + 1).toString() : '');
@@ -84,9 +85,11 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
     }
   };
   
-  const handleNumericInputChange = (field: 'km', rawValue: string) => {
+  const handleNumericInputChange = (field: 'km' | 'hours', rawValue: string) => {
     const sanitizedValue = rawValue.replace(/[^0-9,.]/g, '');
     if (field === 'km') setKmInput(sanitizedValue);
+    if (field === 'hours') setHoursInput(sanitizedValue);
+    
     const numericValue = parseFloat(sanitizedValue.replace(',', '.')) || 0;
     handleFieldChange(field, numericValue);
   }
@@ -150,24 +153,39 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                 />
                </div>
             </div>
-            <div>
-              <Label htmlFor="km">KM Rodados</Label>
-              <div className="relative">
-                <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-500" />
-                <Input
-                  id="km" type="text" inputMode="decimal" placeholder="Ex: 150,5"
-                  value={kmInput}
-                  onChange={(e) => handleNumericInputChange('km', e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="km">KM Rodados</Label>
+                  <div className="relative">
+                    <Milestone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-500" />
+                    <Input
+                      id="km" type="text" inputMode="decimal" placeholder="Ex: 150,5"
+                      value={kmInput}
+                      onChange={(e) => handleNumericInputChange('km', e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                 <div>
+                    <Label htmlFor="hours">Total de Horas</Label>
+                     <div className="relative">
+                         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-500" />
+                         <Input
+                            id="hours" type="text" inputMode="decimal" placeholder="Ex: 10,5"
+                            value={hoursInput}
+                            onChange={(e) => handleNumericInputChange('hours', e.target.value)}
+                            className="pl-10"
+                         />
+                     </div>
+                     <p className="text-xs text-muted-foreground mt-1">Use ponto ou vírgula para decimais (Ex: 8.5 ou 8,5 para 8h30min).</p>
+                 </div>
             </div>
             
             <Separator/>
 
             <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                     <Label>Períodos de Trabalho</Label>
+                     <Label>Períodos de Trabalho (Opcional)</Label>
                      <Button type="button" size="sm" variant="outline" onClick={addTimeEntry}>
                         <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
                      </Button>
@@ -192,11 +210,11 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                     </div>
                 </ScrollArea>
                  <div className="pt-2">
-                    <Label>Total de Horas</Label>
+                    <Label>Total de Horas (Calculado)</Label>
                      <div className="relative">
                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-500 pointer-events-none" />
                          <Input
-                            id="hours" type="text" readOnly
+                            id="hours-calculated" type="text" readOnly
                             value={`${data.hours.toFixed(2).replace('.',',')}h`}
                             className="pl-10 bg-muted/70 cursor-not-allowed"
                          />
