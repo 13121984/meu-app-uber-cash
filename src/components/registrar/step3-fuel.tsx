@@ -91,10 +91,10 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
       <Card className="border-none shadow-none">
         <CardHeader className="p-0 pb-4 flex flex-row justify-between items-center">
             <CardTitle className="font-headline text-lg flex items-center gap-2">
-                <Fuel className="h-5 w-5 text-primary"/>
+                <Fuel className="h-5 w-5 text-destructive"/>
                 Abastecimentos
             </CardTitle>
-            <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline" disabled={fuelTypes.length === 0}>
+            <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="destructive" disabled={fuelTypes.length === 0}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
             </Button>
         </CardHeader>
@@ -173,7 +173,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
        <Card className="border-none shadow-none">
          <CardHeader className="p-0 pb-4 flex flex-row justify-between items-center">
             <CardTitle className="font-headline text-lg flex items-center gap-2">
-                <Wrench className="h-5 w-5 text-primary"/>
+                <Wrench className="h-5 w-5 text-destructive"/>
                 Despesas Extras
             </CardTitle>
             <Button size="sm" type="button" onClick={handleAddMaintenanceEntry} variant="destructive">
@@ -215,3 +215,4 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
     </div>
   );
 }
+
