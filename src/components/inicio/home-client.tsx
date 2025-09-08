@@ -81,7 +81,7 @@ export function HomeClient() {
                         <PlusCircle className="h-6 w-6 text-primary" />
                         Registrar Ganhos
                     </h2>
-                    <p className="text-muted-foreground">Comece adicionando seus ganhos e despesas para acompanhar sua performance.</p>
+                    <p className="text-muted-foreground">Adicione seus ganhos e despesas para acompanhar sua performance.</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <Link href="/registrar/today" className="w-full">

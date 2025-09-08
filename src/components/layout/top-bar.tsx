@@ -3,18 +3,27 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "../ui/button"
 import { AppLogo } from "../ui/app-logo"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 const menuItems = [
   { href: "/", label: "Início", icon: Home },
   { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
-  { href: "/registrar/today", label: "Registrar", icon: PlusCircle },
+  // O botão de registro foi movido para um Dropdown separado
   { href: "/gerenciamento", label: "Gerenciar", icon: History },
   { href: "/taximetro", label: "Taxímetro", icon: Calculator },
   { href: "/manutencao", label: "Manutenção", icon: Wrench },
@@ -76,6 +85,44 @@ export function TopBar() {
                         </Tooltip>
                         )
                     })}
+                     
+                     {/* Botão de Registro com Dropdown */}
+                    <DropdownMenu>
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <DropdownMenuTrigger asChild>
+                                     <button
+                                        className={cn(
+                                            "flex h-10 w-10 items-center justify-center rounded-lg transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                                            pathname.startsWith("/registrar") && "bg-primary text-primary-foreground"
+                                        )}
+                                        >
+                                        <PlusCircle className="h-5 w-5" />
+                                     </button>
+                                </DropdownMenuTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" align="center">
+                                <p>Registrar Ganhos</p>
+                            </TooltipContent>
+                        </Tooltip>
+                        <DropdownMenuContent>
+                            <DropdownMenuLabel>Registrar um Período</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                             <Link href="/registrar/today" passHref>
+                                <DropdownMenuItem>
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    <span>Registrar Hoje</span>
+                                </DropdownMenuItem>
+                             </Link>
+                             <Link href="/registrar/other-day" passHref>
+                                <DropdownMenuItem>
+                                    <CalendarPlus className="mr-2 h-4 w-4" />
+                                    <span>Registrar Outro Dia</span>
+                                </DropdownMenuItem>
+                            </Link>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                      <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" onClick={handleLogout} className="h-10 w-10 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
