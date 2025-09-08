@@ -28,30 +28,24 @@ const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style:
 
 function GoalPlannerSkeleton() {
     return (
-        <Card>
-            <CardHeader>
-                <Skeleton className="h-7 w-64" />
-                <Skeleton className="h-4 w-full mt-2" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-                 <Skeleton className="h-20 w-full" />
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-10 w-full" />
-                </div>
-                 <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-10 w-full" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                </div>
-            </CardContent>
-            <CardFooter>
-                <Skeleton className="h-10 w-36" />
-            </CardFooter>
-        </Card>
+        <div className="space-y-4">
+             <Skeleton className="h-20 w-full" />
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+             <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+            </div>
+            <div className="flex justify-end">
+                 <Skeleton className="h-10 w-36" />
+            </div>
+        </div>
     );
 }
 
@@ -104,77 +98,64 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-headline">
-            <Target className="h-6 w-6 text-primary" />
-            <span>Defina seu Plano</span>
-          </CardTitle>
-          <CardDescription>
-            Insira sua meta de lucro mensal e sua carga de trabalho para calcularmos seus objetivos diários e semanais.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <Alert className="bg-primary/10 border-primary/20">
-                <Info className="h-4 w-4 text-primary" />
-                <AlertDescription>
-                   Aqui você define o valor **livre** que quer ter por mês, ou seja, após tirar seus custos de trabalho (combustível, etc).
-                </AlertDescription>
-            </Alert>
-            <div className="space-y-2">
-                <Label htmlFor="monthly" className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-muted-foreground"/>Meta Mensal de Lucro</Label>
-                <Controller
-                    name="monthly"
-                    control={control}
-                    render={({ field }) => (
-                        <Input
-                            id="monthly" type="number" placeholder="Ex: 4000"
-                            value={field.value === 0 ? '' : field.value}
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                    )}
-                />
-                 {form.formState.errors.monthly && <p className="text-sm text-destructive">{form.formState.errors.monthly.message}</p>}
-            </div>
-            <div className="space-y-2">
-                 <Label htmlFor="workDaysPerWeek" className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/>Carga de Trabalho</Label>
-                 <Controller
-                    name="workDaysPerWeek"
-                    control={control}
-                    render={({ field }) => (
-                         <Select onValueChange={(val) => field.onChange(parseInt(val))} value={String(field.value)}>
-                            <SelectTrigger id="workDaysPerWeek">
-                                <SelectValue placeholder="Selecione os dias..."/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {[...Array(7)].map((_, i) => (
-                                    <SelectItem key={i+1} value={String(i+1)}>{i+1} dias / sem.</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                 />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                 <Card className="text-center p-4 bg-secondary">
-                    <CardDescription className="flex items-center justify-center gap-2"><LineChart className="w-4 h-4"/>Meta Semanal</CardDescription>
-                    <p className="text-2xl font-bold text-primary">{formatCurrency(calculatedGoals.weekly)}</p>
-                 </Card>
-                 <Card className="text-center p-4 bg-secondary">
-                    <CardDescription className="flex items-center justify-center gap-2"><BarChart3 className="w-4 h-4"/>Meta Diária</CardDescription>
-                    <p className="text-2xl font-bold text-primary">{formatCurrency(calculatedGoals.daily)}</p>
-                 </Card>
-            </div>
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
-             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-             {isSubmitting ? 'Salvando...' : 'Salvar Plano'}
-          </Button>
-        </CardFooter>
-      </Card>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Alert className="bg-primary/10 border-primary/20">
+            <Info className="h-4 w-4 text-primary" />
+            <AlertDescription>
+               Aqui você define o valor **livre** que quer ter por mês, ou seja, após tirar seus custos de trabalho (combustível, etc).
+            </AlertDescription>
+        </Alert>
+        <div className="space-y-2">
+            <Label htmlFor="monthly" className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-muted-foreground"/>Meta Mensal de Lucro</Label>
+            <Controller
+                name="monthly"
+                control={control}
+                render={({ field }) => (
+                    <Input
+                        id="monthly" type="number" placeholder="Ex: 4000"
+                        value={field.value === 0 ? '' : field.value}
+                        onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                )}
+            />
+             {form.formState.errors.monthly && <p className="text-sm text-destructive">{form.formState.errors.monthly.message}</p>}
+        </div>
+        <div className="space-y-2">
+             <Label htmlFor="workDaysPerWeek" className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/>Carga de Trabalho</Label>
+             <Controller
+                name="workDaysPerWeek"
+                control={control}
+                render={({ field }) => (
+                     <Select onValueChange={(val) => field.onChange(parseInt(val))} value={String(field.value)}>
+                        <SelectTrigger id="workDaysPerWeek">
+                            <SelectValue placeholder="Selecione os dias..."/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {[...Array(7)].map((_, i) => (
+                                <SelectItem key={i+1} value={String(i+1)}>{i+1} dias / sem.</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+             />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+             <Card className="text-center p-4 bg-secondary">
+                <CardDescription className="flex items-center justify-center gap-2"><LineChart className="w-4 h-4"/>Meta Semanal</CardDescription>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(calculatedGoals.weekly)}</p>
+             </Card>
+             <Card className="text-center p-4 bg-secondary">
+                <CardDescription className="flex items-center justify-center gap-2"><BarChart3 className="w-4 h-4"/>Meta Diária</CardDescription>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(calculatedGoals.daily)}</p>
+             </Card>
+        </div>
+        <div className="flex justify-end">
+            <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isSubmitting ? 'Salvando...' : 'Salvar Plano'}
+            </Button>
+        </div>
     </form>
   );
 }
