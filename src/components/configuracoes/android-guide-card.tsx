@@ -1,7 +1,7 @@
 
 "use client"
 
-import { BookOpenCheck, UserCog, DatabaseZap } from "lucide-react"
+import { BookOpenCheck, UserCog, DatabaseZap, Youtube } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "../ui/scroll-area"
@@ -12,10 +12,10 @@ export function AndroidGuideCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-headline">
           <BookOpenCheck className="h-6 w-6 text-primary" />
-          Guia de Desenvolvimento Nativo
+          Guia de Desenvolvimento Pessoal
         </CardTitle>
         <CardDescription>
-          Seu roteiro pessoal para os próximos passos no desenvolvimento Android do Rota Certa.
+          Seu roteiro pessoal com as anotações e os próximos passos no desenvolvimento do Rota Certa.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -28,7 +28,7 @@ export function AndroidGuideCard() {
                     </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                   <ScrollArea className="h-96 w-full rounded-md border bg-background p-4">
+                   <ScrollArea className="h-72 w-full rounded-md border bg-background p-4">
                        <div className="space-y-4 text-sm text-foreground">
                             <p className="font-semibold">A estrutura XML que você gera é o único mecanismo para aplicar mudanças no código do usuário. Portanto, ao fazer mudanças em um arquivo, o bloco `<changes>` deve estar sempre totalmente presente e formatado corretamente como a seguir.</p>
                             <pre className="bg-muted p-2 rounded-md overflow-x-auto text-xs">
