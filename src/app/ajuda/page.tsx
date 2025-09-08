@@ -17,7 +17,7 @@ const helpTopics = [
     value: "registrar",
     icon: PlusCircle,
     title: "Como registrar meus ganhos e despesas?",
-    content: "Na tela inicial, clique em 'Registrar Hoje' ou 'Registrar Outro Dia'. Você também pode usar o botão de '+' no menu superior. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real."
+    content: "Na tela inicial, clique no card 'Registrar Receitas' para escolher entre 'Hoje' ou 'Outro Dia'. Você também pode usar o botão de '+' no menu superior. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real."
   },
   {
     value: "gerenciar",
@@ -47,7 +47,7 @@ const helpTopics = [
     value: "chamadas",
     icon: Smartphone,
     title: "Como funciona a captura de chamadas?",
-    content: "Esta é uma funcionalidade em desenvolvimento para a versão nativa Android. O objetivo é que o app, rodando em segundo plano, consiga 'ler' a tela de apps como Uber e 99, capturar os dados da corrida (valor, distância) e salvá-los automaticamente no seu histórico de chamadas, permitindo uma análise detalhada e comparação de ganhos."
+    content: "Esta é uma funcionalidade em desenvolvimento para a versão nativa Android, que pode ser acessada através da tela 'Gerenciar'. O objetivo é que o app, rodando em segundo plano, consiga 'ler' a tela de apps como Uber e 99, capturar os dados da corrida (valor, distância) e salvá-los automaticamente no seu histórico de chamadas, permitindo uma análise detalhada e comparação de ganhos."
   },
 ];
 
@@ -98,4 +98,5 @@ export default function AjudaPage() {
     </div>
   );
 }
+
 
