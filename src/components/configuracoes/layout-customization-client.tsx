@@ -32,7 +32,7 @@ export function LayoutCustomizationClient() {
   const [selectedOptionalChartId, setSelectedOptionalChartId] = useState<string | null>(null);
 
   const lastChangeDate = useMemo(() => {
-      return user?.preferences.lastFreebieChangeDate ? new Date(user.preferences.lastFreebieChangeDate) : null;
+      return user?.preferences?.lastFreebieChangeDate ? new Date(user.preferences.lastFreebieChangeDate) : null;
   }, [user]);
 
   const canChange = useMemo(() => {
@@ -103,8 +103,8 @@ export function LayoutCustomizationClient() {
     let newLastChangeDate = preferences.lastFreebieChangeDate;
 
     // Check if the optional card/chart has actually changed before updating the date
-    const previousOptionalCard = user.preferences.dashboardCardOrder?.find(id => !mandatoryCards.includes(id));
-    const previousOptionalChart = user.preferences.reportChartOrder?.find(id => !mandatoryCharts.includes(id));
+    const previousOptionalCard = user.preferences?.dashboardCardOrder?.find(id => !mandatoryCards.includes(id));
+    const previousOptionalChart = user.preferences?.reportChartOrder?.find(id => !mandatoryCharts.includes(id));
     
     if(selectedOptionalCardId !== previousOptionalCard || selectedOptionalChartId !== previousOptionalChart) {
         newLastChangeDate = new Date().toISOString();
@@ -233,3 +233,5 @@ export function LayoutCustomizationClient() {
     </div>
   );
 }
+
+    
