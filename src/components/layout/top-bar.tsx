@@ -21,15 +21,86 @@ import {
 
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home },
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
-  // O botão de registro foi movido para um Dropdown separado
-  { href: "/gerenciamento", label: "Gerenciar", icon: History },
-  { href: "/taximetro", label: "Taxímetro", icon: Calculator },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench },
-  { href: "/metas", label: "Metas", icon: Target },
-  { href: "/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/", label: "Início", icon: Home, showOnHome: true, showOnOthers: true },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, showOnHome: false, showOnOthers: true },
+  // Botão de registro será inserido dinamicamente
+  { href: "/gerenciamento", label: "Gerenciar", icon: History, showOnHome: false, showOnOthers: true },
+  { href: "/taximetro", label: "Taxímetro", icon: Calculator, showOnHome: false, showOnOthers: true },
+  { href: "/manutencao", label: "Manutenção", icon: Wrench, showOnHome: false, showOnOthers: true },
+  { href: "/metas", label: "Metas", icon: Target, showOnHome: false, showOnOthers: true },
+  { href: "/configuracoes", label: "Configurações", icon: Settings, showOnHome: false, showOnOthers: true },
+  { href: "/ajuda", label: "Ajuda", icon: LifeBuoy, showOnHome: true, showOnOthers: false },
 ]
+
+const RegisterDropdown = () => (
+    <DropdownMenu>
+         <Tooltip>
+            <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                     <button
+                        className={cn(
+                            "flex h-10 w-10 items-center justify-center rounded-lg transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                            usePathname().startsWith("/registrar") && "bg-primary text-primary-foreground"
+                        )}
+                        >
+                        <PlusCircle className="h-5 w-5" />
+                     </button>
+                </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="center">
+                <p>Registrar Ganhos</p>
+            </TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent>
+            <DropdownMenuLabel>
+                <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-green-500"/>
+                    <span>Registrar Receitas</span>
+                </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+             <Link href="/registrar/today" passHref>
+                <DropdownMenuItem>
+                    <Calendar className="mr-2 h-4 w-4" />
+                    <span>Registrar Hoje</span>
+                </DropdownMenuItem>
+             </Link>
+             <Link href="/registrar/other-day" passHref>
+                <DropdownMenuItem>
+                    <CalendarPlus className="mr-2 h-4 w-4" />
+                    <span>Registrar Outro Dia</span>
+                </DropdownMenuItem>
+            </Link>
+        </DropdownMenuContent>
+    </DropdownMenu>
+);
+
+const NavButton = ({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) => {
+    const pathname = usePathname();
+    const isActive = href === "/" ? pathname === href : pathname.startsWith(href);
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+            <Link href={href} passHref>
+                <button
+                className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                    isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+                >
+                <Icon className="h-5 w-5" />
+                </button>
+            </Link>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="center">
+            <p>{label}</p>
+            </TooltipContent>
+        </Tooltip>
+    )
+};
+
 
 export function TopBar() {
   const pathname = usePathname();
@@ -46,7 +117,11 @@ export function TopBar() {
     router.push('/login');
   }
 
-  const showNavButtons = pathname !== '/';
+  const isHomePage = pathname === '/';
+
+  const itemsToRender = isHomePage 
+    ? menuItems.filter(item => item.showOnHome)
+    : menuItems.filter(item => item.showOnOthers);
 
   return (
     <TooltipProvider>
@@ -61,73 +136,14 @@ export function TopBar() {
             </div>
             {isClient && (
                 <nav className="flex items-center gap-1">
-                    {showNavButtons && menuItems.map((item) => {
-                        const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
-                        return (
-                        <Tooltip key={item.href}>
-                            <TooltipTrigger asChild>
-                            <Link href={item.href} passHref>
-                                <button
-                                className={cn(
-                                    "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
-                                    isActive
-                                    ? "bg-primary text-primary-foreground"
-                                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                )}
-                                >
-                                <item.icon className="h-5 w-5" />
-                                </button>
-                            </Link>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" align="center">
-                            <p>{item.label}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                        )
-                    })}
+                    {itemsToRender.map((item, index) => (
+                        <React.Fragment key={item.href}>
+                             {/* Insere o botão de registro após o Dashboard em outras páginas */}
+                             {!isHomePage && index === 1 && <RegisterDropdown />}
+                             <NavButton {...item} />
+                        </React.Fragment>
+                    ))}
                      
-                     {/* Botão de Registro com Dropdown */}
-                    <DropdownMenu>
-                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <DropdownMenuTrigger asChild>
-                                     <button
-                                        className={cn(
-                                            "flex h-10 w-10 items-center justify-center rounded-lg transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                                            pathname.startsWith("/registrar") && "bg-primary text-primary-foreground"
-                                        )}
-                                        >
-                                        <PlusCircle className="h-5 w-5" />
-                                     </button>
-                                </DropdownMenuTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" align="center">
-                                <p>Registrar Ganhos</p>
-                            </TooltipContent>
-                        </Tooltip>
-                        <DropdownMenuContent>
-                            <DropdownMenuLabel>
-                                <div className="flex items-center gap-2">
-                                    <DollarSign className="h-4 w-4 text-green-500"/>
-                                    <span>Registrar Receitas</span>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                             <Link href="/registrar/today" passHref>
-                                <DropdownMenuItem>
-                                    <Calendar className="mr-2 h-4 w-4" />
-                                    <span>Registrar Hoje</span>
-                                </DropdownMenuItem>
-                             </Link>
-                             <Link href="/registrar/other-day" passHref>
-                                <DropdownMenuItem>
-                                    <CalendarPlus className="mr-2 h-4 w-4" />
-                                    <span>Registrar Outro Dia</span>
-                                </DropdownMenuItem>
-                            </Link>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
                      <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" onClick={handleLogout} className="h-10 w-10 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
