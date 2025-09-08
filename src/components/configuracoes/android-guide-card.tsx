@@ -1,7 +1,7 @@
 
 "use client"
 
-import { BookOpenCheck, Code, FileText } from "lucide-react"
+import { BookOpenCheck, Code, FileText, UserCog } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "../ui/scroll-area"
@@ -20,6 +20,63 @@ export function AndroidGuideCard() {
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-3">
+                 <AccordionTrigger>
+                    <div className="flex items-center gap-2">
+                        <UserCog className="h-4 w-4" />
+                        <span>Parte 3: Gerenciando Usuários Premium</span>
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                   <ScrollArea className="h-96 w-full rounded-md border bg-background p-4">
+                       <div className="space-y-4 text-sm text-foreground">
+                            <h3 className="font-bold text-lg">Como Funciona o Acesso Premium?</h3>
+                            <p>O status Premium de um usuário é controlado por um campo simples (`isPremium: true` ou `false`) em um arquivo de configuração central.</p>
+                            <p>Todos os usuários do aplicativo são listados no arquivo: <strong>`src/data/users.json`</strong>.</p>
+                            <p>Este arquivo funciona como um "banco de dados" local para autenticação e permissões.</p>
+
+                            <hr className="my-4"/>
+
+                            <h3 className="font-bold text-lg">Guia para Liberar o Acesso Premium</h3>
+                            
+                            <h4 className="font-semibold">Passo 1: Localize o Arquivo</h4>
+                            <p>Abra o arquivo `src/data/users.json` no seu editor de código.</p>
+
+                             <h4 className="font-semibold">Passo 2: Encontre o Usuário</h4>
+                            <p>Dentro do arquivo, você verá uma lista de usuários. Cada um terá uma estrutura parecida com esta:</p>
+                            <pre className="bg-muted p-2 rounded-md overflow-x-auto text-xs">
+                                <code>
+{`{
+  "id": "NomeDoUsuario",
+  "passwordHash": "hashed_senha123",
+  "isPremium": false,
+  "vehicles": [...],
+  "securityAnswers": [...],
+  "preferences": {...}
+}`}
+                                </code>
+                            </pre>
+
+                            <h4 className="font-semibold">Passo 3: Altere o Status</h4>
+                             <p>Para conceder o acesso Premium a um usuário, simplesmente altere o valor do campo <strong>`isPremium` de `false` para `true`</strong>.</p>
+                             <pre className="bg-muted p-2 rounded-md overflow-x-auto text-xs">
+                                <code>
+{`// Antes (Plano Gratuito)
+"isPremium": false,
+
+// Depois (Plano Premium)
+"isPremium": true,`}
+                                </code>
+                            </pre>
+                            <p>Para remover o acesso, faça o inverso (de `true` para `false`).</p>
+                            
+                             <h4 className="font-semibold">Passo 4: Salve e Publique</h4>
+                            <p>Após salvar a alteração no arquivo `users.json`, você precisará gerar uma nova versão do aplicativo (APK ou AAB) e publicá-la. Quando o usuário atualizar o aplicativo, ele terá o novo status de conta.</p>
+                            <p><strong>Importante:</strong> Como o Rota Certa é um app que funciona offline, essa verificação é feita localmente. Por isso, a atualização do status do usuário requer a atualização do próprio aplicativo instalado no dispositivo dele.</p>
+                       </div>
+                    </ScrollArea>
+                </AccordionContent>
+            </AccordionItem>
             <AccordionItem value="item-1">
                  <AccordionTrigger>
                     <div className="flex items-center gap-2">
