@@ -40,7 +40,7 @@ const DisplayCard = ({ icon: Icon, label, value, unit }: { icon: React.ElementTy
     <Card className="flex-1 text-center bg-secondary/50">
         <CardContent className="p-4">
             <Icon className="h-8 w-8 mx-auto text-primary mb-2" />
-            <p className="text-3xl font-bold font-mono">{value}</p>
+            <p className="text-3xl font-bold font-mono">{value}{unit}</p>
             <p className="text-sm text-muted-foreground">{label}</p>
         </CardContent>
     </Card>
@@ -121,13 +121,16 @@ export function TaximeterClient() {
                 const request = await Geolocation.requestPermissions();
                 if (request.location !== 'granted') {
                     toast({ title: "Permissão Negada", description: "O acesso ao GPS é necessário para o taxímetro.", variant: "destructive" });
-                    return;
+                    return false;
                 }
             }
 
             watchId.current = await Geolocation.watchPosition({ enableHighAccuracy: true, timeout: 10000 }, (position, err) => {
                 if (err) {
                     console.error('Geolocation error', err);
+                    stopTracking(); // Para de observar se houver um erro
+                    toast({ title: "Erro de GPS", description: "Sinal de GPS perdido ou indisponível.", variant: "destructive" });
+                    setStatus('paused'); // Pausa a corrida
                     return;
                 }
                 if (position && lastPosition) {
@@ -141,9 +144,10 @@ export function TaximeterClient() {
                 }
                 setLastPosition(position);
             });
-
+            return true;
         } catch (e) {
              toast({ title: "Erro de GPS", description: "Não foi possível iniciar o rastreamento por GPS.", variant: "destructive" });
+             return false;
         }
     }, [lastPosition]);
 
@@ -151,6 +155,10 @@ export function TaximeterClient() {
         if (watchId.current) {
             Geolocation.clearWatch({ id: watchId.current });
             watchId.current = null;
+        }
+         if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
         }
     };
     
@@ -161,29 +169,31 @@ export function TaximeterClient() {
         }
         
         resetState();
-        await startTracking();
-        setStatus('running');
-        timerRef.current = setInterval(() => {
-            setTime(prev => prev + 1);
-        }, 1000);
+        const trackingStarted = await startTracking();
+        if (trackingStarted) {
+            setStatus('running');
+            timerRef.current = setInterval(() => {
+                setTime(prev => prev + 1);
+            }, 1000);
+        }
     };
 
     const pauseRide = () => {
-        if (timerRef.current) clearInterval(timerRef.current);
         stopTracking();
         setStatus('paused');
     };
 
     const resumeRide = async () => {
-        await startTracking();
-        setStatus('running');
-        timerRef.current = setInterval(() => {
-            setTime(prev => prev + 1);
-        }, 1000);
+        const trackingResumed = await startTracking();
+         if (trackingResumed) {
+            setStatus('running');
+            timerRef.current = setInterval(() => {
+                setTime(prev => prev + 1);
+            }, 1000);
+        }
     };
     
     const finishRide = async () => {
-        if (timerRef.current) clearInterval(timerRef.current);
         stopTracking();
         setStatus('idle');
         

@@ -20,7 +20,14 @@
       }
     ],
     "securityAnswers": [],
-    "preferences": {}
+    "preferences": {
+      "taximeterRates": {
+        "startingFare": 3,
+        "ratePerKm": 2,
+        "ratePerMinute": 1
+      },
+      "lastTaximeterUse": "2025-09-08T10:38:51.283Z"
+    }
   },
   {
     "id": "Teste 2",
