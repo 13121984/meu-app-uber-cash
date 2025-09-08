@@ -1,7 +1,7 @@
 
 "use client"
 
-import { BookOpenCheck, Code, FileText, UserCog, DatabaseZap } from "lucide-react"
+import { BookOpenCheck, UserCog, DatabaseZap } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "../ui/scroll-area"
@@ -20,7 +20,7 @@ export function AndroidGuideCard() {
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
-             <AccordionItem value="item-4">
+            <AccordionItem value="item-4">
                  <AccordionTrigger>
                     <div className="flex items-center gap-2">
                         <DatabaseZap className="h-4 w-4" />
