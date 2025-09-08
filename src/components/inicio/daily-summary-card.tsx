@@ -3,8 +3,9 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { DollarSign, Clock, TrendingUp, Target, Car } from "lucide-react";
+import { DollarSign, Clock, TrendingUp, Target } from "lucide-react";
 import type { PeriodData } from "@/services/summary.service";
+import { AppLogo } from "../ui/app-logo";
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -67,13 +68,13 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
             />
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-4 pt-4">
             <div className="flex justify-between items-center text-sm">
                 <p className="text-muted-foreground flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> Meta Diária</p>
                 <p className="font-semibold">{formatCurrency(data.meta.target)}</p>
             </div>
-             <div className="w-full px-1">
-                <div className="relative h-2 w-full bg-secondary rounded-full">
+             <div className="w-full h-8 flex items-center">
+                <div className="relative h-1.5 w-full bg-secondary rounded-full">
                   <div 
                     className="h-full rounded-full bg-primary transition-all duration-500"
                     style={{ width: `${clampedProgress}%`}}
@@ -83,11 +84,11 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                     style={{ left: `calc(${clampedProgress}% - 12px)` }}
                   >
                      <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center">
-                        <Car className="h-5 w-5 text-primary" fill="currentColor" />
+                        <AppLogo className="h-5 w-5 text-primary" />
                      </div>
                   </div>
-                   <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-card" />
-                   <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-card rounded-full border-2 border-foreground flex items-center justify-center">
+                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-card" />
+                   <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-card rounded-full border-2 border-foreground flex items-center justify-center">
                         <Target className="h-2 w-2 text-foreground"/>
                    </div>
                 </div>
@@ -95,7 +96,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
             <div className="text-center">
                 <p className="font-semibold text-lg text-foreground">{clampedProgress.toFixed(0)}% da meta</p>
                  {remaining > 0 && !isComplete && (
-                  <p className="text-xs text-yellow-400 mt-1">Faltam {formatCurrency(remaining)} para sua meta</p>
+                  <p className="text-xs text-yellow-500 dark:text-yellow-400 mt-1">Faltam {formatCurrency(remaining)} para sua meta</p>
                 )}
                  {isComplete && (
                     <p className="text-xs text-green-400 font-semibold mt-1">Meta atingida!</p>
