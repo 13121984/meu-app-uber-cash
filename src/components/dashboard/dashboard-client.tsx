@@ -218,8 +218,8 @@ export function DashboardClient() {
   return (
     <div className="space-y-8">
       <div className="text-center w-full">
-        <h1 className="text-4xl font-bold font-headline">Uber Cash</h1>
-        <p className="text-muted-foreground">Sua rota certa para o sucesso.</p>
+        <h1 className="text-4xl font-bold font-headline">Painel de Controle</h1>
+        <p className="text-muted-foreground">Sua visão geral financeira.</p>
       </div>
 
        <Card>

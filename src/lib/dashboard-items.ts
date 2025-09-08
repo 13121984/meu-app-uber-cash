@@ -24,8 +24,10 @@ export const allCharts = [
   { id: 'earningsByCategory', title: "Ganhos por Categoria", description: "Compare o desempenho de cada app ou serviço.", icon: BarChart3, isMandatory: false },
   { id: 'tripsByCategory', title: "Viagens por Categoria", description: "Analise a quantidade de viagens por plataforma.", icon: BarChart3, isMandatory: false },
   { id: 'maintenance', title: "Resumo de Manutenção", description: "Acompanhe seus gastos com manutenção no período.", icon: Wrench, isMandatory: false },
+  { id: 'fuelExpenses', title: "Despesas com Combustível", description: "Veja quanto gastou com cada tipo de combustível.", icon: Fuel, isMandatory: false},
+  { id: 'dailyTrips', title: "Viagens por Dia", description: "Acompanhe o volume de corridas ao longo dos dias.", icon: LineChart, isMandatory: false},
+  { id: 'averageEarningPerHour', title: "Ganho Médio por Hora (por Categoria)", description: "Compare a rentabilidade por hora de cada serviço.", icon: BarChart3, isMandatory: false},
+  { id: 'averageEarningPerTrip', title: "Ganho Médio por Viagem (por Categoria)", description: "Entenda qual serviço paga melhor por cada corrida.", icon: BarChart3, isMandatory: false},
 ];
 
 export const mandatoryCharts = ['earningsComposition'];
-
-    

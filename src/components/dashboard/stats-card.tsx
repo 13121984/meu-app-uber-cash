@@ -1,5 +1,4 @@
 
-
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -23,7 +22,7 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
     : isValidNumber
       ? isCurrency
         ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: precision, maximumFractionDigits: precision })
-        : `${value.toFixed(precision)}${unit ? ` ${unit}`: ''}`
+        : `${value.toFixed(precision)}${unit ? `${unit}`: ''}`
       : isCurrency ? (0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : "—";
 
 
@@ -31,16 +30,16 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
 
   return (
     <Card className="p-4 bg-secondary/30">
-      <CardContent className="flex items-center gap-4 p-0">
+      <CardContent className="flex flex-col items-start gap-2 p-0">
         {Icon && 
             <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", iconBg)}>
                 <Icon className={cn("h-5 w-5", iconColor)} />
             </div>
         }
         <div className="flex flex-col">
-          <p className="text-lg font-bold truncate">{formattedValue}</p>
+          <p className="text-xl font-bold truncate">{formattedValue}</p>
           {description && (
-             <p className="text-sm text-muted-foreground">{description}</p>
+             <p className="text-xs text-muted-foreground">{description}</p>
           )}
         </div>
       </CardContent>

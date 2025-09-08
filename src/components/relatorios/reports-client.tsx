@@ -5,7 +5,7 @@ import React, { useState, useTransition, useMemo, useCallback, useRef } from 're
 import { useAuth } from '@/contexts/auth-context';
 import { ReportsFilter } from './reports-filter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Loader2, Info, PlusCircle, Wrench, LineChart, PieChart, BarChart3, CandlestickChart } from 'lucide-react';
+import { Loader2, Info, PlusCircle, Wrench, LineChart, PieChart, BarChart3, CandlestickChart, Fuel } from 'lucide-react';
 import { ReportData, getReportData } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
@@ -21,7 +21,7 @@ const EarningsBarChart = dynamic(() => import('../dashboard/earnings-bar-chart')
 const TripsBarChart = dynamic(() => import('../dashboard/trips-bar-chart').then(mod => mod.TripsBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const MaintenanceSummary = dynamic(() => import('../dashboard/maintenance-summary').then(mod => mod.MaintenanceSummary), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const FuelBarChart = dynamic(() => import('./fuel-bar-chart').then(mod => mod.FuelBarChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
-const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr-false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
+const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerHourChart = dynamic(() => import('./average-earning-per-hour-chart').then(mod => mod.AverageEarningPerHourChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
