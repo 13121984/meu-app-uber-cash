@@ -6,15 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import type { State } from './registration-wizard';
 import { cn } from '@/lib/utils';
+import { DollarSign, Droplet, TrendingUp, CircleDollarSign, Car, Gauge, Route } from 'lucide-react';
 
 interface LivePreviewProps {
   data: State;
 }
 
-const StatItem = ({ label, value, className }: { label: string; value: string, className?: string }) => (
-  <div className="flex justify-between items-center text-sm">
-    <p className="text-muted-foreground">{label}</p>
-    <p className={cn("font-semibold", className)}>{value}</p>
+const StatItem = ({ label, value, className, isMain = false }: { label: string; value: string, className?: string, isMain?: boolean }) => (
+  <div className={cn("p-3 rounded-lg", isMain ? "bg-card" : "bg-secondary/50", className)}>
+    <p className="text-xs text-muted-foreground">{label}</p>
+    <p className={cn("font-bold", isMain ? "text-2xl" : "text-lg")}>{value}</p>
   </div>
 );
 
@@ -28,60 +29,53 @@ export function LivePreview({ data }: LivePreviewProps) {
     const totalViagens = data.earnings.reduce((sum, e) => sum + e.trips, 0);
     const totalLitros = data.fuelEntries.reduce((sum, f) => sum + (f.price > 0 ? f.paid / f.price : 0), 0);
     const eficiencia = data.km > 0 && totalLitros > 0 ? data.km / totalLitros : 0;
-    const ganhoPorHoraBruto = data.hours > 0 ? totalGanhos / data.hours : 0;
-    const ganhoPorHoraLiquido = data.hours > 0 ? lucroLiquido / data.hours : 0;
-    const ganhoPorKmBruto = data.km > 0 ? totalGanhos / data.km : 0;
-    const ganhoPorKmLiquido = data.km > 0 ? lucroLiquido / data.km : 0;
+    const ganhoPorHora = data.hours > 0 ? lucroLiquido / data.hours : 0;
+    const ganhoPorKm = data.km > 0 ? lucroLiquido / data.km : 0;
     
     return {
       totalGanhos,
       totalCombustiveis,
       totalManutencao,
-      totalDespesas,
       lucroLiquido,
       totalViagens,
-      totalLitros,
       eficiencia,
-      ganhoPorHoraBruto,
-      ganhoPorHoraLiquido,
-      ganhoPorKmBruto,
-      ganhoPorKmLiquido,
+      ganhoPorHora,
+      ganhoPorKm,
     };
   }, [data]);
 
   const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
-    <Card className="sticky top-6">
+    <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Prévia dos Cálculos</CardTitle>
+        <CardTitle className="font-headline flex items-center gap-2">
+            <Gauge className="h-6 w-6 text-primary" />
+            Prévia dos Cálculos
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg text-center">
-            <p className="text-sm font-semibold text-green-700 dark:text-green-300">Lucro Líquido</p>
-            <p className="text-3xl font-bold text-green-600 dark:text-green-500">{formatCurrency(calculations.lucroLiquido)}</p>
+        
+        <div className="grid grid-cols-2 gap-3">
+             <StatItem label="Ganhos" value={formatCurrency(calculations.totalGanhos)} className="text-green-500" />
+             <StatItem label="Despesas" value={formatCurrency(calculations.totalCombustiveis + calculations.totalManutencao)} className="text-red-500" />
         </div>
-
-        <Separator />
         
-        <StatItem label="Total Ganhos" value={formatCurrency(calculations.totalGanhos)} className="text-green-600 dark:text-green-500" />
-        <StatItem label="Gastos (Comb.+Manut.)" value={formatCurrency(calculations.totalDespesas)} className="text-red-600 dark:text-red-500" />
-        
-        <Separator />
-        
-        <StatItem label="Total Viagens" value={calculations.totalViagens.toString()} />
-        <StatItem label="Total Litros/m³" value={calculations.totalLitros.toFixed(2)} />
-        <StatItem label="Eficiência" value={`${calculations.eficiencia.toFixed(2)} km/L`} />
+        <StatItem 
+            label="Lucro Líquido do Período" 
+            value={formatCurrency(calculations.lucroLiquido)} 
+            className="text-primary bg-primary/10" 
+            isMain 
+        />
         
         <Separator />
         
-        <StatItem label="Ganho/Hora (Bruto)" value={formatCurrency(calculations.ganhoPorHoraBruto)} className="text-green-600 dark:text-green-500" />
-        <StatItem label="Ganho/Hora (Líquido)" value={formatCurrency(calculations.ganhoPorHoraLiquido)} className="text-green-600 dark:text-green-500" />
-
-        <Separator />
-
-        <StatItem label="Ganho/KM (Bruto)" value={formatCurrency(calculations.ganhoPorKmBruto)} className="text-green-600 dark:text-green-500" />
-        <StatItem label="Ganho/KM (Líquido)" value={formatCurrency(calculations.ganhoPorKmLiquido)} className="text-green-600 dark:text-green-500" />
+        <div className="grid grid-cols-2 gap-3">
+            <StatItem label="R$/Hora" value={formatCurrency(calculations.ganhoPorHora)} />
+            <StatItem label="R$/KM" value={formatCurrency(calculations.ganhoPorKm)} />
+            <StatItem label="Eficiência" value={`${calculations.eficiencia.toFixed(2)} km/L`} />
+            <StatItem label="Viagens" value={calculations.totalViagens.toString()} />
+        </div>
       </CardContent>
     </Card>
   );
