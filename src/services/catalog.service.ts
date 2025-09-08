@@ -55,42 +55,38 @@ export async function getCatalog(): Promise<Catalog> {
   const fileContent = await fs.readFile(dataFilePath, 'utf8');
   const data = JSON.parse(fileContent);
   
-  // Merge with default to ensure all default items are present and ordered
-  const mergedEarnings = [...defaultCatalog.earnings];
-  const mergedFuel = [...defaultCatalog.fuel];
+  // Esta função de merge garante que o 'isDefault' venha sempre da fonte da verdade (defaultCatalog)
+  // e que a ordem seja preservada.
+  const mergeCatalogs = (defaults: CatalogItem[], saved: CatalogItem[]): CatalogItem[] => {
+      const savedMap = new Map(saved.map(item => [item.name, item]));
+      const finalItems: CatalogItem[] = [];
+      const usedNames = new Set<string>();
 
-  if (data.earnings && Array.isArray(data.earnings)) {
-      data.earnings.forEach((item: CatalogItem) => {
-          const existingIndex = mergedEarnings.findIndex(i => i.name === item.name);
-          if (existingIndex > -1) {
-              mergedEarnings[existingIndex] = { ...mergedEarnings[existingIndex], ...item };
-          } else {
-              mergedEarnings.push({ ...item, isDefault: false });
+      // Primeiro, percorre os itens padrão, usando o estado salvo se existir
+      defaults.forEach(defaultItem => {
+          const savedItem = savedMap.get(defaultItem.name);
+          finalItems.push({
+              ...defaultItem, // isDefault vem daqui
+              active: savedItem?.active ?? defaultItem.active, // `active` é salvo
+          });
+          usedNames.add(defaultItem.name);
+      });
+
+      // Adiciona itens salvos que não são padrão (customizados)
+      saved.forEach(savedItem => {
+          if (!usedNames.has(savedItem.name)) {
+              finalItems.push({
+                  ...savedItem,
+                  isDefault: false, // Garante que itens customizados não sejam marcados como padrão
+              });
           }
       });
-  }
-
-  if (data.fuel && Array.isArray(data.fuel)) {
-      data.fuel.forEach((item: CatalogItem) => {
-          const existingIndex = mergedFuel.findIndex(i => i.name === item.name);
-          if (existingIndex > -1) {
-              mergedFuel[existingIndex] = { ...mergedFuel[existingIndex], ...item };
-          } else {
-              mergedFuel.push({ ...item, isDefault: false });
-          }
-      });
-  }
+      
+      return finalItems;
+  };
   
-  const finalEarnings = data.earnings ? data.earnings.map((item: CatalogItem) => {
-    const defaultItem = defaultCatalog.earnings.find(d => d.name === item.name);
-    return { ...item, isDefault: !!defaultItem };
-  }) : defaultCatalog.earnings;
-
-  const finalFuel = data.fuel ? data.fuel.map((item: CatalogItem) => {
-    const defaultItem = defaultCatalog.fuel.find(d => d.name === item.name);
-    return { ...item, isDefault: !!defaultItem };
-  }) : defaultCatalog.fuel;
-
+  const finalEarnings = mergeCatalogs(defaultCatalog.earnings, data.earnings || []);
+  const finalFuel = mergeCatalogs(defaultCatalog.fuel, data.fuel || []);
 
   return {
       earnings: finalEarnings,
