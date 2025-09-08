@@ -15,10 +15,10 @@ const menuItems = [
   { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
   { href: "/registrar", label: "Registrar", icon: PlusCircle },
   { href: "/gerenciamento", label: "Gerenciar", icon: History },
-  { href: "/metas", label: "Metas", icon: Target },
   { href: "/relatorios", label: "Relatórios", icon: BarChart },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench },
   { href: "/taximetro", label: "Taxímetro", icon: Calculator },
+  { href: "/manutencao", label: "Manutenção", icon: Wrench },
+  { href: "/metas", label: "Metas", icon: Target },
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ]
 
