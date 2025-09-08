@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, AlertTriangle, Settings, Lock } from 'lucide-react';
+import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, AlertTriangle, Settings, Lock, CalculatorIcon } from 'lucide-react';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { toast } from '@/hooks/use-toast';
 import { updateUserPreferences, TaximeterRates, UserPreferences } from '@/services/auth.service';
@@ -17,6 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Label } from '../ui/label';
 
 // Helper para calcular a distância (fórmula de Haversine)
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -42,6 +43,36 @@ const DisplayCard = ({ icon: Icon, label, value, unit }: { icon: React.ElementTy
         </CardContent>
     </Card>
 );
+
+function FareEstimator({ rates }: { rates: TaximeterRates }) {
+    const [distance, setDistance] = useState(0);
+    const [duration, setDuration] = useState(0); // in minutes
+
+    const estimatedFare = useMemo(() => {
+        if (distance <= 0 && duration <= 0) return 0;
+        return rates.startingFare + (distance * rates.ratePerKm) + (duration * rates.ratePerMinute);
+    }, [distance, duration, rates]);
+
+    return (
+        <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div>
+                    <Label htmlFor="estDistance">Distância Estimada (KM)</Label>
+                    <Input id="estDistance" type="number" placeholder="Ex: 10.5" value={distance || ''} onChange={(e) => setDistance(parseFloat(e.target.value) || 0)} />
+                 </div>
+                 <div>
+                    <Label htmlFor="estDuration">Duração Estimada (Minutos)</Label>
+                    <Input id="estDuration" type="number" placeholder="Ex: 20" value={duration || ''} onChange={(e) => setDuration(parseFloat(e.target.value) || 0)} />
+                 </div>
+            </div>
+            <Card className="text-center p-4 bg-background">
+                <p className="text-sm text-muted-foreground">Valor Sugerido para a Corrida</p>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(estimatedFare)}</p>
+            </Card>
+        </div>
+    )
+}
+
 
 export function TaximeterClient() {
     const { user, refreshUser } = useAuth();
@@ -244,8 +275,8 @@ export function TaximeterClient() {
             </Card>
             
             {/* Configuração de Tarifas */}
-            <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="item-1">
+            <Accordion type="single" collapsible className="w-full space-y-4">
+                <AccordionItem value="rates">
                     <Card>
                         <AccordionTrigger className="p-6 [&[data-state=open]>svg]:text-primary">
                              <CardTitle className="font-headline flex items-center gap-2">
@@ -256,7 +287,7 @@ export function TaximeterClient() {
                         <AccordionContent className="p-6 pt-0">
                             <div className="space-y-4">
                                 <div>
-                                    <label htmlFor="startingFare" className="text-sm font-medium">Taxa de Partida (Bandeirada)</label>
+                                    <Label htmlFor="startingFare">Taxa de Partida (Bandeirada)</Label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                         <Input id="startingFare" type="number" value={rates.startingFare} onChange={(e) => handleRateChange('startingFare', e.target.value)} className="pl-10" />
@@ -264,14 +295,14 @@ export function TaximeterClient() {
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="ratePerKm" className="text-sm font-medium">Preço por KM</label>
+                                        <Label htmlFor="ratePerKm">Preço por KM</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                             <Input id="ratePerKm" type="number" value={rates.ratePerKm} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
                                         </div>
                                     </div>
                                     <div>
-                                        <label htmlFor="ratePerMinute" className="text-sm font-medium">Preço por Minuto</label>
+                                        <Label htmlFor="ratePerMinute">Preço por Minuto</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                             <Input id="ratePerMinute" type="number" value={rates.ratePerMinute} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
@@ -283,6 +314,19 @@ export function TaximeterClient() {
                                     Salvar Tarifas
                                 </Button>
                             </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+                <AccordionItem value="estimator">
+                    <Card>
+                        <AccordionTrigger className="p-6 [&[data-state=open]>svg]:text-primary">
+                             <CardTitle className="font-headline flex items-center gap-2">
+                                <CalculatorIcon className="w-5 h-5"/>
+                                Calculadora de Corrida
+                            </CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent className="p-6 pt-0">
+                           <FareEstimator rates={rates} />
                         </AccordionContent>
                     </Card>
                 </AccordionItem>
