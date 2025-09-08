@@ -2,9 +2,8 @@
 "use client"
 
 import React, { useEffect } from 'react';
-import { Car, CheckCircle } from "lucide-react";
+import { Car, Target, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"
-import { Confetti } from "./confetti";
 
 type GoalProgressProps = {
   progress: number;
@@ -32,11 +31,10 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   const remaining = target - current;
 
   return (
-    <div className="relative flex flex-col items-center justify-center space-y-4 overflow-hidden">
-      {isComplete && <Confetti />}
+    <div className="relative flex flex-col items-center justify-center space-y-4">
       
       <div className="w-full px-1">
-        <div className="relative h-2 w-full rounded-full bg-gray-700 dark:bg-gray-800">
+        <div className="relative h-2 w-full bg-muted rounded-full">
           <div 
             className="h-full rounded-full bg-primary transition-all duration-500"
             style={{ width: `${clampedProgress}%`}}
@@ -52,11 +50,11 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
               />
             </div>
           </div>
-           <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
-           <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-card rounded-full border-2 border-foreground" />
+           <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-4 h-4 bg-green-500 rounded-full border-2 border-card" />
+           <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 bg-card rounded-full border-2 border-foreground flex items-center justify-center">
+             <Target className="h-3 w-3 text-foreground" />
+           </div>
         </div>
-         <div className="w-full h-px border-b border-dashed border-gray-600 mt-1" />
-
       </div>
 
       <div className="text-center">
@@ -66,6 +64,9 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
         </p>
          {remaining > 0 && !isComplete && (
           <p className="text-xs text-yellow-400 mt-2">Faltam {formatCurrency(remaining)} para sua meta</p>
+        )}
+        {isComplete && (
+            <p className="text-xs text-green-400 font-semibold mt-2">Parabéns, meta concluída!</p>
         )}
       </div>
     </div>

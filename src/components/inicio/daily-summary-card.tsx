@@ -69,11 +69,11 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
         
         <div className="space-y-4">
             <div className="flex justify-between items-center text-sm">
-                <p className="text-muted-foreground flex items-center gap-2"><Target className="h-4 w-4 text-amber-500" /> Meta Diária</p>
+                <p className="text-muted-foreground flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> Meta Diária</p>
                 <p className="font-semibold">{formatCurrency(data.meta.target)}</p>
             </div>
              <div className="w-full px-1">
-                <div className="relative h-2 w-full rounded-full bg-secondary">
+                <div className="relative h-2 w-full bg-secondary rounded-full">
                   <div 
                     className="h-full rounded-full bg-primary transition-all duration-500"
                     style={{ width: `${clampedProgress}%`}}
@@ -82,12 +82,15 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                     className="absolute top-1/2 -translate-y-1/2 transition-all duration-500"
                     style={{ left: `calc(${clampedProgress}% - 12px)` }}
                   >
-                     <Car className="h-8 w-8 text-primary" fill="currentColor" />
+                     <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center">
+                        <Car className="h-5 w-5 text-primary" fill="currentColor" />
+                     </div>
                   </div>
-                   <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
-                   <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-card rounded-full border-2 border-foreground" />
+                   <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-card" />
+                   <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-card rounded-full border-2 border-foreground flex items-center justify-center">
+                        <Target className="h-2 w-2 text-foreground"/>
+                   </div>
                 </div>
-                 <div className="w-full h-px border-b border-dashed border-gray-600 mt-1" />
               </div>
             <div className="text-center">
                 <p className="font-semibold text-lg text-foreground">{clampedProgress.toFixed(0)}% da meta</p>
