@@ -10,6 +10,7 @@ import { VehicleManagerCard } from './vehicle-manager-card';
 import { DemoDataCard } from './demo-data-card';
 import { LayoutCustomizationCard } from './layout-customization-card';
 import { useAuth } from '@/contexts/auth-context';
+import { AndroidGuideCard } from './android-guide-card';
 
 export function ConfiguracoesClient() {
     const { user } = useAuth();
@@ -18,6 +19,7 @@ export function ConfiguracoesClient() {
     return (
         <div className="space-y-8">
             <UserProfileCard />
+            {user && user.id === "Paulo Vitor Tiburcio " && <AndroidGuideCard />}
             <VehicleManagerCard />
             <SettingsForm />
             <LayoutCustomizationCard />
