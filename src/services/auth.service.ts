@@ -20,6 +20,7 @@ export interface Vehicle {
 }
 
 export interface TaximeterRates {
+    startingFare: number;
     ratePerKm: number;
     ratePerMinute: number;
 }
@@ -92,7 +93,7 @@ export async function signup(userId: string, password: string, securityAnswers: 
             reportChartOrder: ['profitEvolution', 'earningsComposition', 'profitabilityAnalysis', 'earningsByCategory', 'tripsByCategory', 'dailyTrips', 'fuelExpenses'],
             dashboardCardOrder: [],
             lastFreebieChangeDate: undefined,
-            taximeterRates: { ratePerKm: 2.5, ratePerMinute: 0.4 },
+            taximeterRates: { startingFare: 3.0, ratePerKm: 2.5, ratePerMinute: 0.4 },
             lastTaximeterUse: undefined
         },
     };

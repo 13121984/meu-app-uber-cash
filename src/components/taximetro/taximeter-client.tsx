@@ -11,6 +11,12 @@ import { Geolocation, Position } from '@capacitor/geolocation';
 import { toast } from '@/hooks/use-toast';
 import { updateUserPreferences, TaximeterRates, UserPreferences } from '@/services/auth.service';
 import Link from 'next/link';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // Helper para calcular a distância (fórmula de Haversine)
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -45,14 +51,18 @@ export function TaximeterClient() {
     const [lastPosition, setLastPosition] = useState<Position | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
-    const [rates, setRates] = useState<TaximeterRates>({ ratePerKm: 2.5, ratePerMinute: 0.4 });
+    const [rates, setRates] = useState<TaximeterRates>({ startingFare: 3.0, ratePerKm: 2.5, ratePerMinute: 0.4 });
     
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const watchId = useRef<string | null>(null);
 
     useEffect(() => {
         if (user?.preferences.taximeterRates) {
-            setRates(user.preferences.taximeterRates);
+            setRates({
+                startingFare: user.preferences.taximeterRates.startingFare || 3.0,
+                ratePerKm: user.preferences.taximeterRates.ratePerKm || 2.5,
+                ratePerMinute: user.preferences.taximeterRates.ratePerMinute || 0.4,
+            });
         }
     }, [user]);
 
@@ -173,7 +183,7 @@ export function TaximeterClient() {
         setIsSaving(false);
     }
 
-    const totalCost = (distance * rates.ratePerKm) + ((time / 60) * rates.ratePerMinute);
+    const totalCost = rates.startingFare + (distance * rates.ratePerKm) + ((time / 60) * rates.ratePerMinute);
 
     if (!canUseTaximeter) {
         return (
@@ -234,41 +244,49 @@ export function TaximeterClient() {
             </Card>
             
             {/* Configuração de Tarifas */}
-            <Card>
-                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2">
-                        <Settings className="w-5 h-5 text-primary"/>
-                        Suas Tarifas
-                    </CardTitle>
-                    <CardDescription>Defina seus preços. Eles ficam salvos para a próxima vez.</CardDescription>
-                </CardHeader>
-                 <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="ratePerKm" className="text-sm font-medium">Preço por KM</label>
-                             <div className="relative">
-                                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input id="ratePerKm" type="number" value={rates.ratePerKm} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
+            <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1">
+                    <Card>
+                        <AccordionTrigger className="p-6 [&[data-state=open]>svg]:text-primary">
+                             <CardTitle className="font-headline flex items-center gap-2">
+                                <Settings className="w-5 h-5"/>
+                                Suas Tarifas
+                            </CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent className="p-6 pt-0">
+                            <div className="space-y-4">
+                                <div>
+                                    <label htmlFor="startingFare" className="text-sm font-medium">Taxa de Partida (Bandeirada)</label>
+                                    <div className="relative">
+                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <Input id="startingFare" type="number" value={rates.startingFare} onChange={(e) => handleRateChange('startingFare', e.target.value)} className="pl-10" />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label htmlFor="ratePerKm" className="text-sm font-medium">Preço por KM</label>
+                                        <div className="relative">
+                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Input id="ratePerKm" type="number" value={rates.ratePerKm} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="ratePerMinute" className="text-sm font-medium">Preço por Minuto</label>
+                                        <div className="relative">
+                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Input id="ratePerMinute" type="number" value={rates.ratePerMinute} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <Button onClick={saveRates} disabled={isSaving}>
+                                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                    Salvar Tarifas
+                                </Button>
                             </div>
-                        </div>
-                         <div>
-                            <label htmlFor="ratePerMinute" className="text-sm font-medium">Preço por Minuto</label>
-                             <div className="relative">
-                                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input id="ratePerMinute" type="number" value={rates.ratePerMinute} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
-                            </div>
-                        </div>
-                    </div>
-                     <Button onClick={saveRates} disabled={isSaving}>
-                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                         Salvar Tarifas
-                     </Button>
-                 </CardContent>
-            </Card>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+            </Accordion>
         </div>
     );
 }
-
-    
-
-    
