@@ -3,13 +3,13 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "../ui/button"
-import { AppLogo } from "../ui/app-logo"
+import { Car } from "lucide-react"
 
 const menuItems = [
   { href: "/", label: "Início", icon: Home },
@@ -18,6 +18,7 @@ const menuItems = [
   { href: "/gerenciamento", label: "Gerenciar", icon: History },
   { href: "/relatorios", label: "Relatórios", icon: BarChart },
   { href: "/taximetro", label: "Taxímetro", icon: Calculator },
+  { href: "/historico-chamadas", label: "Chamadas", icon: Smartphone },
   { href: "/manutencao", label: "Manutenção", icon: Wrench },
   { href: "/metas", label: "Metas", icon: Target },
   { href: "/configuracoes", label: "Configurações", icon: Settings },
@@ -46,7 +47,7 @@ export function TopBar() {
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
                     <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center border-2 border-primary-foreground/50 shadow-md">
-                       <AppLogo className="h-6 w-6 text-primary-foreground" />
+                       <Car className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <span className="sr-only">Rota Certa</span>
                 </Link>
