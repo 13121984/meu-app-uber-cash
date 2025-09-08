@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, Settings, Lock, CalculatorIcon, Target, Clock, Calendar } from 'lucide-react';
+import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, Settings, Lock, CalculatorIcon } from 'lucide-react';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { toast } from '@/hooks/use-toast';
 import { updateUserPreferences, TaximeterRates, UserPreferences } from '@/services/auth.service';
