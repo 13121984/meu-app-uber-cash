@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, AlertTriangle, Settings, Lock } from 'lucide-react';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { toast } from '@/hooks/use-toast';
@@ -267,5 +268,7 @@ export function TaximeterClient() {
         </div>
     );
 }
+
+    
 
     
