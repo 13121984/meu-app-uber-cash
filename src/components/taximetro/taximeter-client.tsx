@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,11 +49,17 @@ const DisplayCard = ({ icon: Icon, label, value, unit }: { icon: React.ElementTy
 function FareEstimator({ rates }: { rates: TaximeterRates }) {
     const [distance, setDistance] = useState(0);
     const [duration, setDuration] = useState(0); // in minutes
+    const [estimatedFare, setEstimatedFare] = useState(0);
 
-    const estimatedFare = useMemo(() => {
-        if (distance <= 0 && duration <= 0) return 0;
-        return rates.startingFare + (distance * rates.ratePerKm) + (duration * rates.ratePerMinute);
+    useEffect(() => {
+        if (distance <= 0 && duration <= 0) {
+            setEstimatedFare(0);
+            return;
+        };
+        const fare = rates.startingFare + (distance * rates.ratePerKm) + (duration * rates.ratePerMinute);
+        setEstimatedFare(fare);
     }, [distance, duration, rates]);
+
 
     return (
         <div className="space-y-4">
@@ -87,6 +93,8 @@ export function TaximeterClient() {
     const [isSaving, setIsSaving] = useState(false);
 
     const [rates, setRates] = useState<TaximeterRates>({ startingFare: 3.0, ratePerKm: 2.5, ratePerMinute: 0.4 });
+    const [totalCost, setTotalCost] = useState(0);
+
     
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const watchId = useRef<string | null>(null);
@@ -97,18 +105,13 @@ export function TaximeterClient() {
         }
     }, [user]);
 
-    const canUseTaximeter = useMemo(() => {
-        if (!user) return false;
-        if (user.isPremium) return true;
-        
-        const lastUse = user.preferences.lastTaximeterUse ? new Date(user.preferences.lastTaximeterUse) : null;
-        if (!lastUse) return true;
+    useEffect(() => {
+        const cost = rates.startingFare + (distance * rates.ratePerKm) + ((time / 60) * rates.ratePerMinute);
+        setTotalCost(cost);
+    }, [distance, time, rates]);
 
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-        return lastUse < oneWeekAgo;
 
-    }, [user]);
+    const canUseTaximeter = true; // Placeholder for premium logic
 
 
     const startTracking = useCallback(async () => {
@@ -178,8 +181,6 @@ export function TaximeterClient() {
             setTime(prev => prev + 1);
         }, 1000);
     };
-
-    const totalCost = rates.startingFare + (distance * rates.ratePerKm) + ((time / 60) * rates.ratePerMinute);
     
     const finishRide = async () => {
         if (timerRef.current) clearInterval(timerRef.current);
@@ -310,7 +311,7 @@ export function TaximeterClient() {
                                  <div>
                                     <Label htmlFor="startingFare">Taxa de Partida (Bandeirada)</Label>
                                     <div className="relative">
-                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                                         <Input id="startingFare" type="number" value={rates.startingFare} onChange={(e) => handleRateChange('startingFare', e.target.value)} className="pl-10" />
                                     </div>
                                 </div>
@@ -318,14 +319,14 @@ export function TaximeterClient() {
                                     <div>
                                         <Label htmlFor="ratePerKm">Preço por KM</Label>
                                         <div className="relative">
-                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                                             <Input id="ratePerKm" type="number" value={rates.ratePerKm} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
                                         </div>
                                     </div>
                                     <div>
                                         <Label htmlFor="ratePerMinute">Preço por Minuto</Label>
                                         <div className="relative">
-                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                                             <Input id="ratePerMinute" type="number" value={rates.ratePerMinute} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
                                         </div>
                                     </div>

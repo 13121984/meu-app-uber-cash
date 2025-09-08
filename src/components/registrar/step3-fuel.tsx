@@ -91,7 +91,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold font-headline flex items-center gap-2">
-                <Fuel className="h-6 w-6 text-red-600"/>
+                <Fuel className="h-6 w-6 text-red-500"/>
                 <span>Abastecimentos</span>
             </h2>
             <Button size="sm" type="button" onClick={handleAddFuelEntry} variant="outline" disabled={availableFuelTypes.length === 0}>
@@ -145,7 +145,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                     <div>
                         <Label htmlFor={`fuel-paid-${index}`}>Valor Pago</Label>
                         <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600" />
+                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                             <Input
                             id={`fuel-paid-${index}`}
                             type="number"
@@ -162,7 +162,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                         <div>
                             <Label htmlFor={`fuel-price-${index}`}>Preço por {unit}</Label>
                             <div className="relative">
-                                <Fuel className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Fuel className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
                                 <Input
                                 id={`fuel-price-${index}`}
                                 type="number"
@@ -231,7 +231,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                         <div className="space-y-2">
                             <Label htmlFor={`maintenance-amount-${entry.id}`}>Valor</Label>
                             <div className="relative">
-                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600" />
+                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                                 <Input
                                     id={`maintenance-amount-${entry.id}`}
                                     type="number"
