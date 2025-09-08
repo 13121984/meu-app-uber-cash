@@ -17,19 +17,19 @@ const helpTopics = [
     value: "registrar",
     icon: PlusCircle,
     title: "Como registrar meus ganhos e despesas?",
-    content: "Vá para 'Registrar Hoje' ou 'Registrar Outro Dia'. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real."
+    content: "Na tela inicial, clique em 'Registrar Hoje' ou 'Registrar Outro Dia'. Você também pode usar o botão de '+' no menu superior. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real."
   },
   {
     value: "gerenciar",
     icon: History,
     title: "Como editar ou apagar um registro antigo?",
-    content: "Na tela 'Gerenciar', você pode visualizar todos os seus dias de trabalho. Use os filtros para encontrar um dia específico. Clique em um dia na lista para ver os detalhes e editar cada período de trabalho individualmente ou apagar o dia inteiro."
+    content: "Na tela 'Gerenciar', você pode visualizar todos os seus dias de trabalho. Use os filtros para encontrar um dia específico. Clique em um dia na lista para ver os detalhes e editar cada período de trabalho individualmente ou apagar todos os registros daquele dia."
   },
   {
     value: "relatorios",
     icon: BarChart3,
     title: "Como funcionam os relatórios?",
-    content: "A tela de 'Relatórios' oferece uma visão aprofundada da sua performance. Use os filtros de período (semana, mês, personalizado) para gerar análises detalhadas. Você pode ver gráficos de composição de ganhos, evolução do lucro e muito mais. Também é possível exportar os dados em CSV ou PDF."
+    content: "Acesse os 'Relatórios Detalhados' através do botão na tela 'Gerenciar'. Use os filtros de período (semana, mês, personalizado) para gerar análises aprofundadas da sua performance. Você pode ver gráficos de composição de ganhos, evolução do lucro e muito mais. Também é possível exportar os dados em CSV ou PDF."
   },
    {
     value: "metas",
