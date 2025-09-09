@@ -13,24 +13,20 @@ interface CatalogManagerCardProps {
 
 export function CatalogManagerCard({ isPremium }: CatalogManagerCardProps) {
     return (
-        <Card className={cn(!isPremium && "bg-secondary/50")}>
+        <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <BookCopy className="h-6 w-6 text-primary" />
                     Gerenciar Catálogos
-                    {!isPremium && <Lock className="h-5 w-5 text-amber-500" />}
                 </CardTitle>
                 <CardDescription>
-                    {isPremium 
-                        ? "Personalize as categorias de ganhos e tipos de combustível para adequar o aplicativo às suas necessidades."
-                        : "Assine o plano Premium para criar, editar e organizar suas próprias categorias de ganhos e despesas."
-                    }
+                   Organize suas categorias de ganhos e combustíveis para adequar o aplicativo às suas necessidades.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <Link href={isPremium ? "/configuracoes/catalogos" : "/premium"} passHref legacyBehavior>
+                <Link href="/configuracoes/catalogos" passHref legacyBehavior>
                     <Button as="a">
-                         <span>{isPremium ? "Editar Catálogos" : "Desbloquear com Premium"}</span>
+                         <span>Editar Catálogos</span>
                          <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 </Link>

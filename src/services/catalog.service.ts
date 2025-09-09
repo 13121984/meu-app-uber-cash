@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache';
 export interface CatalogItem {
   name: string;
   active: boolean;
-  isDefault: boolean; // Cannot be deleted if true
+  isDefault: boolean; // Cannot be deleted by any user if true
 }
 
 export interface Catalog {
@@ -18,7 +18,7 @@ export interface Catalog {
 
 const dataFilePath = path.join(process.cwd(), 'data', 'catalog.json');
 
-// CORREÇÃO: Apenas "Aplicativo" e "Combustível" são padrão para o plano gratuito.
+// Defines the base, non-deletable categories.
 const defaultCatalog: Catalog = {
   earnings: [
     { name: "Aplicativo", active: true, isDefault: true },
@@ -30,10 +30,9 @@ const defaultCatalog: Catalog = {
     { name: "In Driver", active: true, isDefault: false },
   ],
   fuel: [
-    { name: "Combustível", active: true, isDefault: true },
     { name: "GNV", active: true, isDefault: false },
     { name: "Etanol", active: true, isDefault: false },
-    { name: "Gasolina Aditivada", active: true, isDefault: false },
+    { name: "Gasolina Aditivada", active: true, isDefault: true },
     { name: "Gasolina Comum", active: true, isDefault: false },
   ]
 };
@@ -55,29 +54,30 @@ export async function getCatalog(): Promise<Catalog> {
   const fileContent = await fs.readFile(dataFilePath, 'utf8');
   const data = JSON.parse(fileContent);
   
-  // Esta função de merge garante que o 'isDefault' venha sempre da fonte da verdade (defaultCatalog)
-  // e que a ordem seja preservada.
-  const mergeCatalogs = (defaults: CatalogItem[], saved: CatalogItem[]): CatalogItem[] => {
+  // Merge saved data with defaults to ensure `isDefault` is always correct
+  // and new default items are added if they don't exist.
+  const mergeCatalogs = (defaults: CatalogItem[], saved: CatalogItem[] = []): CatalogItem[] => {
       const savedMap = new Map(saved.map(item => [item.name, item]));
       const finalItems: CatalogItem[] = [];
       const usedNames = new Set<string>();
 
-      // Primeiro, percorre os itens padrão, usando o estado salvo se existir
+      // 1. Iterate through the hardcoded defaults
       defaults.forEach(defaultItem => {
           const savedItem = savedMap.get(defaultItem.name);
           finalItems.push({
-              ...defaultItem, // isDefault vem daqui
-              active: savedItem?.active ?? defaultItem.active, // `active` é salvo
+              name: defaultItem.name,
+              isDefault: defaultItem.isDefault, // isDefault is the source of truth
+              active: savedItem?.active ?? defaultItem.active, // active state is preserved
           });
           usedNames.add(defaultItem.name);
       });
 
-      // Adiciona itens salvos que não são padrão (customizados)
+      // 2. Add custom items created by premium users
       saved.forEach(savedItem => {
           if (!usedNames.has(savedItem.name)) {
               finalItems.push({
                   ...savedItem,
-                  isDefault: false, // Garante que itens customizados não sejam marcados como padrão
+                  isDefault: false, // Ensure custom items are never default
               });
           }
       });
@@ -85,14 +85,12 @@ export async function getCatalog(): Promise<Catalog> {
       return finalItems;
   };
   
-  const finalEarnings = mergeCatalogs(defaultCatalog.earnings, data.earnings || []);
-  const finalFuel = mergeCatalogs(defaultCatalog.fuel, data.fuel || []);
-
   return {
-      earnings: finalEarnings,
-      fuel: finalFuel
+      earnings: mergeCatalogs(defaultCatalog.earnings, data.earnings),
+      fuel: mergeCatalogs(defaultCatalog.fuel, data.fuel)
   };
 }
+
 
 /**
  * Salva o catálogo de categorias no arquivo local.

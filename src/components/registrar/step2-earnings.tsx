@@ -6,7 +6,6 @@ import { PlusCircle, Trash2, Car, DollarSign, CircleDollarSign, Lock } from 'luc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Earning, State } from './registration-wizard';
 import { useAuth } from '@/contexts/auth-context';
@@ -29,48 +28,33 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
   const isPremium = user?.isPremium || false;
 
   const getInitialSelectedCategories = () => {
+    // If editing an existing entry, use its categories
     if (data.earnings.length > 0) {
       return data.earnings.map(e => e.category);
     }
-    // For new entries, select "Aplicativo" by default for free users
-    if (!isPremium) {
-      return ['Aplicativo'];
-    }
-    return [];
+    // For new entries, select the default "Aplicativo"
+    const defaultCategory = categories.find(c => c.isDefault && c.name === "Aplicativo");
+    return defaultCategory ? [defaultCategory.name] : [];
   };
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(getInitialSelectedCategories);
   
-  // Effect to sync the main state when the component initializes with a default category
+  // Effect to sync the main state when the component initializes or selection changes
   useEffect(() => {
-    if (data.earnings.length === 0 && !isPremium) {
-      const defaultEarnings: Earning[] = [{
-        id: Date.now(),
-        category: 'Aplicativo',
-        trips: 0,
-        amount: 0,
-      }];
-      dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: defaultEarnings } });
-    }
-  }, []); // Run only once on mount for new entries
+    const newEarnings = selectedCategories.map(catName => {
+        const existing = data.earnings.find(e => e.category === catName);
+        return existing || { id: Date.now() + Math.random(), category: catName, trips: 0, amount: 0 };
+    });
+    dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: newEarnings } });
+  }, [selectedCategories, dispatch]);
 
-  const handleCategoryToggle = (categoryName: string, isDefault: boolean) => {
-    if (!isPremium && !isDefault) {
-        return;
-    }
 
+  const handleCategoryToggle = (categoryName: string) => {
     const newSelected = selectedCategories.includes(categoryName)
       ? selectedCategories.filter(c => c !== categoryName)
       : [...selectedCategories, categoryName];
     
     setSelectedCategories(newSelected);
-
-    // Sync the main state
-    const newEarnings = newSelected.map(cat => {
-        const existing = data.earnings.find(e => e.category === cat);
-        return existing || { id: Date.now() + Math.random(), category: cat, trips: 0, amount: 0 };
-    });
-    dispatch({ type: 'UPDATE_FIELD', payload: { field: 'earnings', value: newEarnings } });
   }
 
   const handleEarningChange = (category: string, field: 'trips' | 'amount', value: string) => {
@@ -99,36 +83,33 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
                 <p className="text-xs text-muted-foreground mb-2">Selecione todas as plataformas em que trabalhou.</p>
                 <div className="grid grid-cols-2 gap-2">
                     {categories.map(cat => {
-                        const isSelectable = isPremium || cat.isDefault;
                         const isSelected = selectedCategories.includes(cat.name);
                         return (
-                         <div key={cat.name} onClick={() => handleCategoryToggle(cat.name, cat.isDefault)}
+                         <div key={cat.name} onClick={() => handleCategoryToggle(cat.name)}
                            className={cn(
-                            "flex items-center gap-2 p-3 rounded-lg border-2 transition-all",
-                             isSelectable ? "cursor-pointer" : "cursor-not-allowed bg-secondary/50",
+                            "flex items-center gap-2 p-3 rounded-lg border-2 transition-all cursor-pointer",
                              isSelected ? "border-primary bg-primary/10" : "border-transparent bg-secondary"
                            )}
                          >
                             <Checkbox 
                                 checked={isSelected}
-                                onCheckedChange={() => handleCategoryToggle(cat.name, cat.isDefault)}
+                                onCheckedChange={() => handleCategoryToggle(cat.name)}
                                 id={`check-${cat.name}`}
-                                disabled={!isSelectable}
                             />
-                            <Label htmlFor={`check-${cat.name}`} className={cn("flex-1", isSelectable ? "cursor-pointer" : "cursor-not-allowed")}>{cat.name}</Label>
-                            {!isSelectable && 
-                                <Link href="/premium" passHref>
-                                    <Lock className="h-4 w-4 text-amber-500 hover:text-amber-400" />
-                                </Link>
-                            }
+                            <Label htmlFor={`check-${cat.name}`} className="flex-1 cursor-pointer">{cat.name}</Label>
                          </div>
                     )})}
                 </div>
+                 {!isPremium && 
+                    <p className="text-xs text-muted-foreground mt-2">
+                        Para adicionar ou editar categorias, <Link href="/premium" className="underline text-primary">faça um upgrade para o Premium</Link>.
+                    </p>
+                }
             </div>
 
             {selectedCategories.length > 0 && (
                 <div className="space-y-4 pt-4">
-                    <h3 className="font-semibold">Preencha os valores para cada categoria:</h3>
+                    <h3 className="font-semibold">Preencha os valores para cada categoria selecionada:</h3>
                     {selectedCategories.map(cat => {
                         const earning = data.earnings.find(e => e.category === cat);
                         return (
@@ -169,5 +150,3 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
     </Card>
   );
 }
-
-    

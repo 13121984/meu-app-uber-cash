@@ -38,7 +38,7 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
   }, [dispatch]);
 
   const handleAddFuelEntry = () => {
-    const defaultFuelType = fuelTypes.length > 0 ? fuelTypes[0].name : '';
+    const defaultFuelType = fuelTypes.find(f => f.isDefault)?.name || fuelTypes[0]?.name || '';
     const newEntry: FuelEntry = { id: Date.now(), type: defaultFuelType, paid: 0, price: 0 };
     handleFuelEntriesChange([...data.fuelEntries, newEntry]);
   };
@@ -117,15 +117,8 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {fuelTypes.map((type) => (
-                                                  <SelectItem key={type.name} value={type.name} disabled={!isPremium && !type.isDefault}>
-                                                    <div className="flex items-center justify-between w-full">
-                                                        <span>{type.name}</span>
-                                                        {!isPremium && !type.isDefault && 
-                                                            <Link href="/premium" passHref>
-                                                                <Lock className="h-4 w-4 text-amber-500 hover:text-amber-400" />
-                                                            </Link>
-                                                        }
-                                                    </div>
+                                                  <SelectItem key={type.name} value={type.name}>
+                                                      <span>{type.name}</span>
                                                   </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -164,6 +157,11 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                     );
                 })
             )}
+             {!isPremium && 
+                <p className="text-xs text-muted-foreground pt-2">
+                    Para adicionar novos tipos de combustível, <Link href="/premium" className="underline text-primary">faça um upgrade para o Premium</Link>.
+                </p>
+            }
         </CardContent>
       </Card>
       
@@ -215,4 +213,3 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
     </div>
   );
 }
-
