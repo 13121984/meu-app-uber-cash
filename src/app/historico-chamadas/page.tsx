@@ -45,11 +45,11 @@ export default function HistoricoChamadasPage() {
 
             <div className="relative aspect-[9/16] max-w-sm mx-auto rounded-lg overflow-hidden border-4 border-card shadow-lg">
                 <Image
-                    src="https://picsum.photos/400/711"
+                    src="https://picsum.photos/394/700"
                     alt="Exemplo de análise automática de corrida sobreposta na tela do aplicativo de transporte"
-                    width={400}
-                    height={711}
-                    data-ai-hint="phone screen"
+                    width={394}
+                    height={700}
+                    data-ai-hint="ride hailing app"
                     className="object-cover"
                 />
                  <div className="absolute bottom-4 left-4 right-4 bg-background/80 backdrop-blur-sm p-2 rounded-md text-center">
@@ -81,3 +81,4 @@ export default function HistoricoChamadasPage() {
     </div>
   );
 }
+
