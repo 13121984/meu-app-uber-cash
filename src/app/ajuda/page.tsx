@@ -1,6 +1,7 @@
+
 "use client";
 
-import { LifeBuoy, BookOpen, PlusCircle, BarChart3, History, Target, Calculator, Smartphone, LayoutDashboard, Youtube, Gem, Sparkles } from "lucide-react";
+import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -16,56 +17,70 @@ const helpTopics = [
     value: "registrar",
     icon: PlusCircle,
     title: "Como registrar meus ganhos e despesas?",
-    content: "Na tela inicial, use os botões 'Registrar Hoje' ou 'Outro Dia'. Você também pode usar o botão de '+' no menu superior. Primeiro, insira os dados básicos como KM rodados e horas trabalhadas. Em seguida, avance para as abas de 'Ganhos' e 'Despesas' para adicionar os valores de cada categoria e os abastecimentos do dia. A prévia é atualizada em tempo real.",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    content: "Na tela inicial ou no menu, clique em 'Registrar Hoje' ou 'Outro Dia'. Primeiro, insira KM e horas. Se usar os períodos de trabalho (ex: 08:00-12:00), as horas são calculadas automaticamente. Depois, nas abas seguintes, adicione seus ganhos por categoria e abastecimentos.",
   },
   {
     value: "gerenciar",
     icon: History,
     title: "Como editar ou apagar um registro antigo?",
-    content: "Na tela 'Gerenciar', você pode visualizar todos os seus dias de trabalho. Use os filtros para encontrar um dia específico. Clique em um dia na lista para ver os detalhes, editar cada período de trabalho individualmente ou apagar todos os registros daquele dia."
+    content: "Vá para 'Gerenciamento'. Use os filtros para achar um dia. Clique no dia na lista para abrir os detalhes. Você pode editar cada período de trabalho individualmente, adicionar um novo período àquele dia ou apagar todos os registros da data de uma só vez."
   },
   {
     value: "relatorios",
     icon: BarChart3,
     title: "Como funcionam os relatórios?",
-    content: "Acesse os 'Relatórios Detalhados' através do botão na tela 'Gerenciar'. Use os filtros de período para gerar análises aprofundadas da sua performance. Você pode ver gráficos de composição de ganhos, evolução do lucro e muito mais. Também é possível exportar os dados filtrados para PDF ou CSV a qualquer momento."
-  },
-   {
-    value: "metas",
-    icon: Target,
-    title: "Como planejar minhas metas?",
-    content: "Em 'Metas', defina seu objetivo de lucro mensal e quantos dias por semana você pretende trabalhar. O sistema calculará automaticamente suas metas diárias e semanais, que serão usadas para acompanhar seu progresso no Dashboard e na tela inicial."
+    content: "Em 'Relatórios Detalhados', use os filtros de período para gerar análises da sua performance. Você pode ver gráficos, como a evolução do seu lucro, e exportar os dados para PDF ou CSV."
   },
   {
-    value: "taximetro",
+    value: "metas",
+    icon: Target,
+    title: "Como planejar minhas metas de lucro?",
+    content: "Em 'Planejamento Financeiro', no card 'Plano de Metas Mensal', defina seu objetivo de lucro líquido mensal e quantos dias por semana você pretende trabalhar. O sistema calculará automaticamente suas metas diárias e semanais para acompanhar seu progresso no Dashboard e na tela inicial."
+  },
+  {
+    value: "despesas_pessoais",
+    icon: Wallet,
+    title: "Como controlo minhas despesas pessoais?",
+    content: "Na tela 'Planejamento Financeiro', abra o card 'Controle de Despesas Pessoais'. Clique em 'Adicionar Despesa', preencha a descrição, valor, categoria e data. Isso ajuda a ter uma visão completa do seu saldo final no resumo do mês, que considera o lucro do trabalho menos essas despesas."
+  },
+   {
+    value: "calculadora_objetivos",
     icon: Calculator,
-    title: "Para que serve o Taxímetro?",
-    content: "O Taxímetro Inteligente é ideal para corridas particulares. Configure suas tarifas (bandeirada, preço por km e por minuto) e inicie uma corrida. O app usará o GPS para calcular a distância e o tempo, mostrando o valor final em tempo real. Ao finalizar e confirmar, a corrida é salva automaticamente no seu histórico do dia como um ganho 'Particular'."
+    title: "Como usar a Calculadora de Objetivos?",
+    content: "Esta ferramenta, no 'Planejamento Financeiro', ajuda a estimar quanto tempo você precisa trabalhar para alcançar um valor específico. Insira o valor do seu objetivo (ex: R$ 500 para um pneu novo), ajuste seu ganho médio por hora se necessário, e a calculadora mostrará o total de horas e dias de trabalho necessários."
   },
    {
     value: "layout",
     icon: LayoutDashboard,
-    title: "Posso organizar o layout do aplicativo?",
-    content: "Sim! No plano gratuito, você pode escolher 1 card de estatística e 1 gráfico opcional para exibir, além dos itens padrão, e reordená-los como preferir em 'Configurações > Personalizar Layout'. O plano Premium desbloqueia todos os 12 cards e 8 tipos de gráficos, permitindo que você monte um painel com as métricas que mais importam para você, na ordem que quiser."
+    title: "Posso personalizar o layout dos relatórios?",
+    content: "Sim! Em 'Configurações > Personalizar Layout', você pode reordenar todos os cards de estatísticas e os gráficos dos seus relatórios. Assinantes do plano gratuito podem escolher 1 card e 1 gráfico opcional, enquanto assinantes Premium têm acesso a todos os itens e podem organizá-los como quiserem.",
+    isPremiumFeature: true
   },
   {
     value: "estatisticas_categoria",
     icon: Sparkles,
     title: "Consigo ver o lucro por cada aplicativo (Uber, 99)?",
-    content: "O plano gratuito oferece um resumo geral da sua performance. Para uma análise profunda e detalhada, o plano Premium é a solução. Com ele, você tem acesso a gráficos que mostram o ganho médio por hora e por viagem para cada uma das suas categorias de ganhos, permitindo que você descubra qual plataforma é mais rentável para o seu tempo."
+    content: "Sim, no plano Premium! Em 'Relatórios', você terá acesso a gráficos que mostram o ganho médio por hora e por viagem para cada uma das suas categorias de ganhos. Isso permite que você descubra qual plataforma é mais rentável para o seu tempo e otimize sua estratégia.",
+    isPremiumFeature: true
+  },
+    {
+    value: "lembretes_manutencao",
+    icon: Gem,
+    title: "Como funcionam os lembretes de manutenção?",
+    content: "Assinantes Premium podem configurar lembretes ao registrar uma manutenção. Você pode definir um alerta por data (ex: daqui a 6 meses) ou por quilometragem (ex: a cada 10.000 km). O app irá te avisar na tela inicial quando a próxima manutenção preventiva estiver se aproximando, ajudando a manter seu veículo sempre em dia.",
+    isPremiumFeature: true
   },
   {
-    value: "vantagens_premium",
-    icon: Gem,
-    title: "Quais são as vantagens do plano Premium?",
-    content: "O plano Premium transforma o Uber Cash em uma ferramenta de gestão financeira completa. Além de todas as funcionalidades gratuitas, você desbloqueia: 1) Cards e gráficos ilimitados no Dashboard e Relatórios. 2) Personalização total da ordem de todos os itens visuais. 3) Gerenciamento de múltiplos veículos. 4) Criação de categorias de ganhos e combustíveis totalmente personalizáveis. 5) Uso ilimitado do Taxímetro. 6) Acesso a todas as futuras funcionalidades e suporte prioritário. É o upgrade ideal para o motorista que leva a sério a sua performance."
+    value: "taximetro",
+    icon: Calculator,
+    title: "Para que serve o Taxímetro?",
+    content: "O Taxímetro é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Ao finalizar, a corrida é salva automaticamente no seu histórico do dia."
   },
    {
     value: "chamadas",
     icon: Smartphone,
-    title: "Como funciona a captura de chamadas?",
-    content: "Esta é uma funcionalidade em desenvolvimento para a versão nativa Android, que pode ser acessada através da tela 'Gerenciar'. O objetivo é que o app, rodando em segundo plano, consiga 'ler' a tela de apps como Uber e 99, capturar os dados da corrida (valor, distância) e salvá-los automaticamente no seu histórico de chamadas, permitindo uma análise detalhada e comparação de ganhos."
+    title: "O que é a captura de chamadas?",
+    content: "Esta é uma funcionalidade em desenvolvimento para a versão nativa do aplicativo. O objetivo é que, com sua permissão, o app consiga 'ler' a tela de apps como Uber e 99 para capturar os dados da corrida (valor, distância) e salvá-los automaticamente no seu histórico, permitindo uma análise ainda mais detalhada."
   },
 ];
 
@@ -87,34 +102,20 @@ export default function AjudaPage() {
                         {helpTopics.map((topic) => (
                              <AccordionItem value={topic.value} key={topic.value}>
                                 <AccordionTrigger>
-                                    <div className="flex items-center gap-3">
-                                        <topic.icon className="h-5 w-5 text-primary" />
-                                        <span className="font-semibold text-left">{topic.title}</span>
+                                    <div className="flex items-center gap-3 text-left">
+                                        <topic.icon className="h-5 w-5 text-primary shrink-0" />
+                                        <span className="font-semibold">{topic.title}</span>
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="space-y-4">
                                         <p className="text-foreground/90">{topic.content}</p>
-                                        {topic.videoUrl && (
-                                            <div className="mt-4">
-                                                <h4 className="font-semibold mb-2">Tutorial em Vídeo:</h4>
-                                                <div className="aspect-video w-full rounded-lg overflow-hidden border">
-                                                    <iframe
-                                                        className="w-full h-full"
-                                                        src={topic.videoUrl}
-                                                        title={topic.title}
-                                                        frameBorder="0"
-                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                        allowFullScreen
-                                                    ></iframe>
-                                                </div>
-                                            </div>
-                                        )}
-                                         {topic.value.includes('premium') && (
+                                        
+                                         {topic.isPremiumFeature && (
                                             <Link href="/premium" passHref>
                                                 <Button className="mt-2 animate-pulse" variant="default" size="sm">
                                                     <Gem className="mr-2 h-4 w-4" />
-                                                    Conheça o Plano Premium
+                                                    Disponível no Plano Premium
                                                 </Button>
                                             </Link>
                                         )}
