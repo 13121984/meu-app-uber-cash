@@ -19,15 +19,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadUserFromStorage = useCallback(() => {
+  // Carrega o usuário do localStorage na inicialização.
+  // Isso permite que o app funcione offline com os últimos dados sincronizados.
+  const loadUserFromStorage = useCallback(async () => {
+    setLoading(true);
     try {
-      const storedUser = localStorage.getItem('rota-certa-user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+      const storedUserJSON = localStorage.getItem('rota-certa-user');
+      if (storedUserJSON) {
+        const storedUser = JSON.parse(storedUserJSON);
+        setUser(storedUser);
+        // Tenta atualizar os dados do usuário em segundo plano se estiver online
+        // Isso garante que o status de "isPremium" seja atualizado.
+        const freshUser = await getUserById(storedUser.id);
+        if (freshUser) {
+            setUser(freshUser);
+            localStorage.setItem('rota-certa-user', JSON.stringify(freshUser));
+        }
       }
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
       setUser(null);
+      localStorage.removeItem('rota-certa-user');
     } finally {
         setLoading(false);
     }
@@ -37,16 +49,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadUserFromStorage();
   }, [loadUserFromStorage]);
 
+  // Função para forçar a atualização dos dados do usuário
   const refreshUser = async () => {
-    if (user) {
-      const updatedUser = await getUserById(user.id);
-      if(updatedUser) {
-        setUser(updatedUser);
-        localStorage.setItem('rota-certa-user', JSON.stringify(updatedUser));
-      }
+    if (!user) return;
+    setLoading(true);
+    try {
+        const updatedUser = await getUserById(user.id);
+        if(updatedUser) {
+            setUser(updatedUser);
+            localStorage.setItem('rota-certa-user', JSON.stringify(updatedUser));
+        }
+    } catch (e) {
+        console.error("Failed to refresh user:", e);
+    } finally {
+        setLoading(false);
     }
   };
 
+  // Login sempre busca os dados mais recentes do "servidor" (nosso .json)
   const login = async (userId: string, password: string) => {
     const result = await loginService(userId, password);
     if (result.success && result.user) {
@@ -67,7 +87,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('rota-certa-user');
-    // We don't need to force a reload anymore, the context update will trigger component changes
   };
 
   return (
