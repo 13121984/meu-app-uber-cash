@@ -81,6 +81,20 @@ const verifyPassword = (password: string, hash: string) => createHash(password) 
 
 // --- Funções de Serviço ---
 
+/**
+ * Função simulada para obter o usuário ativo.
+ * Em um app real, isso viria de uma sessão, cookie, etc.
+ * Por enquanto, estamos pegando o primeiro usuário como o "logado".
+ */
+export async function getActiveUser(): Promise<User | null> {
+    const users = await getUsers();
+    // A lógica de login/logout no cliente irá determinar qual usuário está realmente ativo.
+    // Esta função é um placeholder para o servidor. Para o propósito de pré-renderização,
+    // podemos assumir um usuário ou nenhum. Vamos assumir o primeiro como padrão.
+    return users.length > 0 ? users[0] : null;
+}
+
+
 export async function signup(userId: string, password: string, securityAnswers: SecurityAnswer[]): Promise<{ success: boolean, error?: string }> {
     const users = await getUsers();
 
