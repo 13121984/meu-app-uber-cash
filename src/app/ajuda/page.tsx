@@ -299,7 +299,7 @@ export default function AjudaPage() {
                             <AccordionTrigger>
                                 <div className="flex items-center gap-2">
                                     <BotMessageSquare className="h-5 w-5 text-primary" />
-                                    <span className="font-semibold text-left">Analisador de Corridas com IA</span>
+                                    <span className="font-semibold text-left">Analisador de Corridas com IA (Print)</span>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent>
@@ -317,42 +317,27 @@ export default function AjudaPage() {
                             <AccordionTrigger>
                                 <div className="flex items-center gap-2">
                                     <Accessibility className="h-5 w-5 text-primary" />
-                                    <span className="font-semibold text-left">Captura Automática (Serviço de Acessibilidade)</span>
+                                    <span className="font-semibold text-left">Visão de Futuro: Captura Automática</span>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent>
                                <div className="prose prose-sm dark:prose-invert max-w-none">
-                                 <p>Esta é a funcionalidade mais avançada. Ela permite que o app leia a tela de oferta de corrida de outros apps (Uber, 99) e analise os dados em tempo real, sem a necessidade de tirar um print.</p>
-                                 <h4>Passos no Android Studio:</h4>
+                                 <p>Esta é a evolução natural e o recurso mais poderoso do aplicativo. Ele permite que o app leia a tela de outros aplicativos (Uber, 99, etc.) para analisar ofertas e registrar corridas finalizadas, <strong>tudo de forma automática.</strong></p>
+                                 <h4>O Fluxo Ideal (Visão de Produto):</h4>
                                  <ol>
-                                    <li>
-                                        <strong>Criar um Serviço de Acessibilidade:</strong> Em <code>android/app/src/main/java/...</code>, você precisará criar uma nova classe Java/Kotlin que estenda <code>AccessibilityService</code>.
-                                    </li>
-                                    <li>
-                                        <strong>Registrar o Serviço:</strong> No <code>AndroidManifest.xml</code>, declare o serviço e as permissões necessárias:
-                                        <pre className="text-xs p-2 rounded-md bg-muted text-foreground whitespace-pre-wrap">{
-    `<service
-        android:name=".YourAccessibilityService"
-        android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-        android:exported="false">
-        <intent-filter>
-            <action android:name="android.accessibilityservice.AccessibilityService" />
-        </intent-filter>
-        <meta-data
-            android:name="android.accessibilityservice"
-            android:resource="@xml/accessibility_service_config" />
-    </service>`
-                                        }</pre>
-                                        Você também precisará criar o arquivo <code>res/xml/accessibility_service_config.xml</code> para configurar quais eventos e pacotes o serviço irá monitorar.
-                                    </li>
-                                     <li>
-                                        <strong>Implementar a Lógica de Extração:</strong> Dentro do seu serviço, no método <code>onAccessibilityEvent</code>, você irá inspecionar os nós da tela (<code>AccessibilityNodeInfo</code>) para encontrar os textos de valor, distância e tempo quando uma oferta de corrida aparecer.
-                                    </li>
-                                    <li>
-                                        <strong>Comunicar com o WebView:</strong> Uma vez que os dados são extraídos, você precisa enviá-los de volta para a parte web do aplicativo (WebView). A maneira mais comum de fazer isso é usando a classe <code>WebView</code> para executar JavaScript. Você pode chamar uma função global no seu código TypeScript (ex: `window.handleNativeData(jsonData)`), que por sua vez chamaria o fluxo de IA.
-                                    </li>
+                                    <li><strong>Análise da Oferta:</strong> Quando uma oferta de corrida aparece, o app lê os dados (valor, distância, tempo) e exibe uma pequena notificação com a recomendação "Bora" ou "Tô Fora".</li>
+                                    <li><strong>Detecção de Finalização:</strong> Após o motorista aceitar e completar a corrida, o app detecta a tela de resumo/finalização da viagem.</li>
+                                    <li><strong>Registro 100% Automático:</strong> O app extrai os dados finais e salva a corrida no histórico do Rota Certa, sem que o motorista precise fazer nada.</li>
                                  </ol>
-                                 <p className="mt-2">Esta é uma implementação nativa complexa que exige um bom conhecimento do SDK do Android, mas é a chave para a funcionalidade de análise em tempo real.</p>
+                                 <h4>Como Funciona Tecnicamente? (Android)</h4>
+                                 <p>Isso é feito com um <strong>Serviço de Acessibilidade</strong> no Android, que precisa ser habilitado pelo usuário. Ele permite que o nosso app leia o texto exibido na tela de outros apps.</p>
+                                 <ul className="list-disc pl-5">
+                                    <li><strong>Desenvolvimento Nativo:</strong> A criação deste serviço é feita em código nativo (Java/Kotlin) no Android Studio.</li>
+                                    <li><strong>Configuração (Manifest):</strong> É preciso registrar o serviço no arquivo <code>AndroidManifest.xml</code> e criar uma configuração em XML para especificar quais apps e eventos monitorar (ex: monitorar o app da Uber quando uma janela de oferta aparece).</li>
+                                     <li><strong>Lógica de Extração:</strong> O serviço precisa ser inteligente para identificar os textos corretos de "valor", "distância", etc., em meio a todas as outras informações na tela.</li>
+                                    <li><strong>Comunicação:</strong> Os dados extraídos pelo serviço nativo são enviados para a parte web do nosso app (WebView) para serem processados e salvos.</li>
+                                 </ul>
+                                 <p className="mt-2">Esta é uma implementação complexa que exige conhecimento do SDK do Android, mas é o que diferencia um app útil de um app indispensável.</p>
                                </div>
                             </AccordionContent>
                         </AccordionItem>
