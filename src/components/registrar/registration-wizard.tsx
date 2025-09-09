@@ -11,6 +11,7 @@ import { Step3Fuel } from './step3-fuel';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { addOrUpdateWorkDay, deleteWorkDayEntry } from '@/services/work-day.service';
+import { updateAllSummaries } from '@/services/summary.service';
 import { useRouter } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
 import { parseISO, startOfDay } from 'date-fns';
@@ -185,8 +186,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     
     try {
       const { maintenanceEntries, ...workDayData } = state;
-      const isActuallyEditing = !!workDayData.id && !['today', 'other-day'].includes(workDayData.id);
-      
       const result = await addOrUpdateWorkDay(user.id, workDayData as WorkDay);
 
       if (maintenanceEntries.length > 0) {
@@ -198,6 +197,9 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       }
       
       if (result.success) {
+        // Trigger summary update after successful save
+        await updateAllSummaries(user.id);
+        
         toast({
             title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><span>Sucesso!</span></div>,
             description: `Seu período de trabalho foi ${result.operation === 'updated' ? 'atualizado' : 'registrado'}.`,
@@ -233,6 +235,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       setDeletingId(id);
       const result = await deleteWorkDayEntry(user.id, id);
       if (result.success) {
+          await updateAllSummaries(user.id);
           toast({ description: "Período removido com sucesso."});
           router.refresh(); // Recarrega os dados do servidor
       } else {

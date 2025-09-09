@@ -7,7 +7,6 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords, Maintenance } from './maintenance.service';
 import { getWorkDays, WorkDay } from './work-day.service';
 import { getFile, saveFile } from './storage.service';
-import { getActiveUser } from './auth.service';
 
 export interface EarningsByCategory { name: string; total: number; }
 export interface TripsByCategory { name: string; total: number; }

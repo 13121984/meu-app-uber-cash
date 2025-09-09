@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { getFilteredAndGroupedWorkDays, type WorkDay } from '@/services/work-day.service';
+import { updateAllSummaries } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -61,6 +62,7 @@ export function GerenciamentoClient() {
       try {
           const result = await deleteFilteredWorkDaysAction(user.id, currentFilters as ActiveFilters);
           if (result.success) {
+              await updateAllSummaries(user.id);
               toast({ title: "Sucesso!", description: `${result.count || 0} registros apagados.` });
               handleApplyFilters(currentFilters); // Refresh the data
           } else {

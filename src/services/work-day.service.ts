@@ -5,8 +5,8 @@ import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth,
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
-import { updateAllSummaries } from './summary.service';
 import demoData from '../../data/work-days.json';
+
 
 // --- Tipos e Interfaces ---
 
@@ -64,6 +64,10 @@ async function writeWorkDays(userId: string, data: WorkDay[]): Promise<void> {
 
 const revalidateAll = (userId: string) => {
     revalidatePath('/', 'layout');
+    revalidatePath('/dashboard', 'layout');
+    revalidatePath('/gerenciamento', 'layout');
+    revalidatePath('/registrar', 'layout');
+    revalidatePath('/relatorios', 'layout');
 };
 
 // --- Funções CRUD ---
@@ -76,7 +80,6 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
       if (existingDayIndex > -1) {
         allWorkDays[existingDayIndex] = { ...data, date: startOfDay(data.date) };
         await writeWorkDays(userId, allWorkDays);
-        await updateAllSummaries(userId);
         revalidateAll(userId);
         return { success: true, id: data.id, operation: 'updated' };
       }
@@ -89,7 +92,6 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
     };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(userId, allWorkDays);
-    await updateAllSummaries(userId);
     revalidateAll(userId);
     return { success: true, id: newWorkDay.id, operation: 'created' };
 
@@ -159,7 +161,6 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
 
         await writeWorkDays(userId, finalWorkDays);
-        await updateAllSummaries(userId);
         revalidateAll(userId);
         return { success: true, count: workDaysToUpsert.length };
 
@@ -174,7 +175,6 @@ export async function deleteWorkDayEntry(userId: string, id: string): Promise<{ 
     let allWorkDays = await readWorkDays(userId);
     allWorkDays = allWorkDays.filter(r => r.id !== id);
     await writeWorkDays(userId, allWorkDays);
-    await updateAllSummaries(userId);
     revalidateAll(userId);
     return { success: true };
   } catch (error) {
@@ -196,7 +196,6 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
 
         const deletedCount = initialLength - finalWorkDays.length;
         await writeWorkDays(userId, finalWorkDays);
-        await updateAllSummaries(userId);
         revalidateAll(userId);
         return { success: true, count: deletedCount };
     } catch (error) {
@@ -225,7 +224,6 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
         });
 
         await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
-        await updateAllSummaries(userId);
         revalidateAll(userId);
         return { success: true };
     } catch (e) {
@@ -238,7 +236,6 @@ export async function clearAllData(userId: string): Promise<{ success: boolean; 
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
         await writeWorkDays(userId, []);
-        await updateAllSummaries(userId);
         revalidateAll(userId);
         return { success: true };
     } catch (e) {
