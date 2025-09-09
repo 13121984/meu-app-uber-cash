@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -29,7 +28,7 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
   const description = isPreview ? '' : title;
 
   return (
-    <Card className="p-4 bg-secondary/30">
+    <Card className="p-4">
       <CardContent className="flex flex-col items-start gap-2 p-0">
         {Icon && 
             <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", iconBg)}>
