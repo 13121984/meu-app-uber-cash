@@ -93,7 +93,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                         }}
                     >
                         <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center p-0.5">
-                            <Car className="h-6 w-6 text-primary" />
+                            <AppLogo className="h-6 w-6 text-primary" />
                         </div>
                     </div>
 
