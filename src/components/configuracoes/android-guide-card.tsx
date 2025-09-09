@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers } from "lucide-react";
+import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare } from "lucide-react";
 
 const codeStructure = `- src/app: Contém as pastas de cada página (ex: /dashboard).
 - src/components: Contém os "pedaços" da interface (ex: botões, cards).
@@ -106,6 +106,24 @@ export function AndroidGuideCard() {
                                     <strong>Implementar no Código:</strong> No arquivo <code>src/components/taximetro/taximeter-client.tsx</code>, localize as funções <code>startTracking</code> e <code>stopTracking</code>. Você precisará substituir as chamadas do <code>@capacitor/geolocation</code> pelas funções do plugin de background geolocation que você instalou. A estrutura do código já está preparada para essa substituição.
                                 </li>
                              </ol>
+                           </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                     <AccordionItem value="analyzer">
+                        <AccordionTrigger>
+                            <div className="flex items-center gap-2">
+                                <BotMessageSquare className="h-5 w-5 text-primary" />
+                                <span className="font-semibold text-left">Analisador de Corridas com IA</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                           <div className="prose prose-sm dark:prose-invert">
+                             <p>A funcionalidade de análise de corridas utiliza IA para extrair dados de um print da tela e dar um veredito.</p>
+                             <ul className="list-disc pl-5">
+                                <li><strong>Fluxo de IA:</strong> A lógica principal está em <code>src/ai/flows/analise-corrida-flow.ts</code>. Este fluxo usa o Gemini para interpretar a imagem.</li>
+                                <li><strong>Interface:</strong> A página para o usuário interagir com essa funcionalidade está em <code>src/app/analisador/page.tsx</code>.</li>
+                                <li><strong>Dados do Usuário:</strong> As metas de ganhos (R$/km, R$/hora) do usuário para a análise são salvas nas preferências do usuário, gerenciadas pelo <code>src/services/auth.service.ts</code>.</li>
+                             </ul>
                            </div>
                         </AccordionContent>
                     </AccordionItem>

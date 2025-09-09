@@ -28,7 +28,7 @@ export function ConfiguracoesClient() {
             <BackupCard />
             <CatalogManagerCard isPremium={isPremium} />
             <ImportCard />
-            <AndroidGuideCard />
+            {isPremium && <AndroidGuideCard />}
         </div>
     )
 }
