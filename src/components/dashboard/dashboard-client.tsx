@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import React, { useState, useTransition, useEffect } from "react"
@@ -43,22 +44,25 @@ const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
 };
 
 export function DashboardClient() {
-  const { user } = useAuth();
+  const { user, isPro, isAutopilot } = useAuth();
   const [period, setPeriod] = useState<Period>('today');
   const [data, setData] = useState<ReportData | null>(null);
   const [isLoading, startTransition] = useTransition();
 
   const handlePeriodChange = (newPeriod: Period) => {
     setPeriod(newPeriod);
+    if (!user) return;
     startTransition(async () => {
-      const summary = await getReportData({ type: newPeriod });
+      const summary = await getReportData(user.id, { type: newPeriod });
       setData(summary);
     });
   };
 
   useEffect(() => {
-    handlePeriodChange('today');
-  }, []);
+    if(user) {
+        handlePeriodChange('today');
+    }
+  }, [user]);
 
   const periodMap: Record<Period, string> = {
       today: "Hoje",
@@ -68,7 +72,6 @@ export function DashboardClient() {
   
   const currentData = data;
   
-  const isPremium = user?.isPremium || false;
 
   const getChartData = (reportData: ReportData, chartId: string) => {
     switch (chartId) {
@@ -105,13 +108,12 @@ export function DashboardClient() {
       }
 
       let orderedCardIds: string[];
-      if (user?.isPremium) {
-        // Premium: Use a ordem salva, ou todos se não houver ordem.
-        orderedCardIds = user.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
+      if (isPro) {
+        // Pro e Autopilot usam a ordem salva se existir, senão todos os cards
+        orderedCardIds = user?.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
       } else {
-        // Gratuito: Use a ordem salva, garantindo que contenha todos os itens obrigatórios.
-        const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
-        orderedCardIds = [...new Set([...savedCardOrder, ...mandatoryCards])].filter(id => mandatoryCards.includes(id));
+        // Basic usa a ordem fixa
+        orderedCardIds = mandatoryCards;
       }
       
       const cardsToShow = orderedCardIds.map(id => {
@@ -137,11 +139,16 @@ export function DashboardClient() {
       }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
 
       let chartsToShowIds: string[];
-       if (user?.isPremium) {
-        chartsToShowIds = user.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id);
+       if (isAutopilot) {
+        // Autopilot tem acesso a tudo
+        chartsToShowIds = user?.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id);
+      } else if (isPro) {
+        // Pro tem acesso a um conjunto limitado, mas pode reordenar
+        const proCharts = mandatoryCharts;
+        const savedProOrder = user?.preferences?.reportChartOrder?.filter(id => proCharts.includes(id)) || [];
+        chartsToShowIds = [...new Set([...savedProOrder, ...proCharts])];
       } else {
-        const savedChartOrder = user?.preferences?.reportChartOrder || [];
-        chartsToShowIds = [...new Set([...savedChartOrder, ...mandatoryCharts])].filter(id => mandatoryCharts.includes(id));
+        chartsToShowIds = mandatoryCharts;
       }
       const chartsToShow = chartsToShowIds.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
@@ -154,13 +161,13 @@ export function DashboardClient() {
         >
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
-              {!isPremium && (
+              {!isAutopilot && (
                    <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
                             <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
                             <p className="text-sm font-semibold">Adicionar Card</p>
-                            <p className="text-xs text-muted-foreground">Exclusivo Premium</p>
+                            <p className="text-xs text-muted-foreground">Exclusivo Autopilot</p>
                         </CardContent>
                       </Card>
                   </Link>
@@ -205,11 +212,11 @@ export function DashboardClient() {
           })}
 
 
-          {!isPremium && (
+          {!isAutopilot && (
               <Link href="/configuracoes/layout-personalizado" passHref>
                 <Button variant="outline" className="w-full">
                     <Lock className="mr-2 h-4 w-4"/>
-                    Adicionar outro Gráfico (Premium)
+                    Adicionar outro Gráfico (Exclusivo Autopilot)
                 </Button>
             </Link>
           )}

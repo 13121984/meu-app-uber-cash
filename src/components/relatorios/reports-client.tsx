@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useTransition, useMemo, useCallback, useRef } from 'react';
@@ -39,7 +40,7 @@ const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
 };
 
 export function ReportsClient() {
-  const { user } = useAuth();
+  const { user, isPro, isAutopilot } = useAuth();
   const [data, setData] = useState<ReportData | null>(null);
   const [filters, setFilters] = useState<ReportFilterValues | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -47,14 +48,14 @@ export function ReportsClient() {
 
 
   const handleApplyFilters = useCallback((newFilters: ReportFilterValues) => {
+    if (!user) return;
     setFilters(newFilters);
     startTransition(async () => {
-      const reportData = await getReportData(newFilters);
+      const reportData = await getReportData(user.id, newFilters);
       setData(reportData);
     });
-  }, []);
+  }, [user]);
   
-  const isPremium = user?.isPremium || false;
 
   const getChartData = (reportData: ReportData, chartId: string) => {
     switch (chartId) {
@@ -91,10 +92,10 @@ export function ReportsClient() {
     }
     
     let orderedCardIds: string[];
-    if (isPremium) {
-        orderedCardIds = user?.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
+    if (isPro) {
+      orderedCardIds = user?.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
     } else {
-        orderedCardIds = mandatoryCards;
+      orderedCardIds = mandatoryCards;
     }
       
     const cardsToShow = orderedCardIds.map(id => {
@@ -120,8 +121,12 @@ export function ReportsClient() {
     }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
     
     let chartsToShowIds: string[];
-    if (isPremium) {
+    if (isAutopilot) {
         chartsToShowIds = user?.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id);
+    } else if (isPro) {
+        const proCharts = mandatoryCharts;
+        const savedProOrder = user?.preferences?.reportChartOrder?.filter(id => proCharts.includes(id)) || [];
+        chartsToShowIds = [...new Set([...savedProOrder, ...proCharts])];
     } else {
         chartsToShowIds = mandatoryCharts;
     }
@@ -137,13 +142,13 @@ export function ReportsClient() {
         >
              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
-                 {!isPremium && (
+                 {!isAutopilot && (
                    <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
                             <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
                             <p className="text-sm font-semibold">Adicionar Card</p>
-                             <p className="text-xs text-muted-foreground">Exclusivo Premium</p>
+                             <p className="text-xs text-muted-foreground">Exclusivo Autopilot</p>
                         </CardContent>
                       </Card>
                   </Link>
@@ -176,11 +181,11 @@ export function ReportsClient() {
                   </motion.div>
               );
             })}
-             {!isPremium && (
+             {!isAutopilot && (
               <Link href="/configuracoes/layout-personalizado" passHref>
                 <Button variant="outline" className="w-full">
                     <Lock className="mr-2 h-4 w-4"/>
-                    Adicionar outro Gráfico (Premium)
+                    Adicionar outro Gráfico (Exclusivo Autopilot)
                 </Button>
             </Link>
           )}
