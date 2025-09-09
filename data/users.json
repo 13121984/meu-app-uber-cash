@@ -3,7 +3,15 @@
     "id": "Paulo Vitor Tiburcio ",
     "passwordHash": "hashed_Aec081305@",
     "isPremium": true,
-    "vehicles": [],
+    "vehicles": [
+      {
+        "brand": "Renault ",
+        "model": "Kwid ",
+        "color": "Prata",
+        "plate": "",
+        "id": "1757397278689"
+      }
+    ],
     "securityAnswers": [],
     "preferences": {}
   },

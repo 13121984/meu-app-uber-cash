@@ -3,13 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare, Accessibility, DollarSign, Cloud, Link as LinkIcon } from "lucide-react";
-
-const codeStructure = `- src/app: Contém as pastas de cada página (ex: /dashboard).
-- src/components: Contém os "pedaços" da interface (ex: botões, cards).
-- src/services: Lógica de "backend" para ler/salvar dados.
-- src/ai: Fluxos de IA com Genkit.
-- data: Arquivos .json onde os dados são salvos.`;
+import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare, Accessibility, DollarSign, Link as LinkIcon } from "lucide-react";
 
 export function AndroidGuideCard() {
     return (
@@ -29,25 +23,22 @@ export function AndroidGuideCard() {
                         <AccordionTrigger>
                             <div className="flex items-center gap-2">
                                 <CodeXml className="h-5 w-5 text-primary" />
-                                <span className="font-semibold text-left">Estrutura de Pastas</span>
+                                <span className="font-semibold text-left">Estrutura de Pastas e Interação</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                           <p className="text-sm text-muted-foreground mb-2">A estrutura do projeto é baseada em Next.js:</p>
-                           <pre className="text-xs p-4 rounded-md bg-muted text-foreground whitespace-pre-wrap">{codeStructure}</pre>
-                        </AccordionContent>
-                    </AccordionItem>
-                     <AccordionItem value="interaction">
-                        <AccordionTrigger>
-                            <div className="flex items-center gap-2">
-                                <BrainCircuit className="h-5 w-5 text-primary" />
-                                <span className="font-semibold text-left">Como Falar Comigo</span>
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                           <p className="text-sm text-muted-foreground">
-                            Para me pedir para fazer alterações, basta me dizer o que você quer em linguagem natural. Por exemplo: "Adicione um novo card no dashboard para mostrar o total de viagens." Eu vou entender, criar um plano e gerar o código XML necessário para aplicar as mudanças. Você não precisa escrever o XML.
-                           </p>
+                           <div className="prose prose-sm dark:prose-invert max-w-none">
+                               <p>A estrutura do projeto é baseada em Next.js. As pastas mais importantes são:</p>
+                               <ul>
+                                   <li><strong>src/app:</strong> Contém as pastas de cada página (ex: /dashboard).</li>
+                                   <li><strong>src/components:</strong> Contém os "pedaços" da interface (ex: botões, cards).</li>
+                                   <li><strong>src/services:</strong> Lógica de "backend" para ler/salvar dados dos arquivos JSON.</li>
+                                   <li><strong>src/ai:</strong> Fluxos de IA com Genkit (o cérebro das análises).</li>
+                                   <li><strong>data:</strong> Arquivos .json onde os dados são salvos.</li>
+                               </ul>
+                               <h4>Como Falar Comigo</h4>
+                               <p>Para me pedir para fazer alterações, basta me dizer o que você quer em linguagem natural. Por exemplo: "Adicione um novo card no dashboard para mostrar o total de viagens." Eu vou entender, criar um plano e gerar o código XML necessário para aplicar as mudanças. Você não precisa escrever o XML.</p>
+                           </div>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="pricing">
@@ -58,7 +49,7 @@ export function AndroidGuideCard() {
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                           <div className="prose prose-sm dark:prose-invert">
+                           <div className="prose prose-sm dark:prose-invert max-w-none">
                                 <p>Para alterar o preço da assinatura e o link de pagamento da Hotmart (ou outra plataforma), edite o arquivo:</p>
                                 <p><code>src/app/premium/page.tsx</code></p>
                                 <p>Dentro deste arquivo, localize a seguinte constante no início do código e altere seu valor:</p>
@@ -77,7 +68,7 @@ export function AndroidGuideCard() {
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                           <div className="prose prose-sm dark:prose-invert">
+                           <div className="prose prose-sm dark:prose-invert max-w-none">
                                 <p>Para que o acesso Premium seja liberado automaticamente após a compra, você precisa usar um webhook. Como nosso app é estático, o ideal é usar uma função na nuvem (Cloud Function) para isso.</p>
                                 <h4>Passos Recomendados:</h4>
                                 <ol>
@@ -115,24 +106,11 @@ export function AndroidGuideCard() {
                         <AccordionTrigger>
                             <div className="flex items-center gap-2">
                                 <Compass className="h-5 w-5 text-primary" />
-                                <span className="font-semibold text-left">Permissões e GPS</span>
+                                <span className="font-semibold text-left">Taxímetro: Permissões e GPS</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                           <p className="text-sm text-muted-foreground">
-                            Para funcionalidades como o Taxímetro, o app precisa de permissão de GPS. No Android, essa permissão precisa ser declarada no arquivo <code className="bg-muted px-1 py-0.5 rounded">AndroidManifest.xml</code>. Também é importante garantir que o GPS esteja habilitado no emulador ou dispositivo físico durante os testes.
-                           </p>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="background">
-                        <AccordionTrigger>
-                            <div className="flex items-center gap-2">
-                                <Layers className="h-5 w-5 text-primary" />
-                                <span className="font-semibold text-left">Rodando em Segundo Plano (Taxímetro)</span>
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                           <div className="prose prose-sm dark:prose-invert">
+                           <div className="prose prose-sm dark:prose-invert max-w-none">
                              <p>Para que o Taxímetro continue funcionando mesmo com o app minimizado, você precisará de um plugin do Capacitor que gerencie tarefas em segundo plano e permissões específicas.</p>
                              <h4>Passos no Android Studio:</h4>
                              <ol>
@@ -165,7 +143,7 @@ export function AndroidGuideCard() {
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                           <div className="prose prose-sm dark:prose-invert">
+                           <div className="prose prose-sm dark:prose-invert max-w-none">
                              <p>A funcionalidade de análise de corridas utiliza IA para extrair dados de um print da tela e dar um veredito.</p>
                              <ul className="list-disc pl-5">
                                 <li><strong>Fluxo de IA:</strong> A lógica principal está em <code>src/ai/flows/analise-corrida-flow.ts</code>. Este fluxo usa o Gemini para interpretar a imagem.</li>
@@ -183,7 +161,7 @@ export function AndroidGuideCard() {
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                           <div className="prose prose-sm dark:prose-invert">
+                           <div className="prose prose-sm dark:prose-invert max-w-none">
                              <p>Esta é a funcionalidade mais avançada. Ela permite que o app leia a tela de oferta de corrida de outros apps (Uber, 99) e analise os dados em tempo real, sem a necessidade de tirar um print.</p>
                              <h4>Passos no Android Studio:</h4>
                              <ol>
@@ -223,3 +201,5 @@ export function AndroidGuideCard() {
         </Card>
     );
 }
+
+    
