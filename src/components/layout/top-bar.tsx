@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus, DollarSign } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus, DollarSign, Crown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
@@ -104,7 +104,7 @@ const NavButton = ({ href, label, icon: Icon }: { href: string; label: string; i
 
 export function TopBar() {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
@@ -133,6 +133,16 @@ export function TopBar() {
                     </div>
                     <span className="sr-only">Uber Cash</span>
                 </Link>
+                {user?.isPremium && (
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <Crown className="h-6 w-6 text-yellow-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Plano Premium Ativo</p>
+                        </TooltipContent>
+                    </Tooltip>
+                )}
             </div>
             {isClient && (
                 <nav className="flex items-center gap-1">
