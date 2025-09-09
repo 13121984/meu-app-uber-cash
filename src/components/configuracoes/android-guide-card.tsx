@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass } from "lucide-react";
+import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers } from "lucide-react";
 
 const codeStructure = `- src/app: Contém as pastas de cada página (ex: /dashboard).
 - src/components: Contém os "pedaços" da interface (ex: botões, cards).
@@ -74,6 +74,39 @@ export function AndroidGuideCard() {
                            <p className="text-sm text-muted-foreground">
                             Para funcionalidades como o Taxímetro, o app precisa de permissão de GPS. No Android, essa permissão precisa ser declarada no arquivo <code className="bg-muted px-1 py-0.5 rounded">AndroidManifest.xml</code>. Também é importante garantir que o GPS esteja habilitado no emulador ou dispositivo físico durante os testes.
                            </p>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="background">
+                        <AccordionTrigger>
+                            <div className="flex items-center gap-2">
+                                <Layers className="h-5 w-5 text-primary" />
+                                <span className="font-semibold text-left">Rodando em Segundo Plano (Taxímetro)</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                           <div className="prose prose-sm dark:prose-invert">
+                             <p>Para que o Taxímetro continue funcionando mesmo com o app minimizado, você precisará de um plugin do Capacitor que gerencie tarefas em segundo plano e permissões específicas.</p>
+                             <h4>Passos no Android Studio:</h4>
+                             <ol>
+                                <li>
+                                    <strong>Instalar o Plugin:</strong> Você precisará de um plugin da comunidade para geolocalização em segundo plano. Um exemplo popular é o <a href="https://github.com/capacitor-community/background-geolocation" target="_blank" rel="noopener noreferrer">Capacitor Background Geolocation</a>.
+                                    <br />
+                                    Instale-o com: <code className="bg-muted px-1 py-0.5 rounded">npm install @capacitor-community/background-geolocation</code> e sincronize com o Capacitor: <code className="bg-muted px-1 py-0.5 rounded">npx cap sync</code>.
+                                </li>
+                                <li>
+                                    <strong>Adicionar Permissões:</strong> No arquivo <code>android/app/src/main/AndroidManifest.xml</code>, adicione as seguintes permissões dentro da tag <code>&lt;manifest&gt;</code>:
+                                    <pre className="text-xs p-2 rounded-md bg-muted text-foreground whitespace-pre-wrap">{
+`<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />`
+                                    }</pre>
+                                </li>
+                                <li>
+                                    <strong>Implementar no Código:</strong> No arquivo <code>src/components/taximetro/taximeter-client.tsx</code>, localize as funções <code>startTracking</code> e <code>stopTracking</code>. Você precisará substituir as chamadas do <code>@capacitor/geolocation</code> pelas funções do plugin de background geolocation que você instalou. A estrutura do código já está preparada para essa substituição.
+                                </li>
+                             </ol>
+                           </div>
                         </AccordionContent>
                     </AccordionItem>
                  </Accordion>
