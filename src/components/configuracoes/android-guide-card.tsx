@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenCheck, DatabaseZap, UserCog, CodeXml, Youtube, BrainCircuit } from "lucide-react";
+import { BookOpenCheck, DatabaseZap, UserCog, CodeXml, Youtube, BrainCircuit, Smartphone } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 
@@ -22,4 +22,5 @@ const xmlExample = `<changes>
     <content><![CDATA[
       // O conteúdo completo e final do arquivo vai aqui.
       // Eu sempre reescrevo o arquivo inteiro para evitar erros.
+    
     
