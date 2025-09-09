@@ -3,15 +3,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Smartphone, ShieldCheck } from "lucide-react";
+import { Smartphone, ShieldCheck, Clock } from "lucide-react";
 import Image from 'next/image';
 import Link from 'next/link';
-
-// Placeholder data - in the future this would come from a service
-const callHistoryItem = {
-    imageUrl: "/images/call-history-placeholder.png", 
-    altText: "Exemplo de uma corrida capturada da Uber"
-};
 
 export default function HistoricoChamadasPage() {
   return (
@@ -19,32 +13,38 @@ export default function HistoricoChamadasPage() {
       <div className="text-center">
         <Smartphone className="mx-auto w-16 h-16 text-primary mb-4" />
         <h1 className="text-4xl font-bold font-headline">
-          Captura Automática de Corridas
+          Análise Automática de Corridas
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mt-2">
-          Deixe o trabalho manual para trás. Nossa próxima grande funcionalidade permitirá que o Uber Cash registre seus ganhos da Uber e 99 automaticamente, com sua permissão.
+          Deixe o trabalho manual para trás. Nossa próxima grande funcionalidade analisará as ofertas de corrida em tempo real, assim que elas aparecerem na sua tela.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-            <CardTitle>Como vai funcionar?</CardTitle>
+            <CardTitle>A Solução para a Decisão de 7 Segundos</CardTitle>
             <CardDescription>
-                Usando os Serviços de Acessibilidade do Android, o app poderá ler os dados da tela de resumo da corrida e salvá-los para você, de forma segura e privada.
+                Sabemos que você tem poucos segundos para aceitar uma corrida. A análise automática resolve isso.
             </CardDescription>
         </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="space-y-4">
             <div className="text-center text-muted-foreground py-10 bg-secondary rounded-lg">
-                <p className="font-semibold mb-4">Exemplo de como uma chamada capturada será exibida:</p>
+                <p className="font-semibold mb-4">Exemplo de como a análise aparecerá na tela:</p>
                 <div className="relative aspect-[9/16] max-w-sm mx-auto rounded-lg overflow-hidden border-4 border-card shadow-lg">
                    <Image
-                        src="https://storage.googleapis.com/static.aiforge.co/templates/uber-cash/call-history-placeholder.png"
-                        alt={callHistoryItem.altText}
+                        src="https://storage.googleapis.com/static.aiforge.co/templates/uber-cash/race-analysis-overlay-placeholder.png"
+                        alt="Exemplo de análise automática de corrida sobreposta na tela do aplicativo de transporte"
                         width={400}
                         height={711}
                         className="object-contain"
                     />
                 </div>
+            </div>
+             <div className="space-y-2">
+                <h3 className="font-semibold flex items-center gap-2"><Clock className="w-5 h-5 text-primary"/> Como vai funcionar?</h3>
+                <p className="text-sm text-muted-foreground">
+                    Utilizando os Serviços de Acessibilidade do Android, o aplicativo poderá ler os dados da tela (valor, distância, tempo) da oferta de corrida assim que ela surgir. Em seguida, uma pequena notificação aparecerá com o veredito "Bora" ou "Tô Fora", ajudando você a decidir rapidamente.
+                </p>
             </div>
         </CardContent>
       </Card>
@@ -57,13 +57,13 @@ export default function HistoricoChamadasPage() {
             </CardHeader>
             <CardContent>
                 <p className="text-green-800 dark:text-green-300">
-                    Esta funcionalidade será **opcional** e só funcionará com a **sua permissão explícita**. Seus dados de corrida nunca sairão do seu aparelho. O Uber Cash não terá acesso às suas senhas ou qualquer outra informação pessoal.
+                    Esta funcionalidade será **opcional** e só funcionará com a **sua permissão explícita**. O aplicativo não salvará as imagens da sua tela e não terá acesso a senhas ou qualquer outra informação pessoal. Apenas os dados da corrida serão lidos momentaneamente para a análise.
                 </p>
             </CardContent>
        </Card>
         <div className="text-center">
-            <Link href="/gerenciamento" passHref>
-                <Button>Voltar para o Gerenciamento</Button>
+            <Link href="/analisador" passHref>
+                <Button>Voltar para o Analisador Manual</Button>
             </Link>
         </div>
     </div>
