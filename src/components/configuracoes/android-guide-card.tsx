@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenCheck, DatabaseZap, UserCog, CodeXml, Youtube, BrainCircuit, Smartphone } from "lucide-react";
+import { BookOpenCheck, DatabaseZap, UserCog, CodeXml, Youtube, BrainCircuit, Smartphone, Compass } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 
