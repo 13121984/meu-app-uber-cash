@@ -13,7 +13,12 @@
       }
     ],
     "securityAnswers": [],
-    "preferences": {}
+    "preferences": {
+      "analyzerRates": {
+        "ratePerKm": 2,
+        "ratePerHour": 30
+      }
+    }
   },
   {
     "id": "Teste 1",
