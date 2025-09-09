@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -11,19 +11,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { CalendarIcon, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { CalendarIcon, Loader2, CheckCircle, AlertTriangle, BellRing, Lock, Route } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { addMaintenance, updateMaintenance } from '@/services/maintenance.service';
 import type { Maintenance as MaintenanceType } from '@/services/maintenance.service';
+import { useAuth } from '@/contexts/auth-context';
+import { Switch } from '../ui/switch';
+import Link from 'next/link';
+import { Separator } from '../ui/separator';
 
 export const maintenanceSchema = z.object({
   id: z.string().optional(),
   date: z.date({ required_error: "A data é obrigatória." }),
   description: z.string().min(3, "A descrição precisa ter pelo menos 3 caracteres.").max(100, "A descrição não pode ter mais de 100 caracteres."),
   amount: z.number().min(0.01, "O valor deve ser maior que zero."),
+  kmAtService: z.number().nullable(),
+  reminderKm: z.number().nullable(),
+  reminderDate: z.date().nullable(),
 });
 
 export type MaintenanceFormData = z.infer<typeof maintenanceSchema>;
@@ -34,14 +41,23 @@ interface MaintenanceFormProps {
 }
 
 export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps) {
+  const { user } = useAuth();
+  const isPremium = user?.isPremium || false;
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<MaintenanceFormData>({
     resolver: zodResolver(maintenanceSchema),
-    defaultValues: initialData ? { ...initialData, date: new Date(initialData.date) } : {
+    defaultValues: initialData ? { 
+        ...initialData, 
+        date: new Date(initialData.date),
+        reminderDate: initialData.reminderDate ? new Date(initialData.reminderDate) : null,
+     } : {
       date: new Date(),
       description: '',
       amount: 0,
+      kmAtService: null,
+      reminderKm: null,
+      reminderDate: null,
     },
   });
 
@@ -49,7 +65,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
     setIsSubmitting(true);
     try {
       let result;
-      const dataToSend = { date: data.date, description: data.description, amount: data.amount };
+      const dataToSend = { ...data };
 
       if (initialData?.id) {
         result = await updateMaintenance(initialData.id, dataToSend);
@@ -159,6 +175,103 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
                 </FormItem>
             )}
             />
+        </div>
+
+        <Separator />
+        
+        {/* Reminder section */}
+        <div className="space-y-4 rounded-lg border p-4">
+            <div className="flex justify-between items-center">
+                 <h3 className="font-semibold flex items-center gap-2">
+                    <BellRing className="h-5 w-5 text-primary" />
+                    Lembrete de Manutenção
+                 </h3>
+                 {!isPremium && <Link href="/premium"><Button variant="link" size="sm" className="text-amber-500"><Lock className="mr-1 h-3 w-3"/> Premium</Button></Link>}
+            </div>
+            
+             <FormField
+                control={form.control}
+                name="kmAtService"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>KM no momento do serviço</FormLabel>
+                    <FormControl>
+                        <Input 
+                            type="number" 
+                            placeholder="Ex: 85000" 
+                            {...field}
+                            value={field.value || ''}
+                            onChange={e => field.onChange(parseInt(e.target.value) || null)}
+                            disabled={!isPremium}
+                        />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+                 <FormField
+                    control={form.control}
+                    name="reminderKm"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Lembrar após (KM)</FormLabel>
+                        <FormControl>
+                            <Input 
+                                type="number" 
+                                placeholder="Ex: 10000" 
+                                {...field}
+                                value={field.value || ''}
+                                onChange={e => field.onChange(parseInt(e.target.value) || null)}
+                                disabled={!isPremium}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="reminderDate"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col pt-2">
+                        <FormLabel>Lembrar em (Data)</FormLabel>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                )}
+                                 disabled={!isPremium}
+                                >
+                                {field.value ? (
+                                    format(field.value, "PPP", { locale: ptBR })
+                                ) : (
+                                    <span>Escolha uma data</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                initialFocus
+                                locale={ptBR}
+                            />
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+            </div>
         </div>
         
         <Button type="submit" disabled={isSubmitting} className="w-full">

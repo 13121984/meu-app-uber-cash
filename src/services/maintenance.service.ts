@@ -9,10 +9,13 @@ import type { ReportFilterValues } from "@/app/relatorios/actions";
 
 
 export interface Maintenance {
-  id: string; // ID is now mandatory
+  id: string;
   date: Date;
   description: string;
   amount: number;
+  kmAtService: number | null;
+  reminderKm: number | null;
+  reminderDate: Date | null;
 }
 
 const dataFilePath = path.join(process.cwd(), 'data', 'maintenance.json');
@@ -21,13 +24,15 @@ async function readMaintenanceData(): Promise<Maintenance[]> {
   try {
     await fs.access(dataFilePath);
     const fileContent = await fs.readFile(dataFilePath, 'utf8');
-    // Important: Re-hydrate dates, as they are stored as strings in JSON
     return (JSON.parse(fileContent) as any[]).map(record => ({
       ...record,
       date: new Date(record.date),
+      reminderDate: record.reminderDate ? new Date(record.reminderDate) : null,
+      kmAtService: record.kmAtService ?? null,
+      reminderKm: record.reminderKm ?? null,
     }));
   } catch {
-    // If the file doesn't exist, return an empty array
+    await writeMaintenanceData([]);
     return [];
   }
 }
@@ -40,23 +45,21 @@ async function writeMaintenanceData(data: Maintenance[]): Promise<void> {
 
 // --- Funções CRUD ---
 
-/**
- * Adiciona um novo registro de manutenção no arquivo.
- * Retorna o ID do novo documento.
- */
 export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
     const allRecords = await readMaintenanceData();
     const newRecord: Maintenance = {
         ...data,
-        id: Date.now().toString(), // Simple unique ID
+        id: Date.now().toString(),
         date: new Date(data.date),
+        reminderDate: data.reminderDate ? new Date(data.reminderDate) : null,
     };
-    allRecords.unshift(newRecord); // Add to the beginning
+    allRecords.unshift(newRecord);
     await writeMaintenanceData(allRecords);
 
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
+    revalidatePath('/'); // For the new reminder card
     return { success: true, id: newRecord.id };
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Falha ao adicionar registro de manutenção.";
@@ -64,9 +67,6 @@ export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ s
   }
 }
 
-/**
- * Busca todos os registros de manutenção do arquivo, com filtros opcionais.
- */
 export async function getMaintenanceRecords(): Promise<Maintenance[]> {
     let records = await readMaintenanceData();
     return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -75,10 +75,8 @@ export async function getMaintenanceRecords(): Promise<Maintenance[]> {
 export async function getFilteredMaintenanceRecords(filters?: ReportFilterValues): Promise<Maintenance[]> {
     const allRecords = await getMaintenanceRecords();
     
-    // Por padrão (sem filtro), mostra apenas os de hoje
-    if (!filters || !filters.type || filters.type === 'today') {
-        const today = new Date();
-        return allRecords.filter(record => isSameDay(record.date, today));
+    if (!filters || !filters.type) {
+        return allRecords;
     }
     
     let interval: { start: Date; end: Date } | null = null;
@@ -87,6 +85,9 @@ export async function getFilteredMaintenanceRecords(filters?: ReportFilterValues
     switch (filters.type) {
         case 'all':
           return allRecords;
+        case 'today':
+            interval = { start: startOfDay(now), end: endOfDay(now) };
+            break;
         case 'thisWeek':
           interval = { start: startOfWeek(now), end: endOfWeek(now) };
           break;
@@ -114,14 +115,10 @@ export async function getFilteredMaintenanceRecords(filters?: ReportFilterValues
         return allRecords.filter(record => isWithinInterval(record.date, interval!));
     }
 
-    // Fallback para os registros de hoje se algo der errado
-    return allRecords.filter(record => isSameDay(record.date, new Date()));
+    return allRecords;
 }
 
 
-/**
- * Atualiza um registro de manutenção existente no arquivo.
- */
 export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; error?: string }> {
   try {
     const allRecords = await readMaintenanceData();
@@ -129,11 +126,17 @@ export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'
     if (index === -1) {
         return { success: false, error: "Registro não encontrado." };
     }
-    allRecords[index] = { ...data, id, date: new Date(data.date) };
+    allRecords[index] = { 
+        ...data, 
+        id, 
+        date: new Date(data.date),
+        reminderDate: data.reminderDate ? new Date(data.reminderDate) : null,
+    };
     await writeMaintenanceData(allRecords);
     
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
+    revalidatePath('/'); // For the new reminder card
     return { success: true };
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Falha ao atualizar registro.";
@@ -141,9 +144,7 @@ export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'
   }
 }
 
-/**
- * Apaga um registro de manutenção do arquivo.
- */
+
 export async function deleteMaintenance(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     let allRecords = await readMaintenanceData();
@@ -156,6 +157,7 @@ export async function deleteMaintenance(id: string): Promise<{ success: boolean;
     
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
+    revalidatePath('/'); // For the new reminder card
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registro.";
@@ -163,14 +165,13 @@ export async function deleteMaintenance(id: string): Promise<{ success: boolean;
   }
 }
 
-/**
- * Apaga todos os registros de manutenção do arquivo.
- */
+
 export async function deleteAllMaintenance(): Promise<{ success: boolean; error?: string }> {
   try {
-    await writeMaintenanceData([]); // Write an empty array
+    await writeMaintenanceData([]);
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
+    revalidatePath('/'); // For the new reminder card
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar todos os registros.";
