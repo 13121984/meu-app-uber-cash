@@ -26,7 +26,7 @@ const menuItems = [
   // Botão de registro será inserido dinamicamente
   { href: "/gerenciamento", label: "Gerenciar", icon: History, showOnHome: false, showOnOthers: true },
   { href: "/camera", label: "Câmera", icon: Camera, showOnHome: false, showOnOthers: true },
-  { href: "/taximetro", label: "Taxímetro", icon: Calculator, showOnHome: false, showOnOthers: true },
+  { href: "/taximetro", label: "Taxímetro Inteligente", icon: Calculator, showOnHome: false, showOnOthers: true },
   { href: "/manutencao", label: "Manutenção", icon: Wrench, showOnHome: false, showOnOthers: true },
   { href: "/metas", label: "Metas", icon: Target, showOnHome: false, showOnOthers: true },
   { href: "/configuracoes", label: "Configurações", icon: Settings, showOnHome: false, showOnOthers: true },
@@ -171,3 +171,5 @@ export function TopBar() {
     </TooltipProvider>
   )
 }
+
+    

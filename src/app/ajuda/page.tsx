@@ -52,8 +52,8 @@ const helpTopics = [
    {
     value: "taximetro",
     icon: Calculator,
-    title: "Para que serve o Taxímetro?",
-    content: "O Taxímetro é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Usuários gratuitos podem usar o taxímetro uma vez por semana, enquanto assinantes Premium têm acesso ilimitado.",
+    title: "Para que serve o Taxímetro Inteligente?",
+    content: "O Taxímetro Inteligente é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Usuários gratuitos podem usar o taxímetro uma vez por semana, enquanto assinantes Premium têm acesso ilimitado.",
   },
    {
     value: "layout",
@@ -271,7 +271,7 @@ export default function AjudaPage() {
                             </AccordionTrigger>
                             <AccordionContent>
                                <div className="prose prose-sm dark:prose-invert max-w-none">
-                                 <p>Para que o Taxímetro continue funcionando mesmo com o app minimizado, você precisará de um plugin do Capacitor que gerencie tarefas em segundo plano e permissões específicas.</p>
+                                 <p>Para que o Taxímetro Inteligente continue funcionando mesmo com o app minimizado, você precisará de um plugin do Capacitor que gerencie tarefas em segundo plano e permissões específicas.</p>
                                  <h4>Passos no Android Studio:</h4>
                                  <ol>
                                     <li>
@@ -387,7 +387,5 @@ export default function AjudaPage() {
         </div>
     )
 }
-
-    
 
     

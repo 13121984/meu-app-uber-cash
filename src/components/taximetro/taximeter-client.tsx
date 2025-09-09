@@ -57,44 +57,6 @@ const DisplayCard = ({ icon: Icon, label, value, unit }: { icon: React.ElementTy
     </Card>
 );
 
-function FareEstimator({ rates }: { rates: TaximeterRates }) {
-    const [distance, setDistance] = useState(0);
-    const [duration, setDuration] = useState(0); // in minutes
-    const [estimatedFare, setEstimatedFare] = useState(0);
-
-    useEffect(() => {
-        if (distance <= 0 && duration <= 0) {
-            setEstimatedFare(0);
-            return;
-        };
-        const fare = rates.startingFare + (distance * rates.ratePerKm) + (duration * rates.ratePerMinute);
-        setEstimatedFare(fare);
-    }, [distance, duration, rates]);
-
-
-    return (
-        <div className="space-y-4">
-             <p className="text-sm text-muted-foreground">
-                Insira a distância e a duração para estimar o valor de uma corrida com base nas suas tarifas.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div>
-                    <Label htmlFor="estDistance">Distância Estimada (KM)</Label>
-                    <Input id="estDistance" type="number" placeholder="Ex: 10.5" value={distance || ''} onChange={(e) => setDistance(parseFloat(e.target.value) || 0)} />
-                 </div>
-                 <div>
-                    <Label htmlFor="estDuration">Duração Estimada (Minutos)</Label>
-                    <Input id="estDuration" type="number" placeholder="Ex: 20" value={duration || ''} onChange={(e) => setDuration(parseFloat(e.target.value) || 0)} />
-                 </div>
-            </div>
-            <Card className="text-center p-4 bg-background">
-                <p className="text-sm text-muted-foreground">Valor Sugerido para a Corrida</p>
-                <p className="text-2xl font-bold text-primary">{formatCurrency(estimatedFare)}</p>
-            </Card>
-        </div>
-    )
-}
-
 export function TaximeterClient() {
     const { user, loading, refreshUser } = useAuth();
     const [status, setStatus] = useState<'idle' | 'running' | 'paused'>('idle');
@@ -362,7 +324,7 @@ export function TaximeterClient() {
                 </CardContent>
             </Card>
             
-            <Accordion type="multiple" className="w-full space-y-4">
+            <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="rates">
                     <Card>
                         <AccordionTrigger className="p-6 [&[data-state=open]>svg]:text-primary">
@@ -404,19 +366,6 @@ export function TaximeterClient() {
                         </AccordionContent>
                     </Card>
                 </AccordionItem>
-                <AccordionItem value="estimator">
-                    <Card>
-                        <AccordionTrigger className="p-6 [&[data-state=open]>svg]:text-primary">
-                             <CardTitle className="font-headline flex items-center gap-2">
-                                <CalculatorIcon className="w-5 h-5 text-primary"/>
-                                Calculadora de Corrida
-                            </CardTitle>
-                        </AccordionTrigger>
-                        <AccordionContent className="p-6 pt-0">
-                           <FareEstimator rates={rates} />
-                        </AccordionContent>
-                    </Card>
-                </AccordionItem>
             </Accordion>
         </div>
 
@@ -445,3 +394,5 @@ export function TaximeterClient() {
         </>
     );
 }
+
+    

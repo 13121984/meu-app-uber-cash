@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DollarSign, Clock, CalendarDays, TrendingUp } from 'lucide-react';
-import { getTodayData, PeriodData } from '@/services/summary.service';
+import { getReportData, PeriodData } from '@/services/summary.service';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
 
@@ -44,10 +44,10 @@ export function FinancialGoalCalculator() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const data = await getTodayData();
+                // Using last 7 days for a more stable average
+                const data = await getReportData({ type: 'thisWeek' });
                 setTodayData(data);
                 if (data && data.ganhoPorHora > 0) {
-                    // Arredonda o valor para duas casas decimais
                     setHourlyRate(parseFloat(data.ganhoPorHora.toFixed(2)));
                 }
             } catch (error) {
@@ -85,8 +85,8 @@ export function FinancialGoalCalculator() {
                  <TrendingUp className="h-4 w-4 text-green-500" />
                  <AlertDescription>
                     {todayData && todayData.ganhoPorHora > 0 
-                        ? `Seu ganho bruto por hora hoje é de ${formatCurrency(todayData.ganhoPorHora)}. Usamos esse valor para o cálculo, mas você pode ajustá-lo.`
-                        : "Não encontramos um ganho/hora hoje. Usamos um valor padrão que você pode ajustar."
+                        ? `Seu ganho bruto por hora (últimos 7 dias) é de ${formatCurrency(todayData.ganhoPorHora)}. Usamos esse valor para o cálculo, mas você pode ajustá-lo.`
+                        : "Não encontramos um ganho/hora recente. Usamos um valor padrão que você pode ajustar."
                     }
                  </AlertDescription>
             </Alert>
@@ -122,3 +122,5 @@ export function FinancialGoalCalculator() {
         </div>
     );
 }
+
+    

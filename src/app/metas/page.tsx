@@ -18,7 +18,7 @@ export default async function MetasPage() {
       <FinancialSummary />
 
       {/* Ferramentas abaixo, dentro de acordeões */}
-      <div className="space-y-6">
+      <div className="space-y-4">
           <Accordion type="multiple" defaultValue={['item-1']} className="w-full space-y-4">
             <Card>
                 <AccordionItem value="item-1" className="border-b-0">
@@ -76,3 +76,5 @@ export default async function MetasPage() {
     </div>
   );
 }
+
+    
