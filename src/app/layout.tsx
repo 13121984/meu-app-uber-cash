@@ -2,15 +2,14 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/contexts/auth-context';
 import { AppContent } from './app-content';
 
 
-const APP_NAME = "Uber Cash";
-const APP_DEFAULT_TITLE = "Uber Cash";
-const APP_TITLE_TEMPLATE = "%s - Uber Cash";
+const APP_NAME = "Rota Certa";
+const APP_DEFAULT_TITLE = "Rota Certa";
+const APP_TITLE_TEMPLATE = "%s - Rota Certa";
 const APP_DESCRIPTION = "Sua rota certa para o sucesso.";
 
 export const metadata: Metadata = {
