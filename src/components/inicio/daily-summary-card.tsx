@@ -3,7 +3,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { DollarSign, Clock, TrendingUp, Target, Flag } from "lucide-react";
+import { DollarSign, Clock, TrendingUp, Target, Flag, Car } from "lucide-react";
 import type { PeriodData } from "@/services/summary.service";
 import { AppLogo } from "../ui/app-logo";
 
@@ -93,7 +93,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                         }}
                     >
                         <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center p-0.5">
-                            <AppLogo className="h-6 w-6 text-primary" />
+                            <Car className="h-6 w-6 text-primary" />
                         </div>
                     </div>
 
