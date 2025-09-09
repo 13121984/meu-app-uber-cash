@@ -12,9 +12,6 @@ export async function updateWorkDayAction(userId: string, workDay: WorkDay) {
     const result = await addOrUpdateWorkDay(userId, workDay);
     if (result.success) {
         await updateAllSummaries(userId);
-        revalidatePath("/gerenciamento");
-        revalidatePath("/registrar/today");
-        revalidatePath("/");
     }
     return result;
 }
@@ -23,9 +20,6 @@ export async function deleteWorkDayEntryAction(userId: string, workDayId: string
     const result = await deleteWorkDayEntry(userId, workDayId);
     if (result.success) {
         await updateAllSummaries(userId);
-        revalidatePath("/gerenciamento");
-        revalidatePath("/registrar/today");
-        revalidatePath("/");
     }
     return result;
 }
@@ -35,8 +29,6 @@ export async function deleteFilteredWorkDaysAction(userId: string, filters: Repo
     const result = await deleteWorkDaysByFilter(userId, filters);
     if (result.success) {
         await updateAllSummaries(userId);
-        revalidatePath("/gerenciamento");
-        revalidatePath("/");
     }
     return result;
 }

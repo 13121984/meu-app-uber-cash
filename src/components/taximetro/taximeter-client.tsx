@@ -89,7 +89,7 @@ export function TaximeterClient() {
 
     const checkUsage = () => {
         if (!user) return { canUse: false, timeLeft: '' };
-        if (user.plan === 'pro' || user.plan === 'autopilot') return { canUse: true, timeLeft: '' }; // Pro e Autopilot podem usar
+        if (user.plan === 'pro' || user.plan === 'autopilot') return { canUse: true, timeLeft: '' };
         
         const lastUse = user.preferences.lastTaximeterUse;
         if (!lastUse) return { canUse: true, timeLeft: '' }; // Never used before
@@ -195,7 +195,7 @@ export function TaximeterClient() {
 
         setStatus('idle');
         
-        await addOrUpdateWorkDay(user.id, {
+        const result = await addOrUpdateWorkDay(user.id, {
             id: '',
             date: new Date(),
             km: finalRideData.distance,
@@ -211,10 +211,12 @@ export function TaximeterClient() {
             maintenanceEntries: [],
         });
         
-        toast({
-            title: "Corrida Salva!",
-            description: `A corrida de ${formatCurrency(finalRideData.cost)} foi salva no seu histórico.`
-        });
+        if (result.success) {
+            toast({
+                title: "Corrida Salva!",
+                description: `A corrida de ${formatCurrency(finalRideData.cost)} foi salva no seu histórico.`
+            });
+        }
         
         if (user.plan === 'basic') {
             await updateUserPreferences(user.id, { lastTaximeterUse: new Date().toISOString() });

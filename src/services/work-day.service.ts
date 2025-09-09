@@ -64,10 +64,6 @@ async function writeWorkDays(userId: string, data: WorkDay[]): Promise<void> {
 
 const revalidateAll = () => {
     revalidatePath('/', 'layout');
-    revalidatePath('/dashboard', 'layout');
-    revalidatePath('/gerenciamento', 'layout');
-    revalidatePath('/registrar', 'layout');
-    revalidatePath('/relatorios', 'layout');
 };
 
 // --- Funções CRUD ---
