@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { CalendarIcon, Loader2, CheckCircle, AlertTriangle, BellRing, Lock, Route } from 'lucide-react';
+import { CalendarIcon, Loader2, CheckCircle, AlertTriangle, BellRing, Lock, Wrench, ShieldQuestion } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -19,14 +19,15 @@ import { toast } from '@/hooks/use-toast';
 import { addMaintenance, updateMaintenance } from '@/services/maintenance.service';
 import type { Maintenance as MaintenanceType } from '@/services/maintenance.service';
 import { useAuth } from '@/contexts/auth-context';
-import { Switch } from '../ui/switch';
 import Link from 'next/link';
 import { Separator } from '../ui/separator';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 export const maintenanceSchema = z.object({
   id: z.string().optional(),
   date: z.date({ required_error: "A data é obrigatória." }),
   description: z.string().min(3, "A descrição precisa ter pelo menos 3 caracteres.").max(100, "A descrição não pode ter mais de 100 caracteres."),
+  type: z.enum(['preventive', 'corrective', 'both'], { required_error: "Selecione o tipo de manutenção."}),
   amount: z.number().min(0.01, "O valor deve ser maior que zero."),
   kmAtService: z.number().nullable(),
   reminderKm: z.number().nullable(),
@@ -54,6 +55,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
      } : {
       date: new Date(),
       description: '',
+      type: 'corrective',
       amount: 0,
       kmAtService: null,
       reminderKm: null,
@@ -113,6 +115,51 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="flex items-center gap-2"><ShieldQuestion className="w-4 h-4 text-primary"/>Tipo de Manutenção</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-col sm:flex-row gap-4"
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0 flex-1 p-4 border rounded-md has-[:checked]:border-primary">
+                    <FormControl>
+                      <RadioGroupItem value="preventive" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Preventiva <span className="block text-xs text-muted-foreground">Troca programada (óleo, filtro, etc.)</span>
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0 flex-1 p-4 border rounded-md has-[:checked]:border-primary">
+                    <FormControl>
+                      <RadioGroupItem value="corrective" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Corretiva <span className="block text-xs text-muted-foreground">Reparo inesperado (peça quebrou)</span>
+                    </FormLabel>
+                  </FormItem>
+                   <FormItem className="flex items-center space-x-3 space-y-0 flex-1 p-4 border rounded-md has-[:checked]:border-primary">
+                    <FormControl>
+                      <RadioGroupItem value="both" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Ambas <span className="block text-xs text-muted-foreground">Fez uma preventiva e corrigiu algo.</span>
+                    </FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
         <div className="grid grid-cols-2 gap-4">
             <FormField
             control={form.control}

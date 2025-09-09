@@ -13,6 +13,7 @@ export interface Maintenance {
   date: Date;
   description: string;
   amount: number;
+  type: 'preventive' | 'corrective' | 'both'; // Novo campo
   kmAtService: number | null;
   reminderKm: number | null;
   reminderDate: Date | null;
@@ -26,6 +27,7 @@ async function readMaintenanceData(): Promise<Maintenance[]> {
     const fileContent = await fs.readFile(dataFilePath, 'utf8');
     return (JSON.parse(fileContent) as any[]).map(record => ({
       ...record,
+      type: record.type || 'corrective', // Garante um valor padrão para registros antigos
       date: new Date(record.date),
       reminderDate: record.reminderDate ? new Date(record.reminderDate) : null,
       kmAtService: record.kmAtService ?? null,

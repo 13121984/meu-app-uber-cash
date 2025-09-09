@@ -33,6 +33,8 @@ import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { Skeleton } from '../ui/skeleton';
+import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -49,6 +51,12 @@ const SummaryCard = ({ title, value, description, icon: Icon, iconClassName }: {
         </CardContent>
     </Card>
 );
+
+const maintenanceTypeLabels = {
+    preventive: { label: 'Preventiva', className: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
+    corrective: { label: 'Corretiva', className: 'bg-orange-500/10 text-orange-500 border-orange-500/20' },
+    both: { label: 'Ambas', className: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
+};
 
 export function MaintenanceClient() {
   const router = useRouter();
@@ -169,27 +177,33 @@ export function MaintenanceClient() {
                   iconClassName="text-orange-500"
               />
           </div>
-          {records.map(record => (
-          <Card key={record.id}>
-              <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div className="flex-1 space-y-1">
-                      <p className="font-bold">{record.description}</p>
-                      <p className="text-sm text-muted-foreground">
-                          {format(new Date(record.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
-                      </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                      <p className="font-semibold text-red-500">{formatCurrency(record.amount)}</p>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(record)} disabled={isDeleting}>
-                          <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(record.id!)} disabled={isDeleting}>
-                          {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                      </Button>
-                  </div>
-              </CardContent>
-          </Card>
-          ))}
+          {records.map(record => {
+             const typeInfo = maintenanceTypeLabels[record.type] || { label: 'N/A', className: '' };
+             return (
+              <Card key={record.id}>
+                  <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-bold">{record.description}</p>
+                            <Badge variant="outline" className={cn(typeInfo.className)}>{typeInfo.label}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                              {format(new Date(record.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
+                          </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                          <p className="font-semibold text-red-500">{formatCurrency(record.amount)}</p>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(record)} disabled={isDeleting}>
+                              <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(record.id!)} disabled={isDeleting}>
+                              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          </Button>
+                      </div>
+                  </CardContent>
+              </Card>
+             );
+          })}
           {records.length > 0 && (
             <div className="pt-4 flex justify-end">
               <Button variant="destructive" onClick={() => setIsAlertOpen(true)} disabled={isDeleting}>
