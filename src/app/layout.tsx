@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/favicon.ico', // Referência ao favicon
-    apple: '/apple-touch-icon.png',
+    apple: '/icon-192x192.png',
   },
 };
 
