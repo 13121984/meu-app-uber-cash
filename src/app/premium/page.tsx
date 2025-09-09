@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Check, Copy, Crown, PartyPopper, Sparkles } from 'lucide-react';
+import { BotMessageSquare, Check, Copy, Crown, PartyPopper, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 
 const premiumFeatures = [
+  { text: 'Analisador de Corridas com IA: Descubra se uma corrida vale a pena antes de aceitar.', icon: BotMessageSquare },
   { text: 'Cards e gráficos ilimitados no Dashboard e Relatórios.', icon: Sparkles },
   { text: 'Personalize a ordem de todos os itens visuais.', icon: Sparkles },
   { text: 'Gerencie múltiplos veículos.', icon: Sparkles },
@@ -65,8 +66,8 @@ export default function PremiumPage() {
             <ul className="space-y-3">
               {premiumFeatures.map((feature, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <div className="p-1 bg-green-500/20 rounded-full">
-                    <Check className="h-4 w-4 text-green-500" />
+                  <div className="p-1 bg-green-500/20 rounded-full mt-1">
+                    <feature.icon className="h-4 w-4 text-green-500" />
                   </div>
                   <span className="flex-1">{feature.text}</span>
                 </li>

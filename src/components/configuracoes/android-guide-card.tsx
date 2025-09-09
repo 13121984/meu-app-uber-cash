@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare, Accessibility } from "lucide-react";
+import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare, Accessibility, DollarSign } from "lucide-react";
 
 const codeStructure = `- src/app: Contém as pastas de cada página (ex: /dashboard).
 - src/components: Contém os "pedaços" da interface (ex: botões, cards).
@@ -48,6 +48,26 @@ export function AndroidGuideCard() {
                            <p className="text-sm text-muted-foreground">
                             Para me pedir para fazer alterações, basta me dizer o que você quer em linguagem natural. Por exemplo: "Adicione um novo card no dashboard para mostrar o total de viagens." Eu vou entender, criar um plano e gerar o código XML necessário para aplicar as mudanças. Você não precisa escrever o XML.
                            </p>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="pricing">
+                        <AccordionTrigger>
+                            <div className="flex items-center gap-2">
+                                <DollarSign className="h-5 w-5 text-primary" />
+                                <span className="font-semibold text-left">Alterar Preço da Assinatura</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                           <div className="prose prose-sm dark:prose-invert">
+                                <p>Para alterar o preço da assinatura e a chave PIX para pagamento, edite o arquivo:</p>
+                                <p><code>src/app/premium/page.tsx</code></p>
+                                <p>Dentro deste arquivo, localize as seguintes constantes no início do código e altere seus valores:</p>
+                                <ul>
+                                    <li><code>YOUR_PIX_KEY</code>: A sua chave PIX para receber os pagamentos.</li>
+                                    <li><code>YOUR_CONTACT_EMAIL</code>: O e-mail para onde os usuários enviarão o comprovante.</li>
+                                </ul>
+                                <p>O valor exibido na página (ex: R$ 59,90) está diretamente no código JSX, dentro do card de preço. Você pode alterá-lo lá.</p>
+                           </div>
                         </AccordionContent>
                     </AccordionItem>
                       <AccordionItem value="android">
@@ -175,5 +195,3 @@ export function AndroidGuideCard() {
         </Card>
     );
 }
-
-    
