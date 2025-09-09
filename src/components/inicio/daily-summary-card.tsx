@@ -92,8 +92,8 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                             transform: 'translateY(-50%)'
                         }}
                     >
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center p-0.5">
-                            <Car className="h-6 w-6 text-primary" />
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center p-0.5 animate-shake">
+                            <AppLogo className="h-6 w-6 text-primary" />
                         </div>
                     </div>
 

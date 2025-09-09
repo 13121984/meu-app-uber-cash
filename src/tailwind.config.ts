@@ -86,6 +86,11 @@ export default {
         'float': {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-5px)' },
+        },
+        'shake': {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '25%': { transform: 'translateX(-2px) rotate(-1deg)' },
+          '75%': { transform: 'translateX(2px) rotate(1deg)' },
         }
       },
       animation: {
@@ -93,6 +98,7 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'confetti-rain': 'confetti-rain 2s linear infinite',
         'float': 'float 3s ease-in-out infinite',
+        'shake': 'shake 1.5s ease-in-out infinite',
       },
     },
   },
