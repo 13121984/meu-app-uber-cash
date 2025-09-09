@@ -96,6 +96,9 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
 }
 
 export async function addMultipleWorkDays(userId: string, importedData: ImportedWorkDay[]) {
+    if (!userId) {
+        return { success: false, error: "Usuário não fornecido para importação." };
+    }
     try {
         let allWorkDays = await readWorkDays(userId);
         const workDaysToUpsert: WorkDay[] = [];
