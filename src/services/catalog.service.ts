@@ -21,19 +21,21 @@ const dataFilePath = path.join(process.cwd(), 'data', 'catalog.json');
 // Defines the base, non-deletable categories.
 const defaultCatalog: Catalog = {
   earnings: [
-    { name: "Aplicativo", active: true, isDefault: true },
-    { name: "99 Pop", active: true, isDefault: false },
-    { name: "Uber Cash", active: true, isDefault: false },
-    { name: "Particular", active: true, isDefault: false },
-    { name: "Ganhos Extras", active: true, isDefault: false },
-    { name: "MD Drivers", active: true, isDefault: false },
-    { name: "In Driver", active: true, isDefault: false },
+    { name: "99 Pop", active: true, isDefault: true },
+    { name: "Uber Cash", active: true, isDefault: true },
+    { name: "Particular", active: true, isDefault: true },
+    { name: "Ganhos Extras", active: true, isDefault: true },
+    { name: "MD Drivers", active: true, isDefault: true },
+    { name: "In Driver", active: true, isDefault: true },
+    { name: "Outros", active: true, isDefault: true },
+    { name: "Uber Confort", active: false, isDefault: true },
+    { name: "Uber Black", active: false, isDefault: true },
   ],
   fuel: [
-    { name: "GNV", active: true, isDefault: false },
-    { name: "Etanol", active: true, isDefault: false },
-    { name: "Gasolina Aditivada", active: true, isDefault: false },
-    { name: "Gasolina Comum", active: true, isDefault: false },
+    { name: "GNV", active: true, isDefault: true },
+    { name: "Etanol", active: true, isDefault: true },
+    { name: "Gasolina Aditivada", active: true, isDefault: true },
+    { name: "Gasolina Comum", active: true, isDefault: true },
   ]
 };
 

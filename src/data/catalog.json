@@ -1,0 +1,72 @@
+
+{
+  "earnings": [
+    {
+      "name": "99 Pop",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Uber Cash",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Particular",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Ganhos Extras",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "MD Drivers",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "In Driver",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Outros",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Uber Confort",
+      "active": false,
+      "isDefault": true
+    },
+    {
+      "name": "Uber Black",
+      "active": false,
+      "isDefault": true
+    }
+  ],
+  "fuel": [
+    {
+      "name": "GNV",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Etanol",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Gasolina Aditivada",
+      "active": true,
+      "isDefault": true
+    },
+    {
+      "name": "Gasolina Comum",
+      "active": true,
+      "isDefault": true
+    }
+  ]
+}

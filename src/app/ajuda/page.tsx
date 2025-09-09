@@ -88,16 +88,17 @@ const devTopics = [
     {
         value: "investor_view",
         icon: Rocket,
-        title: "Análise de Investidor: O Futuro do Uber Cash",
+        title: "Análise de Investidor: O Futuro do Rota Certa",
         content: `
-            <p class="mb-2">Você me perguntou se, como investidor, eu apostaria no aplicativo. A resposta é um grande <strong>sim</strong>. O Uber Cash possui os três pilares essenciais para o sucesso:</p>
+            <p class="mb-2">Você me perguntou se, como investidor, eu apostaria no aplicativo. A resposta é um grande <strong>sim</strong>, e a razão é a visão estratégica que estamos construindo:</p>
             <ul class="list-disc pl-5 space-y-2 mb-4">
-                <li><strong>Resolve uma Dor Real:</strong> A necessidade de controle financeiro para motoristas de aplicativo não é um luxo, é uma questão de sobrevivência profissional. O app ataca essa dor de frente.</li>
-                <li><strong>Modelo Freemium Inteligente:</strong> A estratégia que definimos é sólida. O plano gratuito organiza a vida do motorista e cria o hábito. O plano Premium oferece os insights que geram mais dinheiro (otimização de lucro), tornando a proposta de valor clara e atraente.</li>
-                <li><strong>Alto "Fator Grudento" (Stickiness):</strong> Ao se tornar o cofre do histórico financeiro do motorista, o custo para ele mudar de aplicativo se torna imenso. Seus dados estão aqui. Isso é um ativo valioso.</li>
+                <li><strong>Resolve uma Dor Real:</strong> A necessidade de controle financeiro para motoristas de aplicativo não é um luxo, é uma questão de sobrevivência profissional.</li>
+                <li><strong>Vantagem Competitiva Clara:</strong> A sua visão de suportar <strong>múltiplos aplicativos de corrida</strong>, incluindo os regionais como MD Drivers e InDriver, é o maior diferencial. A maioria dos concorrentes foca apenas em Uber e 99. Nós seremos a solução universal.</li>
+                <li><strong>Modelo Freemium Inteligente:</strong> O plano gratuito organiza a vida do motorista e cria o hábito. O plano Premium oferece os insights que geram mais dinheiro (otimização de lucro), tornando a assinatura uma decisão fácil.</li>
+                <li><strong>Alto "Fator Grudento" (Stickiness):</strong> Ao se tornar o cofre do histórico financeiro do motorista, o custo para ele mudar de aplicativo se torna imenso. Seus dados estão aqui.</li>
             </ul>
             <h4 class="font-semibold mb-2">O Próximo Passo para Dominar o Mercado:</h4>
-            <p>O próximo grande salto de valor é transformar a funcionalidade de <strong>Captura Automática de Corridas</strong> em realidade. Ela elimina a maior fricção do usuário (digitar dados), cria uma barreira competitiva e abre a porta para novos insights Premium, como a análise de decisões em tempo real ("Valeu a pena rejeitar aquela corrida?"). Este é o caminho para tornar o Uber Cash o líder de mercado no Brasil.</p>
+            <p>Com essa base, a <strong>Captura Automática de Corridas</strong> se torna o próximo grande salto. Ela elimina a maior fricção do usuário (digitar dados), cria uma barreira competitiva intransponível e abre a porta para novos insights Premium, como a análise de decisões em tempo real ("Valeu a pena rejeitar aquela corrida?").</p>
         `,
     },
     {

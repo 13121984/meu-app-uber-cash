@@ -52,7 +52,7 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
         const item = list[index];
         const swapIndex = direction === 'up' ? index - 1 : index + 1;
         
-        if (swapIndex < 0 || swapIndex >= list.length || list[swapIndex].isDefault !== item.isDefault) {
+        if (swapIndex < 0 || swapIndex >= list.length) {
             return list;
         }
 
@@ -109,10 +109,13 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
     
     const renderCategoryItem = (cat: CatalogItem, index: number) => {
         const canEdit = isPremium || cat.isDefault;
+        const canDelete = isPremium && !cat.isDefault;
+        const canReorder = isPremium;
+
         return (
              <div key={cat.name} className="flex items-center justify-between p-2 rounded-md bg-secondary">
                 <div className="flex items-center gap-2 flex-1">
-                     {canEdit && (
+                     {canReorder && (
                         <div className="flex flex-col">
                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleReorder(type, index, 'up')} disabled={index === 0}>
                                 <ArrowUp className="h-4 w-4" />
@@ -125,11 +128,9 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
                     <Label htmlFor={`switch-${cat.name}`} className="flex-1 cursor-pointer">{cat.name}</Label>
                 </div>
                 <div className="flex items-center gap-2">
-                    {!cat.isDefault && (
-                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(type, cat.name)} disabled={!canEdit}>
-                         {canEdit ? <Trash2 className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                       </Button>
-                    )}
+                   <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(type, cat.name)} disabled={!canDelete}>
+                     {canDelete ? <Trash2 className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                   </Button>
                     <Switch
                         id={`switch-${cat.name}`}
                         checked={cat.active}
