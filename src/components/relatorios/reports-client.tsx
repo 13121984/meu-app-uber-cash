@@ -92,8 +92,12 @@ export function ReportsClient() {
     }
     
     let orderedCardIds: string[];
-    if (isPro) {
+    if (isAutopilot) {
       orderedCardIds = user?.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
+    } else if (isPro) {
+      const proCards = mandatoryCards;
+      const savedProOrder = user?.preferences?.dashboardCardOrder?.filter(id => proCards.includes(id)) || [];
+      orderedCardIds = [...new Set([...savedProOrder, ...proCards])];
     } else {
       orderedCardIds = mandatoryCards;
     }

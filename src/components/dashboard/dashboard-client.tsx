@@ -108,11 +108,13 @@ export function DashboardClient() {
       }
 
       let orderedCardIds: string[];
-      if (isPro) {
-        // Pro e Autopilot usam a ordem salva se existir, senão todos os cards
+      if (isAutopilot) {
         orderedCardIds = user?.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
+      } else if (isPro) {
+        const proCards = mandatoryCards; // Pro pode reordenar, mas só os básicos por enquanto. Pode ser expandido.
+        const savedProOrder = user?.preferences?.dashboardCardOrder?.filter(id => proCards.includes(id)) || [];
+        orderedCardIds = [...new Set([...savedProOrder, ...proCards])];
       } else {
-        // Basic usa a ordem fixa
         orderedCardIds = mandatoryCards;
       }
       
