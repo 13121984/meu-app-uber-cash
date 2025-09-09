@@ -14,6 +14,13 @@ import { Button } from "@/components/ui/button";
 
 const helpTopics = [
   {
+    value: "gratuito_vs_premium",
+    icon: Gem,
+    title: "Qual a diferença entre o plano Gratuito e o Premium?",
+    content: "O plano Gratuito oferece todas as ferramentas essenciais para você registrar manualmente seus ganhos, despesas, km e horas. É um controle financeiro completo. O plano Premium eleva sua gestão para o próximo nível com automação e insights: inclui o 'TX IA' para analisar corridas, personalização total do layout, e futuramente, a captura 100% automática das suas corridas sem precisar digitar nada.",
+    isPremiumFeature: true,
+  },
+  {
     value: "registrar",
     icon: PlusCircle,
     title: "Como registrar meus ganhos e despesas?",
@@ -155,7 +162,7 @@ export default function AjudaPage() {
                                             <Link href="/premium" passHref>
                                                 <Button className="mt-2 animate-pulse" variant="default" size="sm">
                                                     <Gem className="mr-2 h-4 w-4" />
-                                                    Disponível no Plano Premium
+                                                    Saiba mais sobre o Premium
                                                 </Button>
                                             </Link>
                                         )}
