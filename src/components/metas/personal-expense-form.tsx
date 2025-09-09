@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { addPersonalExpense, updatePersonalExpense, PersonalExpense } from '@/services/personal-expense.service';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useAuth } from '@/contexts/auth-context';
 
 export const personalExpenseSchema = z.object({
   id: z.string().optional(),
@@ -36,6 +37,7 @@ interface PersonalExpenseFormProps {
 }
 
 export function PersonalExpenseForm({ initialData, categories, onSuccess }: PersonalExpenseFormProps) {
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<PersonalExpenseFormData>({
@@ -49,15 +51,16 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
   });
 
   const onSubmit = async (data: PersonalExpenseFormData) => {
+    if (!user) return;
     setIsSubmitting(true);
     try {
       let result;
       const dataToSend = { ...data };
 
       if (initialData?.id) {
-        result = await updatePersonalExpense(initialData.id, dataToSend);
+        result = await updatePersonalExpense(user.id, initialData.id, dataToSend);
       } else {
-        result = await addPersonalExpense(dataToSend);
+        result = await addPersonalExpense(user.id, dataToSend);
       }
 
       if (result.success && result.id) {

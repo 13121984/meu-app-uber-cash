@@ -11,10 +11,11 @@ import type { GroupedWorkDay } from "@/components/gerenciamento/gerenciamento-cl
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Edit, Trash2, Loader2, PlusCircle } from "lucide-react";
-import { deleteWorkDayEntryAction } from "./actions";
+import { deleteWorkDayEntryAction } from "../gerenciamento/actions";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { ScrollArea } from "../ui/scroll-area";
+import { useAuth } from "@/contexts/auth-context";
 
 interface EditWorkDayDialogProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ function EditSingleEntryForm({ workDay, onCancel, onSuccess }: { workDay: WorkDa
 
 export function EditWorkDayDialog({ isOpen, onOpenChange, groupedWorkDay }: EditWorkDayDialogProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [editingEntry, setEditingEntry] = useState<WorkDay | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -56,8 +58,9 @@ export function EditWorkDayDialog({ isOpen, onOpenChange, groupedWorkDay }: Edit
   }
 
   const handleDelete = async (id: string) => {
+    if(!user) return;
     setDeletingId(id);
-    const result = await deleteWorkDayEntryAction(id);
+    const result = await deleteWorkDayEntryAction(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Período apagado." });
       router.refresh(); // Recarrega a página de gerenciamento

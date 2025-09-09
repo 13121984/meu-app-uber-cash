@@ -5,7 +5,6 @@ import { useState } from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { WorkDay } from "@/services/work-day.service"
 import { EditWorkDayDialog } from "./edit-dialog"
 import { toast } from "@/hooks/use-toast"
 import {
@@ -42,7 +41,6 @@ export const useWorkDayColumns = () => {
     if (!dayToDelete || !user) return;
     setIsDeleting(true);
     try {
-      const dateString = format(dayToDelete.date, 'yyyy-MM-dd');
       await deleteFilteredWorkDaysAction(user.id, { type: 'custom', dateRange: { from: dayToDelete.date, to: dayToDelete.date } });
       toast({ title: "Sucesso!", description: `Registros de ${format(dayToDelete.date, 'dd/MM/yyyy')} apagados.` });
     } catch (error) {

@@ -3,13 +3,12 @@
 
 import { useAuth } from '@/contexts/auth-context';
 import { TopBar } from '@/components/layout/top-bar';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { VehicleSetup } from '@/components/configuracoes/vehicle-setup';
-import { useSearchParams } from 'next/navigation'
 
 export function AppContent({
   children,
@@ -18,7 +17,7 @@ export function AppContent({
 }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [theme, setTheme] = useState('dark');
   const [isInitialSetup, setIsInitialSetup] = useState(false);
@@ -29,7 +28,7 @@ export function AppContent({
       getSettings(user.id).then(settings => {
         setTheme(settings.theme);
       });
-      // Check for vehicle setup condition
+      // Check for vehicle setup condition only if user is logged in
       const setupParam = searchParams.get('setup');
       if (setupParam === 'true' && user.vehicles.length === 0) {
         setIsInitialSetup(true);
@@ -37,9 +36,10 @@ export function AppContent({
         setIsInitialSetup(false);
       }
     } else {
-        setIsInitialSetup(false);
+      // If no user, ensure setup screen is not shown
+      setIsInitialSetup(false);
     }
-  }, [user, searchParams]);
+  }, [user, searchParams, pathname]);
 
   useEffect(() => {
     // Apply theme to HTML element
@@ -59,13 +59,14 @@ export function AppContent({
   
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
       </div>
     );
   }
 
-  // Render vehicle setup flow if required
+  // Render vehicle setup flow if required. This is now safe because it only runs
+  // after the user object is confirmed to exist.
   if (isInitialSetup) {
       return <VehicleSetup />;
   }
@@ -75,12 +76,15 @@ export function AppContent({
     return <>{children}</>;
   }
   
-  // If user is not logged in yet (and redirect hasn't happened), show nothing
+  // If user is not logged in yet (and redirect hasn't happened), show a loader or nothing
   if (!user) {
-    return null;
+    return (
+        <div className="flex min-h-screen items-center justify-center bg-background">
+            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        </div>
+    );
   }
   
-
   // Render the main app layout for authenticated users
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background">

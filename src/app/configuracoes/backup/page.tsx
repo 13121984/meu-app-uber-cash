@@ -8,17 +8,18 @@ import { Button } from '@/components/ui/button';
 import { getBackupData } from '@/services/backup.service';
 import { useAuth } from '@/contexts/auth-context';
 import { useEffect, useState } from 'react';
+import type { BackupData } from '@/services/backup.service';
 
 export default function BackupPage() {
   const { user, loading } = useAuth();
-  const [initialBackupData, setInitialBackupData] = useState(null);
+  const [initialBackupData, setInitialBackupData] = useState<Omit<BackupData, 'csvContent'> | null>(null);
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
     if (user) {
       setIsFetching(true);
       getBackupData(user.id).then(data => {
-        setInitialBackupData(data as any);
+        setInitialBackupData(data);
         setIsFetching(false);
       });
     } else if (!loading) {

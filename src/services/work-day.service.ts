@@ -7,7 +7,6 @@ import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
 import { updateAllSummaries } from './summary.service';
 import demoData from '../../data/work-days.json';
-import { getActiveUser } from './auth.service';
 
 // --- Tipos e Interfaces ---
 
@@ -184,32 +183,20 @@ export async function deleteWorkDayEntry(userId: string, id: string): Promise<{ 
   }
 }
 
-export async function deleteWorkDaysByFilter(userId: string, filters: { query?: string, from?: string, to?: string }): Promise<{ success: boolean; error?: string, count?: number }> {
+export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilterValues): Promise<{ success: boolean; error?: string, count?: number }> {
     try {
-        const allWorkDays = await readWorkDays(userId);
+        let allWorkDays = await readWorkDays(userId);
         const initialLength = allWorkDays.length;
 
-        const workDaysToKeep = allWorkDays.filter(day => {
-            const dayDateString = format(day.date, 'yyyy-MM-dd');
-            if (filters.from) {
-                const fromDateString = filters.from;
-                const toDateString = filters.to || filters.from;
-                if (dayDateString < fromDateString || dayDateString > toDateString) {
-                    return true;
-                }
-            }
-            if (filters.query) {
-                const dateString = format(day.date, 'dd/MM/yyyy');
-                const searchString = JSON.stringify(day).toLowerCase();
-                const queryLower = filters.query.toLowerCase();
-                if (!(dateString.includes(queryLower) || searchString.includes(queryLower))) {
-                   return true;
-                }
-            }
-            return false;
+        const { workDaysToKeep } = getFilteredWorkDays(allWorkDays, filters, true);
+        const workDaysToDelete = getFilteredWorkDays(allWorkDays, filters, false);
+        
+        const finalWorkDays = allWorkDays.filter(day => {
+            return !workDaysToDelete.some(toDelete => toDelete.id === day.id);
         });
-        const deletedCount = initialLength - workDaysToKeep.length;
-        await writeWorkDays(userId, workDaysToKeep);
+
+        const deletedCount = initialLength - finalWorkDays.length;
+        await writeWorkDays(userId, finalWorkDays);
         await updateAllSummaries(userId);
         revalidateAll(userId);
         return { success: true, count: deletedCount };
@@ -221,9 +208,8 @@ export async function deleteWorkDaysByFilter(userId: string, filters: { query?: 
 
 // --- Funções de Gerenciamento de Dados ---
 
-export async function loadDemoData(): Promise<{ success: boolean; error?: string }> {
-    const user = await getActiveUser();
-    if (!user) return { success: false, error: "Nenhum usuário ativo para carregar dados." };
+export async function loadDemoData(userId: string): Promise<{ success: boolean; error?: string }> {
+    if (!userId) return { success: false, error: "Nenhum usuário ativo para carregar dados." };
 
     try {
         const now = new Date();
@@ -239,9 +225,9 @@ export async function loadDemoData(): Promise<{ success: boolean; error?: string
             };
         });
 
-        await writeWorkDays(user.id, adjustedDemoData as unknown as WorkDay[]);
-        await updateAllSummaries(user.id);
-        revalidateAll(user.id);
+        await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
+        await updateAllSummaries(userId);
+        revalidateAll(userId);
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to load demo data.";
@@ -249,7 +235,7 @@ export async function loadDemoData(): Promise<{ success: boolean; error?: string
     }
 }
 
-export async function clearAllDataForUser(userId: string): Promise<{ success: boolean; error?: string }> {
+export async function clearAllData(userId: string): Promise<{ success: boolean; error?: string }> {
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
         await writeWorkDays(userId, []);
@@ -260,12 +246,6 @@ export async function clearAllDataForUser(userId: string): Promise<{ success: bo
         const errorMessage = e instanceof Error ? e.message : "Failed to clear data.";
         return { success: false, error: errorMessage };
     }
-}
-
-export async function clearAllData(): Promise<{ success: boolean; error?: string }> {
-     const user = await getActiveUser();
-     if (!user) return { success: false, error: "Nenhum usuário ativo para limpar dados." };
-     return await clearAllDataForUser(user.id);
 }
 
 // --- Funções de Leitura ---
@@ -279,14 +259,13 @@ export async function getWorkDaysForDate(userId: string, date: Date): Promise<Wo
     return allWorkDays.filter(day => isSameDay(day.date, date));
 }
 
-export async function getFilteredWorkDays(
-  userId: string,
-  filters: ReportFilterValues
-): Promise<GroupedWorkDay[]> {
-  const allWorkDays = await readWorkDays(userId);
+function getFilteredWorkDays(
+  allWorkDays: WorkDay[],
+  filters: ReportFilterValues,
+  returnKept: boolean
+) {
+  if (allWorkDays.length === 0) return { workDaysToKeep: [], workDaysToDelete: [] };
   let filteredEntries: WorkDay[] = [];
-
-  if (allWorkDays.length === 0) return [];
 
   const now = new Date();
   let interval: { start: Date; end: Date } | null = null;
@@ -319,13 +298,26 @@ export async function getFilteredWorkDays(
       }
       break;
   }
+
   if (interval) {
     filteredEntries = allWorkDays.filter(d => isWithinInterval(d.date, interval!));
-  } else if(filters.type !== 'all') {
-    return [];
+  } else if (filters.type !== 'all') {
+    return { workDaysToKeep: [], workDaysToDelete: [] };
   }
 
-  return groupWorkDays(filteredEntries).sort((a, b) => b.date.getTime() - a.date.getTime());
+  const workDaysToDelete = filteredEntries;
+  const workDaysToKeep = allWorkDays.filter(day => !workDaysToDelete.some(toDelete => toDelete.id === day.id));
+
+  return { workDaysToKeep, workDaysToDelete };
+}
+
+export async function getFilteredAndGroupedWorkDays(
+  userId: string,
+  filters: ReportFilterValues
+): Promise<GroupedWorkDay[]> {
+  const allWorkDays = await readWorkDays(userId);
+  const { workDaysToDelete } = getFilteredWorkDays(allWorkDays, filters, false);
+  return groupWorkDays(workDaysToDelete).sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
 function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
@@ -359,5 +351,3 @@ function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
 
   return Array.from(grouped.values());
 }
-
-    
