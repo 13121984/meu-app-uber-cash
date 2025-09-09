@@ -3,9 +3,85 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Smartphone, ShieldCheck, Clock, Accessibility } from "lucide-react";
+import { Smartphone, ShieldCheck, Clock, Accessibility, ThumbsUp, MapPin, Star, Route, X, Sparkles } from "lucide-react";
 import Image from 'next/image';
 import Link from 'next/link';
+
+function RideOfferSimulation() {
+    return (
+        <div className="relative aspect-[9/16] max-w-sm mx-auto rounded-2xl overflow-hidden border-8 border-slate-800 bg-slate-200 shadow-xl">
+            {/* Fundo de Mapa Falso */}
+            <Image
+                src="https://picsum.photos/400/800?grayscale"
+                alt="Fundo de mapa da cidade"
+                layout="fill"
+                objectFit="cover"
+                className="opacity-50"
+                data-ai-hint="city map"
+            />
+            
+            {/* Card de Oferta de Corrida */}
+            <div className="absolute bottom-4 left-4 right-4 bg-white dark:bg-slate-900 rounded-lg shadow-2xl p-4 text-slate-800 dark:text-slate-200">
+                <div className="flex justify-between items-center">
+                    <p className="font-bold">UberX</p>
+                    <X className="h-4 w-4 text-slate-500"/>
+                </div>
+                <h3 className="text-4xl font-bold my-2">R$ 22,28</h3>
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                    <Star className="h-4 w-4 text-yellow-500 fill-current"/>
+                    <span>4,94</span>
+                    <span>+R$ 4,00 incluído</span>
+                </div>
+                <div className="mt-4 space-y-3 text-sm">
+                    <div className="flex items-start gap-3">
+                        <MapPin className="h-4 w-4 mt-1 text-primary"/>
+                        <div>
+                            <p><strong>15 min</strong> (5.2 km) de distância</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">Rua Fernandes Vieira, Cantagalo</p>
+                        </div>
+                    </div>
+                     <div className="flex items-start gap-3">
+                        <Route className="h-4 w-4 mt-1 text-primary"/>
+                        <div>
+                             <p><strong>17 min</strong> (8.4 km) de viagem</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">R. Dos Expedicionarios, 144 - Bingen</p>
+                        </div>
+                    </div>
+                </div>
+                 <Button className="w-full mt-4 bg-slate-800 dark:bg-slate-200 text-white dark:text-black hover:bg-slate-700">Selecionar</Button>
+            </div>
+
+            {/* Overlay de Análise do Rota Certa */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5">
+                <Card className="bg-background/80 dark:bg-card/80 backdrop-blur-md border-2 border-primary shadow-2xl animate-fade-in">
+                    <CardHeader className="p-3 text-center">
+                        <CardTitle className="flex items-center justify-center gap-2 text-primary font-headline text-2xl">
+                            <Sparkles className="h-6 w-6"/>
+                            Análise Rota Certa
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0">
+                         <div className="flex justify-center items-center gap-3 p-3 rounded-lg bg-green-500/20 text-green-600 dark:text-green-400 mb-3">
+                             <ThumbsUp className="h-8 w-8" />
+                             <p className="text-3xl font-bold">Bora!</p>
+                         </div>
+                        <div className="grid grid-cols-2 gap-2 text-center">
+                            <div className="bg-secondary p-2 rounded-md">
+                                <p className="text-xs text-muted-foreground">Ganho/KM</p>
+                                <p className="font-bold text-green-600 dark:text-green-400">R$ 2,65</p>
+                            </div>
+                            <div className="bg-secondary p-2 rounded-md">
+                                <p className="text-xs text-muted-foreground">Ganho/Hora</p>
+                                <p className="font-bold text-green-600 dark:text-green-400">R$ 78,63</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    );
+}
+
 
 export default function HistoricoChamadasPage() {
   return (
@@ -42,20 +118,9 @@ export default function HistoricoChamadasPage() {
                     </p>
                 </div>
             </div>
+            
+            <RideOfferSimulation />
 
-            <div className="relative aspect-[9/16] max-w-sm mx-auto rounded-lg overflow-hidden border-4 border-card shadow-lg">
-                <Image
-                    src="https://picsum.photos/394/700"
-                    alt="Exemplo de análise automática de corrida sobreposta na tela do aplicativo de transporte"
-                    width={394}
-                    height={700}
-                    data-ai-hint="ride hailing app"
-                    className="object-cover"
-                />
-                 <div className="absolute bottom-4 left-4 right-4 bg-background/80 backdrop-blur-sm p-2 rounded-md text-center">
-                    <p className="text-xs text-muted-foreground">Exemplo de como a análise aparecerá na tela.</p>
-                </div>
-            </div>
         </CardContent>
       </Card>
        <Card className="border-green-500/50 bg-green-500/10">
@@ -81,4 +146,3 @@ export default function HistoricoChamadasPage() {
     </div>
   );
 }
-
