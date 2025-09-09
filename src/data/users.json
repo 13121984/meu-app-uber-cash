@@ -23,5 +23,13 @@
     "securityAnswers": [],
     "vehicles": [],
     "preferences": {}
+  },
+  {
+    "id": "Teste 3",
+    "passwordHash": "hashed_123456",
+    "plan": "pro",
+    "securityAnswers": [],
+    "vehicles": [],
+    "preferences": {}
   }
 ]
