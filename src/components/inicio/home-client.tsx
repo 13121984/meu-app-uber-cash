@@ -7,7 +7,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { DailySummaryCard } from "./daily-summary-card";
 import { ShiftPerformance } from "./shift-performance";
-import { getTodayData, PeriodData } from "@/services/summary.service";
+import { getReportData, PeriodData } from "@/services/summary.service";
 import { Skeleton } from "../ui/skeleton";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
@@ -57,8 +57,9 @@ export function HomeClient() {
   useEffect(() => {
     async function loadData() {
         try {
-            const data = await getTodayData();
-            setTodayData(data);
+            // Use getReportData for real-time data instead of stale summary
+            const data = await getReportData({ type: 'today' });
+            setTodayData(data as PeriodData); // Cast as PeriodData for the component
         } catch (error) {
             console.error("Failed to load today's data", error);
         } finally {
@@ -95,7 +96,7 @@ export function HomeClient() {
                         </Button>
                     </Link>
                      <Link href="/registrar/other-day" className="w-full">
-                        <Button className="w-full">
+                        <Button className="w-full" variant="secondary">
                             <PlusCircle className="mr-2 h-4 w-4"/>
                             Outro Dia
                         </Button>
@@ -122,7 +123,7 @@ export function HomeClient() {
                     <div className="text-center text-muted-foreground">
                         <BarChart className="mx-auto h-12 w-12" />
                         <p className="mt-4 font-semibold">Nenhum dado registrado para hoje.</p>
-                        <p className="text-sm">Clique em "Registrar Período de Hoje" para começar.</p>
+                        <p className="text-sm">Clique em "Registrar Hoje" para começar.</p>
                     </div>
                 </Card>
              ) : (
