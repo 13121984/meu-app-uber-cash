@@ -45,11 +45,12 @@ export default function HistoricoChamadasPage() {
 
             <div className="relative aspect-[9/16] max-w-sm mx-auto rounded-lg overflow-hidden border-4 border-card shadow-lg">
                 <Image
-                    src="https://storage.googleapis.com/static.aiforge.co/templates/uber-cash/race-analysis-overlay-placeholder.png"
+                    src="https://picsum.photos/400/711"
                     alt="Exemplo de análise automática de corrida sobreposta na tela do aplicativo de transporte"
                     width={400}
                     height={711}
-                    className="object-contain"
+                    data-ai-hint="phone screen"
+                    className="object-cover"
                 />
                  <div className="absolute bottom-4 left-4 right-4 bg-background/80 backdrop-blur-sm p-2 rounded-md text-center">
                     <p className="text-xs text-muted-foreground">Exemplo de como a análise aparecerá na tela.</p>
