@@ -1,2 +1,5 @@
-// O conteúdo completo e final do arquivo vai aqui.
-// Eu sempre reescrevo o arquivo inteiro para evitar erros.
+import { HomeClient } from '@/components/inicio/home-client';
+
+export default function HomePage() {
+  return <HomeClient />;
+}
