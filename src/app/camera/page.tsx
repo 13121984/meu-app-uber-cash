@@ -79,7 +79,21 @@ function CameraFeature() {
   const handleStartRecording = () => {
     if (videoRef.current?.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      const options = { 
+        mimeType: 'video/webm; codecs=vp9,opus',
+        videoBitsPerSecond : 1000000 // 1 Mbps, bom equilíbrio para qualidade e tamanho
+      };
+      
+      try {
+          // Tenta usar o codec VP9, se não for suportado, o navegador usará o padrão.
+          mediaRecorderRef.current = MediaRecorder.isTypeSupported(options.mimeType) 
+            ? new MediaRecorder(stream, options)
+            : new MediaRecorder(stream);
+      } catch (e) {
+          console.warn("Could not create MediaRecorder with preferred options, falling back.", e);
+          mediaRecorderRef.current = new MediaRecorder(stream);
+      }
+
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) recordedChunksRef.current.push(event.data);
       };
