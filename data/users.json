@@ -20,7 +20,10 @@
         "id": "1757448924042"
       }
     ],
-    "preferences": {}
+    "preferences": {
+      "theme": "dark",
+      "colorTheme": "blue"
+    }
   },
   {
     "id": "Teste 2",
