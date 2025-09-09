@@ -24,8 +24,7 @@ interface Step2EarningsProps {
 }
 
 export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps) {
-  const { user } = useAuth();
-  const isPremium = user?.isPremium || false;
+  const { user, isPro } = useAuth();
 
   const getInitialSelectedCategories = () => {
     // If editing an existing entry, use its categories
@@ -100,9 +99,9 @@ export function Step2Earnings({ data, dispatch, categories }: Step2EarningsProps
                          </div>
                     )})}
                 </div>
-                 {!isPremium && 
+                 {!isPro && 
                     <p className="text-xs text-muted-foreground mt-2">
-                        Para adicionar ou editar categorias, <Link href="/premium" className="underline text-primary">faça um upgrade para o Premium</Link>.
+                        Para adicionar ou editar categorias, <Link href="/premium" className="underline text-primary">faça um upgrade para o Pro</Link>.
                     </p>
                 }
             </div>

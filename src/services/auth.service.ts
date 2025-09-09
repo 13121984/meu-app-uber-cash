@@ -159,11 +159,6 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
         return { success: false, error: 'Usuário não encontrado.' };
     }
 
-    // Garante que o plano seja sempre um valor válido
-    if (updatedData.plan && !['basic', 'pro', 'autopilot'].includes(updatedData.plan)) {
-        delete updatedData.plan;
-    }
-    
     users[userIndex] = { ...users[userIndex], ...updatedData };
     await saveUsers(users);
 

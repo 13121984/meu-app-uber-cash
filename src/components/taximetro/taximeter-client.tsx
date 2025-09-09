@@ -394,5 +394,3 @@ export function TaximeterClient() {
         </>
     );
 }
-
-    

@@ -7,6 +7,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords, Maintenance } from './maintenance.service';
 import { getWorkDays, WorkDay } from './work-day.service';
 import { getFile, saveFile } from './storage.service';
+import { getActiveUser } from './auth.service';
 
 export interface EarningsByCategory { name: string; total: number; }
 export interface TripsByCategory { name: string; total: number; }
@@ -72,12 +73,16 @@ const defaultSummaryData: SummaryData = {
     mes: defaultPeriodData,
 }
 
-export async function getSummaryForPeriod(userId: string): Promise<SummaryData> {
-    return await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
+export async function getSummaryForPeriod(): Promise<SummaryData> {
+    const user = await getActiveUser();
+    if (!user) return defaultSummaryData;
+    return await getFile<SummaryData>(user.id, FILE_NAME, defaultSummaryData);
 }
 
-export async function getTodayData(userId: string): Promise<PeriodData> {
-    const summary = await getSummaryForPeriod(userId);
+export async function getTodayData(): Promise<PeriodData> {
+    const user = await getActiveUser();
+    if (!user) return defaultPeriodData;
+    const summary = await getSummaryForPeriod();
     return summary.hoje;
 }
 
@@ -323,3 +328,5 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     }
   };
 }
+
+    

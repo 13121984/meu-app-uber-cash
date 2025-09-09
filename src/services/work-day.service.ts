@@ -1,12 +1,13 @@
 
 "use server";
 
-import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
 import { updateAllSummaries } from './summary.service';
 import demoData from '../../data/work-days.json';
+import { getActiveUser } from './auth.service';
 
 // --- Tipos e Interfaces ---
 
@@ -220,7 +221,10 @@ export async function deleteWorkDaysByFilter(userId: string, filters: { query?: 
 
 // --- Funções de Gerenciamento de Dados ---
 
-export async function loadDemoData(userId: string): Promise<{ success: boolean; error?: string }> {
+export async function loadDemoData(): Promise<{ success: boolean; error?: string }> {
+    const user = await getActiveUser();
+    if (!user) return { success: false, error: "Nenhum usuário ativo para carregar dados." };
+
     try {
         const now = new Date();
         const currentYear = now.getFullYear();
@@ -235,9 +239,9 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
             };
         });
 
-        await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
-        await updateAllSummaries(userId);
-        revalidateAll(userId);
+        await writeWorkDays(user.id, adjustedDemoData as unknown as WorkDay[]);
+        await updateAllSummaries(user.id);
+        revalidateAll(user.id);
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to load demo data.";
@@ -245,11 +249,13 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
     }
 }
 
-export async function clearAllDataForUser(userId: string): Promise<{ success: boolean; error?: string }> {
+export async function clearAllData(): Promise<{ success: boolean; error?: string }> {
+     const user = await getActiveUser();
+     if (!user) return { success: false, error: "Nenhum usuário ativo para limpar dados." };
      try {
-        await writeWorkDays(userId, []);
-        await updateAllSummaries(userId);
-        revalidateAll(userId);
+        await writeWorkDays(user.id, []);
+        await updateAllSummaries(user.id);
+        revalidateAll(user.id);
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to clear data.";
@@ -348,3 +354,5 @@ function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
 
   return Array.from(grouped.values());
 }
+
+    

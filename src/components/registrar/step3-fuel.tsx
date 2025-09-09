@@ -26,8 +26,7 @@ interface Step3FuelProps {
 }
 
 export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
-  const { user } = useAuth();
-  const isPremium = user?.isPremium || false;
+  const { isPro } = useAuth();
 
   const handleFuelEntriesChange = useCallback((newEntries: FuelEntry[]) => {
       dispatch({ type: 'UPDATE_FIELD', payload: { field: 'fuelEntries', value: newEntries } });
@@ -157,9 +156,9 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
                     );
                 })
             )}
-             {!isPremium && 
+             {!isPro && 
                 <p className="text-xs text-muted-foreground pt-2">
-                    Para adicionar novos tipos de combustível, <Link href="/premium" className="underline text-primary">faça um upgrade para o Premium</Link>.
+                    Para adicionar novos tipos de combustível, <Link href="/premium" className="underline text-primary">faça um upgrade para o Pro</Link>.
                 </p>
             }
         </CardContent>
