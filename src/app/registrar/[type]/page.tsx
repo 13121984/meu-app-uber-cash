@@ -9,6 +9,13 @@ import { useAuth } from '@/contexts/auth-context';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
+export async function generateStaticParams() {
+  return [
+    { type: 'today' },
+    { type: 'other-day' },
+  ];
+}
+
 export default function RegistrarPage({ params }: { params: { type: 'today' | 'other-day' }}) {
   const registrationType = params.type;
   const { user, loading } = useAuth();
