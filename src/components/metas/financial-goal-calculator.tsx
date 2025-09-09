@@ -47,7 +47,8 @@ export function FinancialGoalCalculator() {
                 const data = await getTodayData();
                 setTodayData(data);
                 if (data && data.ganhoPorHora > 0) {
-                    setHourlyRate(data.ganhoPorHora);
+                    // Arredonda o valor para duas casas decimais
+                    setHourlyRate(parseFloat(data.ganhoPorHora.toFixed(2)));
                 }
             } catch (error) {
                 console.error("Failed to load today's data for calculator", error);
@@ -81,7 +82,7 @@ export function FinancialGoalCalculator() {
     return (
         <div className="space-y-6">
             <Alert variant="default" className="bg-secondary">
-                 <TrendingUp className="h-4 w-4" />
+                 <TrendingUp className="h-4 w-4 text-green-500" />
                  <AlertDescription>
                     {todayData && todayData.ganhoPorHora > 0 
                         ? `Seu ganho bruto por hora hoje é de ${formatCurrency(todayData.ganhoPorHora)}. Usamos esse valor para o cálculo, mas você pode ajustá-lo.`
