@@ -113,6 +113,12 @@ const timeToMinutes = (time: string): number => {
 };
 
 const getShift = (startTime: string): PerformanceByShift['shift'] => {
+    // Adiciona uma verificação para garantir que startTime é uma string válida
+    if (typeof startTime !== 'string' || !startTime.includes(':')) {
+        // Se a hora de início não for válida, retorna um turno padrão ou lida com o erro.
+        // Vamos retornar 'Manhã' como um fallback seguro, mas isso não deve acontecer com a lógica aprimorada.
+        return 'Manhã'; 
+    }
     const startMinutes = timeToMinutes(startTime);
     if (startMinutes >= timeToMinutes("06:01") && startMinutes <= timeToMinutes("12:00")) return 'Manhã';
     if (startMinutes > timeToMinutes("12:00") && startMinutes <= timeToMinutes("18:00")) return 'Tarde';
@@ -155,22 +161,23 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
             data.totalViagens += earning.trips;
         });
 
-        if (day.timeEntries && day.timeEntries.length > 0) {
-             const totalDayHours = day.timeEntries.reduce((sum, entry) => {
+        // CORREÇÃO: A lógica de turno só deve ser executada se houver `timeEntries` válidos.
+        if (day.timeEntries && day.timeEntries.length > 0 && day.timeEntries.every(t => t.start && t.end)) {
+             const totalDayHoursFromEntries = day.timeEntries.reduce((sum, entry) => {
                 const startMinutes = timeToMinutes(entry.start);
                 const endMinutes = timeToMinutes(entry.end);
                 return sum + (endMinutes > startMinutes ? (endMinutes - startMinutes) / 60 : 0);
             }, 0);
 
-            if (totalDayHours > 0) {
+            if (totalDayHoursFromEntries > 0) {
                  day.timeEntries.forEach(entry => {
                     const entryHours = (timeToMinutes(entry.end) - timeToMinutes(entry.start)) / 60;
                     if (entryHours > 0) {
                         const shift = getShift(entry.start);
                         const shiftData = shiftPerformanceMap.get(shift) || { profit: 0, hours: 0, rawEarnings: 0 };
                         // Pro-rata allocation of daily profit/earnings to shifts based on hours worked
-                        shiftData.profit += dailyProfit * (entryHours / totalDayHours);
-                        shiftData.rawEarnings += dailyEarnings * (entryHours / totalDayHours);
+                        shiftData.profit += dailyProfit * (entryHours / totalDayHoursFromEntries);
+                        shiftData.rawEarnings += dailyEarnings * (entryHours / totalDayHoursFromEntries);
                         shiftData.hours += entryHours;
                         shiftPerformanceMap.set(shift, shiftData);
                     }
@@ -317,3 +324,5 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     }
   };
 }
+
+    
