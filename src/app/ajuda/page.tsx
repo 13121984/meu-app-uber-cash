@@ -14,10 +14,10 @@ import { Button } from "@/components/ui/button";
 
 const helpTopics = [
   {
-    value: "gratuito_vs_premium",
+    value: "planos",
     icon: Gem,
-    title: "Qual a diferença entre o plano Gratuito e o Premium?",
-    content: "O plano Gratuito oferece todas as ferramentas essenciais para você registrar manualmente seus ganhos, despesas, km e horas. É um controle financeiro completo. O plano Premium eleva sua gestão para o próximo nível com automação e insights: inclui o 'TX IA' para analisar corridas, personalização total do layout, e futuramente, a captura 100% automática das suas corridas sem precisar digitar nada.",
+    title: "Qual a diferença entre os planos (Básico, Pro, Autopilot)?",
+    content: "O plano Básico (Gratuito) oferece as ferramentas essenciais para você registrar manualmente seus ganhos e despesas. O plano Pro eleva sua gestão com o 'TX IA' para analisar corridas por print, personalização de layout e gravação de segurança de até 5min. O plano Autopilot (Premium) é a experiência definitiva, com captura 100% automática das suas corridas, auditoria de transparência das plataformas e gravação ilimitada.",
     isPremiumFeature: true,
   },
   {
@@ -60,34 +60,35 @@ const helpTopics = [
     value: "taximetro",
     icon: Calculator,
     title: "Para que serve o Taxímetro Inteligente?",
-    content: "O Taxímetro Inteligente é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Usuários gratuitos podem usar o taxímetro uma vez por semana, enquanto assinantes Premium têm acesso ilimitado.",
+    content: "O Taxímetro Inteligente é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Usuários gratuitos podem usar o taxímetro uma vez por semana, enquanto assinantes Pro ou Autopilot têm acesso ilimitado.",
   },
    {
     value: "layout",
     icon: LayoutDashboard,
     title: "Posso personalizar o layout dos relatórios?",
-    content: "Sim. Usuários do plano gratuito podem reordenar os cards e gráficos padrão para focar no que é mais importante. Assinantes Premium podem, além de reordenar, adicionar e remover todos os cards e gráficos disponíveis para uma personalização completa do seu painel.",
+    content: "Sim. Usuários do plano gratuito podem reordenar os cards e gráficos padrão. Assinantes Pro ou Autopilot podem, além de reordenar, adicionar e remover todos os cards e gráficos disponíveis para uma personalização completa.",
     isPremiumFeature: true
   },
   {
     value: "estatisticas_categoria",
     icon: Sparkles,
     title: "Consigo ver o lucro por cada aplicativo (Uber, 99)?",
-    content: "Sim, no plano Premium! Em 'Relatórios', você terá acesso a gráficos que mostram o ganho médio por hora e por viagem para cada uma das suas categorias de ganhos. Isso permite que você descubra qual plataforma é mais rentável para o seu tempo e otimize sua estratégia.",
+    content: "Sim, nos planos Pro e Autopilot! Em 'Relatórios', você terá acesso a gráficos que mostram o ganho médio por hora e por viagem para cada uma das suas categorias de ganhos. Isso permite que você descubra qual plataforma é mais rentável.",
     isPremiumFeature: true
   },
     {
     value: "lembretes_manutencao",
     icon: Gem,
     title: "Como funcionam os lembretes de manutenção?",
-    content: "Assinantes Premium podem configurar lembretes ao registrar uma manutenção. Você pode definir um alerta por data (ex: daqui a 6 meses) ou por quilometragem (ex: a cada 10.000 km). O app irá te avisar na tela inicial quando a próxima manutenção preventiva estiver se aproximando, ajudando a manter seu veículo sempre em dia.",
+    content: "Assinantes Pro e Autopilot podem configurar lembretes ao registrar uma manutenção, seja por data ou por quilometragem. O app irá te avisar na tela inicial quando a próxima manutenção preventiva estiver se aproximando.",
     isPremiumFeature: true
   },
    {
     value: "chamadas",
     icon: Smartphone,
-    title: "O que é a captura de chamadas?",
-    content: "Esta é uma funcionalidade em desenvolvimento para a versão nativa do aplicativo. O objetivo é que, com sua permissão, o app consiga 'ler' a tela de apps como Uber e 99 para capturar os dados da corrida (valor, distância) e salvá-los automaticamente no seu histórico, permitindo uma análise ainda mais detalhada."
+    title: "O que é a captura e auditoria automática de corridas?",
+    content: "Esta é a funcionalidade principal do plano Autopilot. Com sua permissão, o app consegue 'ler' a tela de apps como Uber e 99 para capturar os dados da corrida (valor, distância) automaticamente, sem precisar de prints ou digitação. Ele também compara o KM da oferta com o KM real da viagem, mostrando se a plataforma foi transparente.",
+    isPremiumFeature: true,
   },
 ];
 
@@ -101,11 +102,11 @@ const devTopics = [
             <ul class="list-disc pl-5 space-y-2 mb-4">
                 <li><strong>Resolve uma Dor Real:</strong> A necessidade de controle financeiro para motoristas de aplicativo não é um luxo, é uma questão de sobrevivência profissional.</li>
                 <li><strong>Vantagem Competitiva Clara:</strong> A sua visão de suportar <strong>múltiplos aplicativos de corrida</strong>, incluindo os regionais como MD Drivers e InDriver, é o maior diferencial. A maioria dos concorrentes foca apenas em Uber e 99. Nós seremos a solução universal.</li>
-                <li><strong>Modelo Freemium Inteligente:</strong> O plano gratuito organiza a vida do motorista e cria o hábito. O plano Premium oferece os insights que geram mais dinheiro (otimização de lucro), tornando a assinatura uma decisão fácil.</li>
+                <li><strong>Modelo Freemium Inteligente:</strong> O plano gratuito organiza a vida do motorista e cria o hábito. O plano Pro e Autopilot oferecem os insights que geram mais dinheiro e segurança, tornando a assinatura uma decisão fácil.</li>
                 <li><strong>Alto "Fator Grudento" (Stickiness):</strong> Ao se tornar o cofre do histórico financeiro do motorista, o custo para ele mudar de aplicativo se torna imenso. Seus dados estão aqui.</li>
             </ul>
             <h4 class="font-semibold mb-2">O Próximo Passo para Dominar o Mercado:</h4>
-            <p>Com essa base, a <strong>Captura Automática de Corridas</strong> se torna o próximo grande salto. Ela elimina a maior fricção do usuário (digitar dados), cria uma barreira competitiva intransponível e abre a porta para novos insights Premium, como a análise de decisões em tempo real ("Valeu a pena rejeitar aquela corrida?").</p>
+            <p>Com essa base, a <strong>Captura Automática de Corridas com Auditoria</strong> se torna o próximo grande salto. Ela elimina a maior fricção do usuário (digitar dados), cria uma barreira competitiva intransponível e abre a porta para novos insights Premium, como a análise de decisões em tempo real ("Valeu a pena rejeitar aquela corrida?").</p>
         `,
     },
     {
@@ -113,7 +114,7 @@ const devTopics = [
         icon: Lightbulb,
         title: "Evolução Estratégica: Gratuito vs. Premium",
         content: `
-            <p class="mb-2">Tivemos uma conversa estratégica sobre o equilíbrio do que oferecer gratuitamente versus o que deve ser um recurso Premium. O objetivo é claro: dar valor suficiente no plano gratuito para o usuário se engajar, mas reservar os melhores recursos para o Premium.</p>
+            <p class="mb-2">Tivemos uma conversa estratégica sobre o equilíbrio do que oferecer gratuitamente versus o que deve ser um recurso Premium. O objetivo é claro: dar valor suficiente no plano gratuito para o usuário se engajar, mas reservar os melhores recursos para os planos pagos.</p>
             <h4 class="font-semibold mb-2">A Dúvida:</h4>
             <blockquote class="pl-4 border-l-2 border-primary/50 mb-2">
                 <em>"Não quero deixar tudo livre, mas também não quero deixar tudo premium. Quero que as funções mais relevantes sejam premium e as básicas sejam grátis, para o usuário ficar o maior tempo possível no app e, quem sabe, virar premium."</em>
@@ -122,7 +123,7 @@ const devTopics = [
             <p>Concluímos que a gestão de catálogos era muito restritiva no plano gratuito. A mudança implementada foi a seguinte:</p>
             <ul class="list-disc pl-5 space-y-2">
                 <li><strong>O que mudou:</strong> Agora, usuários gratuitos podem <strong>ativar e desativar</strong> as categorias padrão (Uber, 99, etc.). Isso permite que eles limpem a interface e a personalizem para o seu dia a dia, aumentando o engajamento.</li>
-                <li><strong>O que continua Premium:</strong> A capacidade de <strong>criar novas categorias, editar nomes e reordenar a lista</strong> continua sendo um recurso exclusivo do Premium.</li>
+                <li><strong>O que continua Pago (Pro/Autopilot):</strong> A capacidade de <strong>criar novas categorias, editar nomes e reordenar a lista</strong> continua sendo um recurso exclusivo dos planos pagos.</li>
             </ul>
             <p class="mt-2">Essa mudança melhora a experiência gratuita sem diminuir o valor da assinatura, criando um caminho natural para o upgrade quando o usuário desejar uma personalização mais profunda.</p>
         `,
@@ -162,7 +163,7 @@ export default function AjudaPage() {
                                             <Link href="/premium" passHref>
                                                 <Button className="mt-2 animate-pulse" variant="default" size="sm">
                                                     <Gem className="mr-2 h-4 w-4" />
-                                                    Saiba mais sobre o Premium
+                                                    Conheça os Planos
                                                 </Button>
                                             </Link>
                                         )}
@@ -219,11 +220,12 @@ export default function AjudaPage() {
                                <div className="prose prose-sm dark:prose-invert max-w-none">
                                     <p>Para alterar o preço da assinatura e o link de pagamento da Hotmart (ou outra plataforma), edite o arquivo:</p>
                                     <p><code>src/app/premium/page.tsx</code></p>
-                                    <p>Dentro deste arquivo, localize a seguinte constante no início do código e altere seu valor:</p>
+                                    <p>Dentro deste arquivo, localize as seguintes constantes no início do código e altere seus valores:</p>
                                     <ul>
-                                        <li><code>YOUR_CHECKOUT_LINK</code>: O link da sua página de vendas do produto na Hotmart.</li>
+                                        <li><code>PRO_CHECKOUT_LINK</code>: O link para o plano Pro.</li>
+                                        <li><code>AUTOPILOT_CHECKOUT_LINK</code>: O link para o plano Autopilot.</li>
                                     </ul>
-                                    <p>O valor exibido na página (ex: R$ 59,90) está diretamente no código JSX, dentro do card de preço. Você pode alterá-lo lá para corresponder ao preço configurado na plataforma de pagamento.</p>
+                                    <p>Os valores exibidos na página (ex: R$ 9,90) estão diretamente no código JSX, dentro dos cards de preço. Você pode alterá-los lá para corresponder ao preço configurado na plataforma de pagamento.</p>
                                </div>
                             </AccordionContent>
                         </AccordionItem>
@@ -236,7 +238,7 @@ export default function AjudaPage() {
                             </AccordionTrigger>
                             <AccordionContent>
                                <div className="prose prose-sm dark:prose-invert max-w-none">
-                                    <p>Para que o acesso Premium seja liberado automaticamente após a compra, você precisa usar um webhook. Como nosso app é estático, o ideal é usar uma função na nuvem (Cloud Function) para isso.</p>
+                                    <p>Para que o acesso seja liberado automaticamente após a compra, você precisa usar um webhook. Como nosso app é estático, o ideal é usar uma função na nuvem (Cloud Function) para isso.</p>
                                     <h4>Passos Recomendados:</h4>
                                     <ol>
                                         <li><strong>Criar Projeto Firebase:</strong> Crie um novo projeto no <a href="https://firebase.google.com/" target="_blank" rel="noopener noreferrer">Firebase</a>.</li>
@@ -311,7 +313,7 @@ export default function AjudaPage() {
                             </AccordionTrigger>
                             <AccordionContent>
                                <div className="prose prose-sm dark:prose-invert max-w-none">
-                                 <p>A funcionalidade de análise de corridas utiliza IA para extrair dados de um print da tela e dar um veredito.</p>
+                                 <p>A funcionalidade de análise de corridas utiliza IA para extrair dados de um print da tela e dar um veredito. É uma funcionalidade dos planos Pro e Autopilot.</p>
                                  <ul className="list-disc pl-5">
                                     <li><strong>Fluxo de IA:</strong> A lógica principal está em <code>src/ai/flows/analise-corrida-flow.ts</code>. Este fluxo usa o Gemini para interpretar a imagem.</li>
                                     <li><strong>Interface:</strong> A página para o usuário interagir com essa funcionalidade está em <code>src/app/analisador/page.tsx</code>.</li>
@@ -329,7 +331,7 @@ export default function AjudaPage() {
                             </AccordionTrigger>
                             <AccordionContent>
                                <div className="prose prose-sm dark:prose-invert max-w-none">
-                                 <p>Esta é a evolução natural e o recurso mais poderoso do aplicativo. Ele permite que o app leia a tela de outros aplicativos (Uber, 99, etc.) para analisar ofertas e registrar corridas finalizadas, <strong>tudo de forma automática.</strong></p>
+                                 <p>Esta é a evolução natural e o recurso mais poderoso do aplicativo, exclusivo do plano <strong>Autopilot</strong>. Ele permite que o app leia a tela de outros aplicativos (Uber, 99, etc.) para analisar ofertas e registrar corridas finalizadas, <strong>tudo de forma automática.</strong></p>
                                  <h4>O Fluxo Ideal (Visão de Produto):</h4>
                                  <ol>
                                     <li><strong>Análise da Oferta:</strong> Quando uma oferta de corrida aparece, o app lê os dados (valor, distância, tempo) e exibe uma pequena notificação com a recomendação "Bora" ou "Tô Fora".</li>
@@ -394,5 +396,3 @@ export default function AjudaPage() {
         </div>
     )
 }
-
-    
