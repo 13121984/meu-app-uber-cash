@@ -145,16 +145,16 @@ export function GerenciamentoClient() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Smartphone className="h-5 w-5 text-primary" />
-            Histórico de Chamadas
+            Captura Automática de Corridas
           </CardTitle>
            <CardDescription>
-                Acesse o histórico de corridas capturadas automaticamente (Em breve).
+                Acesse a página da funcionalidade de captura automática de corridas (Em breve).
             </CardDescription>
         </CardHeader>
         <CardContent>
            <Link href="/historico-chamadas" passHref>
              <Button variant="secondary">
-                <span>Acessar Histórico</span>
+                <span>Saiba Mais</span>
                 <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
            </Link>
