@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from '../ui/label';
 import { addOrUpdateWorkDay } from '@/services/work-day.service';
+import { isAfter, add } from 'date-fns';
 
 
 // Helper para calcular a distância (fórmula de Haversine)
@@ -125,7 +126,18 @@ export function TaximeterClient() {
     }, [distance, time, rates]);
 
 
-    const canUseTaximeter = true; // Placeholder for premium logic
+    const canUseTaximeter = () => {
+        if (!user) return false;
+        if (user.isPremium) return true;
+        
+        const lastUse = user.preferences.lastTaximeterUse;
+        if (!lastUse) return true; // Never used before
+
+        const lastUseDate = new Date(lastUse);
+        const nextAllowedUse = add(lastUseDate, { weeks: 1 });
+        
+        return isAfter(new Date(), nextAllowedUse);
+    };
 
 
     const startTracking = useCallback(async () => {
@@ -177,7 +189,7 @@ export function TaximeterClient() {
     };
     
     const startRide = async () => {
-        if (!canUseTaximeter) {
+        if (!canUseTaximeter()) {
             toast({ title: "Limite Atingido", description: "Usuários gratuitos podem usar o taxímetro uma vez por semana.", variant: "destructive"});
             return;
         }
@@ -214,7 +226,7 @@ export function TaximeterClient() {
     };
 
     const confirmAndSaveRide = async () => {
-        if (!finalRideData) return;
+        if (!finalRideData || !user) return;
 
         setStatus('idle');
         
@@ -239,7 +251,7 @@ export function TaximeterClient() {
             description: `A corrida de ${formatCurrency(finalRideData.cost)} foi salva no seu histórico.`
         });
         
-        if (user && !user.isPremium) {
+        if (!user.isPremium) {
             await updateUserPreferences(user.id, { lastTaximeterUse: new Date().toISOString() });
             await refreshUser();
         }
@@ -273,7 +285,7 @@ export function TaximeterClient() {
         setIsSaving(false);
     }
 
-    if (!canUseTaximeter) {
+    if (!canUseTaximeter()) {
         return (
              <Card className="text-center p-8 border-dashed">
                  <Lock className="mx-auto h-12 w-12 text-primary mb-4"/>

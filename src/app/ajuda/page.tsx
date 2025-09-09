@@ -74,7 +74,7 @@ const helpTopics = [
     value: "taximetro",
     icon: Calculator,
     title: "Para que serve o Taxímetro?",
-    content: "O Taxímetro é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Ao finalizar, a corrida é salva automaticamente no seu histórico do dia."
+    content: "O Taxímetro é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Ao finalizar, a corrida é salva automaticamente no seu histórico do dia. Usuários gratuitos podem usar o taxímetro uma vez por semana, enquanto assinantes Premium têm acesso ilimitado."
   },
    {
     value: "chamadas",

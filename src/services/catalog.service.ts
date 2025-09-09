@@ -32,7 +32,7 @@ const defaultCatalog: Catalog = {
   fuel: [
     { name: "GNV", active: true, isDefault: false },
     { name: "Etanol", active: true, isDefault: false },
-    { name: "Gasolina Aditivada", active: true, isDefault: true },
+    { name: "Gasolina Aditivada", active: true, isDefault: false },
     { name: "Gasolina Comum", active: true, isDefault: false },
   ]
 };
@@ -66,13 +66,15 @@ export async function getCatalog(): Promise<Catalog> {
           const savedItem = savedMap.get(defaultItem.name);
           finalItems.push({
               name: defaultItem.name,
-              isDefault: defaultItem.isDefault, // isDefault is the source of truth
-              active: savedItem?.active ?? defaultItem.active, // active state is preserved
+              // isDefault is the source of truth from the hardcoded list
+              isDefault: defaultItem.isDefault, 
+              // active state is preserved from the user's saved data, otherwise use default
+              active: savedItem?.active ?? defaultItem.active, 
           });
           usedNames.add(defaultItem.name);
       });
 
-      // 2. Add custom items created by premium users
+      // 2. Add custom items created by premium users that are not in the default list
       saved.forEach(savedItem => {
           if (!usedNames.has(savedItem.name)) {
               finalItems.push({
