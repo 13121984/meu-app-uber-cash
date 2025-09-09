@@ -35,13 +35,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Theme can no longer be determined at build time as it's user-specific.
-  // It will be applied dynamically on the client in AuthProvider/AppContent.
-  
+  // A classe de tema (light/dark) será aplicada dinamicamente no AppContent
+  // para evitar conflitos de renderização no servidor.
   return (
     <html 
       lang="pt-BR" 
-      className="h-full" // Default to light mode, client will override
       suppressHydrationWarning
     >
       <head>
