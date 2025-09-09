@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus, DollarSign, Crown } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus, DollarSign, Crown, Camera } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
@@ -25,6 +25,7 @@ const menuItems = [
   { href: "/dashboard", label: "Painel", icon: LayoutDashboard, showOnHome: false, showOnOthers: true },
   // Botão de registro será inserido dinamicamente
   { href: "/gerenciamento", label: "Gerenciar", icon: History, showOnHome: false, showOnOthers: true },
+  { href: "/camera", label: "Câmera", icon: Camera, showOnHome: false, showOnOthers: true },
   { href: "/taximetro", label: "Taxímetro", icon: Calculator, showOnHome: false, showOnOthers: true },
   { href: "/manutencao", label: "Manutenção", icon: Wrench, showOnHome: false, showOnOthers: true },
   { href: "/metas", label: "Metas", icon: Target, showOnHome: false, showOnOthers: true },
