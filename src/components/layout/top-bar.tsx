@@ -134,7 +134,7 @@ export function TopBar() {
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
                     <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center border-2 border-primary-foreground/50 shadow-md">
-                       <AppLogo className="h-6 w-6 text-primary-foreground" />
+                       <AppLogo className="h-8 w-8 text-primary-foreground" />
                     </div>
                     <span className="sr-only">Uber Cash</span>
                 </Link>
