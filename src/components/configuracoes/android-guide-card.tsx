@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare, Accessibility, DollarSign } from "lucide-react";
+import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare, Accessibility, DollarSign, Cloud, Link as LinkIcon } from "lucide-react";
 
 const codeStructure = `- src/app: Contém as pastas de cada página (ex: /dashboard).
 - src/components: Contém os "pedaços" da interface (ex: botões, cards).
@@ -54,19 +54,47 @@ export function AndroidGuideCard() {
                         <AccordionTrigger>
                             <div className="flex items-center gap-2">
                                 <DollarSign className="h-5 w-5 text-primary" />
-                                <span className="font-semibold text-left">Alterar Preço da Assinatura</span>
+                                <span className="font-semibold text-left">Alterar Preço e Link de Pagamento</span>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
                            <div className="prose prose-sm dark:prose-invert">
-                                <p>Para alterar o preço da assinatura e a chave PIX para pagamento, edite o arquivo:</p>
+                                <p>Para alterar o preço da assinatura e o link de pagamento da Hotmart (ou outra plataforma), edite o arquivo:</p>
                                 <p><code>src/app/premium/page.tsx</code></p>
-                                <p>Dentro deste arquivo, localize as seguintes constantes no início do código e altere seus valores:</p>
+                                <p>Dentro deste arquivo, localize a seguinte constante no início do código e altere seu valor:</p>
                                 <ul>
-                                    <li><code>YOUR_PIX_KEY</code>: A sua chave PIX para receber os pagamentos.</li>
-                                    <li><code>YOUR_CONTACT_EMAIL</code>: O e-mail para onde os usuários enviarão o comprovante.</li>
+                                    <li><code>YOUR_CHECKOUT_LINK</code>: O link da sua página de vendas do produto na Hotmart.</li>
                                 </ul>
-                                <p>O valor exibido na página (ex: R$ 59,90) está diretamente no código JSX, dentro do card de preço. Você pode alterá-lo lá.</p>
+                                <p>O valor exibido na página (ex: R$ 59,90) está diretamente no código JSX, dentro do card de preço. Você pode alterá-lo lá para corresponder ao preço configurado na plataforma de pagamento.</p>
+                           </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="webhook">
+                        <AccordionTrigger>
+                            <div className="flex items-center gap-2">
+                                <LinkIcon className="h-5 w-5 text-primary" />
+                                <span className="font-semibold text-left">Automatizar Acesso Premium com Webhook</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                           <div className="prose prose-sm dark:prose-invert">
+                                <p>Para que o acesso Premium seja liberado automaticamente após a compra, você precisa usar um webhook. Como nosso app é estático, o ideal é usar uma função na nuvem (Cloud Function) para isso.</p>
+                                <h4>Passos Recomendados:</h4>
+                                <ol>
+                                    <li><strong>Criar Projeto Firebase:</strong> Crie um novo projeto no <a href="https://firebase.google.com/" target="_blank" rel="noopener noreferrer">Firebase</a>.</li>
+                                    <li>
+                                        <strong>Configurar o Webhook:</strong> Criei um arquivo de esqueleto para você em <code>src/app/api/hotmart-webhook/route.ts</code>. Você precisará adaptar e implantar este código como uma Firebase Function. Esta função irá:
+                                        <ul className="list-disc pl-5">
+                                            <li>Receber a notificação da Hotmart.</li>
+                                            <li>Verificar a assinatura para segurança.</li>
+                                            <li>Encontrar o usuário no seu <code>users.json</code> pelo e-mail.</li>
+                                            <li>Mudar o status <code>isPremium</code> do usuário para <code>true</code>.</li>
+                                        </ul>
+                                    </li>
+                                     <li><strong>Configurar na Hotmart:</strong> Na sua conta da Hotmart, vá nas configurações do produto e adicione a URL da sua Firebase Function no campo de Webhook (ou "Postback URL").</li>
+                                     <li><strong>Importante:</strong> Para que a Firebase Function possa editar seu arquivo <code>users.json</code>, ele precisará estar em um local acessível, como o Firebase Storage ou Realtime Database. Você precisará ajustar o código no webhook para ler/escrever nesse local.</li>
+                                </ol>
+                                <p>Isso parece complexo, mas é o caminho padrão para automatizar esse tipo de processo de forma segura e escalável.</p>
                            </div>
                         </AccordionContent>
                     </AccordionItem>

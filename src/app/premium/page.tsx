@@ -2,20 +2,10 @@
 "use client";
 
 import { useState } from 'react';
-import { BotMessageSquare, Check, Copy, Crown, PartyPopper, Sparkles } from 'lucide-react';
+import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
 import Link from 'next/link';
-import { Label } from '@/components/ui/label';
 
 const premiumFeatures = [
   { text: 'Analisador de Corridas com IA: Descubra se uma corrida vale a pena antes de aceitar.', icon: BotMessageSquare },
@@ -27,25 +17,11 @@ const premiumFeatures = [
   { text: 'Suporte prioritário.', icon: Sparkles },
 ];
 
-// Substitua pelos seus dados reais antes de publicar
-const YOUR_PIX_KEY = "seu-email-ou-chave-pix@dominio.com";
-const YOUR_CONTACT_EMAIL = "seu-email-de-suporte@dominio.com";
+// Substitua pelo seu link de checkout da Hotmart ou outra plataforma
+const YOUR_CHECKOUT_LINK = "https://pay.hotmart.com/SEU_PRODUTO";
+
 
 export default function PremiumPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleCopyPixKey = () => {
-    navigator.clipboard.writeText(YOUR_PIX_KEY);
-    toast({
-      title: (
-        <div className="flex items-center gap-2">
-          <Check className="h-5 w-5 text-green-500" />
-          <span>Chave PIX Copiada!</span>
-        </div>
-      ),
-      description: 'Agora é só colar no app do seu banco para pagar.',
-    });
-  };
 
   return (
     <>
@@ -87,47 +63,13 @@ export default function PremiumPage() {
            </CardContent>
         </Card>
 
-        <Button size="lg" className="text-lg font-bold animate-pulse" onClick={() => setIsModalOpen(true)}>
-          <PartyPopper className="mr-2 h-6 w-6" />
-          Quero ser Premium Agora!
-        </Button>
+        <Link href={YOUR_CHECKOUT_LINK} passHref legacyBehavior>
+            <Button size="lg" className="text-lg font-bold animate-pulse" as="a" target="_blank">
+                <PartyPopper className="mr-2 h-6 w-6" />
+                Quero ser Premium Agora!
+            </Button>
+        </Link>
       </div>
-
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-headline text-center">Pagamento via PIX</DialogTitle>
-            <DialogDescription className="text-center">
-              Siga os passos abaixo para liberar seu acesso.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-center">
-              <span className="font-semibold">Valor:</span> <span className="text-xl font-bold text-primary">R$ 59,90</span>
-            </p>
-            <div className="p-4 rounded-lg bg-secondary space-y-2">
-                <Label htmlFor="pix-key">Chave PIX (E-mail)</Label>
-                <div className="flex items-center gap-2">
-                    <input id="pix-key" readOnly value={YOUR_PIX_KEY} className="flex-1 bg-muted p-2 rounded-md text-sm" />
-                    <Button variant="outline" size="icon" onClick={handleCopyPixKey}>
-                        <Copy className="h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-            <ul className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
-                <li>Copie a chave PIX acima.</li>
-                <li>Abra o aplicativo do seu banco e faça o pagamento.</li>
-                <li>Envie o comprovante para <strong className="text-primary">{YOUR_CONTACT_EMAIL}</strong></li>
-                <li>Aguarde a confirmação. Seu acesso será liberado em breve!</li>
-            </ul>
-          </div>
-           <DialogFooter>
-             <Link href="/" className="w-full">
-                <Button variant="outline" className="w-full">Voltar ao Início</Button>
-             </Link>
-           </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
