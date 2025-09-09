@@ -147,10 +147,9 @@ export function VehicleManagerCard() {
                     user?.vehicles?.map((v: Vehicle) => (
                         <Card key={v.id} className="p-4 flex items-center justify-between bg-secondary/50">
                             <div className="flex items-center gap-4">
-                                <div className="w-4 h-8 rounded-sm" style={{ backgroundColor: v.color.toLowerCase() }} />
                                 <div>
                                     <p className="font-bold">{v.brand} {v.model}</p>
-                                    <p className="text-sm text-muted-foreground">{v.plate || 'Sem placa'}</p>
+                                    <p className="text-sm text-muted-foreground">{v.color} - {v.plate || 'Sem placa'}</p>
                                 </div>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => handleDelete(v.id)} disabled={!!isDeleting}>
