@@ -2,7 +2,7 @@
 "use client";
 
 import { useAuth } from '@/contexts/auth-context';
-import { BotMessageSquare, Loader2, Sparkles, Gem, ArrowRight, Lock } from 'lucide-react';
+import { BotMessageSquare, Loader2, Sparkles, Gem, ArrowRight, Lock, DollarSign, Target, ThumbsUp } from 'lucide-react';
 import { AnalyzerClient } from '@/components/analisador/analyzer-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,20 +17,20 @@ function PremiumUpgradeScreen() {
                  <Gem className="absolute w-16 h-16 text-yellow-500 bottom-0 right-0 animate-pulse" />
              </div>
             <h1 className="text-3xl font-bold font-headline text-primary">Decida em Segundos com o TX IA</h1>
-            <p className="text-muted-foreground max-w-lg">
-                O TX IA é um recurso dos planos Pro e Autopilot que lê o print da sua corrida e diz se ela vale a pena com base nas SUAS metas. Chega de aceitar corridas no prejuízo!
+            <p className="text-lg text-foreground max-w-lg">
+                O TX IA é seu copiloto inteligente. Ele lê o print da sua corrida, analisa com base nas suas metas e te diz se vale a pena. <strong className="text-primary">Chega de aceitar corridas no prejuízo!</strong>
             </p>
-            <Card className="bg-secondary">
-                 <CardContent className="p-4">
-                     <ul className="text-left space-y-2">
-                         <li className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Análise instantânea de valor, distância e tempo.</li>
-                         <li className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Recomendação "Bora" ou "Tô Fora" baseada em suas metas.</li>
-                         <li className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Salve suas metas de R$/km e R$/hora.</li>
+            <Card className="bg-secondary/50 w-full max-w-md">
+                 <CardContent className="p-6">
+                     <ul className="text-left space-y-3">
+                         <li className="flex items-center gap-3"><Sparkles className="h-5 w-5 text-primary" /> Análise instantânea de valor, distância e tempo.</li>
+                         <li className="flex items-center gap-3"><ThumbsUp className="h-5 w-5 text-primary" /> Recomendação "Bora" ou "Tô Fora".</li>
+                         <li className="flex items-center gap-3"><Target className="h-5 w-5 text-primary" /> Use suas próprias metas de R$/km e R$/hora.</li>
                      </ul>
                  </CardContent>
             </Card>
             <Link href="/premium" passHref>
-                <Button size="lg">
+                <Button size="lg" className="animate-pulse">
                     <Lock className="mr-2 h-4 w-4" />
                     Desbloquear com Pro ou Autopilot
                     <ArrowRight className="ml-2 h-4 w-4" />
