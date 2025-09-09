@@ -126,7 +126,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Simplification: Treat everyone as Autopilot to remove permission errors as a variable.
+  // Para simplificar a depuração e eliminar erros de permissão, temporariamente tratamos
+  // todos os usuários como tendo o plano máximo (Autopilot).
   const isPro = true;
   const isAutopilot = true;
 
