@@ -1,3 +1,4 @@
+
 "use client"
 
 import { SettingsForm } from './settings-form';
@@ -10,7 +11,6 @@ import { DemoDataCard } from './demo-data-card';
 import { LayoutCustomizationCard } from './layout-customization-card';
 import { useAuth } from '@/contexts/auth-context';
 import { HelpAndSupportCard } from './help-and-support-card';
-import { AndroidGuideCard } from './android-guide-card';
 import { RaceAnalyzerCard } from './race-analyzer-card';
 
 export function ConfiguracoesClient() {
@@ -29,7 +29,8 @@ export function ConfiguracoesClient() {
             <BackupCard />
             <CatalogManagerCard isPremium={isPremium} />
             <ImportCard />
-            {user?.id === 'Paulo Vitor Tiburcio ' && <AndroidGuideCard />}
         </div>
     )
 }
+
+    
