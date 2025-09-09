@@ -14,10 +14,12 @@ export default async function MetasPage() {
         <p className="text-muted-foreground">Defina suas metas, controle suas despesas e veja o resultado em tempo real.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Coluna da Esquerda: Ferramentas */}
-        <div className="space-y-6">
-          <Accordion type="multiple" defaultValue={['item-1', 'item-3']} className="w-full space-y-4">
+      {/* Resumo do Mês no topo, sempre visível */}
+      <FinancialSummary />
+
+      {/* Ferramentas abaixo, dentro de acordeões */}
+      <div className="space-y-6">
+          <Accordion type="multiple" defaultValue={['item-1']} className="w-full space-y-4">
             <Card>
                 <AccordionItem value="item-1" className="border-b-0">
                     <AccordionTrigger className="p-6">
@@ -69,13 +71,8 @@ export default async function MetasPage() {
                 </AccordionItem>
             </Card>
           </Accordion>
-        </div>
-
-        {/* Coluna da Direita: Resumo */}
-        <div className="sticky top-20">
-          <FinancialSummary />
-        </div>
       </div>
+
     </div>
   );
 }
