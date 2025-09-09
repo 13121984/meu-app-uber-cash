@@ -4,7 +4,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
-import { startOfDay, parseISO } from 'date-fns';
+import { startOfDay, parseISO, isSameMonth, isSameYear } from 'date-fns';
 
 export interface PersonalExpense {
   id: string;
@@ -66,6 +66,20 @@ export async function getPersonalExpenses(): Promise<PersonalExpense[]> {
     let records = await readPersonalExpenses();
     return records;
 }
+
+
+/**
+ * Calcula o total de despesas pessoais para o mês atual.
+ */
+export async function getCurrentMonthPersonalExpensesTotal(): Promise<number> {
+    const allExpenses = await getPersonalExpenses();
+    const now = new Date();
+    
+    return allExpenses
+        .filter(expense => isSameMonth(expense.date, now) && isSameYear(expense.date, now))
+        .reduce((sum, expense) => sum + expense.amount, 0);
+}
+
 
 /**
  * Atualiza um registro de despesa pessoal existente.
