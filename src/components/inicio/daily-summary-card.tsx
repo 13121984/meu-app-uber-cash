@@ -3,7 +3,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { DollarSign, Clock, TrendingUp, Target, Flag } from "lucide-react";
+import { DollarSign, Clock, TrendingUp, Target, Flag, Car } from "lucide-react";
 import type { PeriodData } from "@/services/summary.service";
 import { AppLogo } from "../ui/app-logo";
 
