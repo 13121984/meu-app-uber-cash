@@ -7,15 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Download, Loader2, AlertTriangle, Filter, Check, FileDown } from 'lucide-react';
+import { Calendar as CalendarIcon, Download, Loader2, AlertTriangle, Check, FileDown } from 'lucide-react';
 import { format, getYear, parseISO, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { generatePdf } from '@/lib/pdf-generator';
+import { getReportData, ReportData } from '@/services/summary.service';
 
 
 interface ReportsFilterProps {
@@ -44,7 +44,6 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
 
   useEffect(() => {
     setIsClient(true);
-    // Sync state with URL params on initial client load
     const typeFromURL = searchParams.get('type') as ReportFilterValues['type'] | null;
     if (typeFromURL) {
       const yearFromURL = parseInt(searchParams.get('year') || getYear(new Date()).toString());
@@ -65,7 +64,6 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
       setMonth(monthFromURL);
       setDateRange(rangeFromURL);
       
-      // Apply filters on initial load if params exist
       onApplyFilters({
           type: typeFromURL,
           year: yearFromURL,
@@ -73,7 +71,7 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
           dateRange: rangeFromURL
       });
     }
-  }, []); // Empty dependency array ensures this runs only once on the client
+  }, []); 
 
 
   const handleApply = () => {
@@ -106,9 +104,12 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
     onApplyFilters(filters);
   };
   
-  const handleDownloadCSV = () => {
-      const filtersToExport = {
-        type: searchParams.get('type') as ReportFilterValues['type'] | null,
+  const getFiltersFromURL = (): ReportFilterValues | null => {
+      const type = searchParams.get('type') as ReportFilterValues['type'] | null;
+      if (!type) return null;
+
+      return {
+        type,
         year: parseInt(searchParams.get('year') || '0'),
         month: parseInt(searchParams.get('month') || '0'),
         dateRange: (() => {
@@ -118,22 +119,26 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
             return undefined;
         })()
       };
+  };
+
+  const handleDownloadCSV = () => {
+      const filtersToExport = getFiltersFromURL();
       
-      if (!filtersToExport.type) {
+      if (!filtersToExport) {
           toast({ title: "Nenhum relatório gerado", description: "Aplique um filtro primeiro para poder exportar os dados.", variant: "destructive"});
           return;
       }
 
       startExportTransition(async () => {
         try {
-            const result = await exportReportAction(filtersToExport as ReportFilterValues);
+            const result = await exportReportAction(filtersToExport);
 
             if (result.csvContent) {
                 const blob = new Blob([result.csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
-                const fileName = `Relatorio_UberCash_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+                const fileName = `Relatorio_RotaCerta_${format(new Date(), 'yyyy-MM-dd')}.csv`;
                 link.setAttribute("download", fileName);
                 
                 document.body.appendChild(link);
@@ -160,50 +165,20 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
   }
 
   const handleDownloadPDF = async () => {
-    const reportElement = reportContentRef.current;
-    if (!reportElement) {
-        toast({ title: "Erro", description: "Não foi possível encontrar o conteúdo do relatório para exportar.", variant: "destructive" });
+    const filtersToExport = getFiltersFromURL();
+      
+    if (!filtersToExport) {
+        toast({ title: "Nenhum relatório gerado", description: "Aplique um filtro primeiro para poder exportar os dados.", variant: "destructive"});
         return;
     }
 
     startExportTransition(async () => {
         try {
-            const canvas = await html2canvas(reportElement, {
-                scale: 2, // Aumenta a resolução para melhor qualidade
-                backgroundColor: null, // Usa o fundo do elemento
-                useCORS: true,
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            
-            // A4 page dimensions in mm: 210 x 297
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = imgWidth / imgHeight;
-
-            let finalImgWidth = pdfWidth - 20; // com margens
-            let finalImgHeight = finalImgWidth / ratio;
-            
-            if (finalImgHeight > pdfHeight - 20) {
-                 finalImgHeight = pdfHeight - 20;
-                 finalImgWidth = finalImgHeight * ratio;
-            }
-
-            const x = (pdfWidth - finalImgWidth) / 2;
-            const y = 10;
-
-            pdf.addImage(imgData, 'PNG', x, y, finalImgWidth, finalImgHeight);
-            
-            const fileName = `Relatorio_UberCash_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-            pdf.save(fileName);
-            
+            const reportData: ReportData = await getReportData(filtersToExport);
+            generatePdf(reportData, filtersToExport);
             toast({
                 title: "Exportação PDF Iniciada",
-                description: `O arquivo ${fileName} será baixado.`,
+                description: `O arquivo será baixado.`,
             });
         } catch (error) {
             console.error(error);
@@ -215,7 +190,7 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
             });
         }
     });
-};
+  };
 
   if (!isClient) {
       return (

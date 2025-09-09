@@ -201,7 +201,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         mediaHorasPorDia: data.diasTrabalhados > 0 ? data.totalHoras / data.diasTrabalhados : 0,
         mediaKmPorDia: data.diasTrabalhados > 0 ? data.totalKm / data.diasTrabalhados : 0,
         ganhoPorHora: data.totalHoras > 0 ? data.totalGanho / data.totalHoras : 0,
-        ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.totalKm : 0,
+        ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.km : 0,
         eficiencia: data.totalKm > 0 && data.totalLitros > 0 ? data.totalKm / data.totalLitros : 0,
         earningsByCategory, tripsByCategory, maintenance: maintenanceData,
         meta: { target: targetGoal, period },
