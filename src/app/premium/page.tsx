@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Link from 'next/link';
 
 const premiumFeatures = [
-  { text: 'Analisador de Corridas com IA: Descubra se uma corrida vale a pena antes de aceitar.', icon: BotMessageSquare },
+  { text: 'TX IA: O Analisador de Corridas com IA. Descubra se uma corrida vale a pena antes de aceitar.', icon: BotMessageSquare },
   { text: 'Cards e gráficos ilimitados no Dashboard e Relatórios.', icon: Sparkles },
   { text: 'Personalize a ordem de todos os itens visuais.', icon: Sparkles },
   { text: 'Gerencie múltiplos veículos.', icon: Sparkles },

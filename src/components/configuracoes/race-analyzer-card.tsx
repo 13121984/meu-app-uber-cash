@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link";
@@ -11,7 +12,7 @@ export function RaceAnalyzerCard() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <BotMessageSquare className="h-6 w-6 text-primary" />
-                    Analisador de Corridas
+                    TX IA: Analisador de Corridas
                 </CardTitle>
                 <CardDescription>
                     Use a IA para analisar um print de uma oferta de corrida e decidir se vale a pena aceitar com base nas suas metas.

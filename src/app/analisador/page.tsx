@@ -16,9 +16,9 @@ function PremiumUpgradeScreen() {
                  <BotMessageSquare className="absolute w-24 h-24 text-muted-foreground/30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                  <Gem className="absolute w-16 h-16 text-yellow-500 bottom-0 right-0 animate-pulse" />
              </div>
-            <h1 className="text-3xl font-bold font-headline text-primary">Decida em Segundos, Lucre Mais</h1>
+            <h1 className="text-3xl font-bold font-headline text-primary">Decida em Segundos com o TX IA</h1>
             <p className="text-muted-foreground max-w-lg">
-                O Analisador de Corridas com IA é um recurso Premium que lê o print da sua corrida e diz se ela vale a pena com base nas SUAS metas. Chega de aceitar corridas no prejuízo!
+                O TX IA é um recurso Premium que lê o print da sua corrida e diz se ela vale a pena com base nas SUAS metas. Chega de aceitar corridas no prejuízo!
             </p>
             <Card className="bg-secondary">
                  <CardContent className="p-4">
@@ -58,12 +58,12 @@ export default function AnalisadorPage() {
   
   return (
     <div className="space-y-6">
-       <div>
-        <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
-            <BotMessageSquare className="w-8 h-8 text-primary" />
-            Analisador de Corridas com IA
+       <div className="text-center">
+        <h1 className="text-5xl font-bold font-headline flex items-center justify-center gap-3">
+            <BotMessageSquare className="w-12 h-12 text-primary" />
+            TX IA
         </h1>
-        <p className="text-muted-foreground">Tire um print de uma oferta de corrida e deixe a IA dizer se vale a pena.</p>
+        <p className="text-xl text-muted-foreground">O Analisador de Corridas com Inteligência Artificial.</p>
       </div>
       
       <AnalyzerClient />

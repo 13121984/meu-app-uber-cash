@@ -299,7 +299,7 @@ export default function AjudaPage() {
                             <AccordionTrigger>
                                 <div className="flex items-center gap-2">
                                     <BotMessageSquare className="h-5 w-5 text-primary" />
-                                    <span className="font-semibold text-left">Analisador de Corridas com IA (Print)</span>
+                                    <span className="font-semibold text-left">TX IA: O Analisador de Corridas</span>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent>
