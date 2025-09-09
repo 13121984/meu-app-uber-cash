@@ -73,16 +73,14 @@ const defaultSummaryData: SummaryData = {
     mes: defaultPeriodData,
 }
 
-export async function getSummaryForPeriod(): Promise<SummaryData> {
-    const user = await getActiveUser();
-    if (!user) return defaultSummaryData;
-    return await getFile<SummaryData>(user.id, FILE_NAME, defaultSummaryData);
+export async function getSummaryForPeriod(userId: string): Promise<SummaryData> {
+    if (!userId) return defaultSummaryData;
+    return await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
 }
 
-export async function getTodayData(): Promise<PeriodData> {
-    const user = await getActiveUser();
-    if (!user) return defaultPeriodData;
-    const summary = await getSummaryForPeriod();
+export async function getTodayData(userId: string): Promise<PeriodData> {
+    if (!userId) return defaultPeriodData;
+    const summary = await getSummaryForPeriod(userId);
     return summary.hoje;
 }
 

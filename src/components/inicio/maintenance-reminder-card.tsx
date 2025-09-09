@@ -10,6 +10,8 @@ import { getWorkDays } from '@/services/work-day.service';
 import Link from 'next/link';
 import { format, differenceInDays, isBefore } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/contexts/auth-context';
+
 
 interface Reminder {
   id: string;
@@ -19,14 +21,20 @@ interface Reminder {
 }
 
 export function MaintenanceReminderCard() {
+  const { user } = useAuth();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+        setIsLoading(false);
+        return;
+    }
+
     async function checkReminders() {
       try {
-        const maintenanceRecords = await getMaintenanceRecords();
-        const workDays = await getWorkDays();
+        const maintenanceRecords = await getMaintenanceRecords(user!.id);
+        const workDays = await getWorkDays(user!.id);
         
         const latestKm = workDays.length > 0 ? Math.max(...workDays.map(d => d.km)) : 0;
         
@@ -75,7 +83,7 @@ export function MaintenanceReminderCard() {
     }
 
     checkReminders();
-  }, []);
+  }, [user]);
 
   if (isLoading || reminders.length === 0) {
     return null; // Não mostra nada se estiver carregando ou se não houver lembretes

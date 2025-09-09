@@ -35,6 +35,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -60,7 +61,7 @@ const maintenanceTypeLabels = {
 
 export function MaintenanceClient() {
   const router = useRouter();
-
+  const { user } = useAuth();
   const [records, setRecords] = useState<Maintenance[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -70,16 +71,17 @@ export function MaintenanceClient() {
   const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
 
   const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
+    if (!user) return;
     setCurrentFilters(filters);
     startTransition(async () => {
       try {
-        const data = await getFilteredMaintenanceRecords(filters);
+        const data = await getFilteredMaintenanceRecords(user.id, filters);
         setRecords(data);
       } catch (e) {
         toast({ title: "Erro ao buscar dados", variant: "destructive" });
       }
     });
-  }, []);
+  }, [user]);
 
   const filteredTotal = useMemo(() => {
     return records.reduce((sum, record) => sum + record.amount, 0);
@@ -100,8 +102,9 @@ export function MaintenanceClient() {
   }
   
   const handleDelete = async (id: string) => {
+    if (!user) return;
     setIsDeleting(true);
-    const result = await deleteMaintenance(id);
+    const result = await deleteMaintenance(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Registro apagado." });
       if (currentFilters) {
@@ -114,8 +117,9 @@ export function MaintenanceClient() {
   }
 
   const handleDeleteAll = async () => {
+    if (!user) return;
     setIsDeleting(true);
-    const result = await deleteAllMaintenance();
+    const result = await deleteAllMaintenance(user.id);
      if(result.success) {
       toast({ title: "Sucesso!", description: "Todos os registros foram apagados." });
       if (currentFilters) {
@@ -245,6 +249,7 @@ export function MaintenanceClient() {
                 <ReportsFilter 
                     onApplyFilters={handleApplyFilters}
                     isPending={isPending}
+                    reportContentRef={React.createRef()}
                 />
                 {renderContent()}
             </CardContent>

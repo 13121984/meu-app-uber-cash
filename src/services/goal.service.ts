@@ -25,9 +25,13 @@ const defaultGoals: Goals = {
  * Busca as metas do arquivo local do usuário.
  */
 export async function getGoals(userId: string): Promise<Goals> {
+  if (!userId) {
+    console.warn("getGoals called without userId, returning default goals.");
+    return defaultGoals;
+  }
   const savedGoals = await getFile<Goals>(userId, FILE_NAME, defaultGoals);
   // Garante que o objeto retornado sempre terá todos os campos do default
-  return { ...defaultGoals, ...savedGoals } as Goals;
+  return { ...defaultGoals, ...savedGoals };
 }
 
 /**
@@ -40,7 +44,7 @@ export async function saveGoals(userId: string, goals: Goals): Promise<{ success
     // Revalida as páginas que dependem desses dados
     revalidatePath('/dashboard');
     revalidatePath('/metas');
-    revalidatePath('/inicio');
+    revalidatePath('/'); // Tela de início também usa metas
 
     return { success: true };
   } catch (error) {

@@ -13,6 +13,8 @@ import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import { MaintenanceReminderCard } from "./maintenance-reminder-card";
 import { getMaintenanceRecords } from "@/services/maintenance.service";
+import { useAuth } from '@/contexts/auth-context';
+
 
 const mainActions = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, iconColor: "text-yellow-500" },
@@ -51,15 +53,20 @@ const DailySummarySkeleton = () => (
 
 
 export function HomeClient() {
+  const { user } = useAuth();
   const [todayData, setTodayData] = useState<PeriodData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+        setIsLoading(false);
+        return;
+    };
+
     async function loadData() {
         try {
-            // Use getReportData for real-time data instead of stale summary
-            const data = await getReportData({ type: 'today' });
-            setTodayData(data as PeriodData); // Cast as PeriodData for the component
+            const data = await getReportData(user!.id, { type: 'today' });
+            setTodayData(data as PeriodData);
         } catch (error) {
             console.error("Failed to load today's data", error);
         } finally {
@@ -67,7 +74,7 @@ export function HomeClient() {
         }
     }
     loadData();
-  }, []);
+  }, [user]);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -116,9 +123,9 @@ export function HomeClient() {
 
         <div className="space-y-4">
              <h2 className="text-2xl font-semibold font-headline">Resumo do Dia</h2>
-             {isLoading || !todayData ? (
+             {isLoading ? (
                  <DailySummarySkeleton />
-             ) : todayData.diasTrabalhados === 0 ? (
+             ) : !todayData || todayData.diasTrabalhados === 0 ? (
                 <Card className="h-full min-h-[400px] flex items-center justify-center border-dashed">
                     <div className="text-center text-muted-foreground">
                         <BarChart className="mx-auto h-12 w-12" />

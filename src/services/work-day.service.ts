@@ -249,18 +249,23 @@ export async function loadDemoData(): Promise<{ success: boolean; error?: string
     }
 }
 
-export async function clearAllData(): Promise<{ success: boolean; error?: string }> {
-     const user = await getActiveUser();
-     if (!user) return { success: false, error: "Nenhum usuário ativo para limpar dados." };
+export async function clearAllDataForUser(userId: string): Promise<{ success: boolean; error?: string }> {
+     if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
-        await writeWorkDays(user.id, []);
-        await updateAllSummaries(user.id);
-        revalidateAll(user.id);
+        await writeWorkDays(userId, []);
+        await updateAllSummaries(userId);
+        revalidateAll(userId);
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to clear data.";
         return { success: false, error: errorMessage };
     }
+}
+
+export async function clearAllData(): Promise<{ success: boolean; error?: string }> {
+     const user = await getActiveUser();
+     if (!user) return { success: false, error: "Nenhum usuário ativo para limpar dados." };
+     return await clearAllDataForUser(user.id);
 }
 
 // --- Funções de Leitura ---

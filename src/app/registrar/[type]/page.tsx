@@ -1,38 +1,51 @@
 
+"use client";
+
 import { RegistrationWizard } from '@/components/registrar/registration-wizard';
 import { getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
 import { startOfDay } from 'date-fns';
 import { notFound } from 'next/navigation';
-import { getActiveUser } from '@/services/auth.service';
+import { useAuth } from '@/contexts/auth-context';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
-// Adicionado para suportar `output: 'export'` com rotas dinâmicas.
-export async function generateStaticParams() {
-  return [
-    { type: 'today' },
-    { type: 'other-day' },
-  ];
-}
-
-export default async function RegistrarPage({ params }: { params: { type: 'today' | 'other-day' }}) {
+export default function RegistrarPage({ params }: { params: { type: 'today' | 'other-day' }}) {
   const registrationType = params.type;
-  
+  const { user, loading } = useAuth();
+  const [existingDayEntries, setExistingDayEntries] = useState<WorkDay[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
   if (registrationType !== 'today' && registrationType !== 'other-day') {
     notFound();
   }
 
-  // A busca de dados agora é feita no servidor.
-  const user = await getActiveUser();
-  let existingDayEntries: WorkDay[] = [];
-
-  if (user && registrationType === 'today') {
-    try {
-      existingDayEntries = await getWorkDaysForDate(user.id, startOfDay(new Date()));
-    } catch (err) {
-      console.error("Failed to load today's entries on server:", err);
-      existingDayEntries = [];
+  useEffect(() => {
+    async function loadInitialData() {
+      if (user && registrationType === 'today') {
+        try {
+          const entries = await getWorkDaysForDate(user.id, startOfDay(new Date()));
+          setExistingDayEntries(entries);
+        } catch (err) {
+          console.error("Failed to load today's entries:", err);
+          setExistingDayEntries([]);
+        }
+      }
+      setIsDataLoading(false);
     }
+    
+    if (!loading) {
+        loadInitialData();
+    }
+  }, [user, loading, registrationType]);
+
+  if (loading || isDataLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
   }
-  
+
   return (
     <div className="space-y-6">
       <div>
@@ -41,7 +54,6 @@ export default async function RegistrarPage({ params }: { params: { type: 'today
         </h1>
         <p className="text-muted-foreground">Preencha as informações do seu dia para acompanhar seu progresso.</p>
       </div>
-      {/* O componente RegistrationWizard é um client component, então a interatividade é mantida. */}
       <RegistrationWizard 
         registrationType={registrationType} 
         existingDayEntries={existingDayEntries}

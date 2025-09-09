@@ -9,6 +9,8 @@ import { DollarSign, Clock, CalendarDays, TrendingUp } from 'lucide-react';
 import { getReportData, PeriodData } from '@/services/summary.service';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
+import { useAuth } from '@/contexts/auth-context';
+
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -34,7 +36,8 @@ const minutesToDecimal = (minutes: number): number => {
 
 
 export function FinancialGoalCalculator() {
-    const [todayData, setTodayData] = useState<PeriodData | null>(null);
+    const { user } = useAuth();
+    const [reportData, setReportData] = useState<PeriodData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const [goalAmount, setGoalAmount] = useState<number | ''>('');
@@ -42,11 +45,16 @@ export function FinancialGoalCalculator() {
     const [hoursPerDayInput, setHoursPerDayInput] = useState('08:00'); // HH:MM format
 
     useEffect(() => {
+        if (!user) {
+            setIsLoading(false);
+            return;
+        };
+
         const loadData = async () => {
             try {
                 // Using last 7 days for a more stable average
-                const data = await getReportData({ type: 'thisWeek' });
-                setTodayData(data);
+                const data = await getReportData(user.id, { type: 'thisWeek' });
+                setReportData(data);
                 if (data && data.ganhoPorHora > 0) {
                     setHourlyRate(parseFloat(data.ganhoPorHora.toFixed(2)));
                 }
@@ -57,7 +65,7 @@ export function FinancialGoalCalculator() {
             }
         };
         loadData();
-    }, []);
+    }, [user]);
     
     const hoursPerDayDecimal = useMemo(() => {
         return minutesToDecimal(timeToMinutes(hoursPerDayInput));
@@ -84,8 +92,8 @@ export function FinancialGoalCalculator() {
             <Alert variant="default" className="bg-secondary">
                  <TrendingUp className="h-4 w-4 text-green-500" />
                  <AlertDescription>
-                    {todayData && todayData.ganhoPorHora > 0 
-                        ? `Seu ganho bruto por hora (últimos 7 dias) é de ${formatCurrency(todayData.ganhoPorHora)}. Usamos esse valor para o cálculo, mas você pode ajustá-lo.`
+                    {reportData && reportData.ganhoPorHora > 0 
+                        ? `Seu ganho bruto por hora (últimos 7 dias) é de ${formatCurrency(reportData.ganhoPorHora)}. Usamos esse valor para o cálculo, mas você pode ajustá-lo.`
                         : "Não encontramos um ganho/hora recente. Usamos um valor padrão que você pode ajustar."
                     }
                  </AlertDescription>

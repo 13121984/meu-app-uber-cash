@@ -13,6 +13,8 @@ import { PlusCircle, Trash2, Edit, DollarSign, List, Loader2, CalendarIcon } fro
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useAuth } from '@/contexts/auth-context';
+
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -35,6 +37,7 @@ const SummaryCard = ({ title, value, description, icon: Icon, iconClassName }: {
 
 export function PersonalExpenseTracker() {
   const router = useRouter();
+  const { user } = useAuth();
   const [records, setRecords] = useState<PersonalExpense[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -42,11 +45,12 @@ export function PersonalExpenseTracker() {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    if (!user) return;
     startTransition(async () => {
-        const data = await getPersonalExpenses();
+        const data = await getPersonalExpenses(user.id);
         setRecords(data);
     });
-  }, []);
+  }, [user]);
 
   const monthlyTotal = useMemo(() => {
     const currentMonth = new Date().getMonth();
@@ -59,8 +63,9 @@ export function PersonalExpenseTracker() {
   const handleSuccess = () => {
     setIsFormOpen(false);
     setSelectedRecord(null);
+    if (!user) return;
     startTransition(async () => {
-        const data = await getPersonalExpenses();
+        const data = await getPersonalExpenses(user.id);
         setRecords(data);
     });
   }
@@ -71,12 +76,13 @@ export function PersonalExpenseTracker() {
   }
   
   const handleDelete = async (id: string) => {
+    if (!user) return;
     setIsDeleting(true);
-    const result = await deletePersonalExpense(id);
+    const result = await deletePersonalExpense(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Despesa apagada." });
       startTransition(async () => {
-          const data = await getPersonalExpenses();
+          const data = await getPersonalExpenses(user.id);
           setRecords(data);
       });
     } else {
@@ -86,8 +92,9 @@ export function PersonalExpenseTracker() {
   }
   
   const handleDeleteAll = async () => {
+    if (!user) return;
     setIsDeleting(true);
-    const result = await deleteAllPersonalExpenses();
+    const result = await deleteAllPersonalExpenses(user.id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Todas as despesas foram apagadas." });
       setRecords([]);

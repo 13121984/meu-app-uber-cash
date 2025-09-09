@@ -16,6 +16,8 @@ import { useRouter } from 'next/navigation';
 import { Skeleton } from '../ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Alert, AlertDescription } from '../ui/alert';
+import { useAuth } from '@/contexts/auth-context';
+
 
 const plannerSchema = z.object({
   monthly: z.number().min(1, "A meta mensal deve ser maior que zero."),
@@ -51,6 +53,7 @@ function GoalPlannerSkeleton() {
 
 function PlannerInternal({ initialData }: { initialData: Goals }) {
   const router = useRouter();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<PlannerFormData>({
@@ -72,6 +75,7 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
   }, [monthlyGoal, workDaysPerWeek]);
 
   const onSubmit = async (data: PlannerFormData) => {
+    if (!user) return;
     setIsSubmitting(true);
     try {
       const finalGoals: Goals = {
@@ -80,7 +84,7 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
           daily: calculatedGoals.daily,
           workDaysPerWeek: data.workDaysPerWeek,
       }
-      await saveGoals(finalGoals);
+      await saveGoals(user.id, finalGoals);
       toast({
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Metas Salvas!</span></div>,
         description: "Seu novo plano de metas foi salvo e será usado no dashboard.",
@@ -161,17 +165,19 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
 }
 
 export function GoalPlanner() {
+    const { user, loading } = useAuth();
     const [initialData, setInitialData] = useState<Goals | null>(null);
 
     useEffect(() => {
+        if (!user) return;
         const loadData = async () => {
-            const goals = await getGoals();
+            const goals = await getGoals(user.id);
             setInitialData(goals);
         };
         loadData();
-    }, []);
+    }, [user]);
 
-    if (!initialData) {
+    if (loading || !initialData) {
         return <GoalPlannerSkeleton />;
     }
 
