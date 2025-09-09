@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useTransition, useEffect } from "react"
-import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Hourglass, Route, Loader2, BarChart, PlusCircle, Wrench, LineChart, PieChart } from "lucide-react"
+import { DollarSign, Fuel, Map, Clock, TrendingUp, Car, CalendarDays, Zap, Hourglass, Route, Loader2, BarChart, PlusCircle, Wrench, LineChart, PieChart, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatsCard } from "./stats-card"
@@ -12,7 +12,7 @@ import dynamic from 'next/dynamic';
 import { ReportData, getReportData } from "@/services/summary.service"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
-import { allStats, mandatoryCards, allCharts } from '@/lib/dashboard-items';
+import { allStats, mandatoryCards, allCharts, mandatoryCharts } from '@/lib/dashboard-items';
 import { ReportFilterValues } from "@/app/relatorios/actions"
 import { motion } from "framer-motion";
 
@@ -104,19 +104,11 @@ export function DashboardClient() {
           )
       }
 
-      // Determine the card order based on user preferences
-      const userCardOrder = user?.preferences?.dashboardCardOrder;
-      let orderedCardIds: string[] = [];
-      
-      if (userCardOrder && userCardOrder.length > 0) {
-        orderedCardIds = userCardOrder;
+      let orderedCardIds: string[];
+      if (isPremium) {
+          orderedCardIds = user?.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
       } else {
-         if (isPremium) {
-           orderedCardIds = allStats.map(s => s.id);
-         } else {
-           const optionalCard = allStats.find(s => !mandatoryCards.includes(s.id))!.id;
-           orderedCardIds = [...mandatoryCards, optionalCard];
-         }
+          orderedCardIds = mandatoryCards;
       }
       
       const cardsToShow = orderedCardIds.map(id => {
@@ -141,8 +133,13 @@ export function DashboardClient() {
           return { ...cardInfo, value };
       }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
 
-      const userChartOrder = user?.preferences?.reportChartOrder || allCharts.filter(c => c.isMandatory).map(c => c.id);
-      const chartsToShow = userChartOrder.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
+      let chartsToShowIds: string[];
+      if (isPremium) {
+          chartsToShowIds = user?.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id);
+      } else {
+          chartsToShowIds = mandatoryCharts;
+      }
+      const chartsToShow = chartsToShowIds.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
       return (
         <motion.div 
@@ -154,11 +151,12 @@ export function DashboardClient() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
               {!isPremium && (
-                   <Link href="/premium" passHref>
+                   <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
-                            <PlusCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
+                            <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
                             <p className="text-sm font-semibold">Adicionar Card</p>
+                            <p className="text-xs text-muted-foreground">Exclusivo Premium</p>
                         </CardContent>
                       </Card>
                   </Link>
@@ -204,10 +202,10 @@ export function DashboardClient() {
 
 
           {!isPremium && (
-              <Link href="/premium" passHref>
+              <Link href="/configuracoes/layout-personalizado" passHref>
                 <Button variant="outline" className="w-full">
-                    <PlusCircle className="mr-2 h-4 w-4"/>
-                    Adicionar outro Gráfico
+                    <Lock className="mr-2 h-4 w-4"/>
+                    Adicionar outro Gráfico (Premium)
                 </Button>
             </Link>
           )}

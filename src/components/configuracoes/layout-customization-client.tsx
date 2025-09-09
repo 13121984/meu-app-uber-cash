@@ -4,7 +4,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Loader2, ArrowUp, ArrowDown, Check, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, ArrowUp, ArrowDown, CheckCircle, AlertTriangle, Lock, PlusCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { allCharts, mandatoryCharts, allStats, mandatoryCards } from '@/lib/dashboard-items';
 import dynamic from 'next/dynamic';
@@ -16,7 +16,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { add, isBefore } from 'date-fns';
+import Link from 'next/link';
 
 const StatsCard = dynamic(() => import('../dashboard/stats-card').then(mod => mod.StatsCard), { ssr: false });
 
@@ -24,45 +24,34 @@ export function LayoutCustomizationClient() {
   const { user, loading, refreshUser } = useAuth();
   
   const [isSaving, setIsSaving] = useState(false);
-  
   const [visibleCardIds, setVisibleCardIds] = useState<string[]>([]);
-  const [selectedOptionalCardId, setSelectedOptionalCardId] = useState<string | null>(null);
-
   const [visibleChartIds, setVisibleChartIds] = useState<string[]>([]);
-  const [selectedOptionalChartId, setSelectedOptionalChartId] = useState<string | null>(null);
-
-  const lastChangeDate = useMemo(() => {
-      return user?.preferences?.lastFreebieChangeDate ? new Date(user.preferences.lastFreebieChangeDate) : null;
-  }, [user]);
-
-  const canChange = useMemo(() => {
-    if (!lastChangeDate) return true;
-    const nextAllowedChange = add(lastChangeDate, { days: 7 });
-    return isBefore(nextAllowedChange, new Date());
-  }, [lastChangeDate]);
-
 
   useEffect(() => {
     if (user) {
-        const userCardOrder = user.preferences?.dashboardCardOrder || [];
-        const userChartOrder = user.preferences?.reportChartOrder || [];
-        
         if (user.isPremium) {
-            setVisibleCardIds(userCardOrder.length > 0 ? userCardOrder : allStats.map(s => s.id));
-            setVisibleChartIds(userChartOrder.length > 0 ? userChartOrder : allCharts.map(c => c.id));
+            // Premium users get their saved order or all items if no order is set
+            setVisibleCardIds(user.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id));
+            setVisibleChartIds(user.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id));
         } else {
-            const optionalCard = userCardOrder.find(id => !mandatoryCards.includes(id)) || allStats.find(s => !mandatoryCards.includes(s.id))!.id;
-            const finalCardOrder = [...mandatoryCards, optionalCard].filter(id => userCardOrder.includes(id) || mandatoryCards.includes(id));
-            setVisibleCardIds(userCardOrder.length > 0 ? userCardOrder : [...mandatoryCards, optionalCard]);
-            setSelectedOptionalCardId(optionalCard);
+            // Free users get only mandatory items, but in their saved order if available
+            const userCardOrder = user.preferences?.dashboardCardOrder || [];
+            const freeUserCards = mandatoryCards.filter(id => userCardOrder.includes(id));
+            // Add any missing mandatory cards if the saved order is incomplete
+            mandatoryCards.forEach(id => {
+                if (!freeUserCards.includes(id)) freeUserCards.push(id);
+            });
+            setVisibleCardIds(freeUserCards);
 
-            const optionalChart = userChartOrder.find(id => !mandatoryCharts.includes(id)) || allCharts.find(c => !mandatoryCharts.includes(c.id))!.id;
-            setVisibleChartIds(userChartOrder.length > 0 ? userChartOrder : [...mandatoryCharts, optionalChart]);
-            setSelectedOptionalChartId(optionalChart);
+            const userChartOrder = user.preferences?.reportChartOrder || [];
+            const freeUserCharts = mandatoryCharts.filter(id => userChartOrder.includes(id));
+            mandatoryCharts.forEach(id => {
+                if(!freeUserCharts.includes(id)) freeUserCharts.push(id);
+            });
+            setVisibleChartIds(freeUserCharts);
         }
     }
   }, [user]);
-
 
   const handleReorder = (type: 'card' | 'chart', index: number, direction: 'up' | 'down') => {
     const list = type === 'card' ? visibleCardIds : visibleChartIds;
@@ -78,44 +67,33 @@ export function LayoutCustomizationClient() {
     setter(newList);
   };
   
-  const handleSelectItem = (type: 'card' | 'chart', id: string) => {
-      const isMandatory = (type === 'card' ? mandatoryCards : mandatoryCharts).includes(id);
-      if(isMandatory) return;
+  const handleToggleVisibility = (type: 'card' | 'chart', id: string) => {
+    if (!user?.isPremium) return; // Should not be possible to call for free users
 
-      if (user && !user.isPremium && !canChange) {
-         toast({ title: "Aguarde para trocar", description: `Você poderá trocar seu item gratuito novamente em 7 dias.`, variant: 'destructive'});
-         return;
+    const list = type === 'card' ? visibleCardIds : visibleChartIds;
+    const setter = type === 'card' ? setVisibleCardIds : setVisibleChartIds;
+
+    if (list.includes(id)) {
+      // Prevent removing mandatory items
+      if ((type === 'card' && mandatoryCards.includes(id)) || (type === 'chart' && mandatoryCharts.includes(id))) {
+          toast({ title: "Item Obrigatório", description: "Este item não pode ser removido.", variant: "destructive" });
+          return;
       }
-      
-      const optionalSetter = type === 'card' ? setSelectedOptionalCardId : setSelectedOptionalChartId;
-      const visibleSetter = type === 'card' ? setVisibleCardIds : setVisibleChartIds;
-      const mandatoryItems = type === 'card' ? mandatoryCards : mandatoryCharts;
-
-      optionalSetter(id);
-      visibleSetter(prev => [...mandatoryItems, id]);
-  }
+      setter(list.filter(itemId => itemId !== id));
+    } else {
+      setter([...list, id]);
+    }
+  };
 
   const handleSaveLayout = async () => {
     if (!user) return;
     setIsSaving(true);
     
-    let preferences = { ...user.preferences };
-    let newLastChangeDate = preferences.lastFreebieChangeDate;
-
-    // Check if the optional card/chart has actually changed before updating the date
-    const previousOptionalCard = user.preferences?.dashboardCardOrder?.find(id => !mandatoryCards.includes(id));
-    const previousOptionalChart = user.preferences?.reportChartOrder?.find(id => !mandatoryCharts.includes(id));
-    
-    if(selectedOptionalCardId !== previousOptionalCard || selectedOptionalChartId !== previousOptionalChart) {
-        newLastChangeDate = new Date().toISOString();
-    }
-    
     const result = await updateUser(user.id, {
         preferences: {
-            ...preferences,
+            ...user.preferences,
             dashboardCardOrder: visibleCardIds,
             reportChartOrder: visibleChartIds,
-            lastFreebieChangeDate: newLastChangeDate
         }
     });
 
@@ -136,12 +114,9 @@ export function LayoutCustomizationClient() {
 
   const renderSection = (type: 'card' | 'chart') => {
     const allItems = type === 'card' ? allStats : allCharts;
-    const mandatoryItems = type === 'card' ? mandatoryCards : mandatoryCharts;
     const visibleIds = type === 'card' ? visibleCardIds : visibleChartIds;
-    const selectedOptionalId = type === 'card' ? selectedOptionalCardId : selectedOptionalChartId;
 
     const visibleItems = visibleIds.map(id => allItems.find(item => item.id === id)).filter(Boolean);
-    const optionalItems = allItems.filter(item => !mandatoryItems.includes(item.id));
     
     return (
       <div className="space-y-4">
@@ -162,31 +137,41 @@ export function LayoutCustomizationClient() {
             ))}
           </div>
         </div>
-
-        <div>
-            <h3 className="text-lg font-semibold">Itens Opcionais</h3>
-            <p className="text-sm text-muted-foreground">{user?.isPremium ? 'Ative ou desative itens.' : 'Escolha 1 item para exibir.'}</p>
-            <div className="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {optionalItems.map(item => {
-                    const isSelected = selectedOptionalId === item.id;
-                    return (
-                        <div key={item.id} className="relative">
-                            <Card className={isSelected ? 'border-primary' : ''}>
+        
+        {user?.isPremium ? (
+             <div>
+                <h3 className="text-lg font-semibold">Itens Opcionais</h3>
+                <p className="text-sm text-muted-foreground">Ative ou desative itens para personalizar seu painel.</p>
+                 <div className="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {allItems.map(item => {
+                        const isSelected = visibleIds.includes(item.id);
+                        return (
+                             <Card key={item.id} className={isSelected ? 'border-primary' : ''}>
                                <CardContent className="p-2">
                                  <StatsCard {...item as any} value={0} isPreview={true} />
                                </CardContent>
                                <CardFooter className="p-2">
-                                 <Button size="sm" className="w-full" onClick={() => handleSelectItem(type, item.id)} disabled={isSelected}>
-                                    {isSelected && <Check className="mr-2 h-4 w-4" />}
-                                    {isSelected ? 'Selecionado' : 'Selecionar'}
+                                 <Button size="sm" className="w-full" onClick={() => handleToggleVisibility(type, item.id)}>
+                                    {isSelected ? 'Visível' : 'Oculto'}
                                  </Button>
                                </CardFooter>
                             </Card>
-                        </div>
-                    )
-                })}
-            </div>
-        </div>
+                        )
+                    })}
+                 </div>
+             </div>
+        ) : (
+             <Link href="/premium" className="w-full">
+                <Card className="mt-4 border-dashed border-primary hover:bg-primary/10 transition-colors">
+                    <CardContent className="p-6 text-center">
+                        <Lock className="mx-auto h-8 w-8 text-primary mb-2" />
+                        <p className="font-semibold text-primary">Desbloqueie todos os cards e gráficos</p>
+                        <p className="text-sm text-muted-foreground">Assine o Premium para ter controle total da sua visualização.</p>
+                    </CardContent>
+                </Card>
+            </Link>
+        )}
+
       </div>
     );
   }
@@ -201,7 +186,7 @@ export function LayoutCustomizationClient() {
 
   return (
     <div className="space-y-6">
-        <Accordion type="multiple" className="w-full space-y-4">
+        <Accordion type="multiple" defaultValue={['cards', 'charts']} className="w-full space-y-4">
           <Card>
             <AccordionItem value="cards" className="border-b-0">
                 <AccordionTrigger className="p-6">
@@ -233,5 +218,3 @@ export function LayoutCustomizationClient() {
     </div>
   );
 }
-
-    

@@ -53,7 +53,7 @@ const helpTopics = [
     value: "layout",
     icon: LayoutDashboard,
     title: "Posso personalizar o layout dos relatórios?",
-    content: "Sim! Em 'Configurações > Personalizar Layout', você pode reordenar todos os cards de estatísticas e os gráficos dos seus relatórios. Assinantes do plano gratuito podem escolher 1 card e 1 gráfico opcional, enquanto assinantes Premium têm acesso a todos os itens e podem organizá-los como quiserem.",
+    content: "Sim. Usuários do plano gratuito podem reordenar os cards e gráficos padrão para focar no que é mais importante. Assinantes Premium podem, além de reordenar, adicionar e remover todos os cards e gráficos disponíveis para uma personalização completa do seu painel.",
     isPremiumFeature: true
   },
   {
