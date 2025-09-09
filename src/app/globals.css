@@ -16,54 +16,54 @@ body {
     --card-foreground: 240 10% 10%;
     --popover: 240 10% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 262.1 83.3% 57.8%; /* vibrant purple */
+    --primary: 34.9 99.3% 49.4%; /* vibrant orange */
     --primary-foreground: 210 20% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 262.1 83.3% 67.8%; /* lighter purple */
+    --accent: 34.9 99.3% 59.4%; /* lighter orange */
     --accent-foreground: 210 20% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 20% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 34.9 99.3% 49.4%;
     --radius: 0.75rem;
 
     --chart-1: 142.1 76.2% 36.3%; /* Green */
     --chart-2: 0 84.2% 60.2%; /* Red */
     --chart-3: 204 90% 50%; /* Blue */
-    --chart-4: 262.1 83.3% 57.8%; /* Purple */
-    --chart-5: 33 100% 50%; /* Orange */
+    --chart-4: 34.9 99.3% 59.4%; /* Orange */
+    --chart-5: 262.1 83.3% 57.8%; /* Purple */
   }
  
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 20 14.3% 4.1%;
     --foreground: 210 20% 98%;
-    --card: 240 4% 10%;
+    --card: 24 9.8% 10%;
     --card-foreground: 210 20% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 20 14.3% 4.1%;
     --popover-foreground: 210 20% 98%;
-    --primary: 262.1 83.3% 57.8%; /* vibrant purple */
+    --primary: 34.9 99.3% 49.4%; /* vibrant orange */
     --primary-foreground: 210 20% 98%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 210 20% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 262.1 83.3% 47.8%; /* darker purple */
+    --accent: 34.9 99.3% 39.4%; /* darker orange */
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 34.9 99.3% 49.4%;
 
     --chart-1: 142.1 76.2% 36.3%; /* Green */
     --chart-2: 0 72.2% 50.6%; /* Red */
     --chart-3: 204 90% 50%; /* Blue */
-    --chart-4: 262.1 83.3% 57.8%; /* Purple */
-    --chart-5: 33 100% 50%; /* Orange */
+    --chart-4: 34.9 99.3% 59.4%; /* Orange */
+    --chart-5: 262.1 83.3% 57.8%; /* Purple */
   }
 }
 
