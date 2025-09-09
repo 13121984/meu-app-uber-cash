@@ -45,15 +45,12 @@
     "securityAnswers": [],
     "preferences": {
       "dashboardCardOrder": [
-        "lucro",
         "ganho",
-        "eficiencia",
+        "lucro",
         "combustivel"
       ],
-      "lastFreebieChangeDate": "2025-09-07T16:47:16.592Z",
       "reportChartOrder": [
-        "earningsComposition",
-        "profitEvolution"
+        "earningsComposition"
       ]
     }
   }

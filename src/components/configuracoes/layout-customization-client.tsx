@@ -30,28 +30,22 @@ export function LayoutCustomizationClient() {
   useEffect(() => {
     if (user) {
         if (user.isPremium) {
-            // Premium users get their saved order or all items if no order is set
+            // Premium: Use a ordem salva, ou todos se não houver ordem.
             setVisibleCardIds(user.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id));
             setVisibleChartIds(user.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id));
         } else {
-            // Free users get only mandatory items, but in their saved order if available
-            const userCardOrder = user.preferences?.dashboardCardOrder || [];
-            const freeUserCards = mandatoryCards.filter(id => userCardOrder.includes(id));
-            // Add any missing mandatory cards if the saved order is incomplete
-            mandatoryCards.forEach(id => {
-                if (!freeUserCards.includes(id)) freeUserCards.push(id);
-            });
-            setVisibleCardIds(freeUserCards);
+            // Gratuito: Use a ordem salva, garantindo que contenha todos os itens obrigatórios.
+            const savedCardOrder = user.preferences?.dashboardCardOrder || [];
+            const finalCardOrder = [...new Set([...savedCardOrder, ...mandatoryCards])].filter(id => mandatoryCards.includes(id));
+            setVisibleCardIds(finalCardOrder);
 
-            const userChartOrder = user.preferences?.reportChartOrder || [];
-            const freeUserCharts = mandatoryCharts.filter(id => userChartOrder.includes(id));
-            mandatoryCharts.forEach(id => {
-                if(!freeUserCharts.includes(id)) freeUserCharts.push(id);
-            });
-            setVisibleChartIds(freeUserCharts);
+            const savedChartOrder = user.preferences?.reportChartOrder || [];
+            const finalChartOrder = [...new Set([...savedChartOrder, ...mandatoryCharts])].filter(id => mandatoryCharts.includes(id));
+            setVisibleChartIds(finalChartOrder);
         }
     }
   }, [user]);
+
 
   const handleReorder = (type: 'card' | 'chart', index: number, direction: 'up' | 'down') => {
     const list = type === 'card' ? visibleCardIds : visibleChartIds;
@@ -115,8 +109,12 @@ export function LayoutCustomizationClient() {
   const renderSection = (type: 'card' | 'chart') => {
     const allItems = type === 'card' ? allStats : allCharts;
     const visibleIds = type === 'card' ? visibleCardIds : visibleChartIds;
+    
+    // Itens que são obrigatórios
+    const mandatoryItems = type === 'card' ? mandatoryCards : mandatoryCharts;
 
     const visibleItems = visibleIds.map(id => allItems.find(item => item.id === id)).filter(Boolean);
+    const optionalItems = allItems.filter(item => !mandatoryItems.includes(item.id));
     
     return (
       <div className="space-y-4">
@@ -138,12 +136,12 @@ export function LayoutCustomizationClient() {
           </div>
         </div>
         
-        {user?.isPremium ? (
+        {user?.isPremium && (
              <div>
-                <h3 className="text-lg font-semibold">Itens Opcionais</h3>
-                <p className="text-sm text-muted-foreground">Ative ou desative itens para personalizar seu painel.</p>
+                <h3 className="text-lg font-semibold">Adicionar/Remover Itens</h3>
+                <p className="text-sm text-muted-foreground">Clique para ativar ou desativar itens do seu painel.</p>
                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {allItems.map(item => {
+                    {optionalItems.map(item => {
                         const isSelected = visibleIds.includes(item.id);
                         return (
                              <Card key={item.id} className={isSelected ? 'border-primary' : ''}>
@@ -160,7 +158,8 @@ export function LayoutCustomizationClient() {
                     })}
                  </div>
              </div>
-        ) : (
+        )}
+        {!user?.isPremium && (
              <Link href="/premium" className="w-full">
                 <Card className="mt-4 border-dashed border-primary hover:bg-primary/10 transition-colors">
                     <CardContent className="p-6 text-center">

@@ -105,10 +105,13 @@ export function DashboardClient() {
       }
 
       let orderedCardIds: string[];
-      if (isPremium) {
-          orderedCardIds = user?.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
+      if (user?.isPremium) {
+        // Premium: Use a ordem salva, ou todos se não houver ordem.
+        orderedCardIds = user.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
       } else {
-          orderedCardIds = mandatoryCards;
+        // Gratuito: Use a ordem salva, garantindo que contenha todos os itens obrigatórios.
+        const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
+        orderedCardIds = [...new Set([...savedCardOrder, ...mandatoryCards])].filter(id => mandatoryCards.includes(id));
       }
       
       const cardsToShow = orderedCardIds.map(id => {
@@ -134,10 +137,11 @@ export function DashboardClient() {
       }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
 
       let chartsToShowIds: string[];
-      if (isPremium) {
-          chartsToShowIds = user?.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id);
+       if (user?.isPremium) {
+        chartsToShowIds = user.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id);
       } else {
-          chartsToShowIds = mandatoryCharts;
+        const savedChartOrder = user?.preferences?.reportChartOrder || [];
+        chartsToShowIds = [...new Set([...savedChartOrder, ...mandatoryCharts])].filter(id => mandatoryCharts.includes(id));
       }
       const chartsToShow = chartsToShowIds.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 
