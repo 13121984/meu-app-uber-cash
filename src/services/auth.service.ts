@@ -25,11 +25,17 @@ export interface TaximeterRates {
     ratePerMinute: number;
 }
 
+export interface AnalyzerRates {
+    ratePerKm: number;
+    ratePerHour: number;
+}
+
 export interface UserPreferences {
-    reportChartOrder: string[];
-    dashboardCardOrder: string[];
+    reportChartOrder?: string[];
+    dashboardCardOrder?: string[];
     lastFreebieChangeDate?: string; // Data da última troca de card/gráfico gratuito
     taximeterRates?: TaximeterRates;
+    analyzerRates?: AnalyzerRates;
     lastTaximeterUse?: string; // Data do último uso do taxímetro para usuários gratuitos
 }
 
@@ -90,11 +96,8 @@ export async function signup(userId: string, password: string, securityAnswers: 
         securityAnswers,
         vehicles: [],
         preferences: { // Preferências padrão
-            reportChartOrder: ['profitEvolution', 'earningsComposition', 'profitabilityAnalysis', 'earningsByCategory', 'tripsByCategory', 'dailyTrips', 'fuelExpenses'],
+            reportChartOrder: [],
             dashboardCardOrder: [],
-            lastFreebieChangeDate: undefined,
-            taximeterRates: { startingFare: 3.0, ratePerKm: 2.5, ratePerMinute: 0.4 },
-            lastTaximeterUse: undefined
         },
     };
 
