@@ -10,13 +10,14 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { BotMessageSquare, Check, DollarSign, ImageUp, Loader2, RefreshCw, Sparkles, ThumbsDown, ThumbsUp, X, Edit } from 'lucide-react';
 import Image from 'next/image';
-import { runAnalysisAction, AnalysisOutput } from './actions';
 import { updateUserPreferences } from '@/services/auth.service';
 import Link from 'next/link';
+import { analyzeRace, AnalyzeRaceInput, AnalyzeRaceOutput } from '@/ai/flows/analise-corrida-flow';
+
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-function ResultDisplay({ result, onReset }: { result: AnalysisOutput, onReset: () => void }) {
+function ResultDisplay({ result, onReset }: { result: AnalyzeRaceOutput, onReset: () => void }) {
     const isGoodDeal = result.recommendation === 'Bora';
 
     return (
@@ -78,7 +79,7 @@ export function AnalyzerClient() {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<AnalysisOutput | null>(null);
+    const [result, setResult] = useState<AnalyzeRaceOutput | null>(null);
     
     const initialRates = user?.preferences.analyzerRates || { ratePerKm: 2, ratePerHour: 30 };
     const [rates, setRates] = useState(initialRates);
@@ -146,17 +147,13 @@ export function AnalyzerClient() {
                     throw new Error("Não foi possível ler a imagem.");
                 }
 
-                const analysisResult = await runAnalysisAction({
-                    image: dataUri,
-                    rates,
-                });
+                const flowInput: AnalyzeRaceInput = {
+                    raceImage: dataUri,
+                    userRates: rates,
+                };
                 
-                if (analysisResult.success && analysisResult.output) {
-                    setResult(analysisResult.output);
-                } else {
-                    throw new Error(analysisResult.error || "A análise falhou.");
-                }
-
+                const analysisResult = await analyzeRace(flowInput);
+                setResult(analysisResult);
                 setIsLoading(false);
              };
              reader.onerror = () => {
@@ -190,7 +187,7 @@ export function AnalyzerClient() {
                             <div>
                                 <Label htmlFor="ratePerHour">Mínimo por Hora (R$)</Label>
                                 <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
                                     <Input id="ratePerHour" type="number" placeholder="Ex: 30.00" value={rates.ratePerHour} onChange={e => handleRateChange('ratePerHour', e.target.value)} className="pl-10"/>
                                 </div>
                             </div>

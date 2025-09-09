@@ -15,7 +15,6 @@ import { RaceAnalyzerCard } from './race-analyzer-card';
 
 export function ConfiguracoesClient() {
     const { user } = useAuth();
-    const isPremium = user?.isPremium || false;
 
     return (
         <div className="space-y-8">
@@ -27,7 +26,7 @@ export function ConfiguracoesClient() {
             <HelpAndSupportCard />
             <DemoDataCard />
             <BackupCard />
-            <CatalogManagerCard isPremium={isPremium} />
+            <CatalogManagerCard />
             <ImportCard />
         </div>
     )
