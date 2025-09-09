@@ -12,7 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { getFilteredWorkDays, type WorkDay } from '@/services/work-day.service';
+import { getFilteredAndGroupedWorkDays, type WorkDay } from '@/services/work-day.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -43,7 +43,7 @@ export function GerenciamentoClient() {
     setCurrentFilters(filters);
     startTransition(async () => {
       try {
-        const filtered = await getFilteredWorkDays(user.id, filters);
+        const filtered = await getFilteredAndGroupedWorkDays(user.id, filters);
         setGroupedWorkDays(filtered);
       } catch (e) {
         console.error("Failed to fetch work days", e);

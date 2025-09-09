@@ -58,7 +58,7 @@ const DisplayCard = ({ icon: Icon, label, value, unit }: { icon: React.ElementTy
 );
 
 export function TaximeterClient() {
-    const { user, loading, refreshUser, isPro } = useAuth();
+    const { user, loading, refreshUser } = useAuth();
     const [status, setStatus] = useState<'idle' | 'running' | 'paused'>('idle');
     const [distance, setDistance] = useState(0); // em km
     const [time, setTime] = useState(0); // em segundos
@@ -89,7 +89,7 @@ export function TaximeterClient() {
 
     const checkUsage = () => {
         if (!user) return { canUse: false, timeLeft: '' };
-        if (isPro) return { canUse: true, timeLeft: '' }; // Pro e Autopilot podem usar
+        if (user.plan === 'pro' || user.plan === 'autopilot') return { canUse: true, timeLeft: '' }; // Pro e Autopilot podem usar
         
         const lastUse = user.preferences.lastTaximeterUse;
         if (!lastUse) return { canUse: true, timeLeft: '' }; // Never used before

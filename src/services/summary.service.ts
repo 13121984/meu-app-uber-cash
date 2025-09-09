@@ -218,13 +218,13 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
 
 export async function getReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
   const now = new Date();
-  let filteredDays: WorkDay[] = [];
   let interval: { start: Date; end: Date } | null = null;
   const allWorkDays = await getWorkDays(userId);
+  const allMaintenance = await getMaintenanceRecords(userId);
   const goals = await getGoals(userId);
 
   switch (filters.type) {
-    case 'all': filteredDays = allWorkDays; break;
+    case 'all': break;
     case 'today': interval = { start: startOfDay(now), end: endOfDay(now) }; break;
     case 'thisWeek': interval = { start: startOfWeek(now), end: endOfWeek(now) }; break;
     case 'thisMonth': interval = { start: startOfMonth(now), end: endOfMonth(now) }; break;
@@ -233,17 +233,9 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     case 'custom': if (filters.dateRange?.from) { interval = { start: startOfDay(filters.dateRange.from), end: filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from) }; } break;
   }
   
-  if (interval && filters.type !== 'all') {
-    filteredDays = allWorkDays.filter(d => isWithinInterval(d.date, interval!));
-  } else if (!interval && filters.type !== 'all') {
-    filteredDays = [];
-  }
+  const filteredDays = interval ? allWorkDays.filter(d => isWithinInterval(d.date, interval!)) : allWorkDays;
+  const filteredMaintenance = interval ? allMaintenance.filter(m => isWithinInterval(m.date, interval!)) : allMaintenance;
   
-  const allMaintenance = await getMaintenanceRecords(userId);
-  const filteredMaintenance = interval 
-    ? allMaintenance.filter(m => isWithinInterval(m.date, interval!))
-    : allMaintenance;
-
   const earningsByCategoryMap = new Map<string, number>();
   const tripsByCategoryMap = new Map<string, number>();
   const hoursByCategoryMap = new Map<string, number>();
@@ -326,5 +318,3 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     }
   };
 }
-
-    

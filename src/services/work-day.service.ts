@@ -188,8 +188,7 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
         let allWorkDays = await readWorkDays(userId);
         const initialLength = allWorkDays.length;
 
-        const { workDaysToKeep } = getFilteredWorkDays(allWorkDays, filters, true);
-        const workDaysToDelete = getFilteredWorkDays(allWorkDays, filters, false);
+        const workDaysToDelete = getFilteredWorkDays(allWorkDays, filters);
         
         const finalWorkDays = allWorkDays.filter(day => {
             return !workDaysToDelete.some(toDelete => toDelete.id === day.id);
@@ -248,6 +247,14 @@ export async function clearAllData(userId: string): Promise<{ success: boolean; 
     }
 }
 
+export async function clearAllDataForUser(userId: string): Promise<void> {
+    try {
+        await writeWorkDays(userId, []);
+    } catch (error) {
+        console.error(`Failed to clear data for new user ${userId}:`, error);
+    }
+}
+
 // --- Funções de Leitura ---
 
 export async function getWorkDays(userId: string): Promise<WorkDay[]> {
@@ -262,17 +269,14 @@ export async function getWorkDaysForDate(userId: string, date: Date): Promise<Wo
 function getFilteredWorkDays(
   allWorkDays: WorkDay[],
   filters: ReportFilterValues,
-  returnKept: boolean
 ) {
-  if (allWorkDays.length === 0) return { workDaysToKeep: [], workDaysToDelete: [] };
-  let filteredEntries: WorkDay[] = [];
-
+  if (allWorkDays.length === 0) return [];
+  
   const now = new Date();
   let interval: { start: Date; end: Date } | null = null;
   switch (filters.type) {
     case 'all':
-      filteredEntries = allWorkDays;
-      break;
+      return allWorkDays;
     case 'today':
       interval = { start: startOfDay(now), end: endOfDay(now) };
       break;
@@ -300,15 +304,10 @@ function getFilteredWorkDays(
   }
 
   if (interval) {
-    filteredEntries = allWorkDays.filter(d => isWithinInterval(d.date, interval!));
-  } else if (filters.type !== 'all') {
-    return { workDaysToKeep: [], workDaysToDelete: [] };
-  }
+    return allWorkDays.filter(d => isWithinInterval(d.date, interval!));
+  } 
 
-  const workDaysToDelete = filteredEntries;
-  const workDaysToKeep = allWorkDays.filter(day => !workDaysToDelete.some(toDelete => toDelete.id === day.id));
-
-  return { workDaysToKeep, workDaysToDelete };
+  return [];
 }
 
 export async function getFilteredAndGroupedWorkDays(
@@ -316,8 +315,8 @@ export async function getFilteredAndGroupedWorkDays(
   filters: ReportFilterValues
 ): Promise<GroupedWorkDay[]> {
   const allWorkDays = await readWorkDays(userId);
-  const { workDaysToDelete } = getFilteredWorkDays(allWorkDays, filters, false);
-  return groupWorkDays(workDaysToDelete).sort((a, b) => b.date.getTime() - a.date.getTime());
+  const filtered = getFilteredWorkDays(allWorkDays, filters);
+  return groupWorkDays(filtered).sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
 function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
