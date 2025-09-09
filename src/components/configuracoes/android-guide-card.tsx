@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare } from "lucide-react";
+import { UserCog, CodeXml, BrainCircuit, Smartphone, Compass, Layers, BotMessageSquare, Accessibility } from "lucide-react";
 
 const codeStructure = `- src/app: Contém as pastas de cada página (ex: /dashboard).
 - src/components: Contém os "pedaços" da interface (ex: botões, cards).
@@ -127,8 +127,53 @@ export function AndroidGuideCard() {
                            </div>
                         </AccordionContent>
                     </AccordionItem>
+                     <AccordionItem value="auto-capture">
+                        <AccordionTrigger>
+                            <div className="flex items-center gap-2">
+                                <Accessibility className="h-5 w-5 text-primary" />
+                                <span className="font-semibold text-left">Captura Automática (Serviço de Acessibilidade)</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                           <div className="prose prose-sm dark:prose-invert">
+                             <p>Esta é a funcionalidade mais avançada. Ela permite que o app leia a tela de oferta de corrida de outros apps (Uber, 99) e analise os dados em tempo real, sem a necessidade de tirar um print.</p>
+                             <h4>Passos no Android Studio:</h4>
+                             <ol>
+                                <li>
+                                    <strong>Criar um Serviço de Acessibilidade:</strong> Em <code>android/app/src/main/java/...</code>, você precisará criar uma nova classe Java/Kotlin que estenda <code>AccessibilityService</code>.
+                                </li>
+                                <li>
+                                    <strong>Registrar o Serviço:</strong> No <code>AndroidManifest.xml</code>, declare o serviço e as permissões necessárias:
+                                    <pre className="text-xs p-2 rounded-md bg-muted text-foreground whitespace-pre-wrap">{
+`<service
+    android:name=".YourAccessibilityService"
+    android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+    android:exported="false">
+    <intent-filter>
+        <action android:name="android.accessibilityservice.AccessibilityService" />
+    </intent-filter>
+    <meta-data
+        android:name="android.accessibilityservice"
+        android:resource="@xml/accessibility_service_config" />
+</service>`
+                                    }</pre>
+                                    Você também precisará criar o arquivo <code>res/xml/accessibility_service_config.xml</code> para configurar quais eventos e pacotes o serviço irá monitorar.
+                                </li>
+                                 <li>
+                                    <strong>Implementar a Lógica de Extração:</strong> Dentro do seu serviço, no método <code>onAccessibilityEvent</code>, você irá inspecionar os nós da tela (<code>AccessibilityNodeInfo</code>) para encontrar os textos de valor, distância e tempo quando uma oferta de corrida aparecer.
+                                </li>
+                                <li>
+                                    <strong>Comunicar com o WebView:</strong> Uma vez que os dados são extraídos, você precisa enviá-los de volta para a parte web do aplicativo (WebView). A maneira mais comum de fazer isso é usando a classe <code>WebView</code> para executar JavaScript. Você pode chamar uma função global no seu código TypeScript (ex: `window.handleNativeData(jsonData)`), que por sua vez chamaria o fluxo de IA.
+                                </li>
+                             </ol>
+                             <p className="mt-2">Esta é uma implementação nativa complexa que exige um bom conhecimento do SDK do Android, mas é a chave para a funcionalidade de análise em tempo real.</p>
+                           </div>
+                        </AccordionContent>
+                    </AccordionItem>
                  </Accordion>
             </CardContent>
         </Card>
     );
 }
+
+    
