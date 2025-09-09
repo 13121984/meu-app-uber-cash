@@ -19,6 +19,9 @@ export function UserProfileCard() {
     if (!user) {
         return null; // ou um skeleton
     }
+    
+    const isPremiumUser = user.plan && user.plan !== 'basic';
+    const planName = user.plan ? user.plan.charAt(0).toUpperCase() + user.plan.slice(1) : 'Básico';
 
     return (
         <Card>
@@ -43,13 +46,13 @@ export function UserProfileCard() {
                     <p className="text-sm text-muted-foreground">Usuário</p>
                 </div>
                 <div className="flex items-center gap-2 mt-4 sm:mt-0 p-3 rounded-full bg-background">
-                    {user.isPremium ? (
+                    {isPremiumUser ? (
                         <>
                             <Crown className="h-5 w-5 text-yellow-500" />
-                            <span className="font-semibold text-yellow-500">Plano Premium</span>
+                            <span className="font-semibold text-yellow-500">Plano {planName}</span>
                         </>
                     ) : (
-                        <span className="font-semibold text-foreground">Plano Gratuito</span>
+                        <span className="font-semibold text-foreground">Plano Básico</span>
                     )}
                 </div>
             </CardContent>

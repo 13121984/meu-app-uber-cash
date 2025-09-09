@@ -58,7 +58,7 @@ const DisplayCard = ({ icon: Icon, label, value, unit }: { icon: React.ElementTy
 );
 
 export function TaximeterClient() {
-    const { user, loading, refreshUser } = useAuth();
+    const { user, loading, refreshUser, isPro } = useAuth();
     const [status, setStatus] = useState<'idle' | 'running' | 'paused'>('idle');
     const [distance, setDistance] = useState(0); // em km
     const [time, setTime] = useState(0); // em segundos
@@ -89,7 +89,7 @@ export function TaximeterClient() {
 
     const checkUsage = () => {
         if (!user) return { canUse: false, timeLeft: '' };
-        if (user.isPremium) return { canUse: true, timeLeft: '' };
+        if (isPro) return { canUse: true, timeLeft: '' }; // Pro e Autopilot podem usar
         
         const lastUse = user.preferences.lastTaximeterUse;
         if (!lastUse) return { canUse: true, timeLeft: '' }; // Never used before
@@ -195,7 +195,7 @@ export function TaximeterClient() {
 
         setStatus('idle');
         
-        await addOrUpdateWorkDay({
+        await addOrUpdateWorkDay(user.id, {
             id: '',
             date: new Date(),
             km: finalRideData.distance,
@@ -216,7 +216,7 @@ export function TaximeterClient() {
             description: `A corrida de ${formatCurrency(finalRideData.cost)} foi salva no seu histórico.`
         });
         
-        if (!user.isPremium) {
+        if (user.plan === 'basic') {
             await updateUserPreferences(user.id, { lastTaximeterUse: new Date().toISOString() });
             await refreshUser();
         }
@@ -264,13 +264,13 @@ export function TaximeterClient() {
                  <Lock className="mx-auto h-12 w-12 text-primary mb-4"/>
                 <CardTitle>Uso Semanal Esgotado</CardTitle>
                 <CardDescription className="my-2">
-                    Usuários gratuitos podem usar o taxímetro uma vez por semana para corridas particulares.
+                    Usuários do plano Básico podem usar o taxímetro uma vez por semana para corridas particulares.
                     <br/>
                     Seu próximo uso estará disponível em aproximadamente <strong className="text-primary">{usageStatus.timeLeft}</strong>.
                 </CardDescription>
                 <Link href="/premium">
                     <Button>
-                        Seja Premium para uso ilimitado
+                        Seja Pro para uso ilimitado
                         <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 </Link>

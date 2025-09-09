@@ -1,70 +1,35 @@
+
 [
   {
-    "id": "Paulo Vitor Tiburcio ",
+    "id": "Paulo Vitor Tiburcio",
     "passwordHash": "hashed_Aec081305@",
-    "isPremium": true,
-    "vehicles": [
-      {
-        "brand": "Renault ",
-        "model": "Kwid ",
-        "color": "Prata",
-        "plate": "",
-        "id": "1757397278689"
-      }
-    ],
+    "plan": "autopilot",
     "securityAnswers": [],
-    "preferences": {
-      "analyzerRates": {
-        "ratePerKm": 2,
-        "ratePerHour": 30
-      }
-    }
+    "vehicles": [],
+    "preferences": {}
   },
   {
     "id": "Teste 1",
     "passwordHash": "hashed_123456",
-    "isPremium": false,
-    "vehicles": [
-      {
-        "brand": "Renault ",
-        "model": "Kwid ",
-        "color": "Prata",
-        "id": "1757274216194"
-      }
-    ],
+    "plan": "basic",
     "securityAnswers": [],
-    "preferences": {
-      "taximeterRates": {
-        "startingFare": 3,
-        "ratePerKm": 2,
-        "ratePerMinute": 1
-      },
-      "lastTaximeterUse": "2025-09-08T10:38:51.283Z"
-    }
+    "vehicles": [],
+    "preferences": {}
   },
   {
     "id": "Teste 2",
-    "passwordHash": "hashed_1234e56",
-    "isPremium": false,
-    "vehicles": [
-      {
-        "brand": "Fiat",
-        "model": "Mobi ",
-        "color": "Branco ",
-        "plate": "",
-        "id": "1757258849759"
-      }
-    ],
+    "passwordHash": "hashed_123456",
+    "plan": "pro",
     "securityAnswers": [],
-    "preferences": {
-      "dashboardCardOrder": [
-        "ganho",
-        "lucro",
-        "combustivel"
-      ],
-      "reportChartOrder": [
-        "earningsComposition"
-      ]
-    }
+    "vehicles": [],
+    "preferences": {}
+  },
+  {
+    "id": "Teste 3",
+    "passwordHash": "hashed_123456",
+    "plan": "pro",
+    "securityAnswers": [],
+    "vehicles": [],
+    "preferences": {}
   }
 ]
