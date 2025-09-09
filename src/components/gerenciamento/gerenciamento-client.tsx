@@ -7,13 +7,11 @@ import { DataTable } from "./data-table";
 import { HistoryFilters } from "./history-filters";
 import { Button } from "../ui/button";
 import { Loader2, Trash2, History, BarChart3, Smartphone } from "lucide-react";
-import { deleteFilteredWorkDaysAction, ActiveFilters } from "./actions";
+import { deleteFilteredWorkDaysAction } from "./actions";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { getFilteredAndGroupedWorkDays, type WorkDay } from '@/services/work-day.service';
-import { updateAllSummaries } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -60,9 +58,8 @@ export function GerenciamentoClient() {
 
     startDeleteTransition(async () => {
       try {
-          const result = await deleteFilteredWorkDaysAction(user.id, currentFilters as ActiveFilters);
+          const result = await deleteFilteredWorkDaysAction(user.id, currentFilters);
           if (result.success) {
-              await updateAllSummaries(user.id);
               toast({ title: "Sucesso!", description: `${result.count || 0} registros apagados.` });
               handleApplyFilters(currentFilters); // Refresh the data
           } else {
