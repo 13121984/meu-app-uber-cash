@@ -11,6 +11,7 @@ import { DemoDataCard } from './demo-data-card';
 import { LayoutCustomizationCard } from './layout-customization-card';
 import { useAuth } from '@/contexts/auth-context';
 import { HelpAndSupportCard } from './help-and-support-card';
+import { AndroidGuideCard } from './android-guide-card';
 
 export function ConfiguracoesClient() {
     const { user } = useAuth();
@@ -27,6 +28,7 @@ export function ConfiguracoesClient() {
             <BackupCard />
             <CatalogManagerCard isPremium={isPremium} />
             <ImportCard />
+            <AndroidGuideCard />
         </div>
     )
 }
