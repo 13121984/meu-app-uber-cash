@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { BotMessageSquare, Check, DollarSign, ImageUp, Loader2, RefreshCw, Sparkles, ThumbsDown, ThumbsUp, X } from 'lucide-react';
+import { BotMessageSquare, Check, DollarSign, ImageUp, Loader2, RefreshCw, Sparkles, ThumbsDown, ThumbsUp, X, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { runAnalysisAction, AnalysisOutput } from './actions';
 import { updateUserPreferences } from '@/services/auth.service';
+import Link from 'next/link';
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -55,10 +56,18 @@ function ResultDisplay({ result, onReset }: { result: AnalysisOutput, onReset: (
                         <p className="font-bold">{formatCurrency(result.calculatedRates.ratePerHour)}</p>
                     </div>
                 </div>
-                <Button onClick={onReset} className="w-full">
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Analisar Outra Corrida
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <Button onClick={onReset} className="w-full" variant="outline">
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Analisar Outra
+                    </Button>
+                    <Link href="/registrar/today" className="w-full">
+                        <Button className="w-full">
+                           <Edit className="mr-2 h-4 w-4" />
+                            Registrar esta Corrida
+                        </Button>
+                    </Link>
+                </div>
             </CardContent>
         </Card>
     );
