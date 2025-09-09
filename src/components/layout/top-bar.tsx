@@ -138,13 +138,13 @@ export function TopBar() {
                     </div>
                     <span className="sr-only">Uber Cash</span>
                 </Link>
-                {user?.plan !== 'basic' && (
+                {user?.plan && user.plan !== 'basic' && (
                     <Tooltip>
                         <TooltipTrigger>
                             <Crown className="h-6 w-6 text-yellow-500" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Plano {user?.plan.charAt(0).toUpperCase() + user?.plan.slice(1)} Ativo</p>
+                            <p>Plano {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} Ativo</p>
                         </TooltipContent>
                     </Tooltip>
                 )}
