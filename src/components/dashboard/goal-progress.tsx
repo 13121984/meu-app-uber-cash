@@ -4,6 +4,7 @@
 import React from 'react';
 import { Flag } from "lucide-react";
 import { AppLogo } from '../ui/app-logo';
+import { motion } from 'framer-motion';
 
 type GoalProgressProps = {
   progress: number;
@@ -39,29 +40,41 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
       {/* A "Estrada" da Meta */}
       <div className="relative w-full flex items-center h-16">
         {/* A Linha da Estrada */}
-        <div className="relative w-full h-1.5 bg-secondary rounded-full">
-            <div 
-            className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all duration-500"
-            style={{ width: `${clampedProgress}%`}}
+        <div className="relative w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+            <motion.div 
+                className="absolute left-0 top-0 h-full rounded-full bg-primary"
+                initial={{ width: '0%' }}
+                animate={{ width: `${clampedProgress}%`}}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
             />
         </div>
         
         {/* O Carro */}
-        <div
-            className="absolute top-1/2 transition-all duration-500"
+        <motion.div
+            className="absolute top-1/2"
+            initial={{ left: '0%' }}
+            animate={{ left: `calc(${clampedProgress}% - 24px)` }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
             style={{ 
-                left: `calc(${clampedProgress}% - 24px)`, // Ajusta a posição do carro
                 transform: 'translateY(-50%)'
             }}
         >
-            <div className="w-12 h-12 rounded-full bg-primary/30 flex items-center justify-center p-1">
+            <motion.div 
+                className="w-12 h-12 rounded-full bg-primary/30 flex items-center justify-center p-1"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 1, ease: 'easeOut' }}
+            >
                 <AppLogo className="h-10 w-10 text-primary drop-shadow-lg" />
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
 
         {/* Linha de Chegada */}
          <div className="absolute right-0 top-1/2 -translate-y-1/2">
             <Flag className="h-6 w-6 text-foreground" />
+             {isComplete && (
+                <div className="absolute -top-1 -left-1 w-8 h-8 rounded-full bg-green-500/50 animate-ping opacity-75" />
+            )}
         </div>
       </div>
     </div>
