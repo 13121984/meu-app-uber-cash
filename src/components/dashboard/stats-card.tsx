@@ -32,7 +32,7 @@ export function StatsCard({ title, value, icon: Icon, isCurrency, unit, precisio
       <CardContent className="flex flex-col items-start gap-2 p-0">
         {Icon && 
             <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", iconBg)}>
-                <Icon className={cn("h-5 w-5 text-white", iconColor)} />
+                <Icon className={cn("h-5 w-5", iconColor)} />
             </div>
         }
         <div className="flex flex-col">
