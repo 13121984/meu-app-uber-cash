@@ -22,6 +22,7 @@ const FILE_NAME = 'maintenance.json';
 
 
 async function readMaintenanceData(userId: string): Promise<Maintenance[]> {
+  if (!userId) return [];
   const data = await getFile<Maintenance[]>(userId, FILE_NAME, []);
   return (data || []).map(record => ({
     ...record,
@@ -34,6 +35,7 @@ async function readMaintenanceData(userId: string): Promise<Maintenance[]> {
 }
 
 async function writeMaintenanceData(userId: string, data: Maintenance[]): Promise<void> {
+    if (!userId) return;
     const sortedData = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     await saveFile(userId, FILE_NAME, sortedData);
 }
@@ -42,6 +44,7 @@ async function writeMaintenanceData(userId: string, data: Maintenance[]): Promis
 // --- Funções CRUD ---
 
 export async function addMaintenance(userId: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; id?: string; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     const allRecords = await readMaintenanceData(userId);
     const newRecord: Maintenance = {
@@ -64,11 +67,13 @@ export async function addMaintenance(userId: string, data: Omit<Maintenance, 'id
 }
 
 export async function getMaintenanceRecords(userId: string): Promise<Maintenance[]> {
+    if (!userId) return [];
     let records = await readMaintenanceData(userId);
     return records;
 }
 
 export async function getFilteredMaintenanceRecords(userId: string, filters?: ReportFilterValues): Promise<Maintenance[]> {
+    if (!userId) return [];
     const allRecords = await getMaintenanceRecords(userId);
     
     if (!filters || !filters.type) {
@@ -116,6 +121,7 @@ export async function getFilteredMaintenanceRecords(userId: string, filters?: Re
 
 
 export async function updateMaintenance(userId: string, id: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     const allRecords = await readMaintenanceData(userId);
     const index = allRecords.findIndex(r => r.id === id);
@@ -142,6 +148,7 @@ export async function updateMaintenance(userId: string, id: string, data: Omit<M
 
 
 export async function deleteMaintenance(userId: string, id: string): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     let allRecords = await readMaintenanceData(userId);
     const initialLength = allRecords.length;
@@ -163,6 +170,7 @@ export async function deleteMaintenance(userId: string, id: string): Promise<{ s
 
 
 export async function deleteAllMaintenance(userId: string): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     await writeMaintenanceData(userId, []);
     revalidatePath('/manutencao');

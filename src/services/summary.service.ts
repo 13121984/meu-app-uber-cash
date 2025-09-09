@@ -84,6 +84,7 @@ export async function getTodayData(userId: string): Promise<PeriodData> {
 }
 
 export async function updateAllSummaries(userId: string): Promise<SummaryData> {
+    if (!userId) return defaultSummaryData;
     const allWorkDays = await getWorkDays(userId);
     const allMaintenance = await getMaintenanceRecords(userId);
     const goals = await getGoals(userId);
@@ -223,6 +224,19 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
 }
 
 export async function getReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
+  if (!userId) {
+    return {
+      ...defaultPeriodData,
+      totalGastos: 0,
+      fuelExpenses: [],
+      profitEvolution: [],
+      dailyTrips: [],
+      averageEarningPerTrip: [],
+      averageEarningPerHour: [],
+      rawWorkDays: [],
+    }
+  }
+  
   const now = new Date();
   let interval: { start: Date; end: Date } | null = null;
   const allWorkDays = await getWorkDays(userId);
@@ -324,5 +338,3 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     }
   };
 }
-
-    

@@ -47,6 +47,7 @@ const FILE_NAME = 'work-days.json';
 // --- Funções de Leitura/Escrita ---
 
 async function readWorkDays(userId: string): Promise<WorkDay[]> {
+  if (!userId) return [];
   const data = await getFile<WorkDay[]>(userId, FILE_NAME, []);
   return (data || []).map(day => ({
       ...day,
@@ -56,6 +57,7 @@ async function readWorkDays(userId: string): Promise<WorkDay[]> {
 }
 
 async function writeWorkDays(userId: string, data: WorkDay[]): Promise<void> {
+    if (!userId) return;
     const sortedData = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     await saveFile(userId, FILE_NAME, sortedData);
 }
@@ -67,6 +69,7 @@ const revalidateAll = () => {
 // --- Funções CRUD ---
 
 export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado.", operation: 'created' };
   try {
     const allWorkDays = await readWorkDays(userId);
     if (data.id && data.id !== 'today' && data.id !== 'other-day') {
@@ -96,9 +99,8 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
 }
 
 export async function addMultipleWorkDays(userId: string, importedData: ImportedWorkDay[]) {
-    if (!userId) {
-        return { success: false, error: "Usuário não fornecido para importação." };
-    }
+    if (!userId) return { success: false, error: "Usuário não fornecido para importação." };
+    
     try {
         let allWorkDays = await readWorkDays(userId);
         const workDaysToUpsert: WorkDay[] = [];
@@ -168,6 +170,7 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
 }
 
 export async function deleteWorkDayEntry(userId: string, id: string): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     let allWorkDays = await readWorkDays(userId);
     allWorkDays = allWorkDays.filter(r => r.id !== id);
@@ -181,6 +184,7 @@ export async function deleteWorkDayEntry(userId: string, id: string): Promise<{ 
 }
 
 export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilterValues): Promise<{ success: boolean; error?: string, count?: number }> {
+    if (!userId) return { success: false, error: "Usuário não autenticado." };
     try {
         let allWorkDays = await readWorkDays(userId);
         const initialLength = allWorkDays.length;
@@ -259,6 +263,7 @@ export async function clearAllData(userId: string): Promise<{ success: boolean; 
 }
 
 export async function clearAllDataForUser(userId: string): Promise<void> {
+    if (!userId) return;
     try {
         await writeWorkDays(userId, []);
     } catch (error) {
@@ -269,10 +274,12 @@ export async function clearAllDataForUser(userId: string): Promise<void> {
 // --- Funções de Leitura ---
 
 export async function getWorkDays(userId: string): Promise<WorkDay[]> {
+    if (!userId) return [];
     return await readWorkDays(userId);
 }
 
 export async function getWorkDaysForDate(userId: string, date: Date): Promise<WorkDay[]> {
+    if (!userId) return [];
     const allWorkDays = await readWorkDays(userId);
     return allWorkDays.filter(day => isSameDay(day.date, date));
 }
@@ -325,6 +332,7 @@ export async function getFilteredAndGroupedWorkDays(
   userId: string,
   filters: ReportFilterValues
 ): Promise<GroupedWorkDay[]> {
+  if (!userId) return [];
   const allWorkDays = await readWorkDays(userId);
   const filtered = getFilteredWorkDays(allWorkDays, filters);
   const grouped = groupWorkDays(filtered);
