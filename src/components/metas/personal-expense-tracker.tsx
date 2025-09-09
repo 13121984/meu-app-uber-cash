@@ -129,43 +129,42 @@ export function PersonalExpenseTracker() {
                 <div className="space-y-4">
                     {records.length > 0 ? (
                         records.slice(0, 10).map(record => (
-                            <div key={record.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary">
-                                <div className="flex-1 space-y-1">
-                                    <p className="font-bold">{record.description}</p>
-                                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                        <span>{record.category}</span>
-                                        <span>{format(new Date(record.date), "dd/MM/yy", { locale: ptBR })}</span>
+                            <AlertDialog key={record.id}>
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-secondary">
+                                    <div className="flex-1 space-y-1">
+                                        <p className="font-bold">{record.description}</p>
+                                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                            <span>{record.category}</span>
+                                            <span>{format(new Date(record.date), "dd/MM/yy", { locale: ptBR })}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold text-destructive">{formatCurrency(record.amount)}</p>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(record)} disabled={isDeleting}>
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" disabled={isDeleting}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <p className="font-semibold text-destructive">{formatCurrency(record.amount)}</p>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(record)} disabled={isDeleting}>
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" disabled={isDeleting}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                </div>
-
-                                <AlertDialog>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                        <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Esta ação não pode ser desfeita. Isso irá apagar permanentemente o registro de: <span className="font-bold">{record.description}</span>.
-                                        </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDelete(record.id)} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
-                                            {isDeleting ? "Apagando..." : "Apagar"}
-                                        </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Esta ação não pode ser desfeita. Isso irá apagar permanentemente o registro de: <span className="font-bold">{record.description}</span>.
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(record.id)} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                                        {isDeleting ? "Apagando..." : "Apagar"}
+                                    </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         ))
                     ) : (
                          <p className="text-center text-muted-foreground py-8">Nenhuma despesa registrada ainda.</p>
