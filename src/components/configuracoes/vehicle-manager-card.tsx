@@ -69,7 +69,7 @@ function VehicleForm({ onSuccess }: { onSuccess: () => void }) {
                  <FormField control={form.control} name="color" render={({ field }) => (
                     <FormItem><FormLabel>Cor</FormLabel><FormControl><Input placeholder="Ex: Branco" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-                {user?.isPremium && (
+                {user?.plan === 'autopilot' && ( // Apenas Autopilot pode adicionar placa
                     <FormField control={form.control} name="plate" render={({ field }) => (
                         <FormItem><FormLabel>Placa (Opcional)</FormLabel><FormControl><Input placeholder="ABC1D23" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -100,7 +100,8 @@ export function VehicleManagerCard() {
         setIsDeleting(null);
     };
     
-    const canAddVehicle = user?.isPremium || (user?.vehicles && user.vehicles.length < 1);
+    // Pro ou Autopilot podem adicionar múltiplos veículos
+    const canAddVehicle = user?.plan === 'pro' || user?.plan === 'autopilot' || (user?.vehicles && user.vehicles.length < 1);
 
     const AddVehicleButton = () => {
         if(canAddVehicle) {

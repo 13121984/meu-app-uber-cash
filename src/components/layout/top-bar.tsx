@@ -21,16 +21,16 @@ import {
 
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home, showOnHome: true, showOnOthers: true },
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, showOnHome: false, showOnOthers: true },
+  { href: "/", label: "Início", icon: Home, showOnHome: true, showOnOthers: true, plan: 'basic' },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, showOnHome: false, showOnOthers: true, plan: 'basic' },
   // Botão de registro será inserido dinamicamente
-  { href: "/gerenciamento", label: "Gerenciar", icon: History, showOnHome: false, showOnOthers: true },
-  { href: "/camera", label: "Câmera", icon: Camera, showOnHome: false, showOnOthers: true },
-  { href: "/taximetro", label: "Taxímetro Inteligente", icon: Calculator, showOnHome: false, showOnOthers: true },
-  { href: "/manutencao", label: "Manutenção", icon: Wrench, showOnHome: false, showOnOthers: true },
-  { href: "/metas", label: "Metas", icon: Target, showOnHome: false, showOnOthers: true },
-  { href: "/configuracoes", label: "Configurações", icon: Settings, showOnHome: false, showOnOthers: true },
-  { href: "/ajuda", label: "Ajuda", icon: LifeBuoy, showOnHome: true, showOnOthers: false },
+  { href: "/gerenciamento", label: "Gerenciar", icon: History, showOnHome: false, showOnOthers: true, plan: 'basic' },
+  { href: "/camera", label: "Câmera", icon: Camera, showOnHome: false, showOnOthers: true, plan: 'pro' },
+  { href: "/taximetro", label: "Taxímetro Inteligente", icon: Calculator, showOnHome: false, showOnOthers: true, plan: 'basic' }, // Taxímetro é básico com limites
+  { href: "/manutencao", label: "Manutenção", icon: Wrench, showOnHome: false, showOnOthers: true, plan: 'basic' },
+  { href: "/metas", label: "Metas", icon: Target, showOnHome: false, showOnOthers: true, plan: 'basic' },
+  { href: "/configuracoes", label: "Configurações", icon: Settings, showOnHome: false, showOnOthers: true, plan: 'basic' },
+  { href: "/ajuda", label: "Ajuda", icon: LifeBuoy, showOnHome: true, showOnOthers: false, plan: 'basic' },
 ]
 
 const RegisterDropdown = () => (
@@ -105,7 +105,7 @@ const NavButton = ({ href, label, icon: Icon }: { href: string; label: string; i
 
 export function TopBar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, isPro, logout } = useAuth();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
@@ -120,9 +120,13 @@ export function TopBar() {
 
   const isHomePage = pathname === '/';
 
-  const itemsToRender = isHomePage 
+  const itemsToRender = (isHomePage 
     ? menuItems.filter(item => item.showOnHome)
-    : menuItems.filter(item => item.showOnOthers);
+    : menuItems.filter(item => item.showOnOthers)
+  ).filter(item => {
+      if (item.plan === 'pro') return isPro;
+      return true;
+  });
 
   return (
     <TooltipProvider>
@@ -134,13 +138,13 @@ export function TopBar() {
                     </div>
                     <span className="sr-only">Uber Cash</span>
                 </Link>
-                {user?.isPremium && (
+                {user?.plan !== 'basic' && (
                     <Tooltip>
                         <TooltipTrigger>
                             <Crown className="h-6 w-6 text-yellow-500" />
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Plano Premium Ativo</p>
+                            <p>Plano {user?.plan.charAt(0).toUpperCase() + user?.plan.slice(1)} Ativo</p>
                         </TooltipContent>
                     </Tooltip>
                 )}
@@ -171,5 +175,3 @@ export function TopBar() {
     </TooltipProvider>
   )
 }
-
-    

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
-import { login as loginService, signup as signupService, User, SecurityAnswer, getUserById } from '@/services/auth.service';
+import { login as loginService, signup as signupService, User, SecurityAnswer, getUserById, Plan } from '@/services/auth.service';
 import { clearAllDataForUser } from '@/services/work-day.service';
 
 interface AuthContextType {
@@ -12,6 +12,9 @@ interface AuthContextType {
   signup: (userId: string, password: string, securityAnswers: SecurityAnswer[]) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  // Helpers de permissão
+  isPro: boolean;
+  isAutopilot: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -109,8 +112,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('rota-certa-user');
   };
 
+  // Helper getters for plan checks
+  const isPro = user?.plan === 'pro' || user?.plan === 'autopilot';
+  const isAutopilot = user?.plan === 'autopilot';
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser, isPro, isAutopilot }}>
       {children}
     </AuthContext.Provider>
   );

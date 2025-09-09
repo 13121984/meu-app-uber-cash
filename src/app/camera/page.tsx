@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Video, VideoOff, AlertTriangle, Shield, Loader2, Gem, Lock, ArrowRight } from 'lucide-react';
+import { Camera, Video, VideoOff, AlertTriangle, Shield, Loader2, Gem, Lock, ArrowRight, Timer } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -19,13 +19,13 @@ function PremiumUpgradeScreen() {
              </div>
             <h1 className="text-3xl font-bold font-headline text-primary">Mais Segurança para Suas Viagens</h1>
             <p className="text-muted-foreground max-w-lg">
-                Use a Câmera de Segurança para gravar suas corridas diretamente pelo aplicativo. Um recurso Premium para sua tranquilidade e proteção.
+                Use a Câmera de Segurança para gravar suas corridas diretamente pelo aplicativo. Um recurso dos planos Pro e Autopilot para sua tranquilidade e proteção.
             </p>
             <Card className="bg-secondary">
                  <CardContent className="p-4">
                      <ul className="text-left space-y-2">
                          <li className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Gravação de vídeo e áudio com um toque.</li>
-                         <li className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Salve as gravações diretamente no seu dispositivo.</li>
+                         <li className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Limite de 5 min no plano Pro, ilimitado no Autopilot.</li>
                          <li className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Tenha provas em caso de incidentes.</li>
                      </ul>
                  </CardContent>
@@ -33,7 +33,7 @@ function PremiumUpgradeScreen() {
             <Link href="/premium" passHref>
                 <Button size="lg">
                     <Lock className="mr-2 h-4 w-4" />
-                    Desbloquear com Premium
+                    Desbloquear com Pro ou Autopilot
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
             </Link>
@@ -42,11 +42,16 @@ function PremiumUpgradeScreen() {
 }
 
 function CameraFeature() {
+  const { isPro, isAutopilot } = useAuth();
   const [isRecording, setIsRecording] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingDurationRef = useRef(0);
+
+  const RECORDING_LIMIT_SECONDS = 300; // 5 minutos para o plano Pro
 
   useEffect(() => {
     const getCameraPermission = async () => {
@@ -74,7 +79,23 @@ function CameraFeature() {
       }
     };
     getCameraPermission();
+
+    // Cleanup
+    return () => {
+        if(recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    }
   }, []);
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      if(recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      recordingDurationRef.current = 0;
+      setIsRecording(false);
+      toast({ title: 'Gravação parada', description: 'O vídeo foi salvo no seu dispositivo.' });
+    }
+  };
+
 
   const handleStartRecording = () => {
     if (videoRef.current?.srcObject) {
@@ -85,7 +106,6 @@ function CameraFeature() {
       };
       
       try {
-          // Tenta usar o codec VP9, se não for suportado, o navegador usará o padrão.
           mediaRecorderRef.current = MediaRecorder.isTypeSupported(options.mimeType) 
             ? new MediaRecorder(stream, options)
             : new MediaRecorder(stream);
@@ -112,16 +132,19 @@ function CameraFeature() {
       mediaRecorderRef.current.start();
       setIsRecording(true);
       toast({ title: 'Gravação iniciada', description: 'Sua câmera de segurança está ativa.' });
+
+      // Inicia o timer
+      recordingTimerRef.current = setInterval(() => {
+        recordingDurationRef.current += 1;
+        // Aplica o limite de tempo para o plano Pro
+        if (isPro && !isAutopilot && recordingDurationRef.current >= RECORDING_LIMIT_SECONDS) {
+            handleStopRecording();
+            toast({ title: 'Limite de Gravação Atingido', description: `Sua gravação foi salva automaticamente. Para gravações ilimitadas, considere o plano Autopilot.`, variant: 'default', duration: 10000 });
+        }
+      }, 1000);
     }
   };
 
-  const handleStopRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      toast({ title: 'Gravação parada', description: 'O vídeo foi salvo no seu dispositivo.' });
-    }
-  };
 
   const renderContent = () => {
     if (hasCameraPermission === null) {
@@ -177,20 +200,36 @@ function CameraFeature() {
         <p className="text-muted-foreground">Grave suas viagens para ter mais segurança no dia a dia.</p>
       </div>
       <Card>
-        <CardContent className="p-6 space-y-4">
+        <CardHeader>
+             {isPro && !isAutopilot && (
+                <Alert variant="default" className="bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400">
+                    <Timer className="h-4 w-4 !text-amber-600" />
+                    <AlertTitle>Plano Pro Ativo</AlertTitle>
+                    <AlertDescription>Suas gravações são limitadas a 5 minutos.</AlertDescription>
+                </Alert>
+             )}
+             {isAutopilot && (
+                <Alert variant="default" className="bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400">
+                    <Shield className="h-4 w-4 !text-green-600" />
+                    <AlertTitle>Plano Autopilot Ativo</AlertTitle>
+                    <AlertDescription>Você tem gravações ilimitadas.</AlertDescription>
+                </Alert>
+             )}
+        </CardHeader>
+        <CardContent className="p-6 pt-0 space-y-4">
           {renderContent()}
         </CardContent>
       </Card>
-      <Card className="bg-amber-500/10 border-amber-500/20">
+      <Card className="bg-secondary/50">
          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-amber-600"/>
+                <Shield className="h-5 w-5 text-primary"/>
                 Aviso de Privacidade e Uso
             </CardTitle>
          </CardHeader>
          <CardContent>
             <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                <li>As gravações são salvas **diretamente no seu dispositivo** e não são enviadas para nossos servidores. Sua privacidade é nossa prioridade.</li>
+                <li>As gravações são salvas **diretamente no seu dispositivo** e não são enviadas para nossos servidores.</li>
                 <li>Este recurso está em fase inicial. Lembre-se de verificar a legislação local sobre gravação de áudio e vídeo em veículos de transporte.</li>
                 <li>Para usar a câmera em segundo plano, o aplicativo precisará ser instalado nativamente no dispositivo (Android/iOS) com permissões adicionais.</li>
             </ul>
@@ -201,7 +240,7 @@ function CameraFeature() {
 }
 
 export default function CameraPage() {
-    const { user, loading } = useAuth();
+    const { isPro, loading } = useAuth();
   
     if (loading) {
       return (
@@ -211,7 +250,7 @@ export default function CameraPage() {
       );
     }
   
-    if (!user?.isPremium) {
+    if (!isPro) {
         return <PremiumUpgradeScreen />
     }
 

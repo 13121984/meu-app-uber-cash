@@ -3,25 +3,25 @@
   {
     "id": "Paulo Vitor Tiburcio ",
     "passwordHash": "hashed_Aec081305@",
-    "isPremium": true,
-    "vehicles": [],
+    "plan": "autopilot",
     "securityAnswers": [],
+    "vehicles": [],
     "preferences": {}
   },
   {
     "id": "Teste 1",
     "passwordHash": "hashed_123456",
-    "isPremium": false,
-    "vehicles": [],
+    "plan": "basic",
     "securityAnswers": [],
+    "vehicles": [],
     "preferences": {}
   },
   {
     "id": "Teste 2",
     "passwordHash": "hashed_123456",
-    "isPremium": false,
-    "vehicles": [],
+    "plan": "pro",
     "securityAnswers": [],
+    "vehicles": [],
     "preferences": {}
   }
 ]

@@ -7,6 +7,8 @@ import { getUserDataPath } from './storage.service';
 
 // --- Tipos e Interfaces ---
 
+export type Plan = 'basic' | 'pro' | 'autopilot';
+
 export interface SecurityAnswer {
   question: string;
   answer: string;
@@ -43,7 +45,7 @@ export interface UserPreferences {
 export interface User {
   id: string; // Nome de usuário
   passwordHash: string; 
-  isPremium: boolean;
+  plan: Plan; // Substitui isPremium
   securityAnswers: SecurityAnswer[];
   vehicles: Vehicle[];
   preferences: UserPreferences;
@@ -93,7 +95,7 @@ export async function signup(userId: string, password: string, securityAnswers: 
     const newUser: User = {
         id: userId,
         passwordHash: createHash(password),
-        isPremium: false, // Todo novo usuário começa como não-premium
+        plan: 'basic', // Todo novo usuário começa como básico
         securityAnswers,
         vehicles: [],
         preferences: { // Preferências padrão
@@ -143,6 +145,11 @@ export async function updateUser(userId: string, updatedData: Partial<User>): Pr
         return { success: false, error: 'Usuário não encontrado.' };
     }
 
+    // Garante que o plano seja sempre um valor válido
+    if (updatedData.plan && !['basic', 'pro', 'autopilot'].includes(updatedData.plan)) {
+        delete updatedData.plan;
+    }
+    
     users[userIndex] = { ...users[userIndex], ...updatedData };
     await saveUsers(users);
 
@@ -203,8 +210,10 @@ export async function addVehicle(userId: string, vehicle: Omit<Vehicle, 'id'>): 
     const user = await getUserById(userId);
     if (!user) return { success: false, error: "Usuário não encontrado." };
 
-    if (!user.isPremium && user.vehicles.length >= 1) {
-        return { success: false, error: "Usuários gratuitos podem cadastrar apenas um veículo." };
+    // Usuário Básico só pode ter 1 veículo. Pro e Autopilot podem ter mais.
+    const isProOrHigher = user.plan === 'pro' || user.plan === 'autopilot';
+    if (!isProOrHigher && user.vehicles.length >= 1) {
+        return { success: false, error: "Usuários do plano Básico podem cadastrar apenas um veículo." };
     }
 
     const newVehicle: Vehicle = {

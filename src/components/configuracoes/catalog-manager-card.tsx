@@ -4,14 +4,9 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookCopy, ArrowRight, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { BookCopy, ArrowRight } from "lucide-react";
 
-interface CatalogManagerCardProps {
-    isPremium: boolean;
-}
-
-export function CatalogManagerCard({ isPremium }: CatalogManagerCardProps) {
+export function CatalogManagerCard() {
     return (
         <Card>
             <CardHeader>

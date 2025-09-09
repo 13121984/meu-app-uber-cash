@@ -36,7 +36,7 @@ const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
 function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings: Settings, fuelTypes: string[] }) {
   const router = useRouter();
   const { user } = useAuth();
-  const isPremium = user?.isPremium || false;
+  const isAutopilot = user?.plan === 'autopilot';
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { control, handleSubmit, watch, formState: { errors } } = useForm<Omit<Settings, 'weeklyBackup' | 'backupEmail'>>({
@@ -49,13 +49,14 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
   });
 
   const onSubmit = async (data: Omit<Settings, 'weeklyBackup' | 'backupEmail'>) => {
+    if (!user) return;
     setIsSubmitting(true);
     try {
       // Merging with existing full settings to not lose backup fields
-      const existingSettings = await getSettings();
+      const existingSettings = await getSettings(user.id);
       const settingsToSave = { ...existingSettings, ...data };
       
-      await saveSettings(settingsToSave);
+      await saveSettings(user.id, settingsToSave);
       toast({
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Configurações Salvas!</span></div>,
         description: "Suas preferências foram atualizadas. A página será recarregada.",
@@ -142,14 +143,14 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
                         <div className="space-y-0.5">
                             <Label className="flex items-center gap-2">
                                 Habilitar Notificações de Manutenção
-                                {!isPremium && <Lock className="h-4 w-4 text-amber-500" />}
+                                {!isAutopilot && <Lock className="h-4 w-4 text-amber-500" />}
                             </Label>
                              <div className="text-xs text-muted-foreground">
-                                {isPremium 
-                                    ? 'Funcionalidade em desenvolvimento.' 
+                                {isAutopilot 
+                                    ? 'Você será notificado sobre as próximas manutenções.' 
                                     : (
                                         <Link href="/premium" className="underline hover:text-primary">
-                                            Exclusivo para assinantes Premium.
+                                            Exclusivo para assinantes Autopilot.
                                         </Link>
                                     )
                                 }
@@ -158,7 +159,7 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
                         <Controller 
                             name="maintenanceNotifications" 
                             control={control} 
-                            render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!isPremium}/>} 
+                            render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!isAutopilot}/>} 
                         />
                     </div>
                 </div>
@@ -169,16 +170,18 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
 }
 
 export function SettingsForm() {
+    const { user, loading } = useAuth();
     const [settings, setSettings] = useState<Settings | null>(null);
     const [catalog, setCatalog] = useState<Catalog | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        if (!user) return;
         async function loadInitialData() {
             setIsLoading(true);
             try {
                 const [settingsData, catalogData] = await Promise.all([
-                    getSettings(),
+                    getSettings(user!.id),
                     getCatalog(),
                 ]);
                 setSettings(settingsData);
@@ -194,9 +197,9 @@ export function SettingsForm() {
             }
         }
         loadInitialData();
-    }, []);
+    }, [user]);
 
-    if (isLoading || !settings || !catalog) {
+    if (loading || isLoading || !settings || !catalog || !user) {
         return (
             <Card>
                 <CardHeader className="flex-row justify-between items-center">

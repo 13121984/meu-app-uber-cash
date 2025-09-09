@@ -4,7 +4,6 @@
 import { useState, useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { PlusCircle, Trash2, Loader2, CheckCircle, AlertTriangle, UploadCloud, ArrowUp, ArrowDown, Lock } from 'lucide-react';
 import { saveCatalog, type Catalog, type CatalogItem } from '@/services/catalog.service';
@@ -22,9 +21,8 @@ interface CatalogManagerProps {
 
 export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
   const router = useRouter();
-  const { user } = useAuth();
-  const isPremium = user?.isPremium || false;
-
+  const { user, isPro } = useAuth(); // Usando isPro (Pro ou Autopilot)
+  
   const [isSaving, startSavingTransition] = useTransition();
   
   const [earningsCategories, setEarningsCategories] = useState<CatalogItem[]>(initialCatalog.earnings);
@@ -108,9 +106,8 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
   }) => {
     
     const renderCategoryItem = (cat: CatalogItem, index: number) => {
-        const canEdit = isPremium || cat.isDefault;
-        const canDelete = isPremium && !cat.isDefault;
-        const canReorder = isPremium;
+        const canDelete = isPro && !cat.isDefault;
+        const canReorder = isPro;
 
         return (
              <div key={cat.name} className="flex items-center justify-between p-2 rounded-md bg-secondary">
@@ -125,14 +122,14 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
                             </Button>
                         </div>
                      )}
-                    <Label htmlFor={`switch-${cat.name}`} className="flex-1 cursor-pointer">{cat.name}</Label>
+                    <Label htmlFor={`switch-${type}-${cat.name}`} className="flex-1 cursor-pointer">{cat.name}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(type, cat.name)} disabled={!canDelete}>
                      {canDelete ? <Trash2 className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                    </Button>
                     <Switch
-                        id={`switch-${cat.name}`}
+                        id={`switch-${type}-${cat.name}`}
                         checked={cat.active}
                         onCheckedChange={() => handleToggle(type, cat.name)}
                     />
@@ -166,9 +163,9 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
                     Adicionar Nova Categoria
                 </CardTitle>
                  <CardDescription>
-                    {isPremium
+                    {isPro
                         ? "Adicione categorias personalizadas para ganhos ou combustíveis."
-                        : "Assine o plano Premium para criar suas próprias categorias."
+                        : "Assine o plano Pro ou Autopilot para criar suas próprias categorias."
                     }
                 </CardDescription>
             </CardHeader>
@@ -181,24 +178,24 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
                             placeholder="Ex: Uber Comfort"
                             value={newItemName}
                             onChange={(e) => setNewItemName(e.target.value)}
-                            disabled={!isPremium}
+                            disabled={!isPro}
                         />
                     </div>
                      <div className="space-y-2">
                          <Label>Adicionar em:</Label>
                          <div className="flex gap-4">
-                            <Button variant={importTarget === 'earnings' ? 'default' : 'outline'} onClick={() => setImportTarget('earnings')} disabled={!isPremium}>Ganhos</Button>
-                            <Button variant={importTarget === 'fuel' ? 'default' : 'outline'} onClick={() => setImportTarget('fuel')} disabled={!isPremium}>Combustível</Button>
+                            <Button variant={importTarget === 'earnings' ? 'default' : 'outline'} onClick={() => setImportTarget('earnings')} disabled={!isPro}>Ganhos</Button>
+                            <Button variant={importTarget === 'fuel' ? 'default' : 'outline'} onClick={() => setImportTarget('fuel')} disabled={!isPro}>Combustível</Button>
                         </div>
                      </div>
-                     <Button onClick={handleAddItem} className="w-full sm:w-auto self-end" disabled={!isPremium || !newItemName}>
-                        {isPremium ? <PlusCircle className="mr-2 h-4 w-4"/> : <Lock className="mr-2 h-4 w-4"/>}
+                     <Button onClick={handleAddItem} className="w-full sm:w-auto self-end" disabled={!isPro || !newItemName}>
+                        {!isPro ? <Lock className="mr-2 h-4 w-4"/> : <PlusCircle className="mr-2 h-4 w-4"/>}
                         Adicionar
                     </Button>
                 </div>
-                 {!isPremium && (
+                 {!isPro && (
                     <Link href="/premium">
-                        <Button variant="link" className="p-0 h-auto">Desbloquear com Premium</Button>
+                        <Button variant="link" className="p-0 h-auto">Desbloquear com Pro</Button>
                     </Link>
                 )}
             </CardContent>

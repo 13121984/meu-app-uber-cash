@@ -43,7 +43,7 @@ interface MaintenanceFormProps {
 
 export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps) {
   const { user } = useAuth();
-  const isPremium = user?.isPremium || false;
+  const isAutopilot = user?.plan === 'autopilot';
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<MaintenanceFormData>({
@@ -64,15 +64,16 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
   });
 
   const onSubmit = async (data: MaintenanceFormData) => {
+    if (!user) return;
     setIsSubmitting(true);
     try {
       let result;
       const dataToSend = { ...data };
 
       if (initialData?.id) {
-        result = await updateMaintenance(initialData.id, dataToSend);
+        result = await updateMaintenance(user.id, initialData.id, dataToSend);
       } else {
-        result = await addMaintenance(dataToSend);
+        result = await addMaintenance(user.id, dataToSend);
       }
 
       if (result.success && result.id) {
@@ -233,7 +234,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
                     <BellRing className="h-5 w-5 text-primary" />
                     Lembrete de Manutenção
                  </h3>
-                 {!isPremium && <Link href="/premium"><Button variant="link" size="sm" className="text-amber-500"><Lock className="mr-1 h-3 w-3"/> Premium</Button></Link>}
+                 {!isAutopilot && <Link href="/premium"><Button variant="link" size="sm" className="text-amber-500"><Lock className="mr-1 h-3 w-3"/> Autopilot</Button></Link>}
             </div>
             
              <FormField
@@ -249,7 +250,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
                             {...field}
                             value={field.value || ''}
                             onChange={e => field.onChange(parseInt(e.target.value) || null)}
-                            disabled={!isPremium}
+                            disabled={!isAutopilot}
                         />
                     </FormControl>
                     <FormMessage />
@@ -271,7 +272,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
                                 {...field}
                                 value={field.value || ''}
                                 onChange={e => field.onChange(parseInt(e.target.value) || null)}
-                                disabled={!isPremium}
+                                disabled={!isAutopilot}
                             />
                         </FormControl>
                         <FormMessage />
@@ -293,7 +294,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
                                     "w-full pl-3 text-left font-normal",
                                     !field.value && "text-muted-foreground"
                                 )}
-                                 disabled={!isPremium}
+                                 disabled={!isAutopilot}
                                 >
                                 {field.value ? (
                                     format(field.value, "PPP", { locale: ptBR })

@@ -18,7 +18,7 @@ function PremiumUpgradeScreen() {
              </div>
             <h1 className="text-3xl font-bold font-headline text-primary">Decida em Segundos com o TX IA</h1>
             <p className="text-muted-foreground max-w-lg">
-                O TX IA é um recurso Premium que lê o print da sua corrida e diz se ela vale a pena com base nas SUAS metas. Chega de aceitar corridas no prejuízo!
+                O TX IA é um recurso dos planos Pro e Autopilot que lê o print da sua corrida e diz se ela vale a pena com base nas SUAS metas. Chega de aceitar corridas no prejuízo!
             </p>
             <Card className="bg-secondary">
                  <CardContent className="p-4">
@@ -32,7 +32,7 @@ function PremiumUpgradeScreen() {
             <Link href="/premium" passHref>
                 <Button size="lg">
                     <Lock className="mr-2 h-4 w-4" />
-                    Desbloquear com Premium
+                    Desbloquear com Pro ou Autopilot
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
             </Link>
@@ -42,7 +42,7 @@ function PremiumUpgradeScreen() {
 
 
 export default function AnalisadorPage() {
-  const { user, loading } = useAuth();
+  const { isPro, loading } = useAuth();
   
   if (loading) {
       return (
@@ -52,7 +52,7 @@ export default function AnalisadorPage() {
       );
   }
 
-  if (!user?.isPremium) {
+  if (!isPro) {
       return <PremiumUpgradeScreen />
   }
   
