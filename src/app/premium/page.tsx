@@ -53,7 +53,7 @@ export default function PremiumPage() {
           <Crown className="mx-auto h-16 w-16 text-yellow-500" />
           <h1 className="text-5xl font-bold font-headline text-foreground">Seja um Assinante Premium</h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
-            Desbloqueie todo o potencial do Uber Cash e leve seu controle financeiro para o próximo nível.
+            Desbloqueie todo o potencial do Rota Certa e leve seu controle financeiro para o próximo nível.
           </p>
         </div>
 
