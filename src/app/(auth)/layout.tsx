@@ -15,7 +15,7 @@ export default function AuthLayout({
                 <AppLogo className="h-16 w-16 text-primary-foreground" />
             </div>
             <h1 className="text-4xl font-bold font-headline mt-4">Uber Cash</h1>
-            <p className="text-muted-foreground">Sua rota certa para o sucesso.</p>
+            <p className="text-muted-foreground">Sua rota para o sucesso.</p>
         </div>
         {children}
       </div>

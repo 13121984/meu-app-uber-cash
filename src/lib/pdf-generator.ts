@@ -44,7 +44,7 @@ export const generatePdf = (data: ReportData, filters: ReportFilterValues) => {
 
     // --- Título ---
     doc.setFontSize(18);
-    doc.text('Relatório Financeiro - Rota Certa', 14, y);
+    doc.text('Relatório Financeiro - Uber Cash', 14, y);
     y += 8;
     doc.setFontSize(12);
     doc.text(`Período: ${getPeriodString(filters)}`, 14, y);
@@ -147,6 +147,6 @@ export const generatePdf = (data: ReportData, filters: ReportFilterValues) => {
     }
     
     // --- Salvar o PDF ---
-    const fileName = `Relatorio_RotaCerta_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+    const fileName = `Relatorio_UberCash_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
     doc.save(fileName);
 };

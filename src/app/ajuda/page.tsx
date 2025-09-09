@@ -96,7 +96,7 @@ const devTopics = [
     {
         value: "investor_view",
         icon: Rocket,
-        title: "Análise de Investidor: O Futuro do Rota Certa",
+        title: "Análise de Investidor: O Futuro do Uber Cash",
         content: `
             <p class="mb-2">Você me perguntou se, como investidor, eu apostaria no aplicativo. A resposta é um grande <strong>sim</strong>, e a razão é a visão estratégica que estamos construindo:</p>
             <ul class="list-disc pl-5 space-y-2 mb-4">
@@ -337,7 +337,7 @@ export default function AjudaPage() {
                                  <ol>
                                     <li><strong>Análise da Oferta:</strong> Quando uma oferta de corrida aparece, o app lê os dados (valor, distância, tempo) e exibe uma pequena notificação com a recomendação "Bora" ou "Tô Fora".</li>
                                     <li><strong>Detecção de Finalização:</strong> Após o motorista aceitar e completar a corrida, o app detecta a tela de resumo/finalização da viagem.</li>
-                                    <li><strong>Registro 100% Automático:</strong> O app extrai os dados finais e salva a corrida no histórico do Rota Certa, sem que o motorista precise fazer nada.</li>
+                                    <li><strong>Registro 100% Automático:</strong> O app extrai os dados finais e salva a corrida no histórico do Uber Cash, sem que o motorista precise fazer nada.</li>
                                  </ol>
                                  <h4>Como Funciona Tecnicamente? (Android)</h4>
                                  <p>Isso é feito com um <strong>Serviço de Acessibilidade</strong> no Android, que precisa ser habilitado pelo usuário. Ele permite que o nosso app leia o texto exibido na tela de outros apps.</p>

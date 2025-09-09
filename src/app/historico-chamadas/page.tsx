@@ -51,13 +51,13 @@ function RideOfferSimulation() {
                  <Button className="w-full mt-4 bg-slate-800 dark:bg-slate-200 text-white dark:text-black hover:bg-slate-700">Selecionar</Button>
             </div>
 
-            {/* Overlay de Análise do Rota Certa */}
+            {/* Overlay de Análise do Uber Cash */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5">
                 <Card className="bg-background/80 dark:bg-card/80 backdrop-blur-md border-2 border-primary shadow-2xl animate-fade-in">
                     <CardHeader className="p-3 text-center">
                         <CardTitle className="flex items-center justify-center gap-2 text-primary font-headline text-2xl">
                             <Sparkles className="h-6 w-6"/>
-                            Análise Rota Certa
+                            Análise Uber Cash
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-3 pt-0">
