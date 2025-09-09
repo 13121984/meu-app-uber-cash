@@ -22,7 +22,7 @@ export default function HistoricoChamadasPage() {
 
       <Card>
         <CardHeader>
-            <CardTitle>A Solução para a Decisão de 7 Segundos</CardTitle>
+            <CardTitle>A Solução para a Decisão de Poucos Segundos</CardTitle>
             <CardDescription>
                 Sabemos que você tem poucos segundos para aceitar uma corrida. A análise automática resolve isso.
             </CardDescription>
