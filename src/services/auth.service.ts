@@ -4,6 +4,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { getUserDataPath } from './storage.service';
+import type { AppTheme } from '@/types/settings';
 
 // --- Tipos e Interfaces ---
 
@@ -40,6 +41,8 @@ export interface UserPreferences {
     taximeterRates?: TaximeterRates;
     analyzerRates?: AnalyzerRates;
     lastTaximeterUse?: string; // Data do último uso do taxímetro para usuários gratuitos
+    colorTheme?: string; // ex: 'orange', 'blue'
+    theme?: AppTheme;
 }
 
 export interface User {
@@ -115,6 +118,8 @@ export async function signup(userId: string, password: string, securityAnswers: 
         preferences: { // Preferências padrão
             reportChartOrder: [],
             dashboardCardOrder: [],
+            colorTheme: 'orange', // Cor padrão
+            theme: 'dark' // Tema padrão
         },
     };
 
@@ -147,6 +152,7 @@ export async function login(userId: string, password: string): Promise<{ success
 
 
 export async function getUserById(userId: string): Promise<User | null> {
+    if (!userId) return null;
     const users = await getUsers();
     return users.find(u => u.id.toLowerCase() === userId.toLowerCase()) || null;
 }

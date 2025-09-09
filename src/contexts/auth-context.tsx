@@ -2,8 +2,9 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
-import { login as loginService, signup as signupService, User, SecurityAnswer, getUserById, Plan } from '@/services/auth.service';
+import { login as loginService, signup as signupService, User, SecurityAnswer, getUserById, Plan, updateUserPreferences } from '@/services/auth.service';
 import { clearAllDataForUser } from '@/services/work-day.service';
+import type { AppTheme } from '@/types/settings';
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +15,8 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
   isPro: boolean;
   isAutopilot: boolean;
+  setColorTheme: (theme: string) => Promise<void>;
+  setTheme: (theme: AppTheme) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -125,14 +128,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('rota-certa-user');
     }
   };
+  
+  const setColorTheme = async (colorTheme: string) => {
+    if (user) {
+      await updateUserPreferences(user.id, { colorTheme });
+      await refreshUser();
+    }
+  };
+
+  const setTheme = async (theme: AppTheme) => {
+      if(user) {
+        await updateUserPreferences(user.id, { theme });
+        await refreshUser();
+      }
+  }
 
   // Para simplificar a depuração e eliminar erros de permissão, temporariamente tratamos
   // todos os usuários como tendo o plano máximo (Autopilot).
-  const isPro = true;
-  const isAutopilot = true;
+  const isPro = true; // user?.plan === 'pro' || user?.plan === 'autopilot';
+  const isAutopilot = true; // user?.plan === 'autopilot';
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser, isPro, isAutopilot }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser, isPro, isAutopilot, setColorTheme, setTheme }}>
       {children}
     </AuthContext.Provider>
   );

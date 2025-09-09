@@ -12,6 +12,7 @@ import { LayoutCustomizationCard } from './layout-customization-card';
 import { useAuth } from '@/contexts/auth-context';
 import { HelpAndSupportCard } from './help-and-support-card';
 import { RaceAnalyzerCard } from './race-analyzer-card';
+import { ColorThemeCard } from './color-theme-card';
 
 export function ConfiguracoesClient() {
     const { user } = useAuth();
@@ -21,6 +22,7 @@ export function ConfiguracoesClient() {
             <UserProfileCard />
             <VehicleManagerCard />
             <SettingsForm />
+            <ColorThemeCard />
             <LayoutCustomizationCard />
             <RaceAnalyzerCard />
             <HelpAndSupportCard />
@@ -31,5 +33,3 @@ export function ConfiguracoesClient() {
         </div>
     )
 }
-
-    

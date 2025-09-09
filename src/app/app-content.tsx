@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/auth-context';
 import { TopBar } from '@/components/layout/top-bar';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getSettings } from '@/services/settings.service';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { VehicleSetup } from '@/components/configuracoes/vehicle-setup';
@@ -20,15 +19,13 @@ export function AppContent({
   const searchParams = useSearchParams();
   const router = useRouter();
   const [theme, setTheme] = useState('dark');
+  const [colorTheme, setColorTheme] = useState('orange');
   const [isInitialSetup, setIsInitialSetup] = useState(false);
 
   useEffect(() => {
     if (user) {
-      // Set theme based on user preferences
-      getSettings(user.id).then(settings => {
-        setTheme(settings.theme);
-      });
-      // Check for vehicle setup condition only if user is logged in
+      setTheme(user.preferences.theme || 'dark');
+      setColorTheme(user.preferences.colorTheme || 'orange');
       const setupParam = searchParams.get('setup');
       if (setupParam === 'true' && user.vehicles.length === 0) {
         setIsInitialSetup(true);
@@ -36,22 +33,20 @@ export function AppContent({
         setIsInitialSetup(false);
       }
     } else {
-      // If no user, ensure setup screen is not shown
       setIsInitialSetup(false);
     }
   }, [user, searchParams, pathname]);
 
   useEffect(() => {
-    // Apply theme to HTML element
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-  }, [theme]);
+    root.setAttribute('data-color-theme', colorTheme);
+  }, [theme, colorTheme]);
   
   const isAuthPage = pathname === '/login' || pathname === '/cadastro' || pathname === '/recuperar';
 
   useEffect(() => {
-    // If not loading, no user, and not on an auth page, redirect to login.
     if (!loading && !user && !isAuthPage) {
       router.replace('/login');
     }
@@ -65,18 +60,14 @@ export function AppContent({
     );
   }
 
-  // Render vehicle setup flow if required. This is now safe because it only runs
-  // after the user object is confirmed to exist.
   if (isInitialSetup) {
       return <VehicleSetup />;
   }
 
-  // If on an auth page, render content directly
   if (isAuthPage) {
     return <>{children}</>;
   }
   
-  // If user is not logged in yet (and redirect hasn't happened), show a loader or nothing
   if (!user) {
     return (
         <div className="flex min-h-screen items-center justify-center bg-background">
@@ -85,7 +76,6 @@ export function AppContent({
     );
   }
   
-  // Render the main app layout for authenticated users
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background">
       <TopBar />

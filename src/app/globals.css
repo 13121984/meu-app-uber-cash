@@ -1,68 +1,92 @@
 
-@import "react-day-picker/dist/style.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'PT Sans', sans-serif;
-}
-
 @layer base {
+  :root, [data-color-theme="orange"] {
+    --primary-hue: 34.9;
+    --primary-saturation: 99.3%;
+    --primary-lightness: 49.4%;
+    --accent-lightness: 59.4%;
+    --accent-dark-lightness: 39.4%;
+  }
+  [data-color-theme="blue"] {
+    --primary-hue: 217.2;
+    --primary-saturation: 91.2%;
+    --primary-lightness: 59.8%;
+    --accent-lightness: 69.8%;
+    --accent-dark-lightness: 49.8%;
+  }
+  [data-color-theme="green"] {
+    --primary-hue: 142.1;
+    --primary-saturation: 76.2%;
+    --primary-lightness: 36.3%;
+    --accent-lightness: 46.3%;
+    --accent-dark-lightness: 26.3%;
+  }
+  [data-color-theme="purple"] {
+    --primary-hue: 262.1;
+    --primary-saturation: 83.3%;
+    --primary-lightness: 57.8%;
+    --accent-lightness: 67.8%;
+    --accent-dark-lightness: 47.8%;
+  }
+
   :root {
-    --background: 240 10% 98%; 
-    --foreground: 240 10% 10%;
-    --card: 240 10% 100%;
-    --card-foreground: 240 10% 10%;
-    --popover: 240 10% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 34.9 99.3% 49.4%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 34.9 99.3% 59.4%;
-    --accent-foreground: 210 20% 98%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: var(--primary-hue) var(--primary-saturation) var(--accent-lightness);
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 34.9 99.3% 49.4%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
     --radius: 0.75rem;
 
     --chart-1: 142.1 76.2% 36.3%; /* Green */
     --chart-2: 0 84.2% 60.2%; /* Red */
     --chart-3: 204 90% 50%; /* Blue */
-    --chart-4: 34.9 99.3% 59.4%; /* Orange */
+    --chart-4: var(--primary); /* Orange */
     --chart-5: 262.1 83.3% 57.8%; /* Purple */
   }
  
   .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 24 9.8% 10%;
-    --card-foreground: 210 20% 98%;
-    --popover: 20 14.3% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 34.9 99.3% 49.4%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 34.9 99.3% 39.4%;
-    --accent-foreground: 210 20% 98%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: var(--primary-hue) var(--primary-saturation) var(--accent-dark-lightness);
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 34.9 99.3% 49.4%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
 
     --chart-1: 142.1 76.2% 36.3%; /* Green */
     --chart-2: 0 72.2% 50.6%; /* Red */
     --chart-3: 204 90% 50%; /* Blue */
-    --chart-4: 34.9 99.3% 59.4%; /* Orange */
+    --chart-4: var(--primary); /* Orange */
     --chart-5: 262.1 83.3% 57.8%; /* Purple */
   }
 }
@@ -73,5 +97,9 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'PT Sans', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6, .font-headline {
+    font-family: 'Poppins', sans-serif;
   }
 }
