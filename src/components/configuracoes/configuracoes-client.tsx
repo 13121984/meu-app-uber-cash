@@ -12,6 +12,7 @@ import { LayoutCustomizationCard } from './layout-customization-card';
 import { useAuth } from '@/contexts/auth-context';
 import { HelpAndSupportCard } from './help-and-support-card';
 import { AndroidGuideCard } from './android-guide-card';
+import { RaceAnalyzerCard } from './race-analyzer-card';
 
 export function ConfiguracoesClient() {
     const { user } = useAuth();
@@ -23,12 +24,13 @@ export function ConfiguracoesClient() {
             <VehicleManagerCard />
             <SettingsForm />
             <LayoutCustomizationCard />
+            <RaceAnalyzerCard />
             <HelpAndSupportCard />
             <DemoDataCard />
             <BackupCard />
             <CatalogManagerCard isPremium={isPremium} />
             <ImportCard />
-            {isPremium && <AndroidGuideCard />}
+            {user?.id === 'Paulo Vitor Tiburcio ' && <AndroidGuideCard />}
         </div>
     )
 }
