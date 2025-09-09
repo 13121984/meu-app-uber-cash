@@ -1,8 +1,21 @@
 
-import { Settings, Car, Palette, Trash2, User } from 'lucide-react';
-import { ConfiguracoesClient } from '@/components/configuracoes/configuracoes-client';
+"use client";
 
-export default async function ConfiguracoesPage() {
+import { Settings } from 'lucide-react';
+import { ConfiguracoesClient } from '@/components/configuracoes/configuracoes-client';
+import { useAuth } from '@/contexts/auth-context';
+import { Loader2 } from 'lucide-react';
+
+export default function ConfiguracoesPage() {
+  const { loading } = useAuth();
+
+  if (loading) {
+      return (
+          <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </div>
+      );
+  }
   
   return (
     <div className="space-y-6">

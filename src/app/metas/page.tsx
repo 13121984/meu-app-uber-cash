@@ -1,12 +1,24 @@
+
+"use client";
+
 import { GoalPlanner } from '@/components/metas/goal-planner';
 import { FinancialGoalCalculator } from '@/components/metas/financial-goal-calculator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card } from '@/components/ui/card';
-import { Target, Calculator, Wallet } from 'lucide-react';
+import { Target, Calculator, Wallet, Loader2 } from 'lucide-react';
 import { PersonalExpenseTracker } from '@/components/metas/personal-expense-tracker';
 import { FinancialSummary } from '@/components/metas/financial-summary';
+import { useAuth } from '@/contexts/auth-context';
 
-export default async function MetasPage() {
+export default function MetasPage() {
+    const { loading } = useAuth();
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        );
+    }
   return (
     <div className="space-y-6">
       <div>
@@ -76,5 +88,3 @@ export default async function MetasPage() {
     </div>
   );
 }
-
-    

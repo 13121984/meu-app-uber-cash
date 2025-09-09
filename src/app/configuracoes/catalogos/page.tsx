@@ -1,12 +1,31 @@
+
+"use client";
+
 import { CatalogManager } from '@/components/configuracoes/catalog-manager';
-import { BookCopy } from 'lucide-react';
+import { BookCopy, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { getCatalog } from '@/services/catalog.service';
+import { getCatalog, type Catalog } from '@/services/catalog.service';
+import { useState, useEffect } from 'react';
 
-export default async function GerenciarCatalogosPage() {
-  const initialCatalog = await getCatalog();
+export default function GerenciarCatalogosPage() {
+  const [initialCatalog, setInitialCatalog] = useState<Catalog | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    getCatalog().then(data => {
+      setInitialCatalog(data);
+      setIsLoading(false);
+    });
+  }, []);
+
+  if (isLoading || !initialCatalog) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">

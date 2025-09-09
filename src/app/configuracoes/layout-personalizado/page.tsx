@@ -1,13 +1,12 @@
 
-import { LayoutDashboard } from 'lucide-react';
+"use client";
+
+import { LayoutDashboard, ArrowLeft } from 'lucide-react';
 import { LayoutCustomizationClient } from '@/components/configuracoes/layout-customization-client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 
-
-export default async function LayoutPersonalizadoPage() {
-
+export default function LayoutPersonalizadoPage() {
   return (
     <div className="space-y-6">
        <div className="flex items-center gap-4">
