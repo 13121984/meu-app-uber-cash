@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, TrendingDown, Wallet, Plus, Minus, Equal } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Equal } from 'lucide-react';
 import { getSummaryForPeriod } from '@/services/summary.service';
 import { getCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
 
@@ -12,7 +12,7 @@ const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 
-const StatCard = ({ title, value, icon: Icon, className, description, variant }: { title: string, value: string, icon: React.ElementType, className?: string, description: string, variant: 'income' | 'expense' | 'net' }) => {
+const StatCard = ({ title, value, icon: Icon, description, variant }: { title: string, value: string, icon: React.ElementType, description: string, variant: 'income' | 'expense' | 'net' }) => {
     const colors = {
         income: "text-green-500",
         expense: "text-red-500",
@@ -43,6 +43,8 @@ export function FinancialSummary() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                // For simplicity, we create a function that fetches both and updates state
+                // This could be further optimized with a dedicated backend endpoint in a real app
                 const [summary, expenses] = await Promise.all([
                     getSummaryForPeriod(),
                     getCurrentMonthPersonalExpensesTotal()
@@ -134,4 +136,3 @@ export function FinancialSummary() {
         </Card>
     );
 }
-
