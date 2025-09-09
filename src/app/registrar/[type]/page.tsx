@@ -9,6 +9,13 @@ import { useAuth } from '@/contexts/auth-context';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
+// Adicionado para corrigir o erro de compilação estática
+export async function generateStaticParams() {
+  return [
+    { type: 'today' },
+    { type: 'other-day' },
+  ]
+}
 
 export default function RegistrarPage() {
   const { user, loading } = useAuth();
