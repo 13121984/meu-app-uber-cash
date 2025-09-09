@@ -10,11 +10,14 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-secondary p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-            <div className="mx-auto h-24 w-24 rounded-2xl bg-primary flex items-center justify-center border-4 border-primary-foreground/50 shadow-lg">
-                <AppLogo className="h-16 w-16 text-primary-foreground" />
+        <div className="flex flex-col items-center text-center">
+            <div className="relative">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-float">
+                <AppLogo className="h-16 w-16 text-white" />
+              </div>
+              <div className="absolute -inset-2 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-3xl blur-xl opacity-60"></div>
             </div>
-            <h1 className="text-4xl font-bold font-headline mt-4">Uber Cash</h1>
+            <h1 className="text-4xl font-bold font-headline mt-6">Uber Cash</h1>
             <p className="text-muted-foreground">Sua rota para o sucesso.</p>
         </div>
         {children}

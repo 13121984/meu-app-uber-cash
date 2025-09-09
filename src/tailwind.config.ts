@@ -82,12 +82,17 @@ export default {
         'confetti-fall': {
           '0%': { transform: 'translateY(0)', opacity: '1' },
           '100%': { transform: 'translateY(100vh)', opacity: '0' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'confetti-rain': 'confetti-rain 2s linear infinite',
+        'float': 'float 3s ease-in-out infinite',
       },
     },
   },
