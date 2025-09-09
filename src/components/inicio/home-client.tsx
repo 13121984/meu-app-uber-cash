@@ -11,6 +11,8 @@ import { getTodayData, PeriodData } from "@/services/summary.service";
 import { Skeleton } from "../ui/skeleton";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
+import { MaintenanceReminderCard } from "./maintenance-reminder-card";
+import { getMaintenanceRecords } from "@/services/maintenance.service";
 
 const mainActions = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, iconColor: "text-yellow-500" },
@@ -69,9 +71,11 @@ export function HomeClient() {
   return (
     <div className="space-y-8 animate-fade-in">
         <div className="space-y-2">
-            <h1 className="text-5xl font-bold font-headline text-foreground">Rota Certa</h1>
+            <h1 className="text-5xl font-bold font-headline text-foreground">Uber Cash</h1>
             <p className="text-muted-foreground text-lg">Sua rota certa para o sucesso.</p>
         </div>
+
+        <MaintenanceReminderCard />
         
         {/* Card de Registro Unificado */}
         <Card className="bg-primary/10 border-primary/20">

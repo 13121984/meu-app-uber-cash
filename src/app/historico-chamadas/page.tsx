@@ -22,7 +22,7 @@ export default function HistoricoChamadasPage() {
           Captura Automática de Corridas
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mt-2">
-          Deixe o trabalho manual para trás. Nossa próxima grande funcionalidade permitirá que o Rota Certa registre seus ganhos da Uber e 99 automaticamente, com sua permissão.
+          Deixe o trabalho manual para trás. Nossa próxima grande funcionalidade permitirá que o Uber Cash registre seus ganhos da Uber e 99 automaticamente, com sua permissão.
         </p>
       </div>
 
@@ -57,7 +57,7 @@ export default function HistoricoChamadasPage() {
             </CardHeader>
             <CardContent>
                 <p className="text-green-800 dark:text-green-300">
-                    Esta funcionalidade será **opcional** e só funcionará com a **sua permissão explícita**. Seus dados de corrida nunca sairão do seu aparelho. O Rota Certa não terá acesso às suas senhas ou qualquer outra informação pessoal.
+                    Esta funcionalidade será **opcional** e só funcionará com a **sua permissão explícita**. Seus dados de corrida nunca sairão do seu aparelho. O Uber Cash não terá acesso às suas senhas ou qualquer outra informação pessoal.
                 </p>
             </CardContent>
        </Card>
