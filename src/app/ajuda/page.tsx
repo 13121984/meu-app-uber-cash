@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare } from "lucide-react";
+import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -60,13 +60,13 @@ const helpTopics = [
     value: "taximetro",
     icon: Calculator,
     title: "Para que serve o Taxímetro Inteligente?",
-    content: "O Taxímetro Inteligente é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Usuários gratuitos podem usar o taxímetro uma vez por semana, enquanto assinantes Pro ou Autopilot têm acesso ilimitado.",
+    content: "O Taxímetro Inteligente é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Usuários do plano Básico podem usar o taxímetro uma vez por semana, enquanto assinantes Pro ou Autopilot têm acesso ilimitado.",
   },
    {
     value: "layout",
     icon: LayoutDashboard,
     title: "Posso personalizar o layout dos relatórios?",
-    content: "Sim. Usuários do plano gratuito podem reordenar os cards e gráficos padrão. Assinantes Pro ou Autopilot podem, além de reordenar, adicionar e remover todos os cards e gráficos disponíveis para uma personalização completa.",
+    content: "Sim. Usuários do plano Básico podem reordenar os cards e gráficos padrão. Assinantes Pro ou Autopilot podem, além de reordenar, adicionar e remover todos os cards e gráficos disponíveis para uma personalização completa.",
     isPremiumFeature: true
   },
   {
@@ -202,7 +202,8 @@ export default function AjudaPage() {
                                        <li><strong>src/components:</strong> Contém os "pedaços" da interface (ex: botões, cards).</li>
                                        <li><strong>src/services:</strong> Lógica de "backend" para ler/salvar dados dos arquivos JSON.</li>
                                        <li><strong>src/ai:</strong> Fluxos de IA com Genkit (o cérebro das análises).</li>
-                                       <li><strong>data:</strong> Arquivos .json onde os dados são salvos.</li>
+                                       <li><strong>data:</strong> Contém arquivos JSON globais como o de usuários (`users.json`) e o de catálogos (`catalog.json`).</li>
+                                        <li><strong>data/user-data/[userId]:</strong> Contém os dados específicos de cada usuário (dias de trabalho, metas, configurações). Essa estrutura garante que os dados de um usuário não interfiram nos de outro.</li>
                                    </ul>
                                    <h4>Como Falar Comigo</h4>
                                    <p>Para me pedir para fazer alterações, basta me dizer o que você quer em linguagem natural. Por exemplo: "Adicione um novo card no dashboard para mostrar o total de viagens." Eu vou entender, criar um plano e gerar o código XML necessário para aplicar as mudanças. Você não precisa escrever o XML.</p>
@@ -248,7 +249,7 @@ export default function AjudaPage() {
                                                 <li>Receber a notificação da Hotmart.</li>
                                                 <li>Verificar a assinatura para segurança.</li>
                                                 <li>Encontrar o usuário no seu <code>users.json</code> pelo e-mail.</li>
-                                                <li>Mudar o status <code>isPremium</code> do usuário para <code>true</code>.</li>
+                                                <li>Mudar o status <code>plan</code> do usuário para `pro` ou `autopilot`.</li>
                                             </ul>
                                         </li>
                                          <li><strong>Configurar na Hotmart:</strong> Na sua conta da Hotmart, vá nas configurações do produto e adicione a URL da sua Firebase Function no campo de Webhook (ou "Postback URL").</li>
