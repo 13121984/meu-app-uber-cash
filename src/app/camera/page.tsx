@@ -2,13 +2,46 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Video, VideoOff, AlertTriangle, Shield, Loader2 } from 'lucide-react';
+import { Camera, Video, VideoOff, AlertTriangle, Shield, Loader2, Gem, Lock, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/auth-context';
+import Link from 'next/link';
 
-export default function CameraPage() {
+function PremiumUpgradeScreen() {
+    return (
+        <div className="flex flex-col items-center justify-center p-4 text-center space-y-6">
+             <div className="relative w-48 h-48">
+                 <Camera className="absolute w-24 h-24 text-muted-foreground/30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                 <Gem className="absolute w-16 h-16 text-yellow-500 bottom-0 right-0 animate-pulse" />
+             </div>
+            <h1 className="text-3xl font-bold font-headline text-primary">Mais Segurança para Suas Viagens</h1>
+            <p className="text-muted-foreground max-w-lg">
+                Use a Câmera de Segurança para gravar suas corridas diretamente pelo aplicativo. Um recurso Premium para sua tranquilidade e proteção.
+            </p>
+            <Card className="bg-secondary">
+                 <CardContent className="p-4">
+                     <ul className="text-left space-y-2">
+                         <li className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Gravação de vídeo e áudio com um toque.</li>
+                         <li className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Salve as gravações diretamente no seu dispositivo.</li>
+                         <li className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" /> Tenha provas em caso de incidentes.</li>
+                     </ul>
+                 </CardContent>
+            </Card>
+            <Link href="/premium" passHref>
+                <Button size="lg">
+                    <Lock className="mr-2 h-4 w-4" />
+                    Desbloquear com Premium
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+            </Link>
+        </div>
+    )
+}
+
+function CameraFeature() {
   const [isRecording, setIsRecording] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -17,7 +50,6 @@ export default function CameraPage() {
 
   useEffect(() => {
     const getCameraPermission = async () => {
-      // Check for mediaDevices support
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         toast({
           variant: 'destructive',
@@ -27,14 +59,10 @@ export default function CameraPage() {
         setHasCameraPermission(false);
         return;
       }
-
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         setHasCameraPermission(true);
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
+        if (videoRef.current) videoRef.current.srcObject = stream;
       } catch (error) {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
@@ -45,21 +73,16 @@ export default function CameraPage() {
         });
       }
     };
-
     getCameraPermission();
   }, []);
 
   const handleStartRecording = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
+    if (videoRef.current?.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       mediaRecorderRef.current = new MediaRecorder(stream);
-      
       mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          recordedChunksRef.current.push(event.data);
-        }
+        if (event.data.size > 0) recordedChunksRef.current.push(event.data);
       };
-      
       mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
@@ -71,7 +94,6 @@ export default function CameraPage() {
         window.URL.revokeObjectURL(url);
         recordedChunksRef.current = [];
       };
-
       recordedChunksRef.current = [];
       mediaRecorderRef.current.start();
       setIsRecording(true);
@@ -96,7 +118,6 @@ export default function CameraPage() {
         </div>
       );
     }
-
     if (!hasCameraPermission) {
       return (
         <Alert variant="destructive">
@@ -108,7 +129,6 @@ export default function CameraPage() {
         </Alert>
       );
     }
-
     return (
       <>
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden border">
@@ -142,13 +162,11 @@ export default function CameraPage() {
         </h1>
         <p className="text-muted-foreground">Grave suas viagens para ter mais segurança no dia a dia.</p>
       </div>
-
       <Card>
         <CardContent className="p-6 space-y-4">
           {renderContent()}
         </CardContent>
       </Card>
-
       <Card className="bg-amber-500/10 border-amber-500/20">
          <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -164,7 +182,24 @@ export default function CameraPage() {
             </ul>
          </CardContent>
       </Card>
-
     </div>
   );
+}
+
+export default function CameraPage() {
+    const { user, loading } = useAuth();
+  
+    if (loading) {
+      return (
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      );
+    }
+  
+    if (!user?.isPremium) {
+        return <PremiumUpgradeScreen />
+    }
+
+    return <CameraFeature />;
 }

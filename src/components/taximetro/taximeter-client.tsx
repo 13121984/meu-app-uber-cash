@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, Settings, Lock, CalculatorIcon, Check } from 'lucide-react';
+import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, Settings, Lock, CalculatorIcon, Check, ArrowRight } from 'lucide-react';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { toast } from '@/hooks/use-toast';
 import { updateUserPreferences, TaximeterRates, UserPreferences } from '@/services/auth.service';
@@ -29,8 +29,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from '../ui/label';
 import { addOrUpdateWorkDay } from '@/services/work-day.service';
-import { isAfter, add } from 'date-fns';
-
+import { isAfter, add, formatDistanceToNowStrict } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 // Helper para calcular a distância (fórmula de Haversine)
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -96,7 +96,7 @@ function FareEstimator({ rates }: { rates: TaximeterRates }) {
 }
 
 export function TaximeterClient() {
-    const { user, refreshUser } = useAuth();
+    const { user, loading, refreshUser } = useAuth();
     const [status, setStatus] = useState<'idle' | 'running' | 'paused'>('idle');
     const [distance, setDistance] = useState(0); // em km
     const [time, setTime] = useState(0); // em segundos
@@ -110,7 +110,6 @@ export function TaximeterClient() {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [finalRideData, setFinalRideData] = useState<{distance: number, time: number, cost: number} | null>(null);
 
-    
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const watchId = useRef<string | null>(null);
 
@@ -126,19 +125,23 @@ export function TaximeterClient() {
     }, [distance, time, rates]);
 
 
-    const canUseTaximeter = () => {
-        if (!user) return false;
-        if (user.isPremium) return true;
+    const checkUsage = () => {
+        if (!user) return { canUse: false, timeLeft: '' };
+        if (user.isPremium) return { canUse: true, timeLeft: '' };
         
         const lastUse = user.preferences.lastTaximeterUse;
-        if (!lastUse) return true; // Never used before
+        if (!lastUse) return { canUse: true, timeLeft: '' }; // Never used before
 
         const lastUseDate = new Date(lastUse);
         const nextAllowedUse = add(lastUseDate, { weeks: 1 });
         
-        return isAfter(new Date(), nextAllowedUse);
+        const canUse = isAfter(new Date(), nextAllowedUse);
+        const timeLeft = canUse ? '' : formatDistanceToNowStrict(nextAllowedUse, { locale: ptBR, unit: 'day' });
+
+        return { canUse, timeLeft };
     };
 
+    const usageStatus = checkUsage();
 
     const startTracking = useCallback(async () => {
         try {
@@ -189,8 +192,8 @@ export function TaximeterClient() {
     };
     
     const startRide = async () => {
-        if (!canUseTaximeter()) {
-            toast({ title: "Limite Atingido", description: "Usuários gratuitos podem usar o taxímetro uma vez por semana.", variant: "destructive"});
+        if (!usageStatus.canUse) {
+            toast({ title: "Limite Atingido", description: `Você poderá usar o taxímetro novamente em aproximadamente ${usageStatus.timeLeft}.`, variant: "destructive"});
             return;
         }
         
@@ -285,14 +288,29 @@ export function TaximeterClient() {
         setIsSaving(false);
     }
 
-    if (!canUseTaximeter()) {
+     if (loading) {
+      return (
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      );
+    }
+
+    if (!usageStatus.canUse) {
         return (
-             <Card className="text-center p-8 border-dashed">
+             <Card className="text-center p-8 space-y-4">
                  <Lock className="mx-auto h-12 w-12 text-primary mb-4"/>
                 <CardTitle>Uso Semanal Esgotado</CardTitle>
-                <CardDescription className="my-2">Você já utilizou o taxímetro esta semana.</CardDescription>
+                <CardDescription className="my-2">
+                    Usuários gratuitos podem usar o taxímetro uma vez por semana para corridas particulares.
+                    <br/>
+                    Seu próximo uso estará disponível em aproximadamente <strong className="text-primary">{usageStatus.timeLeft}</strong>.
+                </CardDescription>
                 <Link href="/premium">
-                    <Button>Seja Premium para uso ilimitado</Button>
+                    <Button>
+                        Seja Premium para uso ilimitado
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
                 </Link>
              </Card>
         )
