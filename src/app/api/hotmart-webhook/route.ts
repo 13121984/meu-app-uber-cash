@@ -1,4 +1,3 @@
-
 // /src/app/api/hotmart-webhook/route.ts
 // ATENÇÃO: Este é um arquivo de exemplo e esqueleto.
 // Ele NÃO FUNCIONARÁ diretamente neste projeto estático.
@@ -13,8 +12,8 @@ const HOTMART_WEBHOOK_SECRET = process.env.HOTMART_WEBHOOK_SECRET || 'SUA_CHAVE_
 
 /**
  * Esta função de API (route handler do Next.js) simula um endpoint de webhook.
- * Ela recebe uma notificação da Hotmart, verifica sua autenticidade e, se for
- * uma compra aprovada, atualiza o status do usuário para premium.
+ * Ela recebe uma notificação da Hotmart, verifica sua autenticidade e, com base
+ * no status do evento (compra, cancelamento, reembolso), atualiza o status do usuário.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -39,14 +38,28 @@ export async function POST(req: NextRequest) {
     const event = payload.event;
     const data = payload.data;
     const userEmail = data?.buyer?.email;
-    const transactionStatus = data?.purchase?.status;
-
-    if (event !== 'PURCHASE_APPROVED' && event !== 'PURCHASE_COMPLETE') {
-      return NextResponse.json({ success: true, message: `Evento ${event} ignorado.` });
-    }
 
     if (!userEmail) {
       return NextResponse.json({ success: false, message: 'E-mail do comprador não encontrado no payload.' }, { status: 400 });
+    }
+
+    let isPremiumStatus: boolean;
+
+    switch (event) {
+        case 'PURCHASE_APPROVED':
+        case 'PURCHASE_COMPLETE':
+            isPremiumStatus = true;
+            break;
+
+        case 'PURCHASE_REFUNDED':
+        case 'PURCHASE_CANCELED':
+        case 'PURCHASE_CHARGEBACK':
+            isPremiumStatus = false;
+            break;
+        
+        default:
+            // Ignora outros eventos que não nos interessam (ex: boleto impresso)
+            return NextResponse.json({ success: true, message: `Evento ${event} ignorado.` });
     }
     
     // **PASSO 3: ATUALIZAR O USUÁRIO**
@@ -55,16 +68,16 @@ export async function POST(req: NextRequest) {
     // IMPORTANTE: Acessar o sistema de arquivos diretamente de uma função serverless é complexo e
     // geralmente requer o uso de um banco de dados como Firestore ou Realtime Database.
     
-    // Simulação:
-    console.log(`[Webhook Simulado] Procurando usuário com e-mail: ${userEmail}`);
+    console.log(`[Webhook Simulado] Evento: ${event}. Atualizando usuário ${userEmail} para isPremium: ${isPremiumStatus}`);
+    
     // O ideal é que o `id` do usuário no seu sistema seja o e-mail dele para facilitar a busca.
     // Como nosso `id` é um nome de usuário, a lógica real precisaria de um campo de e-mail no perfil do usuário.
     // Por enquanto, vamos assumir que o ID do usuário é o e-mail para fins de demonstração.
     
-    const result = await updateUser(userEmail, { isPremium: true });
+    const result = await updateUser(userEmail, { isPremium: isPremiumStatus });
 
     if (result.success) {
-      console.log(`[Webhook Simulado] Usuário ${userEmail} atualizado para Premium.`);
+      console.log(`[Webhook Simulado] Usuário ${userEmail} atualizado com sucesso.`);
       return NextResponse.json({ success: true });
     } else {
       console.error(`[Webhook Simulado] Falha ao atualizar o usuário ${userEmail}: ${result.error}`);
