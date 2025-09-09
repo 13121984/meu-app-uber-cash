@@ -1,22 +1,12 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, ArrowUpDown, Edit, Trash2, Loader2, Clock, Map } from "lucide-react"
-
+import { ArrowUpDown, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { WorkDay } from "@/services/work-day.service"
 import { EditWorkDayDialog } from "./edit-dialog"
-import { deleteFilteredWorkDaysAction } from "./actions"
 import { toast } from "@/hooks/use-toast"
 import {
   AlertDialog,
@@ -30,38 +20,30 @@ import {
 } from "@/components/ui/alert-dialog"
 import { format, parseISO } from "date-fns"
 import { ptBR } from 'date-fns/locale';
-import { cn } from "@/lib/utils"
+import { useAuth } from "@/contexts/auth-context"
+import { deleteFilteredWorkDaysAction } from "./actions"
 import type { GroupedWorkDay } from '@/components/gerenciamento/gerenciamento-client'
-
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export const useWorkDayColumns = () => {
-  // O estado agora armazena a data do dia a ser editado/deletado
+  const { user } = useAuth();
   const [editingDay, setEditingDay] = useState<GroupedWorkDay | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [dayToDelete, setDayToDelete] = useState<GroupedWorkDay | null>(null);
   
-
-  const handleDeleteClick = (e: React.MouseEvent, day: GroupedWorkDay) => {
-    e.stopPropagation(); 
-    setDayToDelete(day);
-    setIsAlertOpen(true);
-  }
-
   const handleEditClick = (e: React.MouseEvent, day: GroupedWorkDay) => {
     e.stopPropagation();
     setEditingDay(day);
   }
 
   const handleConfirmDelete = async () => {
-    if (!dayToDelete) return;
+    if (!dayToDelete || !user) return;
     setIsDeleting(true);
     try {
-      // Deleta todos os registros para a data especificada
       const dateString = format(dayToDelete.date, 'yyyy-MM-dd');
-      await deleteFilteredWorkDaysAction({ from: dateString, to: dateString });
+      await deleteFilteredWorkDaysAction(user.id, { type: 'custom', dateRange: { from: dayToDelete.date, to: dayToDelete.date } });
       toast({ title: "Sucesso!", description: `Registros de ${format(dayToDelete.date, 'dd/MM/yyyy')} apagados.` });
     } catch (error) {
       toast({ title: "Erro!", description: "Não foi possível apagar os registros.", variant: "destructive" });
@@ -124,7 +106,6 @@ export const useWorkDayColumns = () => {
       id: "actions",
       cell: ({ row }) => {
         const day = row.original;
-
         return (
           <div className="text-right">
             <Button 

@@ -28,6 +28,7 @@ import {
 import { getCatalog, Catalog } from '@/services/catalog.service';
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -121,6 +122,7 @@ function WizardSkeleton() {
 
 export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType = 'today', existingDayEntries: propsExistingEntries }: RegistrationWizardProps) {
   const router = useRouter();
+  const { user } = useAuth();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -128,7 +130,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   
   const [existingEntries, setExistingEntries] = useState<WorkDay[]>(propsExistingEntries || []);
   const [entryBeingEdited, setEntryBeingEdited] = useState<WorkDay | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [catalog, setCatalog] = useState<Catalog | null>(null);
 
@@ -169,6 +171,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   };
   
   const handleSubmit = async () => {
+    if (!user) return;
     if (!state.date) {
         toast({
             title: "Data Inválida",
@@ -184,7 +187,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       const { maintenanceEntries, ...workDayData } = state;
       const isActuallyEditing = !!workDayData.id && !['today', 'other-day'].includes(workDayData.id);
       
-      const result = await addOrUpdateWorkDay(workDayData as WorkDay);
+      const result = await addOrUpdateWorkDay(user.id, workDayData as WorkDay);
 
       if (maintenanceEntries.length > 0) {
           toast({
@@ -226,13 +229,17 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   };
   
   const handleDeleteEntry = async (id: string) => {
-      const result = await deleteWorkDayEntry(id);
+      if (!user) return;
+      setDeletingId(id);
+      const result = await deleteWorkDayEntry(user.id, id);
       if (result.success) {
           toast({ description: "Período removido com sucesso."});
           router.refresh(); // Recarrega os dados do servidor
       } else {
           toast({ description: `Erro ao remover período: ${result.error}`, variant: "destructive" });
       }
+      setDeletingId(null);
+      setIsAlertOpen(false);
   };
 
   if (!catalog) {
@@ -269,16 +276,34 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
                     {existingEntries.map(entry => {
                         const profit = entry.earnings.reduce((sum, e) => sum + e.amount, 0) - entry.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
                         return (
-                            <Card key={entry.id} className="p-2 flex justify-between items-center bg-secondary">
-                                <div>
-                                    <p className="font-semibold">{entry.timeEntries.map(t => `${t.start}-${t.end}`).join(', ') || `${entry.hours.toFixed(1)}h`}</p>
-                                    <p className="text-sm text-green-500">{formatCurrency(profit)}</p>
+                             <AlertDialog key={entry.id}>
+                                <div className="p-2 flex justify-between items-center bg-secondary rounded-md">
+                                    <div>
+                                        <p className="font-semibold">{entry.timeEntries.map(t => `${t.start}-${t.end}`).join(', ') || `${entry.hours.toFixed(1)}h`}</p>
+                                        <p className="text-sm text-green-500">{formatCurrency(profit)}</p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button size="icon" variant="ghost" onClick={() => setEntryBeingEdited(entry)}><Edit className="h-4 w-4" /></Button>
+                                        <AlertDialogTrigger asChild>
+                                            <Button size="icon" variant="ghost" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                        </AlertDialogTrigger>
+                                    </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <Button size="icon" variant="ghost" onClick={() => setEntryBeingEdited(entry)}><Edit className="h-4 w-4" /></Button>
-                                    <Button size="icon" variant="ghost" onClick={() => handleDeleteEntry(entry.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                                </div>
-                            </Card>
+                                 <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Tem certeza que deseja apagar este período de trabalho?
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteEntry(entry.id)} className="bg-destructive hover:bg-destructive/80">
+                                        {deletingId === entry.id ? <Loader2 className="animate-spin" /> : "Apagar"}
+                                    </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         )
                     })}
                 </CardContent>

@@ -1,24 +1,22 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback, useTransition, TransitionStartFunction } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Download, Loader2, FilterX } from 'lucide-react';
+import { Calendar as CalendarIcon, Check } from 'lucide-react';
 import { format, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DateRange } from "react-day-picker";
 import { cn } from '@/lib/utils';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
+import { toast } from '@/hooks/use-toast';
 
 interface HistoryFiltersProps {
   isPending: boolean;
-  startTransition: TransitionStartFunction;
-  onFiltersChange?: (filters: ReportFilterValues) => void;
-  initialFilters?: ReportFilterValues;
+  onFiltersChange: (filters: ReportFilterValues) => void;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -27,57 +25,34 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: new Date(0, i).toLocaleString('pt-BR', { month: 'long' }),
 }));
 
-export function HistoryFilters({ isPending, startTransition, onFiltersChange, initialFilters }: HistoryFiltersProps) {
-  const router = useRouter();
-  const pathname = usePathname();
+export function HistoryFilters({ isPending, onFiltersChange }: HistoryFiltersProps) {
+  const [filterType, setFilterType] = useState<ReportFilterValues['type'] | null>(null);
+  const [year, setYear] = useState<number>(getYear(new Date()));
+  const [month, setMonth] = useState<number>(new Date().getMonth());
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
-  const [filterType, setFilterType] = useState<ReportFilterValues['type']>(initialFilters?.type || 'today');
-  const [year, setYear] = useState<number>(initialFilters?.year || getYear(new Date()));
-  const [month, setMonth] = useState<number>(initialFilters?.month || new Date().getMonth());
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(initialFilters?.dateRange);
-  
-  useEffect(() => {
-    const params = new URLSearchParams();
-    params.set('type', filterType);
-    const newFilters: ReportFilterValues = { type: filterType };
-
-    if (filterType === 'specificMonth') {
-      newFilters.year = year;
-      newFilters.month = month;
-      params.set('year', year.toString());
-      params.set('month', month.toString());
-    } else if (filterType === 'specificYear') {
-      newFilters.year = year;
-      params.set('year', year.toString());
-    } else if (filterType === 'custom' && dateRange?.from) {
-      newFilters.dateRange = dateRange;
-      params.set('from', format(dateRange.from, 'yyyy-MM-dd'));
-      if (dateRange.to) {
-        params.set('to', format(dateRange.to, 'yyyy-MM-dd'));
-      }
+  const handleApplyFilters = () => {
+    if (!filterType) {
+      toast({ title: "Selecione um período", description: "Você precisa escolher um tipo de período para gerar o relatório.", variant: "destructive" });
+      return;
     }
     
-    startTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`);
-      if (onFiltersChange) {
-        onFiltersChange(newFilters);
-      }
-    });
+    const filters: ReportFilterValues = { type: filterType };
+    if (filterType === 'specificMonth') {
+      filters.year = year;
+      filters.month = month;
+    } else if (filterType === 'specificYear') {
+      filters.year = year;
+    } else if (filterType === 'custom' && dateRange?.from) {
+      filters.dateRange = dateRange;
+    }
 
-  }, [filterType, year, month, dateRange, pathname, router, startTransition, onFiltersChange]);
-
-  const handleClearFilters = () => {
-    setFilterType('today');
-    setDateRange(undefined);
-    setYear(getYear(new Date()));
-    setMonth(new Date().getMonth());
+    onFiltersChange(filters);
   };
-
-  const hasActiveFilters = filterType !== 'today';
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
-      <Select value={filterType} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])} disabled={isPending}>
+      <Select value={filterType || ""} onValueChange={(val) => setFilterType(val as ReportFilterValues['type'])} disabled={isPending}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Tipo de Período" />
         </SelectTrigger>
@@ -165,14 +140,10 @@ export function HistoryFilters({ isPending, startTransition, onFiltersChange, in
         </Popover>
       )}
       
-      {hasActiveFilters && (
-        <Button variant="ghost" onClick={handleClearFilters} disabled={isPending}>
-            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FilterX className="mr-2 h-4 w-4" />}
-            Limpar
-        </Button>
-      )}
-
-       {isPending && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
+      <Button onClick={handleApplyFilters} disabled={isPending}>
+          <Check className="mr-2 h-4 w-4"/>
+          Aplicar Filtros
+      </Button>
     </div>
   );
 }

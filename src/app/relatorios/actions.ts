@@ -5,6 +5,7 @@ import { exportToCsvFlow, ExportToCsvOutput } from '@/ai/flows/export-flow';
 import { getReportData, ReportData } from '@/services/summary.service';
 import { z } from 'zod';
 import type { DateRange } from "react-day-picker";
+import { getWorkDaysForDate } from '@/services/work-day.service';
 
 const ReportFilterValuesSchema = z.object({
     type: z.enum(['all', 'today', 'thisWeek', 'thisMonth', 'specificMonth', 'specificYear', 'custom']),
@@ -14,9 +15,9 @@ const ReportFilterValuesSchema = z.object({
 });
 export type ReportFilterValues = z.infer<typeof ReportFilterValuesSchema>;
 
-export async function exportReportAction(filters: ReportFilterValues): Promise<ExportToCsvOutput> {
+export async function exportReportAction(userId: string, filters: ReportFilterValues): Promise<ExportToCsvOutput> {
   const validatedFilters = ReportFilterValuesSchema.parse(filters);
-  const reportData = await getReportData(validatedFilters);
+  const reportData = await getReportData(userId, validatedFilters);
   
   const serializableWorkDays = reportData.rawWorkDays.map(day => ({
       ...day,

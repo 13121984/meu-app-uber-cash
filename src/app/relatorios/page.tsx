@@ -21,9 +21,6 @@ export default function RelatoriosPage() {
           </div>
       );
   }
-
-  // Se não for pro, você pode mostrar uma tela de upgrade aqui se quiser
-  // Por enquanto, vamos permitir o acesso mas os componentes internos podem ter features limitadas
   
   return (
     <div className="space-y-6">

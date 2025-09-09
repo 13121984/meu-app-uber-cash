@@ -4,7 +4,7 @@
 import { useState, useTransition, useEffect, useCallback } from "react";
 import { useWorkDayColumns } from "./columns";
 import { DataTable } from "./data-table";
-import { ReportsFilter } from "@/components/relatorios/reports-filter";
+import { HistoryFilters } from "./history-filters";
 import { Button } from "../ui/button";
 import { Loader2, Trash2, History, BarChart3, Smartphone } from "lucide-react";
 import { deleteFilteredWorkDaysAction, ActiveFilters } from "./actions";
@@ -16,6 +16,7 @@ import { getFilteredWorkDays, type WorkDay } from '@/services/work-day.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 
 export interface GroupedWorkDay {
@@ -27,7 +28,7 @@ export interface GroupedWorkDay {
 }
 
 export function GerenciamentoClient() {
-  const router = useRouter();
+  const { user } = useAuth();
   const { columns, Dialogs, setEditingDay } = useWorkDayColumns();
 
   const [isDeletingFiltered, startDeleteTransition] = useTransition();
@@ -38,26 +39,27 @@ export function GerenciamentoClient() {
   const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
 
   const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
+    if (!user) return;
     setCurrentFilters(filters);
     startTransition(async () => {
       try {
-        const filtered = await getFilteredWorkDays(filters);
+        const filtered = await getFilteredWorkDays(user.id, filters);
         setGroupedWorkDays(filtered);
       } catch (e) {
         console.error("Failed to fetch work days", e);
         toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
       }
     });
-  }, []);
+  }, [user]);
 
   const filteredCount = groupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
 
   const handleDeleteFiltered = async () => {
-    if (!currentFilters) return;
+    if (!currentFilters || !user) return;
 
     startDeleteTransition(async () => {
       try {
-          const result = await deleteFilteredWorkDaysAction(currentFilters as ActiveFilters);
+          const result = await deleteFilteredWorkDaysAction(user.id, currentFilters as ActiveFilters);
           if (result.success) {
               toast({ title: "Sucesso!", description: `${result.count || 0} registros apagados.` });
               handleApplyFilters(currentFilters); // Refresh the data
@@ -133,9 +135,9 @@ export function GerenciamentoClient() {
           </div>
         </CardHeader>
         <CardContent>
-          <ReportsFilter 
-            onApplyFilters={handleApplyFilters}
+          <HistoryFilters 
             isPending={isPending}
+            onFiltersChange={handleApplyFilters}
           />
           {renderContent()}
         </CardContent>
