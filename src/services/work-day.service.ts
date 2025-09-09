@@ -5,8 +5,6 @@ import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth,
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
-import demoData from '../../data/work-days.json';
-
 
 // --- Tipos e Interfaces ---
 
@@ -202,6 +200,22 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
 
 // --- Funções de Gerenciamento de Dados ---
 
+// Internal demo data, to avoid file system issues during build
+const demoData: Omit<WorkDay, 'date'> & { date: string }[] = [
+  { "id": "demo-1", "date": "2024-12-31", "km": 120.8, "hours": 10, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 19, "amount": 172 }, { "id": 2, "category": "Uber Cash", "trips": 4, "amount": 55.46 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 56.33, "price": 4.99 }, { "id": 2, "type": "Etanol", "paid": 50.9, "price": 5.09 } ], "maintenanceEntries": [] },
+  { "id": "demo-2", "date": "2024-12-30", "km": 88, "hours": 6, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 16, "amount": 168.8 } ], "fuelEntries": [], "maintenanceEntries": [] },
+  { "id": "demo-3", "date": "2024-12-28", "km": 119.5, "hours": 9, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 22, "amount": 222.44 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 38.57, "price": 4.99 } ], "maintenanceEntries": [] },
+  { "id": "demo-4", "date": "2024-12-27", "km": 34, "hours": 3, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 6, "amount": 66.97 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 20.85, "price": 4.99 } ], "maintenanceEntries": [] },
+  { "id": "demo-5", "date": "2024-12-21", "km": 136, "hours": 9, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 16, "amount": 234.49 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 71.25, "price": 4.99 } ], "maintenanceEntries": [] },
+  { "id": "demo-6", "date": "2024-12-20", "km": 123.9, "hours": 9.5, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 24, "amount": 275.86 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 40.26, "price": 4.99 }, { "id": 2, "type": "Etanol", "paid": 50, "price": 5.09 } ], "maintenanceEntries": [] },
+  { "id": "demo-7", "date": "2024-12-19", "km": 132.7, "hours": 9.5, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 25, "amount": 272.32 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 54.41, "price": 4.99 } ], "maintenanceEntries": [] },
+  { "id": "demo-8", "date": "2024-12-18", "km": 147.8, "hours": 10, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 21, "amount": 284.54 }, { "id": 2, "category": "Ganhos Extras", "trips": 0, "amount": 7 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 40.26, "price": 5.09 } ], "maintenanceEntries": [] },
+  { "id": "demo-9", "date": "2024-12-17", "km": 76, "hours": 5.92, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 15, "amount": 167.41 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 43.2, "price": 4.99 } ], "maintenanceEntries": [] },
+  { "id": "demo-10", "date": "2024-12-15", "km": 112, "hours": 8, "timeEntries": [], "earnings": [ { "id": 1, "category": "Ganhos Extras", "trips": 0, "amount": 61 }, { "id": 2, "category": "99 Pop", "trips": 25, "amount": 274.6 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 71.73, "price": 4.99 }, { "id": 2, "type": "Etanol", "paid": 30, "price": 5.09 } ], "maintenanceEntries": [] },
+  { "id": "demo-11", "date": "2024-12-12", "km": 94, "hours": 5.92, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 2, "amount": 13.99 }, { "id": 2, "category": "Particular", "trips": 2, "amount": 22 }, { "id": 3, "category": "Uber Cash", "trips": 8, "amount": 83.18 }, { "id": 4, "category": "Ganhos Extras", "trips": 0, "amount": 7 } ], "fuelEntries": [], "maintenanceEntries": [] },
+  { "id": "demo-12", "date": "2024-12-11", "km": 100, "hours": 6, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 12, "amount": 88.79 }, { "id": 2, "category": "Uber Cash", "trips": 3, "amount": 61.63 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 68.58, "price": 4.99 } ], "maintenanceEntries": [] }
+];
+
 export async function loadDemoData(userId: string): Promise<{ success: boolean; error?: string }> {
     if (!userId) return { success: false, error: "Nenhum usuário ativo para carregar dados." };
 
@@ -227,6 +241,7 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
         return { success: false, error: errorMessage };
     }
 }
+
 
 export async function clearAllData(userId: string): Promise<{ success: boolean; error?: string }> {
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
