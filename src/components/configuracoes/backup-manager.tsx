@@ -11,12 +11,14 @@ import type { BackupData } from '@/services/backup.service';
 import { getBackupForDownload } from '@/services/backup.service';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/contexts/auth-context';
 
 interface BackupManagerProps {
     initialBackupData: Omit<BackupData, 'csvContent'>;
 }
 
 export function BackupManager({ initialBackupData }: BackupManagerProps) {
+  const { user } = useAuth();
   const [backupData, setBackupData] = useState(initialBackupData);
   const [isProcessing, startTransition] = useTransition();
   const [isClient, setIsClient] = useState(false);
@@ -37,8 +39,9 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
   }
   
   const handleGenerateBackup = () => {
+    if(!user) return;
     startTransition(async () => {
-        const result = await runBackupAction();
+        const result = await runBackupAction({ userId: user.id });
         if (result.success && result.backupDate) {
             toast({
                 title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Backup Criado!</span></div>,
@@ -60,8 +63,9 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
   }
   
   const handleDownloadBackup = () => {
+      if(!user) return;
       startTransition(async () => {
-          const result = await getBackupForDownload();
+          const result = await getBackupForDownload(user.id);
           if (result.success && result.csvContent && result.fileName) {
             const blob = new Blob([result.csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");

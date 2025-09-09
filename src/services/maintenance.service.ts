@@ -2,10 +2,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import fs from 'fs/promises';
-import path from 'path';
-import { isWithinInterval, startOfDay, endOfDay, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { isWithinInterval, startOfDay, endOfDay, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO } from "date-fns";
 import type { ReportFilterValues } from "@/app/relatorios/actions";
+import { getFile, saveFile } from './storage.service';
 
 
 export interface Maintenance {
@@ -13,43 +12,38 @@ export interface Maintenance {
   date: Date;
   description: string;
   amount: number;
-  type: 'preventive' | 'corrective' | 'both'; // Novo campo
+  type: 'preventive' | 'corrective' | 'both'; 
   kmAtService: number | null;
   reminderKm: number | null;
   reminderDate: Date | null;
 }
 
-const dataFilePath = path.join(process.cwd(), 'data', 'maintenance.json');
+const FILE_NAME = 'maintenance.json';
 
-async function readMaintenanceData(): Promise<Maintenance[]> {
-  try {
-    await fs.access(dataFilePath);
-    const fileContent = await fs.readFile(dataFilePath, 'utf8');
-    return (JSON.parse(fileContent) as any[]).map(record => ({
-      ...record,
-      type: record.type || 'corrective', // Garante um valor padrão para registros antigos
-      date: new Date(record.date),
-      reminderDate: record.reminderDate ? new Date(record.reminderDate) : null,
-      kmAtService: record.kmAtService ?? null,
-      reminderKm: record.reminderKm ?? null,
-    }));
-  } catch {
-    await writeMaintenanceData([]);
-    return [];
-  }
+
+async function readMaintenanceData(userId: string): Promise<Maintenance[]> {
+  const data = await getFile<Maintenance[]>(userId, FILE_NAME, []);
+  return (data || []).map(record => ({
+    ...record,
+    type: record.type || 'corrective', // Garante um valor padrão para registros antigos
+    date: parseISO(record.date as any),
+    reminderDate: record.reminderDate ? parseISO(record.reminderDate as any) : null,
+    kmAtService: record.kmAtService ?? null,
+    reminderKm: record.reminderKm ?? null,
+  }));
 }
 
-async function writeMaintenanceData(data: Maintenance[]): Promise<void> {
-    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+async function writeMaintenanceData(userId: string, data: Maintenance[]): Promise<void> {
+    const sortedData = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    await saveFile(userId, FILE_NAME, sortedData);
 }
 
 
 // --- Funções CRUD ---
 
-export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; id?: string; error?: string }> {
+export async function addMaintenance(userId: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    const allRecords = await readMaintenanceData();
+    const allRecords = await readMaintenanceData(userId);
     const newRecord: Maintenance = {
         ...data,
         id: Date.now().toString(),
@@ -57,7 +51,7 @@ export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ s
         reminderDate: data.reminderDate ? new Date(data.reminderDate) : null,
     };
     allRecords.unshift(newRecord);
-    await writeMaintenanceData(allRecords);
+    await writeMaintenanceData(userId, allRecords);
 
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
@@ -69,13 +63,13 @@ export async function addMaintenance(data: Omit<Maintenance, 'id'>): Promise<{ s
   }
 }
 
-export async function getMaintenanceRecords(): Promise<Maintenance[]> {
-    let records = await readMaintenanceData();
-    return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+export async function getMaintenanceRecords(userId: string): Promise<Maintenance[]> {
+    let records = await readMaintenanceData(userId);
+    return records;
 }
 
-export async function getFilteredMaintenanceRecords(filters?: ReportFilterValues): Promise<Maintenance[]> {
-    const allRecords = await getMaintenanceRecords();
+export async function getFilteredMaintenanceRecords(userId: string, filters?: ReportFilterValues): Promise<Maintenance[]> {
+    const allRecords = await getMaintenanceRecords(userId);
     
     if (!filters || !filters.type) {
         return allRecords;
@@ -121,9 +115,9 @@ export async function getFilteredMaintenanceRecords(filters?: ReportFilterValues
 }
 
 
-export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; error?: string }> {
+export async function updateMaintenance(userId: string, id: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; error?: string }> {
   try {
-    const allRecords = await readMaintenanceData();
+    const allRecords = await readMaintenanceData(userId);
     const index = allRecords.findIndex(r => r.id === id);
     if (index === -1) {
         return { success: false, error: "Registro não encontrado." };
@@ -134,7 +128,7 @@ export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'
         date: new Date(data.date),
         reminderDate: data.reminderDate ? new Date(data.reminderDate) : null,
     };
-    await writeMaintenanceData(allRecords);
+    await writeMaintenanceData(userId, allRecords);
     
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
@@ -147,15 +141,15 @@ export async function updateMaintenance(id: string, data: Omit<Maintenance, 'id'
 }
 
 
-export async function deleteMaintenance(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteMaintenance(userId: string, id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    let allRecords = await readMaintenanceData();
+    let allRecords = await readMaintenanceData(userId);
     const initialLength = allRecords.length;
     allRecords = allRecords.filter(r => r.id !== id);
     if(allRecords.length === initialLength){
         return { success: false, error: "Registro não encontrado."};
     }
-    await writeMaintenanceData(allRecords);
+    await writeMaintenanceData(userId, allRecords);
     
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
@@ -168,9 +162,9 @@ export async function deleteMaintenance(id: string): Promise<{ success: boolean;
 }
 
 
-export async function deleteAllMaintenance(): Promise<{ success: boolean; error?: string }> {
+export async function deleteAllMaintenance(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    await writeMaintenanceData([]);
+    await writeMaintenanceData(userId, []);
     revalidatePath('/manutencao');
     revalidatePath('/dashboard');
     revalidatePath('/'); // For the new reminder card

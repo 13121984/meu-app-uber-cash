@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview A flow for creating a data backup.
+ * @fileOverview A flow for creating a data backup for a specific user.
  *
  * - runBackupFlow - A Genkit flow that handles the backup process.
  * - BackupOutput - The return type for the backup function.
@@ -14,8 +14,9 @@ import { exportToCsvFlow } from './export-flow';
 import { format } from 'date-fns';
 import { saveBackupData } from '@/services/backup.service';
 
-// No input is needed anymore as it's a manual trigger
-const BackupInputSchema = z.object({});
+const BackupInputSchema = z.object({
+    userId: z.string(),
+});
 export type BackupInput = z.infer<typeof BackupInputSchema>;
 
 const BackupOutputSchema = z.object({
@@ -28,10 +29,10 @@ export type BackupOutput = z.infer<typeof BackupOutputSchema>;
 /**
  * A server action to securely call the Genkit flow for creating a backup.
  */
-export async function runBackupAction(input?: BackupInput): Promise<BackupOutput> {
-    return await runBackupFlow(input || {});
+export async function runBackupAction(input: BackupInput): Promise<BackupOutput> {
+    const validatedInput = BackupInputSchema.parse(input);
+    return await runBackupFlow(validatedInput);
 }
-
 
 const runBackupFlow = ai.defineFlow(
   {
@@ -39,9 +40,9 @@ const runBackupFlow = ai.defineFlow(
     inputSchema: BackupInputSchema,
     outputSchema: BackupOutputSchema,
   },
-  async () => {
+  async ({ userId }) => {
     
-    const allWorkDays = await getWorkDays();
+    const allWorkDays = await getWorkDays(userId);
     if (allWorkDays.length === 0) {
       return { success: false, message: "Nenhum dado para fazer backup." };
     }
@@ -61,8 +62,8 @@ const runBackupFlow = ai.defineFlow(
     const now = new Date();
     const backupFileName = `Backup_UberCash_${format(now, 'yyyy-MM-dd_HH-mm')}.csv`;
 
-    // Save the backup data to a local file
-    const saveResult = await saveBackupData({
+    // Save the backup data to a user-specific file
+    const saveResult = await saveBackupData(userId, {
       fileName: backupFileName,
       csvContent: csvContent,
     });

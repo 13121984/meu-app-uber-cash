@@ -3,6 +3,7 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 import { login as loginService, signup as signupService, User, SecurityAnswer, getUserById } from '@/services/auth.service';
+import { clearAllDataForUser } from '@/services/work-day.service';
 
 interface AuthContextType {
   user: User | null;
@@ -19,37 +20,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Carrega o usuário do localStorage na inicialização.
-  // Isso permite que o app funcione offline com os últimos dados sincronizados.
-  const loadUserFromStorage = useCallback(async () => {
-    setLoading(true);
+  const getActiveUserId = useCallback(() => {
     try {
       const storedUserJSON = localStorage.getItem('rota-certa-user');
       if (storedUserJSON) {
         const storedUser = JSON.parse(storedUserJSON);
-        setUser(storedUser);
-        // Tenta atualizar os dados do usuário em segundo plano se estiver online
-        // Isso garante que o status de "isPremium" seja atualizado.
-        const freshUser = await getUserById(storedUser.id);
+        return storedUser.id;
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  }, []);
+
+  const loadUserFromStorage = useCallback(async () => {
+    setLoading(true);
+    const userId = getActiveUserId();
+    if (userId) {
+      try {
+        const freshUser = await getUserById(userId);
         if (freshUser) {
             setUser(freshUser);
             localStorage.setItem('rota-certa-user', JSON.stringify(freshUser));
+        } else {
+            // User might have been deleted, clear storage
+            setUser(null);
+            localStorage.removeItem('rota-certa-user');
+        }
+      } catch (error) {
+        console.error("Failed to fetch user from server, using stale local data.", error);
+        // Fallback to local data if server is unreachable
+        const storedUserJSON = localStorage.getItem('rota-certa-user');
+        if (storedUserJSON) {
+          setUser(JSON.parse(storedUserJSON));
         }
       }
-    } catch (error) {
-      console.error("Failed to parse user from localStorage", error);
-      setUser(null);
-      localStorage.removeItem('rota-certa-user');
-    } finally {
-        setLoading(false);
     }
-  }, []);
+    setLoading(false);
+  }, [getActiveUserId]);
 
   useEffect(() => {
     loadUserFromStorage();
   }, [loadUserFromStorage]);
 
-  // Função para forçar a atualização dos dados do usuário
   const refreshUser = async () => {
     if (!user) return;
     setLoading(true);
@@ -66,8 +79,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Login sempre busca os dados mais recentes do "servidor" (nosso .json)
   const login = async (userId: string, password: string) => {
+    setLoading(true);
     const result = await loginService(userId, password);
     if (result.success && result.user) {
       setUser(result.user);
@@ -76,11 +89,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         localStorage.removeItem('rota-certa-user');
     }
+    setLoading(false);
     return { success: result.success, user: result.user, error: result.error };
   };
   
   const signup = async (userId: string, password: string, securityAnswers: SecurityAnswer[]) => {
+      setLoading(true);
       const result = await signupService(userId, password, securityAnswers);
+      // On successful signup, also clear any data for that user ID to ensure a clean slate
+      if (result.success) {
+          await clearAllDataForUser(userId);
+      }
+      setLoading(false);
       return { success: result.success, error: result.error };
   };
 

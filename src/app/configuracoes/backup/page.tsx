@@ -1,14 +1,45 @@
 
+"use client";
+
 import { BackupManager } from '@/components/configuracoes/backup-manager';
-import { DatabaseBackup } from 'lucide-react';
+import { DatabaseBackup, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import { getBackupData } from '@/services/backup.service';
+import { useAuth } from '@/contexts/auth-context';
+import { useEffect, useState } from 'react';
 
-export default async function BackupPage() {
-  const initialBackupData = await getBackupData();
-  
+export default function BackupPage() {
+  const { user, loading } = useAuth();
+  const [initialBackupData, setInitialBackupData] = useState(null);
+  const [isFetching, setIsFetching] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      setIsFetching(true);
+      getBackupData(user.id).then(data => {
+        setInitialBackupData(data as any);
+        setIsFetching(false);
+      });
+    } else if (!loading) {
+      // Handle case where user is not logged in
+      setIsFetching(false);
+    }
+  }, [user, loading]);
+
+  if (loading || isFetching) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    // Optionally, redirect or show a login message
+    return <p>Por favor, faça login para acessar esta página.</p>;
+  }
+
   return (
     <div className="space-y-6">
        <div className="flex items-center gap-4">
@@ -26,7 +57,7 @@ export default async function BackupPage() {
         </div>
       </div>
       
-      <BackupManager initialBackupData={initialBackupData} />
+      {initialBackupData && <BackupManager initialBackupData={initialBackupData} />}
     </div>
   );
 }

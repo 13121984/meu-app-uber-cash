@@ -31,17 +31,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getSettings();
-
+  // Theme can no longer be determined at build time as it's user-specific.
+  // It will be applied dynamically on the client in AuthProvider/AppContent.
+  
   return (
     <html 
       lang="pt-BR" 
-      className={cn("h-full", settings.theme === 'dark' ? 'dark' : '')}
+      className="h-full" // Default to light mode, client will override
       suppressHydrationWarning
     >
       <head>

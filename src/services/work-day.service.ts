@@ -3,11 +3,10 @@
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, sub, eachDayOfInterval, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import fs from 'fs/promises';
-import path from 'path';
+import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
 import { updateAllSummaries } from './summary.service';
-import demoData from '../../data/work-days.json'; // Importa os dados de demonstração
+import demoData from '../../data/work-days.json';
 
 // --- Tipos e Interfaces ---
 
@@ -45,51 +44,40 @@ export interface ImportedWorkDay {
     maintenance_amount: string;
 }
 
-const workDaysFilePath = path.join(process.cwd(), 'data', 'work-days.json');
+const FILE_NAME = 'work-days.json';
 
 // --- Funções de Leitura/Escrita ---
 
-async function readWorkDays(): Promise<WorkDay[]> {
-  try {
-    await fs.access(workDaysFilePath);
-    const fileContent = await fs.readFile(workDaysFilePath, 'utf8');
-    return (JSON.parse(fileContent) as any[]).map(day => ({
-        ...day,
-        date: parseISO(day.date),
-        maintenanceEntries: day.maintenanceEntries || [],
-    }));
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        await writeWorkDays([]);
-        return [];
-    }
-    console.error("Failed to read work-days.json", error);
-    return [];
-  }
+async function readWorkDays(userId: string): Promise<WorkDay[]> {
+  const data = await getFile<WorkDay[]>(userId, FILE_NAME, []);
+  return (data || []).map(day => ({
+      ...day,
+      date: parseISO(day.date as any), // Datas são salvas como ISO strings
+      maintenanceEntries: day.maintenanceEntries || [],
+  }));
 }
 
-async function writeWorkDays(data: WorkDay[]): Promise<void> {
-    await fs.mkdir(path.dirname(workDaysFilePath), { recursive: true });
+async function writeWorkDays(userId: string, data: WorkDay[]): Promise<void> {
     const sortedData = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    await fs.writeFile(workDaysFilePath, JSON.stringify(sortedData, null, 2), 'utf8');
+    await saveFile(userId, FILE_NAME, sortedData);
 }
 
-const revalidateAll = () => {
+const revalidateAll = (userId: string) => {
     revalidatePath('/', 'layout');
 };
 
 // --- Funções CRUD ---
 
-export async function addOrUpdateWorkDay(data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
+export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
   try {
-    const allWorkDays = await readWorkDays();
+    const allWorkDays = await readWorkDays(userId);
     if (data.id && data.id !== 'today' && data.id !== 'other-day') {
       const existingDayIndex = allWorkDays.findIndex(d => d.id === data.id);
       if (existingDayIndex > -1) {
         allWorkDays[existingDayIndex] = { ...data, date: startOfDay(data.date) };
-        await writeWorkDays(allWorkDays);
-        await updateAllSummaries();
-        revalidateAll();
+        await writeWorkDays(userId, allWorkDays);
+        await updateAllSummaries(userId);
+        revalidateAll(userId);
         return { success: true, id: data.id, operation: 'updated' };
       }
     }
@@ -100,9 +88,9 @@ export async function addOrUpdateWorkDay(data: WorkDay): Promise<{ success: bool
       date: startOfDay(data.date),
     };
     allWorkDays.unshift(newWorkDay);
-    await writeWorkDays(allWorkDays);
-    await updateAllSummaries();
-    revalidateAll();
+    await writeWorkDays(userId, allWorkDays);
+    await updateAllSummaries(userId);
+    revalidateAll(userId);
     return { success: true, id: newWorkDay.id, operation: 'created' };
 
   } catch (e) {
@@ -111,9 +99,9 @@ export async function addOrUpdateWorkDay(data: WorkDay): Promise<{ success: bool
   }
 }
 
-export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
+export async function addMultipleWorkDays(userId: string, importedData: ImportedWorkDay[]) {
     try {
-        let allWorkDays = await readWorkDays();
+        let allWorkDays = await readWorkDays(userId);
         const workDaysToUpsert: WorkDay[] = [];
 
         const groupedByDate = new Map<string, ImportedWorkDay[]>();
@@ -170,9 +158,9 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
         const filteredWorkDays = allWorkDays.filter(wd => !datesToReplace.has(format(wd.date, 'yyyy-MM-dd')));
         const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
 
-        await writeWorkDays(finalWorkDays);
-        await updateAllSummaries();
-        revalidateAll();
+        await writeWorkDays(userId, finalWorkDays);
+        await updateAllSummaries(userId);
+        revalidateAll(userId);
         return { success: true, count: workDaysToUpsert.length };
 
     } catch(e) {
@@ -181,13 +169,13 @@ export async function addMultipleWorkDays(importedData: ImportedWorkDay[]) {
     }
 }
 
-export async function deleteWorkDayEntry(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteWorkDayEntry(userId: string, id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    let allWorkDays = await readWorkDays();
+    let allWorkDays = await readWorkDays(userId);
     allWorkDays = allWorkDays.filter(r => r.id !== id);
-    await writeWorkDays(allWorkDays);
-    await updateAllSummaries();
-    revalidateAll();
+    await writeWorkDays(userId, allWorkDays);
+    await updateAllSummaries(userId);
+    revalidateAll(userId);
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registro.";
@@ -195,9 +183,9 @@ export async function deleteWorkDayEntry(id: string): Promise<{ success: boolean
   }
 }
 
-export async function deleteWorkDaysByFilter(filters: { query?: string, from?: string, to?: string }): Promise<{ success: boolean; error?: string, count?: number }> {
+export async function deleteWorkDaysByFilter(userId: string, filters: { query?: string, from?: string, to?: string }): Promise<{ success: boolean; error?: string, count?: number }> {
     try {
-        const allWorkDays = await readWorkDays();
+        const allWorkDays = await readWorkDays(userId);
         const initialLength = allWorkDays.length;
 
         const workDaysToKeep = allWorkDays.filter(day => {
@@ -220,9 +208,9 @@ export async function deleteWorkDaysByFilter(filters: { query?: string, from?: s
             return false;
         });
         const deletedCount = initialLength - workDaysToKeep.length;
-        await writeWorkDays(workDaysToKeep);
-        await updateAllSummaries();
-        revalidateAll();
+        await writeWorkDays(userId, workDaysToKeep);
+        await updateAllSummaries(userId);
+        revalidateAll(userId);
         return { success: true, count: deletedCount };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registros em massa.";
@@ -232,7 +220,7 @@ export async function deleteWorkDaysByFilter(filters: { query?: string, from?: s
 
 // --- Funções de Gerenciamento de Dados ---
 
-export async function loadDemoData(): Promise<{ success: boolean; error?: string }> {
+export async function loadDemoData(userId: string): Promise<{ success: boolean; error?: string }> {
     try {
         const now = new Date();
         const currentYear = now.getFullYear();
@@ -243,13 +231,13 @@ export async function loadDemoData(): Promise<{ success: boolean; error?: string
             const newDate = setMonth(setYear(originalDate, currentYear), currentMonth);
             return {
                 ...day,
-                date: newDate.toISOString() // Store as ISO string
+                date: newDate.toISOString() 
             };
         });
 
-        await writeWorkDays(adjustedDemoData as unknown as WorkDay[]);
-        await updateAllSummaries();
-        revalidateAll();
+        await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
+        await updateAllSummaries(userId);
+        revalidateAll(userId);
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to load demo data.";
@@ -257,11 +245,11 @@ export async function loadDemoData(): Promise<{ success: boolean; error?: string
     }
 }
 
-export async function clearAllData(): Promise<{ success: boolean; error?: string }> {
+export async function clearAllDataForUser(userId: string): Promise<{ success: boolean; error?: string }> {
      try {
-        await writeWorkDays([]);
-        await updateAllSummaries();
-        revalidateAll();
+        await writeWorkDays(userId, []);
+        await updateAllSummaries(userId);
+        revalidateAll(userId);
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to clear data.";
@@ -271,19 +259,20 @@ export async function clearAllData(): Promise<{ success: boolean; error?: string
 
 // --- Funções de Leitura ---
 
-export async function getWorkDays(): Promise<WorkDay[]> {
-    return await readWorkDays();
+export async function getWorkDays(userId: string): Promise<WorkDay[]> {
+    return await readWorkDays(userId);
 }
 
-export async function getWorkDaysForDate(date: Date): Promise<WorkDay[]> {
-    const allWorkDays = await readWorkDays();
+export async function getWorkDaysForDate(userId: string, date: Date): Promise<WorkDay[]> {
+    const allWorkDays = await readWorkDays(userId);
     return allWorkDays.filter(day => isSameDay(day.date, date));
 }
 
 export async function getFilteredWorkDays(
+  userId: string,
   filters: ReportFilterValues
 ): Promise<GroupedWorkDay[]> {
-  const allWorkDays = await readWorkDays();
+  const allWorkDays = await readWorkDays(userId);
   let filteredEntries: WorkDay[] = [];
 
   if (allWorkDays.length === 0) return [];

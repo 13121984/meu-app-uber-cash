@@ -6,8 +6,7 @@ import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords, Maintenance } from './maintenance.service';
 import { getWorkDays, WorkDay } from './work-day.service';
-import fs from 'fs/promises';
-import path from 'path';
+import { getFile, saveFile } from './storage.service';
 
 export interface EarningsByCategory { name: string; total: number; }
 export interface TripsByCategory { name: string; total: number; }
@@ -55,32 +54,37 @@ export interface ReportData extends Omit<PeriodData, 'performanceByShift'> {
   rawWorkDays: WorkDay[];
 }
 
-const summaryFilePath = path.join(process.cwd(), 'data', 'summary.json');
+const FILE_NAME = 'summary.json';
 
-async function writeSummary(data: SummaryData): Promise<void> {
-    await fs.mkdir(path.dirname(summaryFilePath), { recursive: true });
-    await fs.writeFile(summaryFilePath, JSON.stringify(data, null, 2), 'utf8');
+const defaultPeriodData: PeriodData = {
+    totalGanho: 0, totalLucro: 0, totalCombustivel: 0, totalExtras: 0,
+    diasTrabalhados: 0, totalKm: 0, totalHoras: 0, mediaHorasPorDia: 0, mediaKmPorDia: 0,
+    ganhoPorHora: 0, ganhoPorKm: 0, totalViagens: 0, eficiencia: 0,
+    earningsByCategory: [], tripsByCategory: [],
+    maintenance: { totalSpent: 0, servicesPerformed: 0 },
+    meta: { target: 0, period: '' },
+    profitComposition: [], performanceByShift: [],
+};
+
+const defaultSummaryData: SummaryData = {
+    hoje: defaultPeriodData,
+    semana: defaultPeriodData,
+    mes: defaultPeriodData,
 }
 
-export async function getSummaryForPeriod(): Promise<SummaryData> {
-    try {
-        await fs.access(summaryFilePath);
-        const fileContent = await fs.readFile(summaryFilePath, 'utf8');
-        return JSON.parse(fileContent);
-    } catch {
-        return await updateAllSummaries();
-    }
+export async function getSummaryForPeriod(userId: string): Promise<SummaryData> {
+    return await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
 }
 
-export async function getTodayData(): Promise<PeriodData> {
-    const summary = await getSummaryForPeriod();
+export async function getTodayData(userId: string): Promise<PeriodData> {
+    const summary = await getSummaryForPeriod(userId);
     return summary.hoje;
 }
 
-export async function updateAllSummaries(): Promise<SummaryData> {
-    const allWorkDays = await getWorkDays();
-    const allMaintenance = await getMaintenanceRecords();
-    const goals = await getGoals();
+export async function updateAllSummaries(userId: string): Promise<SummaryData> {
+    const allWorkDays = await getWorkDays(userId);
+    const allMaintenance = await getMaintenanceRecords(userId);
+    const goals = await getGoals(userId);
     const now = new Date();
 
     const todayWorkDays = allWorkDays.filter(day => isSameDay(day.date, now));
@@ -96,7 +100,7 @@ export async function updateAllSummaries(): Promise<SummaryData> {
     const mes = calculatePeriodData(thisMonthWorkDays, "mensal", goals, thisMonthMaintenance);
 
     const summaryData = { hoje, semana, mes };
-    await writeSummary(summaryData);
+    await saveFile(userId, FILE_NAME, summaryData);
     return summaryData;
 }
 
@@ -209,12 +213,12 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
     };
 }
 
-export async function getReportData(filters: ReportFilterValues): Promise<ReportData> {
+export async function getReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
   const now = new Date();
   let filteredDays: WorkDay[] = [];
   let interval: { start: Date; end: Date } | null = null;
-  const allWorkDays = await getWorkDays();
-  const goals = await getGoals();
+  const allWorkDays = await getWorkDays(userId);
+  const goals = await getGoals(userId);
 
   switch (filters.type) {
     case 'all': filteredDays = allWorkDays; break;
@@ -232,7 +236,7 @@ export async function getReportData(filters: ReportFilterValues): Promise<Report
     filteredDays = [];
   }
   
-  const allMaintenance = await getMaintenanceRecords();
+  const allMaintenance = await getMaintenanceRecords(userId);
   const filteredMaintenance = interval 
     ? allMaintenance.filter(m => isWithinInterval(m.date, interval!))
     : allMaintenance;

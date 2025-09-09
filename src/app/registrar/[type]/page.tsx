@@ -1,28 +1,54 @@
 
+"use client";
+
 import { RegistrationWizard } from '@/components/registrar/registration-wizard';
 import { getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
 import { startOfDay } from 'date-fns';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
-export async function generateStaticParams() {
-  return [
-    { type: 'today' },
-    { type: 'other-day' },
-  ]
-}
 
-export default async function RegistrarPage({ params }: { params: { type: string } }) {
-  const registrationType = params.type;
+export default function RegistrarPage() {
+  const { user, loading } = useAuth();
+  const params = useParams();
+  const registrationType = params.type as 'today' | 'other-day';
+  
+  const [existingDayEntries, setExistingDayEntries] = useState<WorkDay[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  useEffect(() => {
+    if (user && registrationType === 'today') {
+      setIsDataLoading(true);
+      getWorkDaysForDate(user.id, startOfDay(new Date()))
+        .then(data => {
+          setExistingDayEntries(data);
+        })
+        .catch(err => {
+          console.error("Failed to load today's entries:", err);
+          setExistingDayEntries([]);
+        })
+        .finally(() => {
+          setIsDataLoading(false);
+        });
+    } else {
+        setIsDataLoading(false);
+    }
+  }, [user, registrationType]);
 
   if (registrationType !== 'today' && registrationType !== 'other-day') {
     notFound();
   }
 
-  // Para 'today', buscamos os registros existentes para hoje
-  // Para 'other-day', começamos com uma lousa limpa, pois a data ainda será selecionada
-  const today = startOfDay(new Date());
-  const existingTodayEntries: WorkDay[] = registrationType === 'today' ? await getWorkDaysForDate(today) : [];
-
+  if (loading || isDataLoading) {
+    return (
+       <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    )
+  }
+  
   return (
     <div className="space-y-6">
       <div>
@@ -33,7 +59,7 @@ export default async function RegistrarPage({ params }: { params: { type: string
       </div>
       <RegistrationWizard 
         registrationType={registrationType} 
-        existingDayEntries={existingTodayEntries}
+        existingDayEntries={existingDayEntries}
       />
     </div>
   );

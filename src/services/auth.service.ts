@@ -3,6 +3,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+import { getUserDataPath } from './storage.service';
 
 // --- Tipos e Interfaces ---
 
@@ -103,6 +104,9 @@ export async function signup(userId: string, password: string, securityAnswers: 
 
     users.push(newUser);
     await saveUsers(users);
+    
+    // Create user-specific data directory on signup
+    await getUserDataPath(userId);
 
     return { success: true };
 }
