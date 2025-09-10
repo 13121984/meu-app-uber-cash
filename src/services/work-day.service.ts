@@ -2,7 +2,6 @@
 "use server";
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
@@ -44,7 +43,6 @@ export interface ImportedWorkDay {
 }
 
 const FILE_NAME = 'work-days.json';
-const TIME_ZONE = 'America/Sao_Paulo';
 
 // --- Funções de Leitura/Escrita ---
 
@@ -72,8 +70,7 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
     const allWorkDays = await readWorkDays(userId);
     
     // Garante que a data está no início do dia local do Brasil
-    const localDate = utcToZonedTime(data.date, TIME_ZONE);
-    const finalDate = startOfDay(localDate);
+    const finalDate = startOfDay(new Date(data.date));
 
     if (data.id && data.id !== 'today' && data.id !== 'other-day') {
       const existingDayIndex = allWorkDays.findIndex(d => d.id === data.id);
@@ -226,7 +223,7 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
     if (!userId) return { success: false, error: "Nenhum usuário ativo para carregar dados." };
 
     try {
-        const now = utcToZonedTime(new Date(), TIME_ZONE);
+        const now = new Date();
         const currentYear = now.getFullYear();
         const currentMonth = now.getMonth();
 
@@ -289,7 +286,7 @@ function getFilteredWorkDays(
 ) {
   if (allWorkDays.length === 0) return [];
   
-  const now = utcToZonedTime(new Date(), TIME_ZONE);
+  const now = new Date();
   let interval: { start: Date; end: Date } | null = null;
   switch (filters.type) {
     case 'all':
@@ -305,20 +302,20 @@ function getFilteredWorkDays(
       break;
     case 'specificMonth':
       if (filters.year !== undefined && filters.month !== undefined) {
-        const specificDate = utcToZonedTime(new Date(filters.year, filters.month), TIME_ZONE);
+        const specificDate = new Date(filters.year, filters.month);
         interval = { start: startOfMonth(specificDate), end: endOfMonth(specificDate) };
       }
       break;
     case 'specificYear':
       if (filters.year !== undefined) {
-        const specificDate = utcToZonedTime(new Date(filters.year, 0), TIME_ZONE);
+        const specificDate = new Date(filters.year, 0);
         interval = { start: startOfYear(specificDate), end: endOfYear(specificDate) };
       }
       break;
     case 'custom':
       if (filters.dateRange?.from) {
-        const fromDate = utcToZonedTime(filters.dateRange.from, TIME_ZONE);
-        const toDate = filters.dateRange.to ? utcToZonedTime(filters.dateRange.to, TIME_ZONE) : fromDate;
+        const fromDate = new Date(filters.dateRange.from);
+        const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : fromDate;
         interval = { start: startOfDay(fromDate), end: endOfDay(toDate) };
       }
       break;

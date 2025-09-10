@@ -2,7 +2,6 @@
 "use server";
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords, Maintenance } from './maintenance.service';
@@ -56,7 +55,6 @@ export interface ReportData extends Omit<PeriodData, 'performanceByShift'> {
 }
 
 const FILE_NAME = 'summary.json';
-const TIME_ZONE = 'America/Sao_Paulo';
 
 const defaultPeriodData: PeriodData = {
     totalGanho: 0, totalLucro: 0, totalCombustivel: 0, totalExtras: 0,
@@ -91,7 +89,7 @@ export async function updateAllSummaries(userId: string): Promise<SummaryData> {
     const allMaintenance = await getMaintenanceRecords(userId);
     const goals = await getGoals(userId);
     
-    const now = utcToZonedTime(new Date(), TIME_ZONE);
+    const now = new Date();
 
     const todayWorkDays = allWorkDays.filter(day => isSameDay(day.date, now));
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
@@ -117,10 +115,7 @@ const timeToMinutes = (time: string): number => {
 };
 
 const getShift = (startTime: string): PerformanceByShift['shift'] => {
-    // Adiciona uma verificação para garantir que startTime é uma string válida
     if (typeof startTime !== 'string' || !startTime.includes(':')) {
-        // Se a hora de início não for válida, retorna um turno padrão ou lida com o erro.
-        // Vamos retornar 'Manhã' como um fallback seguro, mas isso não deve acontecer com a lógica aprimorada.
         return 'Manhã'; 
     }
     const startMinutes = timeToMinutes(startTime);
@@ -165,7 +160,6 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
             data.totalViagens += earning.trips;
         });
 
-        // CORREÇÃO: A lógica de turno só deve ser executada se houver `timeEntries` válidos.
         if (day.timeEntries && day.timeEntries.length > 0 && day.timeEntries.every(t => t.start && t.end)) {
              const totalDayHoursFromEntries = day.timeEntries.reduce((sum, entry) => {
                 const startMinutes = timeToMinutes(entry.start);
@@ -179,7 +173,6 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
                     if (entryHours > 0) {
                         const shift = getShift(entry.start);
                         const shiftData = shiftPerformanceMap.get(shift) || { profit: 0, hours: 0, rawEarnings: 0 };
-                        // Pro-rata allocation of daily profit/earnings to shifts based on hours worked
                         shiftData.profit += dailyProfit * (entryHours / totalDayHoursFromEntries);
                         shiftData.rawEarnings += dailyEarnings * (entryHours / totalDayHoursFromEntries);
                         shiftData.hours += entryHours;
@@ -198,7 +191,6 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         shift, 
         profit: data.profit, 
         hours: data.hours,
-        // Use rawEarnings for profitPerHour calculation
         profitPerHour: data.hours > 0 ? data.rawEarnings / data.hours : 0
     })).sort((a,b) => a.shift.localeCompare(b.shift));
 
@@ -240,7 +232,7 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     }
   }
   
-  const now = utcToZonedTime(new Date(), TIME_ZONE);
+  const now = new Date();
   let interval: { start: Date; end: Date } | null = null;
   const allWorkDays = await getWorkDays(userId);
   const allMaintenance = await getMaintenanceRecords(userId);
@@ -252,16 +244,16 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     case 'thisWeek': interval = { start: startOfWeek(now), end: endOfWeek(now) }; break;
     case 'thisMonth': interval = { start: startOfMonth(now), end: endOfMonth(now) }; break;
     case 'specificMonth': if (filters.year !== undefined && filters.month !== undefined) {
-        const specificDate = utcToZonedTime(new Date(filters.year, filters.month), TIME_ZONE);
+        const specificDate = new Date(filters.year, filters.month);
         interval = { start: startOfMonth(specificDate), end: endOfMonth(specificDate) };
     } break;
     case 'specificYear': if (filters.year !== undefined) {
-        const specificDate = utcToZonedTime(new Date(filters.year, 0), TIME_ZONE);
+        const specificDate = new Date(filters.year, 0);
         interval = { start: startOfYear(specificDate), end: endOfYear(specificDate) };
     } break;
     case 'custom': if (filters.dateRange?.from) {
-        const fromDate = utcToZonedTime(filters.dateRange.from, TIME_ZONE);
-        const toDate = filters.dateRange.to ? utcToZonedTime(filters.dateRange.to, TIME_ZONE) : fromDate;
+        const fromDate = new Date(filters.dateRange.from);
+        const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : fromDate;
         interval = { start: startOfDay(fromDate), end: endOfDay(toDate) };
     } break;
   }
