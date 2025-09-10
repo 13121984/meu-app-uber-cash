@@ -69,7 +69,7 @@ export function GerenciamentoClient() {
   useEffect(() => {
     const period = searchParams.get('period');
     
-    if (period) {
+    if (user && period && !currentFilters) {
         const year = searchParams.get('year');
         const month = searchParams.get('month');
         const from = searchParams.get('from');
@@ -81,13 +81,9 @@ export function GerenciamentoClient() {
             filtersFromUrl.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
         }
         
-        // This check prevents an infinite loop.
-        // It only applies filters if the component hasn't been initialized with filters yet.
-        if (!currentFilters) {
-            handleApplyFilters(filtersFromUrl);
-        }
+        handleApplyFilters(filtersFromUrl);
     }
-  }, [searchParams, handleApplyFilters, currentFilters]);
+  }, [user, searchParams, currentFilters, handleApplyFilters]);
 
 
   const filteredCount = groupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
