@@ -25,6 +25,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { getCatalog, Catalog } from '@/services/catalog.service';
 import { Skeleton } from '../ui/skeleton';
