@@ -52,25 +52,30 @@ export function ReportsClient() {
   const handleApplyFilters = useCallback((newFilters: ReportFilterValues) => {
     if (!user) return;
     
-    const params = new URLSearchParams();
-    params.set('period', newFilters.type);
-    if(newFilters.year) params.set('year', newFilters.year.toString());
-    if(newFilters.month !== undefined) params.set('month', newFilters.month.toString());
-    if(newFilters.dateRange?.from) params.set('from', newFilters.dateRange.from.toISOString());
-    if(newFilters.dateRange?.to) params.set('to', newFilters.dateRange.to.toISOString());
-    router.replace(`/relatorios?${params.toString()}`);
+    // Only update URL if filters are actually changing to avoid unnecessary re-renders
+    const currentQuery = new URLSearchParams(searchParams.toString());
+    const newQuery = new URLSearchParams();
+    newQuery.set('period', newFilters.type);
+    if(newFilters.year) newQuery.set('year', newFilters.year.toString());
+    if(newFilters.month !== undefined) newQuery.set('month', newFilters.month.toString());
+    if(newFilters.dateRange?.from) newQuery.set('from', newFilters.dateRange.from.toISOString());
+    if(newFilters.dateRange?.to) newQuery.set('to', newFilters.dateRange.to.toISOString());
+
+    if (currentQuery.toString() !== newQuery.toString()) {
+        router.replace(`/relatorios?${newQuery.toString()}`);
+    }
 
     setFilters(newFilters);
     startTransition(async () => {
       const reportData = await getReportData(user.id, newFilters);
       setData(reportData);
     });
-  }, [user, router]);
+  }, [user, router, searchParams]);
   
-  // Effect to read filters from URL on initial load or on back/forward navigation
+  // Effect to read filters from URL on initial load
   useEffect(() => {
-    // Only apply filters from URL if they haven't been set yet and user is loaded
-    if (!filters && user && searchParams) {
+    // Only run if user is loaded and filters haven't been set yet
+    if (user && !filters && searchParams) {
         const period = searchParams.get('period');
         if (period) {
             const initialFilters: ReportFilterValues = { type: period as any };
@@ -80,14 +85,15 @@ export function ReportsClient() {
             const to = searchParams.get('to');
             
             if (year) initialFilters.year = parseInt(year);
-            if (month) initialFilters.month = parseInt(month);
+            if (month !== null) initialFilters.month = parseInt(month);
             if (from) {
                 initialFilters.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
             }
+            // Set filters and trigger data load
             handleApplyFilters(initialFilters);
         }
     }
-  }, [searchParams, user, filters, handleApplyFilters]);
+  }, [user, filters, searchParams, handleApplyFilters]);
   
 
   const getChartData = (reportData: ReportData, chartId: string) => {
