@@ -176,6 +176,7 @@ export async function deleteWorkDayEntry(userId: string, id: string): Promise<{ 
     let allWorkDays = await readWorkDays(userId);
     allWorkDays = allWorkDays.filter(r => r.id !== id);
     await writeWorkDays(userId, allWorkDays);
+    await updateAllSummaries(userId);
     revalidateAll();
     return { success: true };
   } catch (error) {
@@ -198,6 +199,7 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
 
         const deletedCount = initialLength - finalWorkDays.length;
         await writeWorkDays(userId, finalWorkDays);
+        await updateAllSummaries(userId);
         revalidateAll();
         return { success: true, count: deletedCount };
     } catch (error) {
@@ -242,6 +244,7 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
         });
 
         await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
+        await updateAllSummaries(userId);
         revalidateAll();
         return { success: true };
     } catch (e) {
@@ -255,6 +258,7 @@ export async function clearAllData(userId: string): Promise<{ success: boolean; 
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
         await writeWorkDays(userId, []);
+        await updateAllSummaries(userId);
         revalidateAll();
         return { success: true };
     } catch (e) {
