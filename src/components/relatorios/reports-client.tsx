@@ -92,14 +92,13 @@ export function ReportsClient() {
     }
     
     let orderedCardIds: string[];
-    if (isAutopilot) {
-      orderedCardIds = user?.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id);
-    } else if (isPro) {
-      const proCards = mandatoryCards;
-      const savedProOrder = user?.preferences?.dashboardCardOrder?.filter(id => proCards.includes(id)) || [];
-      orderedCardIds = [...new Set([...savedProOrder, ...proCards])];
+    if (!isPro) {
+        orderedCardIds = mandatoryCards;
     } else {
-      orderedCardIds = mandatoryCards;
+      const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
+      const allowedCards = isAutopilot ? allStats.map(s => s.id) : mandatoryCards;
+      const filteredSavedOrder = savedCardOrder.filter(id => allowedCards.includes(id));
+      orderedCardIds = [...new Set([...filteredSavedOrder, ...mandatoryCards])];
     }
       
     const cardsToShow = orderedCardIds.map(id => {
@@ -125,14 +124,13 @@ export function ReportsClient() {
     }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
     
     let chartsToShowIds: string[];
-    if (isAutopilot) {
-        chartsToShowIds = user?.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id);
-    } else if (isPro) {
-        const proCharts = mandatoryCharts;
-        const savedProOrder = user?.preferences?.reportChartOrder?.filter(id => proCharts.includes(id)) || [];
-        chartsToShowIds = [...new Set([...savedProOrder, ...proCharts])];
-    } else {
+    if (!isPro) {
         chartsToShowIds = mandatoryCharts;
+    } else {
+        const savedChartOrder = user?.preferences?.reportChartOrder || [];
+        const allowedCharts = isAutopilot ? allCharts.map(c => c.id) : mandatoryCharts;
+        const filteredSavedOrder = savedChartOrder.filter(id => allowedCharts.includes(id));
+        chartsToShowIds = [...new Set([...filteredSavedOrder, ...mandatoryCharts])];
     }
     const chartsToShow = chartsToShowIds.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
 

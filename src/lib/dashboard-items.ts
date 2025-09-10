@@ -1,3 +1,4 @@
+
 import { DollarSign, Fuel, Car, CalendarDays, Hourglass, Route, TrendingUp, Zap, Map, Clock, PieChart, BarChart3, LineChart, CandlestickChart, Wrench } from "lucide-react";
 
 export const allStats = [
@@ -15,11 +16,11 @@ export const allStats = [
     { id: 'horasTrabalhadas', title: "Horas Trabalhadas", value: 8.5, icon: Clock, unit: "h", iconBg: "bg-orange-500", iconColor: "text-white", precision: 1 },
 ];
 
-export const mandatoryCards = ['lucro', 'ganho', 'combustivel'];
+export const mandatoryCards = ['lucro', 'ganho', 'combustivel', 'viagens'];
 
 export const allCharts = [
   { id: 'earningsComposition', title: "Composição de Ganhos", description: "Distribuição do seu faturamento bruto no período.", icon: PieChart, isMandatory: true },
-  { id: 'profitEvolution', title: "Evolução do Lucro", description: "Veja a tendência do seu lucro ao longo do tempo.", icon: LineChart, isMandatory: false },
+  { id: 'profitEvolution', title: "Evolução do Lucro", description: "Veja a tendência do seu lucro ao longo do tempo.", icon: LineChart, isMandatory: true },
   { id: 'earningsByCategory', title: "Ganhos por Categoria", description: "Compare o desempenho de cada app ou serviço.", icon: BarChart3, isMandatory: false },
   { id: 'tripsByCategory', title: "Viagens por Categoria", description: "Analise a quantidade de viagens por plataforma.", icon: BarChart3, isMandatory: false },
   { id: 'maintenance', title: "Resumo de Manutenção", description: "Acompanhe seus gastos com manutenção no período.", icon: Wrench, isMandatory: false },
@@ -29,4 +30,4 @@ export const allCharts = [
   { id: 'averageEarningPerTrip', title: "Ganho Médio por Viagem (por Categoria)", description: "Entenda qual serviço paga melhor por cada corrida.", icon: BarChart3, isMandatory: false},
 ];
 
-export const mandatoryCharts = ['earningsComposition'];
+export const mandatoryCharts = ['earningsComposition', 'profitEvolution'];

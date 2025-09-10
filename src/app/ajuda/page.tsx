@@ -16,8 +16,8 @@ const helpTopics = [
   {
     value: "planos",
     icon: Gem,
-    title: "Qual a diferença entre os planos (Básico, Pro, Autopilot)?",
-    content: "O plano Básico (Gratuito) oferece as ferramentas essenciais para você registrar manualmente seus ganhos e despesas. O plano Pro eleva sua gestão com o 'TX IA' para analisar corridas por print, personalização de layout e gravação de segurança de até 5min. O plano Autopilot (Premium) é a experiência definitiva, com captura 100% automática das suas corridas, auditoria de transparência das plataformas e gravação ilimitada.",
+    title: "Qual a diferença entre os planos?",
+    content: "O plano **Básico** (Gratuito) oferece as ferramentas essenciais: registros manuais, 4 cards e 2 gráficos fixos para análise. O plano **Pro** eleva sua gestão com o 'TX IA' para analisar corridas por print, acesso a todos os cards e gráficos, personalização de layout, câmera de segurança (5 min) e programa de parceiros. O plano **Autopilot** (Premium) é a experiência definitiva, com captura 100% automática das suas corridas, auditoria de transparência das plataformas, câmera ilimitada e todos os outros benefícios.",
     isPremiumFeature: true,
   },
   {
@@ -36,7 +36,7 @@ const helpTopics = [
     value: "relatorios",
     icon: BarChart3,
     title: "Como funcionam os relatórios?",
-    content: "Em 'Relatórios Detalhados', use os filtros de período para gerar análises da sua performance. Você pode ver gráficos, como a evolução do seu lucro, e exportar os dados para PDF ou CSV."
+    content: "Em 'Relatórios Detalhados', use os filtros de período para gerar análises da sua performance. Usuários do plano Básico verão 4 cards e 2 gráficos fixos. Assinantes Pro ou Autopilot têm acesso a todos os cards e gráficos disponíveis para uma análise completa."
   },
   {
     value: "metas",
@@ -73,7 +73,7 @@ const helpTopics = [
     value: "layout",
     icon: LayoutDashboard,
     title: "Posso personalizar o layout dos relatórios?",
-    content: "Sim. Usuários do plano Básico podem reordenar os cards e gráficos padrão. Assinantes Pro ou Autopilot podem, além de reordenar, adicionar e remover todos os cards e gráficos disponíveis para uma personalização completa.",
+    content: "Sim. Usuários do plano Básico podem reordenar os cards e gráficos padrão. Assinantes Pro podem reordenar e desbloquear todos os itens. Assinantes Autopilot podem, além de reordenar, adicionar e remover todos os cards e gráficos disponíveis para uma personalização completa.",
     isPremiumFeature: true
   },
   {

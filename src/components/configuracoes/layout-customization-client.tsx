@@ -30,19 +30,20 @@ export function LayoutCustomizationClient() {
 
   useEffect(() => {
     if (user) {
-        if (isAutopilot) {
-            // Autopilot: Use a ordem salva, ou todos se não houver ordem.
-            setVisibleCardIds(user.preferences?.dashboardCardOrder?.length ? user.preferences.dashboardCardOrder : allStats.map(s => s.id));
-            setVisibleChartIds(user.preferences?.reportChartOrder?.length ? user.preferences.reportChartOrder : allCharts.map(c => c.id));
-        } else if (isPro) {
-            // Pro: Usa a ordem salva, mas restrito aos itens obrigatórios.
-            const savedCardOrder = user.preferences?.dashboardCardOrder || [];
-            const finalCardOrder = [...new Set([...savedCardOrder, ...mandatoryCards])].filter(id => mandatoryCards.includes(id));
-            setVisibleCardIds(finalCardOrder);
+        const savedCardOrder = user.preferences?.dashboardCardOrder || [];
+        const savedChartOrder = user.preferences?.reportChartOrder || [];
 
-            const savedChartOrder = user.preferences?.reportChartOrder || [];
-            const finalChartOrder = [...new Set([...savedChartOrder, ...mandatoryCharts])].filter(id => mandatoryCharts.includes(id));
-            setVisibleChartIds(finalChartOrder);
+        if (isAutopilot) {
+            // Autopilot: Usa a ordem salva, garantindo que os obrigatórios estejam lá.
+            setVisibleCardIds([...new Set([...savedCardOrder, ...mandatoryCards])]);
+            setVisibleChartIds([...new Set([...savedChartOrder, ...mandatoryCharts])]);
+        } else if (isPro) {
+            // Pro: Pode reordenar, mas SÓ os itens obrigatórios.
+            const filteredSavedCards = savedCardOrder.filter(id => mandatoryCards.includes(id));
+            setVisibleCardIds([...new Set([...filteredSavedCards, ...mandatoryCards])]);
+
+            const filteredSavedCharts = savedChartOrder.filter(id => mandatoryCharts.includes(id));
+            setVisibleChartIds([...new Set([...filteredSavedCharts, ...mandatoryCharts])]);
         } else {
              // Basic: Ordem fixa, sem personalização.
              setVisibleCardIds(mandatoryCards);
@@ -116,11 +117,10 @@ export function LayoutCustomizationClient() {
   const renderSection = (type: 'card' | 'chart') => {
     const allItems = type === 'card' ? allStats : allCharts;
     const visibleIds = type === 'card' ? visibleCardIds : visibleChartIds;
-    
-    const mandatoryItems = type === 'card' ? mandatoryCards : mandatoryCharts;
+    const mandatoryItemsIds = type === 'card' ? mandatoryCards : mandatoryCharts;
 
     const visibleItems = visibleIds.map(id => allItems.find(item => item.id === id)).filter(Boolean);
-    const optionalItems = allItems.filter(item => !mandatoryItems.includes(item.id));
+    const optionalItems = allItems.filter(item => !mandatoryItemsIds.includes(item.id));
     
     return (
       <div className="space-y-4">

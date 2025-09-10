@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles, Car, Camera, BarChart3, ShieldCheck, Accessibility, Handshake } from 'lucide-react';
+import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles, Car, Camera, BarChart3, ShieldCheck, Accessibility, Handshake, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
@@ -15,15 +15,17 @@ const AUTOPILOT_CHECKOUT_LINK = "https://pay.hotmart.com/SEU_PRODUTO_AUTOPILOT";
 
 const features = [
   { id: 'registros', name: 'Registros Manuais Ilimitados', basic: true, pro: true, autopilot: true },
-  { id: 'relatorios', name: 'Relatórios e Dashboard', basic: true, pro: true, autopilot: true },
+  { id: 'relatorios_limitados', name: '4 Cards e 2 Gráficos Essenciais', description: "Lucro, Ganhos, Combustível, Viagens, Composição e Evolução", basic: true, pro: false, autopilot: false },
+  { id: 'relatorios_completos', name: 'Todos os Cards e Gráficos', description: "Ganho/h, Ganho/km, Eficiência, e muito mais", basic: false, pro: true, autopilot: true },
   { id: 'taximetro', name: 'Taxímetro Inteligente', basic: '1 uso/semana', pro: 'Ilimitado', autopilot: 'Ilimitado' },
-  { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Permite ao app ler as ofertas de corrida para análise", basic: false, pro: true, autopilot: true },
-  { id: 'personalizacao', name: 'Personalização do Layout', basic: 'Limitado', pro: true, autopilot: true },
+  { id: 'personalizacao_basica', name: 'Reordenar Layout', basic: true, pro: true, autopilot: true },
+  { id: 'personalizacao_completa', name: 'Adicionar/Remover Itens do Layout', basic: false, pro: false, autopilot: true },
+  { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Analise prints de corridas com IA", basic: false, pro: true, autopilot: true },
   { id: 'camera', name: 'Câmera de Segurança', basic: false, pro: 'Gravações de 5 min', autopilot: 'Gravações Ilimitadas' },
   { id: 'lembretes_manutencao', name: 'Lembretes de Manutenção', basic: false, pro: true, autopilot: true },
+  { id: 'afiliado', name: 'Programa de Parceiros', description: "Ganhe dinheiro indicando o app", basic: false, pro: true, autopilot: true },
   { id: 'captura_auto', name: 'Captura Automática de Corridas', description: "Registra corridas finalizadas sem digitação", basic: false, pro: false, autopilot: true },
   { id: 'auditoria', name: 'Auditoria de Transparência', description: "Compara o KM da oferta com o KM real da viagem", basic: false, pro: false, autopilot: true },
-  { id: 'afiliado', name: 'Programa de Parceiros', description: "Ganhe dinheiro indicando o app", basic: false, pro: true, autopilot: true },
 ];
 
 const plans = [
@@ -31,21 +33,31 @@ const plans = [
         name: 'Básico', 
         description: 'O essencial para começar a organizar.',
         price: { monthly: 'Grátis', annual: 'Grátis' },
-        link: ''
+        link: '',
+        featured: false,
     },
     { 
         name: 'Pro', 
         description: 'Ferramentas de IA para decisões mais inteligentes.',
         price: { monthly: 'R$ 9,90', annual: 'R$ 99,90' },
-        link: PRO_CHECKOUT_LINK
+        link: PRO_CHECKOUT_LINK,
+        featured: true,
     },
     { 
         name: 'Autopilot', 
         description: 'A experiência completa com automação total.',
         price: { monthly: 'R$ 19,90', annual: 'R$ 199,90' },
-        link: AUTOPILOT_CHECKOUT_LINK
+        link: AUTOPILOT_CHECKOUT_LINK,
+        featured: false,
     }
 ];
+
+const FeatureIcon = ({ isIncluded }: { isIncluded: boolean }) => {
+    if (isIncluded) {
+        return <Check className="h-5 w-5 text-green-500 shrink-0" />;
+    }
+    return <X className="h-5 w-5 text-muted-foreground/30 shrink-0" />;
+};
 
 export default function PremiumPage() {
   const [isAnnual, setIsAnnual] = useState(true);
@@ -66,14 +78,14 @@ export default function PremiumPage() {
           <span className="font-bold text-primary">Anual (Economize 2 meses)</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto items-start">
         {plans.map(plan => (
            <Card key={plan.name} className={cn(
              "flex flex-col transition-all duration-300",
-             plan.name === 'Pro' && "border-primary ring-2 ring-primary shadow-lg"
+             plan.featured && "border-primary ring-2 ring-primary shadow-lg"
            )}>
               <CardHeader className="text-center">
-                {plan.name === 'Pro' && <div className="text-sm font-bold text-primary -mt-2 mb-2">MAIS POPULAR</div>}
+                {plan.featured && <div className="text-sm font-bold text-primary -mt-2 mb-2">MAIS POPULAR</div>}
                 <CardTitle className="font-headline text-2xl">{plan.name}</CardTitle>
                 <CardDescription>{plan.description}</CardDescription>
               </CardHeader>
@@ -85,22 +97,36 @@ export default function PremiumPage() {
                   {plan.name !== 'Básico' && (isAnnual ? 'por ano' : 'por mês')}
                 </p>
 
+                 <div className="p-6 pt-0 mt-6">
+                    <Link href={plan.link} passHref legacyBehavior>
+                        <Button 
+                            className="w-full" 
+                            variant={plan.featured ? 'default' : 'outline'}
+                            disabled={plan.name === 'Básico'}
+                        >
+                          {plan.name === 'Básico' ? 'Seu Plano Atual' : 'Fazer Upgrade'}
+                        </Button>
+                    </Link>
+                </div>
+                
                 <ul className="space-y-4 pt-4">
                   {features.map(feature => {
                     const planKey = plan.name.toLowerCase() as 'basic' | 'pro' | 'autopilot';
                     const isIncluded = !!feature[planKey];
-                    const featureText = feature[planKey] === true ? 'Incluído' : feature[planKey] || 'Não incluído';
+                    const featureText = typeof feature[planKey] === 'string' ? feature[planKey] : '';
+
+                    if (!isIncluded && !featureText) return null;
 
                     return (
                        <li key={feature.id} className="flex items-start gap-3 text-sm">
-                         <Check className={cn("h-5 w-5 mt-0.5 shrink-0", isIncluded ? 'text-green-500' : 'text-muted-foreground/30')} />
+                         <FeatureIcon isIncluded={isIncluded || !!featureText} />
                          <div>
-                            <span className={cn(!isIncluded && "text-muted-foreground/70")}>{feature.name}</span>
+                            <span className={cn(!isIncluded && !featureText && "text-muted-foreground/70 line-through")}>{feature.name}</span>
                             {feature.description && (
                                 <p className="text-xs text-muted-foreground">{feature.description}</p>
                             )}
-                            {typeof feature[planKey] !== 'boolean' && feature[planKey] && (
-                                <p className="text-xs text-muted-foreground font-semibold">{feature[planKey]}</p>
+                            {featureText && (
+                                <p className="text-xs text-muted-foreground font-semibold">{featureText}</p>
                             )}
                          </div>
                        </li>
@@ -108,22 +134,10 @@ export default function PremiumPage() {
                   })}
                 </ul>
               </CardContent>
-              <div className="p-6 pt-0 mt-6">
-                <Link href={plan.link} passHref legacyBehavior>
-                    <Button 
-                        className="w-full" 
-                        variant={plan.name === 'Pro' ? 'default' : 'outline'}
-                        disabled={plan.name === 'Básico'}
-                    >
-                      {plan.name === 'Básico' ? 'Seu Plano Atual' : 'Fazer Upgrade'}
-                    </Button>
-                </Link>
-              </div>
             </Card>
         ))}
       </div>
       
-      {/* Seção de Afiliados */}
        <Card className="mt-12 bg-secondary/50 border-primary/20">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
@@ -131,7 +145,7 @@ export default function PremiumPage() {
                     Seja um Parceiro Uber Cash
                 </CardTitle>
                 <CardDescription>
-                    Transforme sua experiência em uma nova fonte de renda. Indique nosso app e ganhe dinheiro de verdade.
+                    Assinantes dos planos Pro e Autopilot podem transformar sua experiência em uma nova fonte de renda.
                 </CardDescription>
             </CardHeader>
             <CardContent>

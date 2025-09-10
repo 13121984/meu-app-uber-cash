@@ -12,7 +12,7 @@
     "mediaHorasPorDia": 9,
     "mediaKmPorDia": 75,
     "ganhoPorHora": 33.333333333333336,
-    "ganhoPorKm": null,
+    "ganhoPorKm": 4,
     "eficiencia": 5.9624999999999995,
     "earningsByCategory": [
       {
@@ -39,7 +39,7 @@
       "servicesPerformed": 0
     },
     "meta": {
-      "target": 200,
+      "target": 208.33333333333334,
       "period": "diária"
     },
     "profitComposition": [
@@ -84,7 +84,7 @@
     "mediaHorasPorDia": 5.791666666666667,
     "mediaKmPorDia": 62.5,
     "ganhoPorHora": 37.55395683453237,
-    "ganhoPorKm": null,
+    "ganhoPorKm": 3.48,
     "eficiencia": 6.625,
     "earningsByCategory": [
       {
@@ -111,7 +111,7 @@
       "servicesPerformed": 0
     },
     "meta": {
-      "target": 1000,
+      "target": 1250,
       "period": "semanal"
     },
     "profitComposition": [
@@ -156,7 +156,7 @@
     "mediaHorasPorDia": 5.791666666666667,
     "mediaKmPorDia": 62.5,
     "ganhoPorHora": 37.55395683453237,
-    "ganhoPorKm": null,
+    "ganhoPorKm": 3.48,
     "eficiencia": 6.625,
     "earningsByCategory": [
       {
@@ -183,7 +183,7 @@
       "servicesPerformed": 0
     },
     "meta": {
-      "target": 4000,
+      "target": 5000,
       "period": "mensal"
     },
     "profitComposition": [
