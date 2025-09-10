@@ -3,13 +3,13 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { DollarSign, Clock, TrendingUp, Target, Flag, Rocket } from "lucide-react";
+import { DollarSign, Clock, TrendingUp, Target, Flag, Rocket, Trophy } from "lucide-react";
 import type { PeriodData } from "@/services/summary.service";
 import { AppLogo } from "../ui/app-logo";
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-const StatItem = ({ icon: Icon, label, value, description, iconColor }: { icon: React.ElementType, label: string, value: string, description: string, iconColor?: string }) => (
+const StatItem = ({ icon: Icon, label, value, description, iconColor }: { icon: React.ElementType, label: string, value: string, description: React.ReactNode, iconColor?: string }) => (
     <div className="flex gap-4 items-start">
         <div className="text-muted-foreground pt-1">
              <Icon className={`h-6 w-6 ${iconColor}`} />
@@ -17,7 +17,7 @@ const StatItem = ({ icon: Icon, label, value, description, iconColor }: { icon: 
         <div>
             <p className="text-sm text-muted-foreground">{label}</p>
             <p className="text-2xl font-bold text-foreground">{value}</p>
-            <p className="text-xs text-muted-foreground">{description}</p>
+            <div className="text-xs text-muted-foreground">{description}</div>
         </div>
     </div>
 );
@@ -39,9 +39,24 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
     ? remainingValue / data.ganhoPorHora 
     : 0;
 
-  const hoursDescription = remainingHours > 0 
-    ? `Faltam ~${remainingHours.toFixed(1)}h para a meta`
-    : `${data.diasTrabalhados > 0 ? data.diasTrabalhados : 'Nenhum'} dia de trabalho`;
+  const hoursDescription = () => {
+    if (isComplete) {
+      return (
+        <span className="font-bold text-green-500 flex items-center gap-1">
+          <Trophy className="h-3 w-3" />
+          Meta Atingida!
+        </span>
+      );
+    }
+    if (remainingHours > 0) {
+      return (
+        <span className="font-bold text-yellow-500">
+          Faltam ~{remainingHours.toFixed(1)}h para a meta
+        </span>
+      );
+    }
+    return `${data.diasTrabalhados > 0 ? data.diasTrabalhados : 'Nenhum'} dia de trabalho`;
+  };
 
 
   return (
@@ -62,7 +77,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                 icon={Clock}
                 label="Horas Trabalhadas"
                 value={`${data.totalHoras.toFixed(1)}h`}
-                description={hoursDescription}
+                description={hoursDescription()}
                 iconColor="text-amber-500"
             />
 
