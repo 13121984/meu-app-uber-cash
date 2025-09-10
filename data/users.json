@@ -24,7 +24,17 @@
     ],
     "preferences": {
       "theme": "dark",
-      "colorTheme": "blue"
+      "colorTheme": "blue",
+      "dashboardCardOrder": [
+        "combustivel",
+        "lucro",
+        "ganho",
+        "viagens"
+      ],
+      "reportChartOrder": [
+        "profitEvolution",
+        "earningsComposition"
+      ]
     }
   },
   {

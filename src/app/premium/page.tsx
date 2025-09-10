@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
+import { useAuth } from '@/contexts/auth-context';
 
 // Substitua pelos seus links de checkout
 const PRO_CHECKOUT_LINK = "https://pay.hotmart.com/SEU_PRODUTO_PRO";
@@ -19,7 +20,7 @@ const features = [
   { id: 'relatorios_completos', name: 'Todos os Cards e Gráficos', description: "Ganho/h, Ganho/km, Eficiência, e muito mais", basic: false, pro: true, autopilot: true },
   { id: 'taximetro', name: 'Taxímetro Inteligente', basic: '1 uso/semana', pro: 'Ilimitado', autopilot: 'Ilimitado' },
   { id: 'personalizacao_basica', name: 'Reordenar Layout', basic: true, pro: true, autopilot: true },
-  { id: 'personalizacao_completa', name: 'Adicionar/Remover Itens do Layout', basic: false, pro: false, autopilot: true },
+  { id: 'personalizacao_completa', name: 'Adicionar/Remover Itens do Layout', basic: false, pro: true, autopilot: true },
   { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Analise prints de corridas com IA", basic: false, pro: true, autopilot: true },
   { id: 'camera', name: 'Câmera de Segurança', basic: false, pro: 'Gravações de 5 min', autopilot: 'Gravações Ilimitadas' },
   { id: 'lembretes_manutencao', name: 'Lembretes de Manutenção', basic: false, pro: true, autopilot: true },
@@ -61,6 +62,9 @@ const FeatureIcon = ({ isIncluded }: { isIncluded: boolean }) => {
 
 export default function PremiumPage() {
   const [isAnnual, setIsAnnual] = useState(true);
+  const { user } = useAuth();
+  
+  const currentUserPlan = user?.plan || 'basic';
 
   return (
     <div className="space-y-8 p-4 sm:p-8">
@@ -79,17 +83,20 @@ export default function PremiumPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto items-start">
-        {plans.map(plan => (
+        {plans.map(plan => {
+           const isCurrentPlan = currentUserPlan === plan.name.toLowerCase();
+           return (
            <Card key={plan.name} className={cn(
-             "flex flex-col transition-all duration-300",
-             plan.featured && "border-primary ring-2 ring-primary shadow-lg"
+             "flex flex-col transition-all duration-300 h-full",
+             plan.featured && !isCurrentPlan && "border-primary ring-2 ring-primary shadow-lg",
+             isCurrentPlan && "border-2 border-primary"
            )}>
               <CardHeader className="text-center">
                 {plan.featured && <div className="text-sm font-bold text-primary -mt-2 mb-2">MAIS POPULAR</div>}
                 <CardTitle className="font-headline text-2xl">{plan.name}</CardTitle>
                 <CardDescription>{plan.description}</CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 space-y-2">
+              <CardContent className="flex-1 flex flex-col space-y-2">
                 <p className="text-4xl font-bold text-center">
                   {isAnnual ? plan.price.annual : plan.price.monthly}
                 </p>
@@ -101,10 +108,10 @@ export default function PremiumPage() {
                     <Link href={plan.link} passHref legacyBehavior>
                         <Button 
                             className="w-full" 
-                            variant={plan.featured ? 'default' : 'outline'}
-                            disabled={plan.name === 'Básico'}
+                            variant={isCurrentPlan ? 'default' : (plan.featured ? 'default' : 'outline')}
+                            disabled={isCurrentPlan}
                         >
-                          {plan.name === 'Básico' ? 'Seu Plano Atual' : 'Fazer Upgrade'}
+                          {isCurrentPlan ? 'Seu Plano Atual' : 'Fazer Upgrade'}
                         </Button>
                     </Link>
                 </div>
@@ -114,8 +121,6 @@ export default function PremiumPage() {
                     const planKey = plan.name.toLowerCase() as 'basic' | 'pro' | 'autopilot';
                     const isIncluded = !!feature[planKey];
                     const featureText = typeof feature[planKey] === 'string' ? feature[planKey] : '';
-
-                    if (!isIncluded && !featureText) return null;
 
                     return (
                        <li key={feature.id} className="flex items-start gap-3 text-sm">
@@ -135,7 +140,8 @@ export default function PremiumPage() {
                 </ul>
               </CardContent>
             </Card>
-        ))}
+           )
+        })}
       </div>
       
        <Card className="mt-12 bg-secondary/50 border-primary/20">
