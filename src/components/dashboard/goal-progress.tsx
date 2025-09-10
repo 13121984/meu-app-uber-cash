@@ -56,7 +56,7 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
         <motion.div
             className="absolute top-1/2"
             initial={{ left: '0%' }}
-            animate={{ left: `calc(${clampedProgress}% - 16px)` }}
+            animate={{ left: `calc(${clampedProgress}% - 20px)` }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
             style={{ 
                 transform: 'translateY(-50%)'
@@ -67,7 +67,9 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
               animate={{ y: [0, -4, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <Car className="w-8 h-8 text-primary drop-shadow-lg" />
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                <Car className="w-6 h-6 text-primary-foreground" />
+              </div>
             </motion.div>
         </motion.div>
 
