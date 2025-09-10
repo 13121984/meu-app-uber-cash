@@ -68,9 +68,10 @@ export function ReportsClient() {
     });
   }, [user, router]);
   
-  // Effect to read filters from URL on initial load
+  // Effect to read filters from URL on initial load or on back/forward navigation
   useEffect(() => {
-    if (searchParams && !filters) { // Only run once on initial load
+    // Only apply filters from URL if they haven't been set yet
+    if (!filters && searchParams) {
         const period = searchParams.get('period');
         if (period) {
             const initialFilters: ReportFilterValues = { type: period as any };
