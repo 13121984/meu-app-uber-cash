@@ -65,23 +65,26 @@ export function GerenciamentoClient() {
     });
   }, [user, router]);
   
-  // Effect to read filters from URL on initial load
+  // Effect to read filters from URL on initial load or on back/forward navigation
   useEffect(() => {
-    if (searchParams && !currentFilters) { // Only run once on initial load
-        const period = searchParams.get('period');
-        if (period) {
-            const filters: ReportFilterValues = { type: period as any };
-            const year = searchParams.get('year');
-            const month = searchParams.get('month');
-            const from = searchParams.get('from');
-            const to = searchParams.get('to');
-            
-            if (year) filters.year = parseInt(year);
-            if (month) filters.month = parseInt(month);
-            if (from) {
-                filters.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
-            }
-            handleApplyFilters(filters);
+    const period = searchParams.get('period');
+    const year = searchParams.get('year');
+    const month = searchParams.get('month');
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
+    
+    // Check if there are any filters in the URL
+    if (period) {
+        const filtersFromUrl: ReportFilterValues = { type: period as any };
+        if (year) filtersFromUrl.year = parseInt(year);
+        if (month) filtersFromUrl.month = parseInt(month);
+        if (from) {
+            filtersFromUrl.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
+        }
+        
+        // Only apply filters if they are different from the current ones, to avoid loops
+        if (JSON.stringify(filtersFromUrl) !== JSON.stringify(currentFilters)) {
+            handleApplyFilters(filtersFromUrl);
         }
     }
   }, [searchParams, handleApplyFilters, currentFilters]);
@@ -190,10 +193,10 @@ export function GerenciamentoClient() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Smartphone className="h-5 w-5 text-primary" />
-            Captura Automática de Corridas
+            Registro Simplificado de Corridas
           </CardTitle>
            <CardDescription>
-                Acesse a página da funcionalidade de captura automática de corridas (Em breve).
+                Saiba mais sobre nosso futuro recurso de registro de corridas com um toque (Em breve).
             </CardDescription>
         </CardHeader>
         <CardContent>
