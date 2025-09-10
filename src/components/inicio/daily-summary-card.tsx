@@ -35,10 +35,14 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
   const remainingValue = data.meta.target - data.totalLucro;
   const isComplete = progress >= 100;
 
-  // Calcula as horas restantes
   const remainingHours = (!isComplete && data.ganhoPorHora > 0 && remainingValue > 0) 
     ? remainingValue / data.ganhoPorHora 
     : 0;
+
+  const hoursDescription = remainingHours > 0 
+    ? `Faltam ~${remainingHours.toFixed(1)}h para a meta`
+    : `${data.diasTrabalhados > 0 ? data.diasTrabalhados : 'Nenhum'} dia de trabalho`;
+
 
   return (
     <Card className="h-full">
@@ -58,7 +62,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                 icon={Clock}
                 label="Horas Trabalhadas"
                 value={`${data.totalHoras.toFixed(1)}h`}
-                description={`${data.diasTrabalhados > 0 ? data.diasTrabalhados : 'Nenhum'} dia de trabalho`}
+                description={hoursDescription}
                 iconColor="text-amber-500"
             />
 
@@ -113,9 +117,6 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                  {remainingValue > 0 && !isComplete && (
                   <p className="text-xs text-yellow-500 dark:text-yellow-400 mt-1">Faltam {formatCurrency(remainingValue)} para sua meta</p>
                 )}
-                 {remainingHours > 0 && (
-                    <p className="text-xs text-amber-500 dark:text-amber-400 mt-1">Cerca de {remainingHours.toFixed(1)} horas para sua meta.</p>
-                 )}
                  {isComplete && (
                     <p className="text-xs text-green-400 font-semibold mt-1">Meta atingida!</p>
                  )}
