@@ -3,6 +3,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getFile, saveFile } from './storage.service';
+import { updateAllSummaries } from "./summary.service";
 
 export interface Goals {
   daily: number;
@@ -41,10 +42,11 @@ export async function saveGoals(userId: string, goals: Goals): Promise<{ success
   try {
     await saveFile(userId, FILE_NAME, goals);
     
+    // Dispara a atualização de todos os resumos para refletir a nova meta
+    await updateAllSummaries(userId);
+
     // Revalida as páginas que dependem desses dados
-    revalidatePath('/dashboard');
-    revalidatePath('/metas');
-    revalidatePath('/'); // Tela de início também usa metas
+    revalidatePath('/', 'layout');
 
     return { success: true };
   } catch (error) {
