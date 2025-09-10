@@ -3,13 +3,12 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus, DollarSign, Crown, Camera } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus, DollarSign, Crown, Camera, Car } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "../ui/button"
-import { AppLogo } from "../ui/app-logo"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -134,7 +133,7 @@ export function TopBar() {
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
                     <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center border-2 border-primary-foreground/50 shadow-md">
-                       <AppLogo className="h-6 w-6 text-primary-foreground" />
+                       <Car className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <span className="sr-only">Uber Cash</span>
                 </Link>
