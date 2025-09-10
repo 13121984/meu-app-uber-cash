@@ -5,6 +5,7 @@ import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth,
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
+import { updateAllSummaries } from './summary.service';
 
 // --- Tipos e Interfaces ---
 
@@ -77,7 +78,7 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
       if (existingDayIndex > -1) {
         allWorkDays[existingDayIndex] = { ...data, date: startOfDay(data.date) };
         await writeWorkDays(userId, allWorkDays);
-        revalidateAll();
+        await updateAllSummaries(userId);
         return { success: true, id: data.id, operation: 'updated' };
       }
     }
@@ -89,7 +90,7 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
     };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(userId, allWorkDays);
-    revalidateAll();
+    await updateAllSummaries(userId);
     return { success: true, id: newWorkDay.id, operation: 'created' };
 
   } catch (e) {
@@ -160,7 +161,7 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
 
         await writeWorkDays(userId, finalWorkDays);
-        revalidateAll();
+        await updateAllSummaries(userId);
         return { success: true, count: workDaysToUpsert.length };
 
     } catch(e) {

@@ -31,6 +31,7 @@ import { getCatalog, Catalog } from '@/services/catalog.service';
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
+import { motion } from 'framer-motion';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -327,7 +328,12 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
                                 const isCompleted = currentStep > index + 1;
                                 const isCurrent = currentStep === index + 1;
                                 return (
-                                    <div key={step.id} className="flex flex-col items-center z-10">
+                                    <motion.div 
+                                      key={step.id} 
+                                      className="flex flex-col items-center z-10"
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.95 }}
+                                    >
                                         <div className={cn(
                                             "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",
                                             isCurrent ? "bg-primary border-primary text-primary-foreground" : 
@@ -336,7 +342,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
                                         )}>
                                             {isCompleted ? <Check /> : <step.icon className="h-5 w-5"/>}
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 )
                             })}
                         </div>
