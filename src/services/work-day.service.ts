@@ -404,7 +404,7 @@ function escapeCsvValue(value: any): string {
     }
     
     // Se o valor contém vírgula, aspas ou quebra de linha, envolve com aspas
-    if (/[",\r\n]/.test(stringValue)) {
+    if (/[";\r\n]/.test(stringValue)) {
         return `"${stringValue.replace(/"/g, '""')}"`;
     }
     return stringValue;
@@ -422,34 +422,20 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
 
     sortedWorkDays.forEach(day => {
         const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
-        const timeEntriesStr = day.timeEntries.map(t => `${t.start}-${t.end}`).join('; ');
+        const timeEntriesStr = day.timeEntries.map(t => `${t.start}-${t.end}`).join('; '); // Usa ; aqui também
         
-        // Se um dia não tem ganhos, combustíveis ou manutenção, cria uma linha única para ele
-        if (day.earnings.length === 0 && day.fuelEntries.length === 0 && day.maintenanceEntries.length === 0) {
-             rows.push([
-                dateStr,
-                escapeCsvValue(day.km),
-                escapeCsvValue(day.hours),
-                escapeCsvValue(timeEntriesStr),
-                ...Array(8).fill('') // Preenche as colunas restantes
-            ]);
-            return;
-        }
-
-        // Descobre o número máximo de entradas entre ganhos, combustíveis e manutenções para este dia
         const maxEntries = Math.max(
             day.earnings.length,
             day.fuelEntries.length,
-            day.maintenanceEntries.length
+            day.maintenanceEntries.length,
+            1 // Garante pelo menos uma linha para o dia
         );
 
-        // Cria uma linha para cada "nível" de entrada
         for (let i = 0; i < maxEntries; i++) {
             const earning = day.earnings[i];
             const fuel = day.fuelEntries[i];
             const maintenance = day.maintenanceEntries[i];
 
-            // A primeira linha de um dia contém os dados principais (data, km, horas)
             const isFirstRowOfDay = i === 0;
 
             rows.push([
@@ -470,7 +456,7 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
     });
 
     return [
-        CSV_HEADERS.join(','),
-        ...rows.map(row => row.join(','))
+        CSV_HEADERS.join(';'),
+        ...rows.map(row => row.join(';'))
     ].join('\n');
 }
