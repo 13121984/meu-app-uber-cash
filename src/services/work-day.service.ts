@@ -382,3 +382,69 @@ function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
 
   return Array.from(grouped.values());
 }
+
+
+// --- Funções de Exportação ---
+
+const CSV_HEADERS = [
+    'date', 'km', 'hours',
+    'earnings_category', 'earnings_trips', 'earnings_amount',
+    'fuel_type', 'fuel_paid', 'fuel_price',
+    'maintenance_description', 'maintenance_amount'
+];
+
+function escapeCsvValue(value: any): string {
+    if (value === null || value === undefined || value === '') return '';
+    let stringValue = String(value);
+    if (typeof value === 'number') stringValue = stringValue.replace('.', ',');
+    if (/[",\r\n]/.test(stringValue)) return `"${stringValue.replace(/"/g, '""')}"`;
+    return stringValue;
+}
+
+export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
+    if (!workDays || workDays.length === 0) {
+      throw new Error("Nenhum dado para exportar com os filtros selecionados.");
+    }
+
+    const rows: string[][] = [];
+
+    workDays.forEach(day => {
+        const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
+        
+        if (day.earnings.length === 0 && day.fuelEntries.length === 0 && day.maintenanceEntries.length === 0) {
+             rows.push([
+                dateStr, escapeCsvValue(day.km), escapeCsvValue(day.hours),
+                '', '', '', '', '', '', '', ''
+            ]);
+            return;
+        }
+
+        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, day.maintenanceEntries.length);
+
+        for (let i = 0; i < maxEntries; i++) {
+            const earning = day.earnings[i];
+            const fuel = day.fuelEntries[i];
+            const maintenance = day.maintenanceEntries[i];
+            const isFirstRowOfDay = (i === 0);
+
+            rows.push([
+                isFirstRowOfDay ? dateStr : '',
+                isFirstRowOfDay ? escapeCsvValue(day.km) : '',
+                isFirstRowOfDay ? escapeCsvValue(day.hours) : '',
+                earning ? escapeCsvValue(earning.category) : '',
+                earning ? escapeCsvValue(earning.trips) : '',
+                earning ? escapeCsvValue(earning.amount) : '',
+                fuel ? escapeCsvValue(fuel.type) : '',
+                fuel ? escapeCsvValue(fuel.paid) : '',
+                fuel ? escapeCsvValue(fuel.price) : '',
+                maintenance ? escapeCsvValue(maintenance.description) : '',
+                maintenance ? escapeCsvValue(maintenance.amount) : ''
+            ]);
+        }
+    });
+
+    return [
+        CSV_HEADERS.join(','),
+        ...rows.map(row => row.join(','))
+    ].join('\n');
+}
