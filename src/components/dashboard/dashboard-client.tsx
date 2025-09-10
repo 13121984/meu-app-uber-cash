@@ -10,7 +10,7 @@ import { StatsCard } from "./stats-card"
 import { GoalProgress } from "./goal-progress"
 import { cn } from "@/lib/utils"
 import dynamic from 'next/dynamic';
-import { ReportData, getReportData } from "@/services/summary.service"
+import { ReportData, SummaryData, getSummaryForPeriod } from "@/services/summary.service"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { allStats, mandatoryCards, allCharts, mandatoryCharts } from '@/lib/dashboard-items';
@@ -46,23 +46,17 @@ const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
 export function DashboardClient() {
   const { user, isPro, isAutopilot } = useAuth();
   const [period, setPeriod] = useState<Period>('today');
-  const [data, setData] = useState<ReportData | null>(null);
+  const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
   const [isLoading, startTransition] = useTransition();
-
-  const handlePeriodChange = (newPeriod: Period) => {
-    setPeriod(newPeriod);
-    if (!user) return;
-    startTransition(async () => {
-      const summary = await getReportData(user.id, { type: newPeriod });
-      setData(summary);
-    });
-  };
 
   useEffect(() => {
     if(user) {
-        handlePeriodChange(period);
+        startTransition(async () => {
+            const summary = await getSummaryForPeriod(user.id);
+            setSummaryData(summary);
+        });
     }
-  }, [user, period]);
+  }, [user]);
 
   const periodMap: Record<Period, string> = {
       today: "Hoje",
@@ -70,10 +64,14 @@ export function DashboardClient() {
       thisMonth: "Este Mês"
   };
   
-  const currentData = data;
+  const currentData = summaryData ? {
+      today: summaryData.hoje,
+      thisWeek: summaryData.semana,
+      thisMonth: summaryData.mes
+  }[period] : null;
   
 
-  const getChartData = (reportData: ReportData, chartId: string) => {
+  const getChartData = (reportData: any, chartId: string) => {
     switch (chartId) {
         case 'earningsComposition': return reportData.profitComposition;
         case 'profitEvolution': return reportData.profitEvolution;
@@ -89,7 +87,7 @@ export function DashboardClient() {
   }
 
   const renderContent = () => {
-      if(isLoading && !currentData) {
+      if(isLoading || !summaryData) {
           return (
               <div className="flex justify-center items-center h-96">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -157,6 +155,7 @@ export function DashboardClient() {
       return (
         <motion.div 
             className="space-y-6"
+            key={period}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -242,7 +241,7 @@ export function DashboardClient() {
                  <Button 
                     key={p} 
                     variant={period === p ? "default" : "secondary"}
-                    onClick={() => handlePeriodChange(p)}
+                    onClick={() => setPeriod(p)}
                     disabled={isLoading}
                     className={cn(
                         "rounded-full transition-all",

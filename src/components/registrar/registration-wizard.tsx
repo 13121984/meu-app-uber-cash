@@ -198,7 +198,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         if (onSuccess) {
             onSuccess();
         } else {
-            router.push('/'); // Redirect home to force a full data refresh
+            router.push('/'); 
             router.refresh(); 
         }
 
