@@ -96,10 +96,10 @@ export function TaximeterClient() {
         if (!lastUse) return { canUse: true, timeLeft: '' }; // Never used before
 
         const lastUseDate = new Date(lastUse);
-        const nextAllowedUse = add(lastUseDate, { weeks: 1 });
+        const nextAllowedUse = add(lastUseDate, { days: 1 });
         
         const canUse = isAfter(new Date(), nextAllowedUse);
-        const timeLeft = canUse ? '' : formatDistanceToNowStrict(nextAllowedUse, { locale: ptBR, unit: 'day' });
+        const timeLeft = canUse ? '' : formatDistanceToNowStrict(nextAllowedUse, { locale: ptBR, unit: 'hour' });
 
         return { canUse, timeLeft };
     };
@@ -266,9 +266,9 @@ export function TaximeterClient() {
         return (
              <Card className="text-center p-8 space-y-4">
                  <Lock className="mx-auto h-12 w-12 text-primary mb-4"/>
-                <CardTitle>Uso Semanal Esgotado</CardTitle>
+                <CardTitle>Uso Diário Esgotado</CardTitle>
                 <CardDescription className="my-2">
-                    Usuários do plano Básico podem usar o taxímetro uma vez por semana para corridas particulares.
+                    Usuários do plano Básico podem usar o taxímetro uma vez por dia para corridas particulares.
                     <br/>
                     Seu próximo uso estará disponível em aproximadamente <strong className="text-primary">{usageStatus.timeLeft}</strong>.
                 </CardDescription>

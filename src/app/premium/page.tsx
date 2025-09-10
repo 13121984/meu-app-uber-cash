@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles, Car, Camera, BarChart3, ShieldCheck, Accessibility, Handshake, X } from 'lucide-react';
+import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles, Car, Camera, BarChart3, ShieldCheck, Accessibility, Handshake, X, DollarSign, Target, Wrench, Calculator, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
@@ -14,13 +14,21 @@ import { useAuth } from '@/contexts/auth-context';
 const PRO_CHECKOUT_LINK = "https://pay.hotmart.com/SEU_PRODUTO_PRO";
 const AUTOPILOT_CHECKOUT_LINK = "https://pay.hotmart.com/SEU_PRODUTO_AUTOPILOT";
 
-const features = [
-  { id: 'registros', name: 'Registros Manuais Ilimitados', basic: true, pro: true, autopilot: true },
-  { id: 'relatorios_limitados', name: '4 Cards e 2 Gráficos Essenciais', description: "Lucro, Ganhos, Combustível, Viagens, Composição e Evolução", basic: true, pro: false, autopilot: false },
+const basicFeatures = [
+    { id: 'ganhos', name: 'Controle de Ganhos', icon: DollarSign },
+    { id: 'cards', name: '4 Cards e 2 Gráficos Essenciais', icon: BarChart3 },
+    { id: 'metas', name: 'Análise de Metas', icon: Target },
+    { id: 'taximetro', name: 'Taxímetro Inteligente (1 uso/dia)', icon: Calculator },
+    { id: 'manutencao', name: 'Registro de Manutenção', icon: Wrench },
+    { id: 'despesas', name: 'Organizador de Despesas Pessoais', icon: DollarSign },
+    { id: 'relatorios', name: 'Relatórios de Ganhos (PDF)', icon: FileDown },
+]
+
+const proFeatures = [
+  { id: 'registros', name: 'Controle de Ganhos', basic: true, pro: true, autopilot: true },
   { id: 'relatorios_completos', name: 'Todos os Cards e Gráficos', description: "Ganho/h, Ganho/km, Eficiência, e muito mais", basic: false, pro: true, autopilot: true },
-  { id: 'taximetro', name: 'Taxímetro Inteligente', basic: '1 uso/semana', pro: 'Ilimitado', autopilot: 'Ilimitado' },
-  { id: 'personalizacao_basica', name: 'Reordenar Layout', basic: true, pro: true, autopilot: true },
-  { id: 'personalizacao_completa', name: 'Adicionar/Remover Itens do Layout', basic: false, pro: true, autopilot: true },
+  { id: 'personalizacao_completa', name: 'Adicionar e Ocultar Itens do Layout', basic: false, pro: true, autopilot: true },
+  { id: 'taximetro', name: 'Taxímetro Inteligente', basic: '1 uso/dia', pro: 'Ilimitado', autopilot: 'Ilimitado' },
   { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Analise prints de corridas com IA", basic: false, pro: true, autopilot: true },
   { id: 'camera', name: 'Câmera de Segurança', basic: false, pro: 'Gravações de 5 min', autopilot: 'Gravações Ilimitadas' },
   { id: 'lembretes_manutencao', name: 'Lembretes de Manutenção', basic: false, pro: true, autopilot: true },
@@ -65,6 +73,51 @@ export default function PremiumPage() {
   const { user } = useAuth();
   
   const currentUserPlan = user?.plan || 'basic';
+
+  const renderFeatures = (planName: string) => {
+    if (planName === 'Básico') {
+      return (
+        <ul className="space-y-4 pt-4">
+          {basicFeatures.map(feature => (
+            <li key={feature.id} className="flex items-start gap-3 text-sm">
+              <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <span>{feature.name}</span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    return (
+        <ul className="space-y-4 pt-4">
+            {proFeatures.map(feature => {
+            const planKey = planName.toLowerCase() as 'pro' | 'autopilot';
+            const isIncluded = feature[planKey] || feature['basic'];
+            const featureText = typeof feature[planKey] === 'string' ? feature[planKey] : '';
+            const isBasicOnly = feature.basic && !feature.pro && !feature.autopilot;
+            const finalInclusion = isBasicOnly ? planName === 'Básico' : !!isIncluded;
+
+            // Para Pro e Autopilot, não mostramos os itens básicos que já estão implícitos
+            if(planName !== 'Básico' && feature.id === 'registros') return null;
+
+            return (
+                <li key={feature.id} className="flex items-start gap-3 text-sm">
+                <FeatureIcon isIncluded={finalInclusion} />
+                <div>
+                    <span className={cn(!finalInclusion && "text-muted-foreground/70 line-through")}>{feature.name}</span>
+                    {feature.description && (
+                        <p className="text-xs text-muted-foreground">{feature.description}</p>
+                    )}
+                    {featureText && (
+                        <p className="text-xs text-muted-foreground font-semibold">{featureText}</p>
+                    )}
+                </div>
+                </li>
+            )
+            })}
+        </ul>
+    );
+  }
 
   return (
     <div className="space-y-8 p-4 sm:p-8">
@@ -116,28 +169,7 @@ export default function PremiumPage() {
                     </Link>
                 </div>
                 
-                <ul className="space-y-4 pt-4">
-                  {features.map(feature => {
-                    const planKey = plan.name.toLowerCase() as 'basic' | 'pro' | 'autopilot';
-                    const isIncluded = !!feature[planKey];
-                    const featureText = typeof feature[planKey] === 'string' ? feature[planKey] : '';
-
-                    return (
-                       <li key={feature.id} className="flex items-start gap-3 text-sm">
-                         <FeatureIcon isIncluded={isIncluded || !!featureText} />
-                         <div>
-                            <span className={cn(!isIncluded && !featureText && "text-muted-foreground/70 line-through")}>{feature.name}</span>
-                            {feature.description && (
-                                <p className="text-xs text-muted-foreground">{feature.description}</p>
-                            )}
-                            {featureText && (
-                                <p className="text-xs text-muted-foreground font-semibold">{featureText}</p>
-                            )}
-                         </div>
-                       </li>
-                    )
-                  })}
-                </ul>
+                {renderFeatures(plan.name)}
               </CardContent>
             </Card>
            )

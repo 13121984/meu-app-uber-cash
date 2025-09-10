@@ -68,13 +68,13 @@ const helpTopics = [
     value: "taximetro",
     icon: Calculator,
     title: "Para que serve o Taxímetro Inteligente?",
-    content: "O Taxímetro Inteligente é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Usuários do plano Básico podem usar o taxímetro uma vez por semana, enquanto assinantes Pro ou Autopilot têm acesso ilimitado.",
+    content: "O Taxímetro Inteligente é ideal para corridas particulares. Em 'Configurações', defina suas tarifas (bandeirada, preço por km e por minuto). Ao iniciar uma corrida, o app usará o GPS para calcular distância e tempo, mostrando o valor em tempo real. Usuários do plano Básico podem usar o taxímetro uma vez por dia, enquanto assinantes Pro ou Autopilot têm acesso ilimitado.",
   },
    {
     value: "layout",
     icon: LayoutDashboard,
     title: "Posso personalizar o layout dos relatórios?",
-    content: "Sim. Usuários do plano Básico podem reordenar os cards e gráficos padrão. Assinantes Pro podem reordenar e desbloquear todos os itens. Assinantes Autopilot podem, além de reordenar, adicionar e remover todos os cards e gráficos disponíveis para uma personalização completa.",
+    content: "Sim. Usuários do plano Básico podem reordenar os cards e gráficos padrão. Assinantes Pro podem reordenar, adicionar e remover todos os itens disponíveis para uma personalização completa.",
     isPremiumFeature: true
   },
   {
