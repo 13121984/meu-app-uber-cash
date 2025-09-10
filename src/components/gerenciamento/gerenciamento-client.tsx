@@ -51,7 +51,12 @@ export function GerenciamentoClient() {
     if(filters.month !== undefined) params.set('month', filters.month.toString());
     if(filters.dateRange?.from) params.set('from', filters.dateRange.from.toISOString());
     if(filters.dateRange?.to) params.set('to', filters.dateRange.to.toISOString());
-    router.replace(`/gerenciamento?${params.toString()}`);
+    
+    // Only push to router if the URL is different, to help prevent loops.
+    const currentSearch = window.location.search;
+    if (`?${params.toString()}` !== currentSearch) {
+        router.replace(`/gerenciamento?${params.toString()}`);
+    }
     
     setCurrentFilters(filters);
     startTransition(async () => {
@@ -69,7 +74,7 @@ export function GerenciamentoClient() {
   useEffect(() => {
     const period = searchParams.get('period');
     
-    if (user && period && !currentFilters) {
+    if (user && period) {
         const year = searchParams.get('year');
         const month = searchParams.get('month');
         const from = searchParams.get('from');
@@ -81,7 +86,10 @@ export function GerenciamentoClient() {
             filtersFromUrl.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
         }
         
-        handleApplyFilters(filtersFromUrl);
+        // Prevent re-applying the same filters, which was causing the loop.
+        if (JSON.stringify(filtersFromUrl) !== JSON.stringify(currentFilters)) {
+            handleApplyFilters(filtersFromUrl);
+        }
     }
   }, [user, searchParams, currentFilters, handleApplyFilters]);
 
