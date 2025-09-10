@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { BotMessageSquare, Check, DollarSign, ImageUp, Loader2, RefreshCw, Sparkles, ThumbsDown, ThumbsUp, X, Edit } from 'lucide-react';
+import { BotMessageSquare, Check, DollarSign, ImageUp, Loader2, RefreshCw, Sparkles, ThumbsDown, ThumbsUp, X, Pencil } from 'lucide-react';
 import Image from 'next/image';
 import { updateUserPreferences } from '@/services/auth.service';
 import Link from 'next/link';
@@ -64,7 +64,7 @@ function ResultDisplay({ result, onReset }: { result: AnalyzeRaceOutput, onReset
                     </Button>
                     <Link href="/registrar/today" className="w-full">
                         <Button className="w-full">
-                           <Edit className="mr-2 h-4 w-4" />
+                           <Pencil className="mr-2 h-4 w-4" />
                             Registrar esta Corrida
                         </Button>
                     </Link>

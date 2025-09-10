@@ -104,9 +104,10 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         let allWorkDays = await readWorkDays(userId);
         const workDaysToUpsert: WorkDay[] = [];
 
+        // Agrupa todas as linhas do CSV pela data
         const groupedByDate = new Map<string, ImportedWorkDay[]>();
         for (const row of importedData) {
-            if (!row.date) continue;
+            if (!row.date) continue; // Pula linhas sem data
             const dateKey = row.date;
             if (!groupedByDate.has(dateKey)) {
                 groupedByDate.set(dateKey, []);
@@ -114,43 +115,50 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
             groupedByDate.get(dateKey)!.push(row);
         }
 
+        // Processa cada grupo de data
         for (const [dateKey, rows] of groupedByDate.entries()) {
             const date = startOfDay(parseISO(dateKey)); // Garante a data sem fuso
-            const firstRow = rows[0];
-            const km = parseFloat(firstRow.km.replace(',', '.')) || 0;
-            const hours = parseFloat(firstRow.hours?.toString().replace(',', '.') || 0);
 
-            const earnings: Earning[] = [];
-            const fuelEntries: FuelEntry[] = [];
+            // Junta os dados de todas as linhas de um mesmo dia
+            const dailyKm = rows.reduce((max, row) => Math.max(max, parseFloat(row.km?.replace(',', '.')) || 0), 0);
+            const dailyHours = rows.reduce((max, row) => Math.max(max, parseFloat(row.hours?.replace(',', '.')) || 0), 0);
+
+            const earnings: Earning[] = rows
+                .filter(row => row.earnings_category && row.earnings_amount)
+                .map(row => ({
+                    id: Date.now() + Math.random(),
+                    category: row.earnings_category,
+                    trips: parseInt(row.earnings_trips) || 0,
+                    amount: parseFloat(row.earnings_amount.replace(',', '.')) || 0
+                }));
+
+            const fuelEntries: FuelEntry[] = rows
+                .filter(row => row.fuel_type && row.fuel_paid)
+                .map(row => ({
+                    id: Date.now() + Math.random(),
+                    type: row.fuel_type,
+                    paid: parseFloat(row.fuel_paid.replace(',', '.')) || 0,
+                    price: parseFloat(row.fuel_price?.replace(',', '.')) || 0
+                }));
             
-            rows.forEach(row => {
-                if (row.earnings_category && row.earnings_amount) {
-                    earnings.push({
-                        id: Date.now() + Math.random(),
-                        category: row.earnings_category,
-                        trips: parseInt(row.earnings_trips) || 0,
-                        amount: parseFloat(row.earnings_amount.replace(',', '.')) || 0
-                    });
-                }
-                if (row.fuel_type && row.fuel_paid) {
-                    fuelEntries.push({
-                        id: Date.now() + Math.random(),
-                        type: row.fuel_type,
-                        paid: parseFloat(row.fuel_paid.replace(',', '.')) || 0,
-                        price: parseFloat(row.fuel_price.replace(',', '.')) || 0
-                    });
-                }
-            });
-            
+            const maintenanceEntries: WorkDay['maintenanceEntries'] = rows
+                .filter(row => row.maintenance_description && row.maintenance_amount)
+                .map(row => ({
+                    id: Date.now() + Math.random(),
+                    description: row.maintenance_description,
+                    amount: parseFloat(row.maintenance_amount.replace(',', '.')) || 0
+                }));
+
+            // Cria um único WorkDay para a data, consolidando todos os dados
             workDaysToUpsert.push({
                 id: Date.now().toString() + dateKey,
                 date: date,
-                km: km,
-                hours: hours,
+                km: dailyKm,
+                hours: dailyHours,
                 earnings,
                 fuelEntries,
-                maintenanceEntries: [],
-                timeEntries: [],
+                maintenanceEntries,
+                timeEntries: [], // timeEntries não são importados por CSV
             });
         }
         

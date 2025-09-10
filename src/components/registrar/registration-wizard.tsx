@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useReducer, useEffect } from 'react';
-import { Check, Loader2, CheckCircle, AlertTriangle, Edit, Trash2, PlusCircle, Car, MapPin, DollarSign, Gauge } from 'lucide-react';
+import { Check, Loader2, CheckCircle, AlertTriangle, Edit, Trash2, PlusCircle, Car, MapPin, DollarSign, Gauge, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Step1Info } from './step1-info';
@@ -273,7 +273,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
                                         <p className="text-sm text-green-500">{formatCurrency(profit)}</p>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button size="icon" variant="ghost" onClick={() => setEntryBeingEdited(entry)}><Edit className="h-4 w-4" /></Button>
+                                        <Button size="icon" variant="ghost" onClick={() => setEntryBeingEdited(entry)}><Pencil className="h-4 w-4" /></Button>
                                         <AlertDialogTrigger asChild>
                                             <Button size="icon" variant="ghost" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
                                         </AlertDialogTrigger>

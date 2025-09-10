@@ -19,15 +19,7 @@ export async function exportReportAction(userId: string, filters: ReportFilterVa
   const validatedFilters = ReportFilterValuesSchema.parse(filters);
   const reportData = await getReportData(userId, validatedFilters);
   
-  const serializableWorkDays = reportData.rawWorkDays.map(day => ({
-      ...day,
-      date: day.date.toISOString(),
-      maintenance: {
-        description: day.maintenanceEntries.map(m => m.description).join('; '),
-        amount: day.maintenanceEntries.reduce((sum, m) => sum + m.amount, 0),
-      }
-  }));
-
-  const result = await exportToCsvFlow(serializableWorkDays as any);
+  // A ação agora usa a estrutura `rawWorkDays` que já tem tudo que precisamos
+  const result = await exportToCsvFlow(reportData.rawWorkDays);
   return result;
 }

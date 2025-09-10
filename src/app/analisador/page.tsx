@@ -2,7 +2,7 @@
 "use client";
 
 import { useAuth } from '@/contexts/auth-context';
-import { BotMessageSquare, Loader2, Sparkles, Gem, ArrowRight, Lock, DollarSign, Target, ThumbsUp } from 'lucide-react';
+import { BotMessageSquare, Loader2, Sparkles, Gem, ArrowRight, Lock, DollarSign, Target, ThumbsUp, Pencil } from 'lucide-react';
 import { AnalyzerClient } from '@/components/analisador/analyzer-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

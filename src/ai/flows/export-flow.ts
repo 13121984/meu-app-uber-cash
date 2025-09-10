@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow for exporting report data to a CSV file.
@@ -38,7 +39,7 @@ function escapeCsvValue(value: any): string {
     
     // Replace comma with dot for decimal values, as Sheets/Excel might use it
     if (typeof value === 'number') {
-        stringValue = stringValue.replace(',', '.');
+        stringValue = stringValue.replace('.', ',');
     }
 
     // If the value contains a comma, quote, or newline, enclose it in double quotes
@@ -69,7 +70,7 @@ export const exportToCsvFlow = ai.defineFlow(
         const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
         
         // Handle days with no entries, just basic info
-        if (day.earnings.length === 0 && day.fuelEntries.length === 0 && (!day.maintenance || day.maintenance.amount === 0)) {
+        if (day.earnings.length === 0 && day.fuelEntries.length === 0 && day.maintenanceEntries.length === 0) {
              rows.push([
                 dateStr,
                 escapeCsvValue(day.km),
@@ -79,13 +80,13 @@ export const exportToCsvFlow = ai.defineFlow(
             return;
         }
 
-        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, (day.maintenance && day.maintenance.amount > 0) ? 1 : 0);
+        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, day.maintenanceEntries.length);
 
         for (let i = 0; i < maxEntries; i++) {
             const earning = day.earnings[i];
             const fuel = day.fuelEntries[i];
-            // Maintenance should only be on the first row for a given day
-            const maintenance = (i === 0 && day.maintenance && day.maintenance.amount > 0) ? day.maintenance : null;
+            const maintenance = day.maintenanceEntries[i];
+            
             // Basic info (date, km, hours) should only be on the first row for a given day
             const isFirstRowOfDay = (i === 0);
 
