@@ -6,7 +6,7 @@ import React, { useState, useTransition, useMemo, useCallback, useRef, useEffect
 import { useAuth } from '@/contexts/auth-context';
 import { ReportsFilter } from './reports-filter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Loader2, Info, PlusCircle, Wrench, LineChart, PieChart, BarChart3, CandlestickChart, Fuel, Lock } from 'lucide-react';
+import { Loader2, Info, PlusCircle, Wrench, LineChart, PieChart, BarChart3, CandlestickChart, Fuel, Lock, ArrowLeft } from 'lucide-react';
 import { ReportData, getReportData } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
@@ -249,7 +249,15 @@ export function ReportsClient() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-4 space-y-4">
+           <div className="flex flex-wrap gap-2 items-center">
+             <Link href={`/gerenciamento?${searchParams.toString()}`}>
+                <Button variant="outline">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Voltar para Gerenciamento
+                </Button>
+            </Link>
+          </div>
           <ReportsFilter 
             onApplyFilters={handleApplyFilters} 
             isPending={isPending}

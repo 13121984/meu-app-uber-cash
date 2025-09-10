@@ -1,39 +1,21 @@
 {
   "hoje": {
-    "totalGanho": 300,
-    "totalLucro": 240,
-    "totalCombustivel": 60,
+    "totalGanho": 0,
+    "totalLucro": 0,
+    "totalCombustivel": 0,
     "totalExtras": 0,
-    "diasTrabalhados": 1,
-    "totalKm": 75,
-    "totalHoras": 9,
-    "totalViagens": 25,
-    "totalLitros": 12.578616352201259,
-    "mediaHorasPorDia": 9,
-    "mediaKmPorDia": 75,
-    "ganhoPorHora": 33.333333333333336,
-    "ganhoPorKm": 4,
-    "eficiencia": 5.9624999999999995,
-    "earningsByCategory": [
-      {
-        "name": "Uber Cash",
-        "total": 150
-      },
-      {
-        "name": "99 Pop",
-        "total": 150
-      }
-    ],
-    "tripsByCategory": [
-      {
-        "name": "Uber Cash",
-        "total": 15
-      },
-      {
-        "name": "99 Pop",
-        "total": 10
-      }
-    ],
+    "diasTrabalhados": 0,
+    "totalKm": 0,
+    "totalHoras": 0,
+    "totalViagens": 0,
+    "totalLitros": 0,
+    "mediaHorasPorDia": 0,
+    "mediaKmPorDia": 0,
+    "ganhoPorHora": 0,
+    "ganhoPorKm": 0,
+    "eficiencia": 0,
+    "earningsByCategory": [],
+    "tripsByCategory": [],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
@@ -42,68 +24,34 @@
       "target": 208.33333333333334,
       "period": "diária"
     },
-    "profitComposition": [
-      {
-        "name": "Lucro Líquido",
-        "value": 240,
-        "fill": "hsl(var(--chart-1))",
-        "totalGanho": 300
-      },
-      {
-        "name": "Combustível",
-        "value": 60,
-        "fill": "hsl(var(--chart-2))",
-        "totalGanho": 300
-      }
-    ],
-    "performanceByShift": [
-      {
-        "shift": "Manhã",
-        "profit": 80,
-        "hours": 3,
-        "profitPerHour": 26.666666666666668
-      },
-      {
-        "shift": "Tarde",
-        "profit": 160,
-        "hours": 6,
-        "profitPerHour": 36.666666666666664
-      }
-    ]
+    "profitComposition": [],
+    "performanceByShift": []
   },
   "semana": {
-    "totalGanho": 435,
-    "totalLucro": 345,
-    "totalCombustivel": 90,
+    "totalGanho": 135,
+    "totalLucro": 105,
+    "totalCombustivel": 30,
     "totalExtras": 0,
-    "diasTrabalhados": 2,
-    "totalKm": 125,
-    "totalHoras": 11.583333333333334,
-    "totalViagens": 35,
-    "totalLitros": 18.867924528301888,
-    "mediaHorasPorDia": 5.791666666666667,
-    "mediaKmPorDia": 62.5,
-    "ganhoPorHora": 37.55395683453237,
-    "ganhoPorKm": 3.48,
-    "eficiencia": 6.625,
+    "diasTrabalhados": 1,
+    "totalKm": 50,
+    "totalHoras": 2.5833333333333335,
+    "totalViagens": 10,
+    "totalLitros": 6.289308176100629,
+    "mediaHorasPorDia": 2.5833333333333335,
+    "mediaKmPorDia": 50,
+    "ganhoPorHora": 52.25806451612903,
+    "ganhoPorKm": 2.7,
+    "eficiencia": 7.949999999999999,
     "earningsByCategory": [
       {
-        "name": "Uber Cash",
-        "total": 150
-      },
-      {
         "name": "99 Pop",
-        "total": 285
+        "total": 135
       }
     ],
     "tripsByCategory": [
       {
-        "name": "Uber Cash",
-        "total": 15
-      },
-      {
         "name": "99 Pop",
-        "total": 20
+        "total": 10
       }
     ],
     "maintenance": {
@@ -117,65 +65,51 @@
     "profitComposition": [
       {
         "name": "Lucro Líquido",
-        "value": 345,
+        "value": 105,
         "fill": "hsl(var(--chart-1))",
-        "totalGanho": 435
+        "totalGanho": 135
       },
       {
         "name": "Combustível",
-        "value": 90,
+        "value": 30,
         "fill": "hsl(var(--chart-2))",
-        "totalGanho": 435
+        "totalGanho": 135
       }
     ],
     "performanceByShift": [
       {
         "shift": "Manhã",
-        "profit": 185,
-        "hours": 5.583333333333334,
-        "profitPerHour": 38.50746268656716
-      },
-      {
-        "shift": "Tarde",
-        "profit": 160,
-        "hours": 6,
-        "profitPerHour": 36.666666666666664
+        "profit": 105,
+        "hours": 2.5833333333333335,
+        "profitPerHour": 52.25806451612903
       }
     ]
   },
   "mes": {
-    "totalGanho": 435,
-    "totalLucro": 345,
-    "totalCombustivel": 90,
+    "totalGanho": 135,
+    "totalLucro": 105,
+    "totalCombustivel": 30,
     "totalExtras": 0,
-    "diasTrabalhados": 2,
-    "totalKm": 125,
-    "totalHoras": 11.583333333333334,
-    "totalViagens": 35,
-    "totalLitros": 18.867924528301888,
-    "mediaHorasPorDia": 5.791666666666667,
-    "mediaKmPorDia": 62.5,
-    "ganhoPorHora": 37.55395683453237,
-    "ganhoPorKm": 3.48,
-    "eficiencia": 6.625,
+    "diasTrabalhados": 1,
+    "totalKm": 50,
+    "totalHoras": 2.5833333333333335,
+    "totalViagens": 10,
+    "totalLitros": 6.289308176100629,
+    "mediaHorasPorDia": 2.5833333333333335,
+    "mediaKmPorDia": 50,
+    "ganhoPorHora": 52.25806451612903,
+    "ganhoPorKm": 2.7,
+    "eficiencia": 7.949999999999999,
     "earningsByCategory": [
       {
-        "name": "Uber Cash",
-        "total": 150
-      },
-      {
         "name": "99 Pop",
-        "total": 285
+        "total": 135
       }
     ],
     "tripsByCategory": [
       {
-        "name": "Uber Cash",
-        "total": 15
-      },
-      {
         "name": "99 Pop",
-        "total": 20
+        "total": 10
       }
     ],
     "maintenance": {
@@ -189,29 +123,23 @@
     "profitComposition": [
       {
         "name": "Lucro Líquido",
-        "value": 345,
+        "value": 105,
         "fill": "hsl(var(--chart-1))",
-        "totalGanho": 435
+        "totalGanho": 135
       },
       {
         "name": "Combustível",
-        "value": 90,
+        "value": 30,
         "fill": "hsl(var(--chart-2))",
-        "totalGanho": 435
+        "totalGanho": 135
       }
     ],
     "performanceByShift": [
       {
         "shift": "Manhã",
-        "profit": 185,
-        "hours": 5.583333333333334,
-        "profitPerHour": 38.50746268656716
-      },
-      {
-        "shift": "Tarde",
-        "profit": 160,
-        "hours": 6,
-        "profitPerHour": 36.666666666666664
+        "profit": 105,
+        "hours": 2.5833333333333335,
+        "profitPerHour": 52.25806451612903
       }
     ]
   }
