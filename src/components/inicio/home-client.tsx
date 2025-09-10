@@ -79,7 +79,7 @@ export function HomeClient() {
   return (
     <div className="space-y-8 animate-fade-in">
         <div className="space-y-2">
-            <h1 className="text-5xl font-bold font-headline text-foreground">Rota Certa</h1>
+            <h1 className="text-5xl font-bold font-headline text-foreground">Uber Cash</h1>
             <p className="text-muted-foreground text-lg">Sua rota para o sucesso.</p>
         </div>
 

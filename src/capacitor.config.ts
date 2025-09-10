@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.uber.cash',
-  appName: 'Rota Certa',
+  appName: 'Uber Cash',
   webDir: 'out',
   bundledWebRuntime: false,
   server: {
