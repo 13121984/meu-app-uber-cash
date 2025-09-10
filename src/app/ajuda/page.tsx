@@ -297,97 +297,106 @@ export default function AjudaPage() {
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent>
-                               <div className="prose prose-sm dark:prose-invert max-w-none">
-                                    <p>Para transformar seu aplicativo web em um aplicativo Android instalável, usamos uma ferramenta chamada <strong>Capacitor</strong>. Ele "empacota" seu site em um contêiner nativo. Este guia detalha todo o processo.</p>
-                                    
-                                    <h4 class="font-semibold">Visão Geral do Processo</h4>
-                                    <p>O fluxo é o seguinte: <strong>Seu Código -> Build do Next.js -> Capacitor -> Android Studio -> App Android.</strong></p>
-                                    
-                                    <h4 class="font-semibold">1. Pré-requisitos: As Ferramentas Essenciais</h4>
-                                    <p>Antes de tudo, você precisa instalar 3 programas no seu computador. Eles são a base para o desenvolvimento Android.</p>
-                                    <ol>
-                                        <li>
-                                            <strong>Node.js:</strong> É o ambiente que roda seu aplicativo Next.js. Se você está vendo esta página, ele já está instalado.
-                                        </li>
-                                        <li>
-                                            <strong>Java Development Kit (JDK):</strong> O Android é baseado em Java. Você precisa do kit de desenvolvimento para que o Android Studio funcione. Recomendo a versão <strong>OpenJDK 17</strong>.
-                                            <ul>
-                                                <li><a href="https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html" target="_blank" rel="noopener noreferrer">Link para Download do JDK 17</a> (Escolha o instalador para seu sistema operacional, Windows x64 Installer ou macOS x64 DMG Installer).</li>
-                                            </ul>
-                                        </li>
-                                        <li>
-                                            <strong>Android Studio:</strong> Este é o programa oficial do Google para criar aplicativos Android. É aqui que vamos gerar os arquivos finais.
-                                            <ul>
-                                                <li><a href="https://developer.android.com/studio" target="_blank" rel="noopener noreferrer">Link para Download do Android Studio</a>.</li>
-                                            </ul>
-                                        </li>
-                                    </ol>
-                                    <p><strong>Dica:</strong> Instale o JDK primeiro, depois o Android Studio. Geralmente, o Android Studio detecta automaticamente a instalação do JDK.</p>
-
-                                    <h4 class="font-semibold">2. Passo a Passo: Gerando seu Aplicativo</h4>
-                                    <p>Com tudo instalado, siga estas etapas na ordem correta.</p>
-                                    <ol>
-                                        <li>
-                                            <strong>Abra o Terminal:</strong> No Firebase Studio, você pode usar o terminal integrado. Se estiver rodando localmente, abra o terminal (Prompt de Comando, PowerShell ou Terminal) na pasta raiz do seu projeto.
-                                        </li>
-                                        <li>
-                                            <strong>Instale as Dependências (se necessário):</strong> Se for a primeira vez que você abre o projeto, rode o comando:
-                                            <br/>
-                                            <code class="bg-muted px-1 py-0.5 rounded">npm install</code>
-                                        </li>
-                                        <li>
-                                            <strong>Construa a Versão Web (Build):</strong> O Capacitor precisa da versão final e otimizada do seu site. Gere-a com o comando:
-                                            <br/>
-                                            <code class="bg-muted px-1 py-0.5 rounded">npm run build</code>
-                                            <br/>
-                                            <em class="text-xs">Isso cria uma pasta chamada `out` com seu site pronto.</em>
-                                        </li>
-                                        <li>
-                                            <strong>Sincronize com o Android (Sync):</strong> Agora, vamos dizer ao Capacitor para copiar essa versão web para o projeto Android. Rode:
-                                            <br/>
-                                            <code class="bg-muted px-1 py-0.5 rounded">npx cap sync android</code>
-                                            <br/>
-                                            <em class="text-xs">Este comando atualiza o projeto Android dentro da pasta `android` com o conteúdo da pasta `out`.</em>
-                                        </li>
-                                        <li>
-                                            <strong>Abra o Android Studio:</strong> Chegou a hora de abrir o projeto nativo. Rode o comando:
-                                            <br/>
-                                            <code class="bg-muted px-1 py-0.5 rounded">npx cap open android</code>
-                                            <br/>
-                                            <em class="text-xs">Isso irá iniciar o Android Studio e carregar a pasta `android` do seu projeto. Pode levar um tempo na primeira vez.</em>
-                                        </li>
-                                    </ol>
-
-                                    <h4 class="font-semibold">3. Dentro do Android Studio: A Reta Final</h4>
-                                    <p>Uma vez que o Android Studio estiver aberto e o projeto carregado (pode haver uma barra de progresso "Gradle Sync" na parte inferior, espere ela terminar), siga os passos para gerar os arquivos.</p>
-                                    
-                                    <h5 class="font-semibold mt-2">A. Gerando o APK (para testes)</h5>
-                                    <p class="text-xs">O arquivo <code>.apk</code> é usado para instalar o app diretamente no seu celular ou em um emulador para testes rápidos.</p>
-                                    <ol>
-                                        <li>No menu superior, vá em <strong>Build > Build Bundle(s) / APK(s) > Build APK(s)</strong>.</li>
-                                        <li>Aguarde a construção terminar. Uma notificação aparecerá no canto inferior direito.</li>
-                                        <li>Clique no link <strong>"locate"</strong> na notificação. Isso abrirá a pasta onde o arquivo foi gerado.</li>
-                                        <li>O arquivo estará em `android/app/build/outputs/apk/debug/`. O nome geralmente é `app-debug.apk`.</li>
-                                    </ol>
-
-                                    <h5 class="font-semibold mt-2">B. Gerando o AAB (para a Google Play Store)</h5>
-                                    <p class="text-xs">O arquivo <code>.aab</code> (Android App Bundle) é o formato oficial que você envia para a loja. Ele é otimizado pelo Google para diferentes celulares.</p>
-                                    <ol>
-                                        <li>No menu superior, vá em <strong>Build > Generate Signed Bundle / APK...</strong>.</li>
-                                        <li>Selecione <strong>Android App Bundle</strong> e clique em "Next".</li>
-                                        <li>
-                                            <strong>Chave de Assinatura (Keystore):</strong> Esta é a etapa mais importante e é como você prova que é o dono do app.
-                                            <ul>
-                                                <li><strong>Se for a primeira vez:</strong> Clique em "Create new...". Preencha as informações (guarde a senha em um lugar seguro!) e salve o arquivo de chave (ex: `minha-chave.jks`) em um local seguro NO SEU COMPUTADOR, fora da pasta do projeto. <strong>NÃO PERCA ESSA CHAVE NEM A SENHA!</strong></li>
-                                                <li><strong>Se você já tem uma chave:</strong> Clique em "Choose existing..." e localize o arquivo de chave que você criou.</li>
-                                            </ul>
-                                        </li>
-                                        <li>Preencha os campos com a senha da chave e o alias, e clique em "Next".</li>
-                                        <li>Selecione a variante de build <strong>"release"</strong> e clique em "Finish".</li>
-                                        <li>Aguarde a construção. Assim como no APK, uma notificação aparecerá com um link <strong>"locate"</strong>.</li>
-                                        <li>O arquivo estará em `android/app/release/`. O nome será `app-release.aab`. É este arquivo que você enviará para a Google Play Store.</li>
-                                    </ol>
-                               </div>
+                                <Accordion type="single" collapsible className="w-full">
+                                    <AccordionItem value="android-overview">
+                                        <AccordionTrigger className="font-semibold">Visão Geral do Processo</AccordionTrigger>
+                                        <AccordionContent className="prose prose-sm dark:prose-invert max-w-none">
+                                            <p>O fluxo para transformar seu site em um app Android é: <strong>Seu Código → Build do Next.js → Capacitor → Android Studio → App Android.</strong></p>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    <AccordionItem value="android-prereqs">
+                                        <AccordionTrigger className="font-semibold">1. Pré-requisitos: As Ferramentas Essenciais</AccordionTrigger>
+                                        <AccordionContent className="prose prose-sm dark:prose-invert max-w-none">
+                                            <p>Antes de tudo, você precisa instalar 3 programas no seu computador. Eles são a base para o desenvolvimento Android.</p>
+                                            <ol>
+                                                <li>
+                                                    <strong>Node.js:</strong> É o ambiente que roda seu aplicativo Next.js. Se você está vendo esta página, ele já está instalado.
+                                                </li>
+                                                <li>
+                                                    <strong>Java Development Kit (JDK):</strong> O Android é baseado em Java. Você precisa do kit de desenvolvimento para que o Android Studio funcione. Recomendo a versão <strong>OpenJDK 17</strong>.
+                                                    <ul>
+                                                        <li><a href="https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html" target="_blank" rel="noopener noreferrer">Link para Download do JDK 17</a> (Escolha o instalador para seu sistema operacional, Windows x64 Installer ou macOS x64 DMG Installer).</li>
+                                                    </ul>
+                                                </li>
+                                                <li>
+                                                    <strong>Android Studio:</strong> Este é o programa oficial do Google para criar aplicativos Android. É aqui que vamos gerar os arquivos finais.
+                                                    <ul>
+                                                        <li><a href="https://developer.android.com/studio" target="_blank" rel="noopener noreferrer">Link para Download do Android Studio</a>.</li>
+                                                    </ul>
+                                                </li>
+                                            </ol>
+                                            <p><strong>Dica:</strong> Instale o JDK primeiro, depois o Android Studio. Geralmente, o Android Studio detecta automaticamente a instalação do JDK.</p>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    <AccordionItem value="android-steps">
+                                        <AccordionTrigger className="font-semibold">2. Passo a Passo: Gerando seu Aplicativo</AccordionTrigger>
+                                        <AccordionContent className="prose prose-sm dark:prose-invert max-w-none">
+                                            <p>Com tudo instalado, siga estas etapas na ordem correta.</p>
+                                            <ol>
+                                                <li>
+                                                    <strong>Abra o Terminal:</strong> No Firebase Studio, você pode usar o terminal integrado. Se estiver rodando localmente, abra o terminal (Prompt de Comando, PowerShell ou Terminal) na pasta raiz do seu projeto.
+                                                </li>
+                                                <li>
+                                                    <strong>Instale as Dependências (se necessário):</strong> Se for a primeira vez que você abre o projeto, rode o comando:
+                                                    <br/>
+                                                    <code className="bg-muted px-1 py-0.5 rounded">npm install</code>
+                                                </li>
+                                                <li>
+                                                    <strong>Construa a Versão Web (Build):</strong> O Capacitor precisa da versão final e otimizada do seu site. Gere-a com o comando:
+                                                    <br/>
+                                                    <code className="bg-muted px-1 py-0.5 rounded">npm run build</code>
+                                                    <br/>
+                                                    <em className="text-xs">Isso cria uma pasta chamada `out` com seu site pronto.</em>
+                                                </li>
+                                                <li>
+                                                    <strong>Sincronize com o Android (Sync):</strong> Agora, vamos dizer ao Capacitor para copiar essa versão web para o projeto Android. Rode:
+                                                    <br/>
+                                                    <code className="bg-muted px-1 py-0.5 rounded">npx cap sync android</code>
+                                                    <br/>
+                                                    <em className="text-xs">Este comando atualiza o projeto Android dentro da pasta `android` com o conteúdo da pasta `out`.</em>
+                                                </li>
+                                                <li>
+                                                    <strong>Abra o Android Studio:</strong> Chegou a hora de abrir o projeto nativo. Rode o comando:
+                                                    <br/>
+                                                    <code className="bg-muted px-1 py-0.5 rounded">npx cap open android</code>
+                                                    <br/>
+                                                    <em className="text-xs">Isso irá iniciar o Android Studio e carregar a pasta `android` do seu projeto. Pode levar um tempo na primeira vez.</em>
+                                                </li>
+                                            </ol>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    <AccordionItem value="android-studio">
+                                        <AccordionTrigger className="font-semibold">3. Dentro do Android Studio: A Reta Final</AccordionTrigger>
+                                        <AccordionContent className="prose prose-sm dark:prose-invert max-w-none">
+                                            <p>Uma vez que o Android Studio estiver aberto e o projeto carregado (pode haver uma barra de progresso "Gradle Sync" na parte inferior, espere ela terminar), siga os passos para gerar os arquivos.</p>
+                                            <h5 className="font-semibold mt-2">A. Gerando o APK (para testes)</h5>
+                                            <p className="text-xs">O arquivo <code>.apk</code> é usado para instalar o app diretamente no seu celular ou em um emulador para testes rápidos.</p>
+                                            <ol>
+                                                <li>No menu superior, vá em <strong>Build > Build Bundle(s) / APK(s) > Build APK(s)</strong>.</li>
+                                                <li>Aguarde a construção terminar. Uma notificação aparecerá no canto inferior direito.</li>
+                                                <li>Clique no link <strong>"locate"</strong> na notificação. Isso abrirá a pasta onde o arquivo foi gerado.</li>
+                                                <li>O arquivo estará em `android/app/build/outputs/apk/debug/`. O nome geralmente é `app-debug.apk`.</li>
+                                            </ol>
+                                            <h5 className="font-semibold mt-2">B. Gerando o AAB (para a Google Play Store)</h5>
+                                            <p className="text-xs">O arquivo <code>.aab</code> (Android App Bundle) é o formato oficial que você envia para a loja. Ele é otimizado pelo Google para diferentes celulares.</p>
+                                            <ol>
+                                                <li>No menu superior, vá em <strong>Build > Generate Signed Bundle / APK...</strong>.</li>
+                                                <li>Selecione <strong>Android App Bundle</strong> e clique em "Next".</li>
+                                                <li>
+                                                    <strong>Chave de Assinatura (Keystore):</strong> Esta é a etapa mais importante e é como você prova que é o dono do app.
+                                                    <ul>
+                                                        <li><strong>Se for a primeira vez:</strong> Clique em "Create new...". Preencha as informações (guarde a senha em um lugar seguro!) e salve o arquivo de chave (ex: `minha-chave.jks`) em um local seguro NO SEU COMPUTADOR, fora da pasta do projeto. <strong>NÃO PERCA ESSA CHAVE NEM A SENHA!</strong></li>
+                                                        <li><strong>Se você já tem uma chave:</strong> Clique em "Choose existing..." e localize o arquivo de chave que você criou.</li>
+                                                    </ul>
+                                                </li>
+                                                <li>Preencha os campos com a senha da chave e o alias, e clique em "Next".</li>
+                                                <li>Selecione a variante de build <strong>"release"</strong> e clique em "Finish".</li>
+                                                <li>Aguarde a construção. Assim como no APK, uma notificação aparecerá com um link <strong>"locate"</strong>.</li>
+                                                <li>O arquivo estará em `android/app/release/`. O nome será `app-release.aab`. É este arquivo que você enviará para a Google Play Store.</li>
+                                            </ol>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
                             </AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="gps">
