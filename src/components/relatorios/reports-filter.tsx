@@ -232,12 +232,12 @@ export function ReportsFilter({ onApplyFilters, isPending, reportData, activeFil
       <div className="flex-grow"></div>
       
        <Button onClick={handleDownloadPDF} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !activeFilters}>
-          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4 text-primary" />}
           {isExporting ? 'Exportando...' : 'Baixar PDF'}
       </Button>
 
       <Button onClick={handleDownloadCSV} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !activeFilters}>
-          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4 text-primary" />}
           {isExporting ? 'Exportando...' : 'Baixar CSV'}
       </Button>
     </div>
