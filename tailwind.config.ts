@@ -2,6 +2,24 @@ import type {Config} from 'tailwindcss';
 
 export default {
   darkMode: ['class'],
+  safelist: [
+    'bg-green-500', 'text-white',
+    'bg-red-500',
+    'bg-primary',
+    'bg-blue-500',
+    'bg-orange-500',
+    'bg-purple-500',
+    'bg-yellow-500',
+    'bg-sky-500',
+    'bg-green-500/20', 'text-green-500',
+    'bg-red-500/20', 'text-red-500',
+    'bg-primary/20', 'text-primary',
+    'bg-blue-500/20', 'text-blue-500',
+    'bg-orange-500/20', 'text-orange-500',
+    'bg-purple-500/20', 'text-purple-500',
+    'bg-yellow-500/20', 'text-yellow-500',
+    'bg-sky-500/20', 'text-sky-500'
+  ],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -81,12 +99,23 @@ export default {
         'confetti-fall': {
           '0%': { transform: 'translateY(0)', opacity: '1' },
           '100%': { transform: 'translateY(100vh)', opacity: '0' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
+        },
+        'shake': {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '25%': { transform: 'translateX(-2px) rotate(-1deg)' },
+          '75%': { transform: 'translateX(2px) rotate(1deg)' },
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'confetti-rain': 'confetti-rain 2s linear infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'shake': 'shake 1.5s ease-in-out infinite',
       },
     },
   },
