@@ -108,7 +108,7 @@ export function DashboardClient() {
       const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
       const orderedCardIds = isPro 
         ? [...new Set([...savedCardOrder, ...allStats.map(s => s.id)])] 
-        : mandatoryCards;
+        : savedCardOrder.length > 0 ? savedCardOrder : mandatoryCards;
 
       const cardsToShow = orderedCardIds.map(id => {
           if (!isPro && !mandatoryCards.includes(id)) return null;
@@ -140,9 +140,11 @@ export function DashboardClient() {
         : mandatoryCharts;
 
       const chartsToShow = chartsToShowIds.map(id => {
-        if (!isPro && !mandatoryCharts.includes(id)) return null;
-        return allCharts.find(c => c.id === id);
+        const chart = allCharts.find(c => c.id === id);
+        if (!isPro && chart && !chart.isMandatory) return null;
+        return chart;
       }).filter(Boolean);
+
 
       return (
         <motion.div 
