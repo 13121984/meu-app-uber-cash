@@ -142,7 +142,9 @@ export function ReportsClient() {
     const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
     const orderedCardIds = isPro 
       ? [...new Set([...savedCardOrder, ...allStats.map(s => s.id)])] 
-      : mandatoryCards.filter(id => savedCardOrder.includes(id)).concat(mandatoryCards.filter(id => !savedCardOrder.includes(id)));
+      : savedCardOrder.length > 0 && savedCardOrder.some(id => mandatoryCards.includes(id))
+        ? [...new Set([...savedCardOrder.filter(id => mandatoryCards.includes(id)), ...mandatoryCards])]
+        : mandatoryCards;
 
     const cardsToShow = orderedCardIds.map(id => {
         if (!isPro && !mandatoryCards.includes(id)) return null;
@@ -171,7 +173,9 @@ export function ReportsClient() {
     const savedChartOrder = user?.preferences?.reportChartOrder || [];
     const chartsToShowIds = isPro 
       ? [...new Set([...savedChartOrder, ...allCharts.map(c => c.id)])]
-      : mandatoryCharts.filter(id => savedChartOrder.includes(id)).concat(mandatoryCharts.filter(id => !savedChartOrder.includes(id)));
+      : savedChartOrder.length > 0 && savedChartOrder.some(id => mandatoryCharts.includes(id))
+        ? [...new Set([...savedChartOrder.filter(id => mandatoryCharts.includes(id)), ...mandatoryCharts])]
+        : mandatoryCharts;
 
     const chartsToShow = chartsToShowIds.map(id => {
       if (!isPro && !mandatoryCharts.includes(id)) return null;
