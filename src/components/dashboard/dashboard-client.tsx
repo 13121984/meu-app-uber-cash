@@ -105,14 +105,11 @@ export function DashboardClient() {
           )
       }
 
-      let orderedCardIds: string[];
-      if (isPro) {
-        const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
-        orderedCardIds = [...new Set([...savedCardOrder, ...mandatoryCards])];
-      } else {
-        orderedCardIds = mandatoryCards;
-      }
-      
+      const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
+      const orderedCardIds = isPro 
+        ? [...new Set([...savedCardOrder, ...allStats.map(s => s.id)])] 
+        : mandatoryCards;
+
       const cardsToShow = orderedCardIds.map(id => {
           if (!isPro && !mandatoryCards.includes(id)) return null;
 
@@ -137,13 +134,11 @@ export function DashboardClient() {
           return { ...cardInfo, value };
       }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
 
-      let chartsToShowIds: string[];
-       if (isPro) {
-        const savedChartOrder = user?.preferences?.reportChartOrder || [];
-        chartsToShowIds = [...new Set([...savedChartOrder, ...mandatoryCharts])];
-      } else {
-        chartsToShowIds = mandatoryCharts;
-      }
+      const savedChartOrder = user?.preferences?.reportChartOrder || [];
+      const chartsToShowIds = isPro 
+        ? [...new Set([...savedChartOrder, ...allCharts.map(c => c.id)])]
+        : mandatoryCharts;
+
       const chartsToShow = chartsToShowIds.map(id => {
         if (!isPro && !mandatoryCharts.includes(id)) return null;
         return allCharts.find(c => c.id === id);
@@ -163,7 +158,7 @@ export function DashboardClient() {
                    <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
-                            <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
+                            <Lock className="h-8 w-8 mx-auto text-primary mb-2"/>
                             <p className="text-sm font-semibold">Adicionar Card</p>
                             <p className="text-xs text-muted-foreground">Desbloquear com Pro</p>
                         </CardContent>
@@ -213,7 +208,7 @@ export function DashboardClient() {
           {!isPro && (
               <Link href="/configuracoes/layout-personalizado" passHref>
                 <Button variant="outline" className="w-full">
-                    <Lock className="mr-2 h-4 w-4"/>
+                    <Lock className="mr-2 h-4 w-4 text-primary"/>
                     Adicionar outro Gráfico (Desbloquear com Pro)
                 </Button>
             </Link>

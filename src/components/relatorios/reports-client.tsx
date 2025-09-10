@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useTransition, useMemo, useCallback, useRef, useEffect } from 'react';
@@ -138,14 +139,11 @@ export function ReportsClient() {
         );
     }
     
-    let orderedCardIds: string[];
-    if (isPro) {
-      const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
-      orderedCardIds = [...new Set([...savedCardOrder, ...mandatoryCards])];
-    } else {
-      orderedCardIds = mandatoryCards;
-    }
-      
+    const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
+    const orderedCardIds = isPro 
+      ? [...new Set([...savedCardOrder, ...allStats.map(s => s.id)])] 
+      : mandatoryCards.filter(id => savedCardOrder.includes(id)).concat(mandatoryCards.filter(id => !savedCardOrder.includes(id)));
+
     const cardsToShow = orderedCardIds.map(id => {
         if (!isPro && !mandatoryCards.includes(id)) return null;
 
@@ -170,17 +168,16 @@ export function ReportsClient() {
         return { ...cardInfo, value };
     }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
     
-    let chartsToShowIds: string[];
-    if (isPro) {
-      const savedChartOrder = user?.preferences?.reportChartOrder || [];
-      chartsToShowIds = [...new Set([...savedChartOrder, ...mandatoryCharts])];
-    } else {
-      chartsToShowIds = mandatoryCharts;
-    }
+    const savedChartOrder = user?.preferences?.reportChartOrder || [];
+    const chartsToShowIds = isPro 
+      ? [...new Set([...savedChartOrder, ...allCharts.map(c => c.id)])]
+      : mandatoryCharts.filter(id => savedChartOrder.includes(id)).concat(mandatoryCharts.filter(id => !savedChartOrder.includes(id)));
+
     const chartsToShow = chartsToShowIds.map(id => {
       if (!isPro && !mandatoryCharts.includes(id)) return null;
       return allCharts.find(c => c.id === id);
     }).filter(Boolean);
+
 
     return (
         <motion.div 
