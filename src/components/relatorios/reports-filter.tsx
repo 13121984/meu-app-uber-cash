@@ -14,16 +14,19 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions';
 import { generatePdf } from '@/lib/pdf-generator';
-import { getReportData, ReportData } from '@/services/summary.service';
+import { ReportData } from '@/services/summary.service';
 import { useAuth } from '@/contexts/auth-context';
 import { useSearchParams } from 'next/navigation';
+import { Plan } from '@/services/auth.service';
 
 
 interface ReportsFilterProps {
   onApplyFilters: (filters: ReportFilterValues) => void;
   isPending: boolean;
-  reportContentRef: React.RefObject<HTMLDivElement>;
+  reportData: ReportData | null;
   activeFilters: ReportFilterValues | null;
+  chartRefs: { [key: string]: HTMLElement | null };
+  plan: Plan;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -32,11 +35,10 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
 }));
 
-export function ReportsFilter({ onApplyFilters, isPending, reportContentRef, activeFilters }: ReportsFilterProps) {
+export function ReportsFilter({ onApplyFilters, isPending, reportData, activeFilters, chartRefs, plan }: ReportsFilterProps) {
   const { user } = useAuth();
   const searchParams = useSearchParams();
 
-  // Initialize state from URL params to ensure UI matches URL on load
   const getInitialFilterType = () => searchParams.get('period') as ReportFilterValues['type'] | null;
   const getInitialYear = () => parseInt(searchParams.get('year') || getYear(new Date()).toString());
   const getInitialMonth = () => parseInt(searchParams.get('month') || new Date().getMonth().toString());
@@ -110,14 +112,13 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef, act
   }
 
   const handleDownloadPDF = async () => {
-    if (!activeFilters || !user) {
+    if (!activeFilters || !user || !reportData) {
         toast({ title: "Nenhum relatório gerado", description: "Aplique um filtro primeiro para poder exportar os dados.", variant: "destructive"});
         return;
     }
     startExportTransition(async () => {
         try {
-            const reportData: ReportData = await getReportData(user.id, activeFilters);
-            generatePdf(reportData, activeFilters);
+            await generatePdf(reportData, activeFilters, plan, chartRefs);
             toast({
                 title: "Exportação PDF Iniciada",
                 description: `O arquivo será baixado.`,

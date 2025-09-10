@@ -14,6 +14,7 @@ import { Button } from '../ui/button';
 import { allCharts, mandatoryCharts, allStats, mandatoryCards } from '@/lib/dashboard-items';
 import { motion } from 'framer-motion';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { Plan } from '@/services/auth.service';
 
 const StatsCard = dynamic(() => import('../dashboard/stats-card').then(mod => mod.StatsCard), { ssr: false });
 const EarningsPieChart = dynamic(() => import('../dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -47,6 +48,7 @@ export function ReportsClient() {
   const [filters, setFilters] = useState<ReportFilterValues | null>(null);
   const [isPending, startTransition] = useTransition();
   const reportContentRef = useRef<HTMLDivElement>(null);
+  const chartRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
 
   const handleApplyFilters = useCallback((newFilters: ReportFilterValues) => {
@@ -217,6 +219,7 @@ export function ReportsClient() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: 0.2 }}
+                    ref={(el) => (chartRefs.current[chart.id] = el)}
                   >
                     <Card>
                         <CardHeader>
@@ -249,8 +252,10 @@ export function ReportsClient() {
           <ReportsFilter 
             onApplyFilters={handleApplyFilters} 
             isPending={isPending}
-            reportContentRef={reportContentRef}
+            reportData={data}
             activeFilters={filters}
+            chartRefs={chartRefs.current}
+            plan={user?.plan || 'basic'}
           />
         </CardContent>
       </Card>

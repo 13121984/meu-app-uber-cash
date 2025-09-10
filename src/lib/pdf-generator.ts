@@ -3,10 +3,13 @@
 
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { ReportData } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
+import { mandatoryCards, allStats } from './dashboard-items';
+import type { Plan } from '@/services/auth.service';
 
 // Adiciona a interface para a API do autoTable no jsPDF
 interface jsPDFWithAutoTable extends jsPDF {
@@ -37,9 +40,33 @@ const getPeriodString = (filters: ReportFilterValues): string => {
     }
 };
 
-export const generatePdf = (data: ReportData, filters: ReportFilterValues) => {
+const getValueForStat = (id: string, data: ReportData) => {
+    switch(id) {
+        case 'lucro': return formatCurrency(data.totalLucro);
+        case 'ganho': return formatCurrency(data.totalGanho);
+        case 'combustivel': return formatCurrency(data.totalCombustivel);
+        case 'viagens': return data.totalViagens.toString();
+        case 'dias': return data.diasTrabalhados.toString();
+        case 'mediaHoras': return `${data.mediaHorasPorDia.toFixed(1)} h`;
+        case 'mediaKm': return `${data.mediaKmPorDia.toFixed(1)} km`;
+        case 'ganhoHora': return formatCurrency(data.ganhoPorHora);
+        case 'ganhoKm': return formatCurrency(data.ganhoPorKm);
+        case 'eficiencia': return `${data.eficiencia.toFixed(2)} km/L`;
+        case 'kmRodados': return `${data.totalKm.toFixed(1)} km`;
+        case 'horasTrabalhadas': return `${data.totalHoras.toFixed(1)} h`;
+        default: return 'N/A';
+    }
+}
+
+export const generatePdf = async (
+    data: ReportData, 
+    filters: ReportFilterValues,
+    plan: Plan,
+    chartElements: { [key: string]: HTMLElement | null }
+) => {
     const doc = new jsPDF() as jsPDFWithAutoTable;
     const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
     let y = 15; // Posição vertical inicial
 
     // --- Título ---
@@ -55,84 +82,64 @@ export const generatePdf = (data: ReportData, filters: ReportFilterValues) => {
     doc.text('Resumo Geral do Período', 14, y);
     y += 7;
 
-    const summaryData = [
-        ['Lucro Líquido', formatCurrency(data.totalLucro), 'Ganhos Brutos', formatCurrency(data.totalGanho)],
-        ['Total Despesas', formatCurrency(data.totalGastos), 'Dias Trabalhados', data.diasTrabalhados],
-        ['Total KM Rodados', `${data.totalKm.toFixed(1)} km`, 'Total Horas', `${data.totalHoras.toFixed(1)} h`],
-        ['Ganho por KM', formatCurrency(data.ganhoPorKm), 'Ganho por Hora', formatCurrency(data.ganhoPorHora)],
-        ['Total Viagens', data.totalViagens, 'Eficiência Média', `${data.eficiencia.toFixed(2)} km/L`],
-    ];
+    const isPro = plan === 'pro' || plan === 'autopilot';
+    const statIdsToShow = isPro ? allStats.map(s => s.id) : mandatoryCards;
+    
+    const summaryData = [];
+    const statsToDisplay = allStats.filter(stat => statIdsToShow.includes(stat.id));
+
+    for (let i = 0; i < statsToDisplay.length; i += 2) {
+        const row = [];
+        row.push(statsToDisplay[i].title);
+        row.push(getValueForStat(statsToDisplay[i].id, data));
+        if (i + 1 < statsToDisplay.length) {
+            row.push(statsToDisplay[i + 1].title);
+            row.push(getValueForStat(statsToDisplay[i + 1].id, data));
+        }
+        summaryData.push(row);
+    }
 
     doc.autoTable({
         startY: y,
         body: summaryData,
         theme: 'grid',
-        styles: {
-            cellPadding: 2,
-            fontSize: 10,
-        },
-        headStyles: {
-            fillColor: [22, 163, 74]
-        },
-        columnStyles: {
-            0: { fontStyle: 'bold' },
-            2: { fontStyle: 'bold' }
-        }
+        styles: { cellPadding: 2, fontSize: 10 },
+        headStyles: { fillColor: [22, 163, 74] },
+        columnStyles: { 0: { fontStyle: 'bold' }, 2: { fontStyle: 'bold' } }
     });
 
     y = doc.autoTable.previous.finalY + 10;
 
-    // --- Tabela de Ganhos por Categoria ---
-    if (data.earningsByCategory.length > 0) {
-        if (y > pageHeight - 40) { doc.addPage(); y = 15; }
-        doc.setFontSize(14);
-        doc.text('Detalhes de Ganhos e Viagens', 14, y);
-        y += 7;
+    // --- Inserir Gráficos ---
+    doc.setFontSize(14);
+    if(y > pageHeight - 60) { doc.addPage(); y = 15; }
+    doc.text('Gráficos de Performance', 14, y);
+    y += 7;
 
-        const earningsBody = data.earningsByCategory.map(item => {
-            const trips = data.tripsByCategory.find(t => t.name === item.name)?.total || 0;
-            return [item.name, formatCurrency(item.total), trips];
-        });
+    for (const key in chartElements) {
+        const element = chartElements[key];
+        if (element) {
+            try {
+                const canvas = await html2canvas(element, { backgroundColor: '#111827' }); // Use um fundo para evitar transparência
+                const imgData = canvas.toDataURL('image/png');
+                
+                const imgWidth = 180;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        doc.autoTable({
-            startY: y,
-            head: [['Categoria', 'Total Ganhos', 'Total Viagens']],
-            body: earningsBody,
-            theme: 'striped',
-            headStyles: {
-                fillColor: [59, 130, 246]
-            },
-        });
-        y = doc.autoTable.previous.finalY + 10;
-    }
-    
-     // --- Tabela de Despesas ---
-    if (data.fuelExpenses.length > 0 || data.maintenance.totalSpent > 0) {
-        if (y > pageHeight - 40) { doc.addPage(); y = 15; }
-        doc.setFontSize(14);
-        doc.text('Detalhes de Despesas', 14, y);
-        y += 7;
+                if (y + imgHeight > pageHeight - 20) {
+                    doc.addPage();
+                    y = 15;
+                }
+                
+                doc.addImage(imgData, 'PNG', 14, y, imgWidth, imgHeight);
+                y += imgHeight + 10;
 
-        const expensesBody: (string | number)[][] = data.fuelExpenses.map(item => [
-            `Combustível: ${item.type}`, 
-            formatCurrency(item.total)
-        ]);
-        
-        if (data.maintenance.totalSpent > 0) {
-            expensesBody.push(['Manutenção', formatCurrency(data.maintenance.totalSpent)]);
+            } catch (e) {
+                console.error(`Error capturing chart ${key}:`, e);
+            }
         }
-
-        doc.autoTable({
-            startY: y,
-            head: [['Tipo de Despesa', 'Total Gasto']],
-            body: expensesBody,
-            theme: 'striped',
-            headStyles: {
-                fillColor: [220, 38, 38]
-            },
-        });
-        y = doc.autoTable.previous.finalY + 10;
     }
+
 
     // --- Rodapé ---
     const pageCount = doc.internal.pages.length;
