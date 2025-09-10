@@ -68,13 +68,12 @@ export function GerenciamentoClient() {
   // Effect to read filters from URL on initial load or on back/forward navigation
   useEffect(() => {
     const period = searchParams.get('period');
-    const year = searchParams.get('year');
-    const month = searchParams.get('month');
-    const from = searchParams.get('from');
-    const to = searchParams.get('to');
     
-    // Check if there are any filters in the URL
     if (period) {
+        const year = searchParams.get('year');
+        const month = searchParams.get('month');
+        const from = searchParams.get('from');
+        const to = searchParams.get('to');
         const filtersFromUrl: ReportFilterValues = { type: period as any };
         if (year) filtersFromUrl.year = parseInt(year);
         if (month) filtersFromUrl.month = parseInt(month);
@@ -82,8 +81,9 @@ export function GerenciamentoClient() {
             filtersFromUrl.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
         }
         
-        // Only apply filters if they are different from the current ones, to avoid loops
-        if (JSON.stringify(filtersFromUrl) !== JSON.stringify(currentFilters)) {
+        // This check prevents an infinite loop.
+        // It only applies filters if the component hasn't been initialized with filters yet.
+        if (!currentFilters) {
             handleApplyFilters(filtersFromUrl);
         }
     }
@@ -193,7 +193,7 @@ export function GerenciamentoClient() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Smartphone className="h-5 w-5 text-primary" />
-            Registro Simplificado de Corridas
+            Visão de Futuro: Registro Simplificado
           </CardTitle>
            <CardDescription>
                 Saiba mais sobre nosso futuro recurso de registro de corridas com um toque (Em breve).
