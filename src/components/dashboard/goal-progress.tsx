@@ -2,7 +2,7 @@
 "use client"
 
 import React from 'react';
-import { Flag } from "lucide-react";
+import { Flag, Car } from "lucide-react";
 import { motion } from 'framer-motion';
 
 type GoalProgressProps = {
@@ -11,18 +11,13 @@ type GoalProgressProps = {
   current: number;
 };
 
-const CarIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M5.334 3.003c-1.015.343-1.832 1.16-2.175 2.175L2 8.667v8.666l1.159 3.488c.343 1.015 1.16 1.832 2.175 2.175L8.667 24h6.666l3.488-1.159c1.015-.343 1.832-1.16 2.175-2.175L22 17.333V8.667l-1.159-3.488c-.343-1.015-1.16-1.832-2.175-2.175L15.333 2H8.667L5.334 3.003zM7 9a1 1 0 0 1 2 0v2a1 1 0 1 1-2 0V9zm8 0a1 1 0 0 1 2 0v2a1 1 0 1 1-2 0V9z" />
-    </svg>
-)
+const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export function GoalProgress({ progress, target, current }: GoalProgressProps) {
   
   const isComplete = progress >= 100;
   const clampedProgress = Math.min(progress, 100);
 
-  const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const remaining = target - current;
 
   return (
@@ -72,7 +67,7 @@ export function GoalProgress({ progress, target, current }: GoalProgressProps) {
               animate={{ y: [0, -4, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <CarIcon className="w-8 h-8 text-primary drop-shadow-lg" />
+              <Car className="w-8 h-8 text-primary drop-shadow-lg" />
             </motion.div>
         </motion.div>
 
