@@ -10,10 +10,10 @@ import { Step2Earnings } from './step2-earnings';
 import { Step3Fuel } from './step3-fuel';
 import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
-import { addOrUpdateWorkDay, deleteWorkDayEntry } from '@/services/work-day.service';
 import { useRouter } from 'next/navigation';
 import { parseISO, startOfDay } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
+import { updateWorkDayAction, deleteWorkDayEntryAction } from '@/app/gerenciamento/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -186,7 +186,8 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     
     try {
       const { maintenanceEntries, ...workDayData } = state;
-      const result = await addOrUpdateWorkDay(user.id, workDayData as WorkDay);
+      // Use the server action to ensure sequential updates
+      const result = await updateWorkDayAction(user.id, workDayData as WorkDay);
       
       if (result.success) {
         toast({
@@ -197,11 +198,8 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         if (onSuccess) {
             onSuccess();
         } else {
-            // Se não for um pop-up (como no gerenciamento), reseta o formulário
-            setEntryBeingEdited(null);
-            dispatch({ type: 'RESET_STATE', payload: { registrationType }});
-            setCurrentStep(1);
-            router.refresh(); // Força a atualização dos dados em toda a aplicação
+            router.push('/'); // Redirect home to force a full data refresh
+            router.refresh(); 
         }
 
       } else {
@@ -223,10 +221,10 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const handleDeleteEntry = async (id: string) => {
       if (!user) return;
       setDeletingId(id);
-      const result = await deleteWorkDayEntry(user.id, id);
+      const result = await deleteWorkDayEntryAction(user.id, id);
       if (result.success) {
           toast({ description: "Período removido com sucesso."});
-          router.refresh(); // Recarrega os dados do servidor
+          router.refresh();
       } else {
           toast({ description: `Erro ao remover período: ${result.error}`, variant: "destructive" });
       }

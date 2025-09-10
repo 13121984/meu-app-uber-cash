@@ -5,7 +5,6 @@ import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth,
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
-import { updateAllSummaries } from './summary.service';
 
 // --- Tipos e Interfaces ---
 
@@ -63,10 +62,6 @@ async function writeWorkDays(userId: string, data: WorkDay[]): Promise<void> {
     await saveFile(userId, FILE_NAME, sortedData);
 }
 
-const revalidateAll = () => {
-    revalidatePath('/', 'layout');
-};
-
 // --- Funções CRUD ---
 
 export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
@@ -78,7 +73,6 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
       if (existingDayIndex > -1) {
         allWorkDays[existingDayIndex] = { ...data, date: startOfDay(data.date) };
         await writeWorkDays(userId, allWorkDays);
-        await updateAllSummaries(userId);
         return { success: true, id: data.id, operation: 'updated' };
       }
     }
@@ -90,7 +84,6 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
     };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(userId, allWorkDays);
-    await updateAllSummaries(userId);
     return { success: true, id: newWorkDay.id, operation: 'created' };
 
   } catch (e) {
@@ -161,7 +154,7 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
 
         await writeWorkDays(userId, finalWorkDays);
-        await updateAllSummaries(userId);
+        revalidatePath('/', 'layout');
         return { success: true, count: workDaysToUpsert.length };
 
     } catch(e) {
@@ -176,8 +169,6 @@ export async function deleteWorkDayEntry(userId: string, id: string): Promise<{ 
     let allWorkDays = await readWorkDays(userId);
     allWorkDays = allWorkDays.filter(r => r.id !== id);
     await writeWorkDays(userId, allWorkDays);
-    await updateAllSummaries(userId);
-    revalidateAll();
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registro.";
@@ -199,8 +190,7 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
 
         const deletedCount = initialLength - finalWorkDays.length;
         await writeWorkDays(userId, finalWorkDays);
-        await updateAllSummaries(userId);
-        revalidateAll();
+        revalidatePath('/', 'layout');
         return { success: true, count: deletedCount };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registros em massa.";
@@ -244,8 +234,7 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
         });
 
         await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
-        await updateAllSummaries(userId);
-        revalidateAll();
+        revalidatePath('/', 'layout');
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to load demo data.";
@@ -258,8 +247,7 @@ export async function clearAllData(userId: string): Promise<{ success: boolean; 
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
         await writeWorkDays(userId, []);
-        await updateAllSummaries(userId);
-        revalidateAll();
+        revalidatePath('/', 'layout');
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to clear data.";

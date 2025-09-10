@@ -14,9 +14,7 @@ export async function updateWorkDayAction(userId: string, workDay: WorkDay) {
     const result = await addOrUpdateWorkDay(userId, workDay);
     if (result.success) {
         await updateAllSummaries(userId);
-        revalidatePath("/gerenciamento");
-        revalidatePath("/registrar/today");
-        revalidatePath("/");
+        revalidatePath("/", "layout");
     }
     return result;
 }
@@ -25,9 +23,7 @@ export async function deleteWorkDayEntryAction(userId: string, workDayId: string
     const result = await deleteWorkDayEntry(userId, workDayId);
     if (result.success) {
         await updateAllSummaries(userId);
-        revalidatePath("/gerenciamento");
-        revalidatePath("/registrar/today");
-        revalidatePath("/");
+        revalidatePath("/", "layout");
     }
     return result;
 }
@@ -43,12 +39,10 @@ export type ActiveFilters = z.infer<typeof FilterSchema>;
 
 // Ação otimizada que recebe os filtros em vez dos dados
 export async function deleteFilteredWorkDaysAction(userId: string, filters: ReportFilterValues) {
-    const validatedFilters = FilterSchema.parse(filters);
-    const result = await deleteWorkDaysByFilter(userId, validatedFilters);
+    const result = await deleteWorkDaysByFilter(userId, filters);
     if (result.success) {
         await updateAllSummaries(userId);
-        revalidatePath("/gerenciamento");
-        revalidatePath("/");
+        revalidatePath("/", "layout");
     }
     return result;
 }
