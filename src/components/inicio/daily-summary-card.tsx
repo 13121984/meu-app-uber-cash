@@ -3,7 +3,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { DollarSign, Clock, TrendingUp, Target, Flag, Car } from "lucide-react";
+import { DollarSign, Clock, TrendingUp, Target, Flag, Rocket } from "lucide-react";
 import type { PeriodData } from "@/services/summary.service";
 import { AppLogo } from "../ui/app-logo";
 
@@ -84,16 +84,16 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
                         />
                     </div>
                     
-                    {/* O Carro */}
+                    {/* O Ícone em movimento (agora um foguete) */}
                     <div
                         className="absolute top-1/2 transition-all duration-500"
                         style={{ 
-                            left: `calc(${clampedProgress}% - 16px)`, // Ajusta a posição do carro
+                            left: `calc(${clampedProgress}% - 16px)`, // Ajusta a posição do ícone
                             transform: 'translateY(-50%)'
                         }}
                     >
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center p-0.5 animate-shake">
-                            <AppLogo className="h-6 w-6 text-primary" />
+                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center p-0.5 animate-shake">
+                            <Rocket className="h-6 w-6 text-primary" />
                         </div>
                     </div>
 
