@@ -2,9 +2,9 @@
 import { DollarSign, Fuel, Car, CalendarDays, Hourglass, Route, TrendingUp, Zap, Map, Clock, PieChart, BarChart3, LineChart, CandlestickChart, Wrench } from "lucide-react";
 
 export const allStats = [
-    { id: 'lucro', title: "Lucro Líquido", value: 123.45, icon: DollarSign, isCurrency: true, iconBg: "bg-green-500", iconColor: "text-white" },
-    { id: 'ganho', title: "Ganhos Brutos", value: 234.56, icon: DollarSign, isCurrency: true, iconBg: "bg-primary", iconColor: "text-white" },
-    { id: 'combustivel', title: "Combustível", value: 56.78, icon: Fuel, isCurrency: true, iconBg: "bg-red-500", iconColor: "text-white" },
+    { id: 'lucro', title: "Lucro Líquido", value: 123.45, icon: DollarSign, isCurrency: true, iconBg: "bg-chart-1", iconColor: "text-white" },
+    { id: 'ganho', title: "Ganhos Brutos", value: 234.56, icon: DollarSign, isCurrency: true, iconBg: "bg-chart-4", iconColor: "text-white" },
+    { id: 'combustivel', title: "Combustível", value: 56.78, icon: Fuel, isCurrency: true, iconBg: "bg-chart-2", iconColor: "text-white" },
     { id: 'viagens', title: "Viagens", value: 15, icon: Car, iconBg: "bg-blue-500/20", iconColor: "text-blue-500" },
     { id: 'dias', title: "Dias Trabalhados", value: 1, icon: CalendarDays, iconBg: "bg-primary/20", iconColor: "text-primary" },
     { id: 'mediaHoras', title: "Média de Horas/Dia", value: 8.5, icon: Hourglass, unit: "h", iconBg: "bg-orange-500/20", iconColor: "text-orange-500", precision: 1 },
