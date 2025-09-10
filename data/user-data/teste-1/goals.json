@@ -1,6 +1,6 @@
 {
-  "daily": 200,
-  "weekly": 1000,
-  "monthly": 4000,
+  "monthly": 5000,
+  "weekly": 1250,
+  "daily": 208.33333333333334,
   "workDaysPerWeek": 6
 }

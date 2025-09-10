@@ -210,7 +210,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
         mediaHorasPorDia: data.diasTrabalhados > 0 ? data.totalHoras / data.diasTrabalhados : 0,
         mediaKmPorDia: data.diasTrabalhados > 0 ? data.totalKm / data.diasTrabalhados : 0,
         ganhoPorHora: data.totalHoras > 0 ? data.totalGanho / data.totalHoras : 0,
-        ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.km : 0,
+        ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.totalKm : 0,
         eficiencia: data.totalKm > 0 && data.totalLitros > 0 ? data.totalKm / data.totalLitros : 0,
         earningsByCategory, tripsByCategory, maintenance: maintenanceData,
         meta: { target: targetGoal, period },
@@ -306,14 +306,12 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
   const sortedDailyEntries = Array.from(dailyDataMap.entries()).sort((a, b) => parseISO(a[0]).getTime() - parseISO(b[0]).getTime());
 
   const getTargetGoal = () => {
-    switch (filters.type) {
-        case 'today': return goals.daily;
-        case 'thisWeek': return goals.weekly;
-        case 'thisMonth': return goals.monthly;
-        case 'specificMonth': return goals.monthly;
-        default: return 0;
-    }
-  }
+    const periodType = filters.type;
+    if (periodType === 'today') return goals.daily;
+    if (periodType === 'thisWeek') return goals.weekly;
+    if (periodType === 'thisMonth' || periodType === 'specificMonth') return goals.monthly;
+    return 0; // No specific goal for other filter types
+  };
 
   return {
     totalGanho, totalLucro, totalCombustivel, totalExtras: 0, diasTrabalhados, totalKm, totalHoras,
