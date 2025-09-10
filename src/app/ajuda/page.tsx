@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck, MessageSquarePlus, MessageCircleQuestion, Share2 } from "lucide-react";
+import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck, MessageSquarePlus, MessageCircleQuestion, Share2, Handshake } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -43,6 +43,13 @@ const helpTopics = [
     icon: Target,
     title: "Como planejar minhas metas de lucro?",
     content: "Em 'Planejamento Financeiro', no card 'Plano de Metas Mensal', defina seu objetivo de lucro líquido mensal e quantos dias por semana você pretende trabalhar. O sistema calculará automaticamente suas metas diárias e semanais para acompanhar seu progresso no Dashboard e na tela inicial."
+  },
+  {
+    value: "ganhar_dinheiro",
+    icon: Handshake,
+    title: "Posso ganhar dinheiro com o Uber Cash?",
+    content: "Com certeza! Acreditamos que o sucesso é melhor quando compartilhado. Por isso, criamos o Programa de Parceiros Uber Cash. Ao se tornar um assinante Pro ou Autopilot, você não apenas desbloqueia todo o potencial do aplicativo para si mesmo, mas também recebe um link exclusivo para indicar a outros motoristas. Cada novo assinante que usar seu link se traduz em uma recompensa para você. É uma chance de criar uma nova fonte de renda enquanto ajuda seus colegas a se tornarem mais lucrativos e a tomarem o controle de suas finanças.",
+    isPremiumFeature: true,
   },
   {
     value: "despesas_pessoais",
@@ -370,7 +377,7 @@ export default function AjudaPage() {
                                      <li><strong>Lógica de Extração:</strong> O serviço precisa ser inteligente para identificar os textos corretos de "valor", "distância", etc., em meio a todas as outras informações na tela.</li>
                                     <li><strong>Comunicação:</strong> Os dados extraídos pelo serviço nativo são enviados para a parte web do nosso app (WebView) para serem processados e salvos.</li>
                                  </ul>
-                                 <p className="mt-2">Esta é uma implementação complexa que exige conhecimento do SDK do Android, mas é o que diferencia um app útil de um app indispensível.</p>
+                                 <p className="mt-2">Esta é uma implementação complexa que exige conhecimento do SDK do Android, mas é o que diferencia um app útil de um app indispensável.</p>
                                </div>
                             </AccordionContent>
                         </AccordionItem>

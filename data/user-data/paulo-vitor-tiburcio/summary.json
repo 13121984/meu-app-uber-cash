@@ -1,0 +1,83 @@
+{
+  "hoje": {
+    "totalGanho": 0,
+    "totalLucro": 0,
+    "totalCombustivel": 0,
+    "totalExtras": 0,
+    "diasTrabalhados": 0,
+    "totalKm": 0,
+    "totalHoras": 0,
+    "mediaHorasPorDia": 0,
+    "mediaKmPorDia": 0,
+    "ganhoPorHora": 0,
+    "ganhoPorKm": 0,
+    "totalViagens": 0,
+    "eficiencia": 0,
+    "earningsByCategory": [],
+    "tripsByCategory": [],
+    "maintenance": {
+      "totalSpent": 0,
+      "servicesPerformed": 0
+    },
+    "meta": {
+      "target": 0,
+      "period": ""
+    },
+    "profitComposition": [],
+    "performanceByShift": []
+  },
+  "semana": {
+    "totalGanho": 0,
+    "totalLucro": 0,
+    "totalCombustivel": 0,
+    "totalExtras": 0,
+    "diasTrabalhados": 0,
+    "totalKm": 0,
+    "totalHoras": 0,
+    "mediaHorasPorDia": 0,
+    "mediaKmPorDia": 0,
+    "ganhoPorHora": 0,
+    "ganhoPorKm": 0,
+    "totalViagens": 0,
+    "eficiencia": 0,
+    "earningsByCategory": [],
+    "tripsByCategory": [],
+    "maintenance": {
+      "totalSpent": 0,
+      "servicesPerformed": 0
+    },
+    "meta": {
+      "target": 0,
+      "period": ""
+    },
+    "profitComposition": [],
+    "performanceByShift": []
+  },
+  "mes": {
+    "totalGanho": 0,
+    "totalLucro": 0,
+    "totalCombustivel": 0,
+    "totalExtras": 0,
+    "diasTrabalhados": 0,
+    "totalKm": 0,
+    "totalHoras": 0,
+    "mediaHorasPorDia": 0,
+    "mediaKmPorDia": 0,
+    "ganhoPorHora": 0,
+    "ganhoPorKm": 0,
+    "totalViagens": 0,
+    "eficiencia": 0,
+    "earningsByCategory": [],
+    "tripsByCategory": [],
+    "maintenance": {
+      "totalSpent": 0,
+      "servicesPerformed": 0
+    },
+    "meta": {
+      "target": 0,
+      "period": ""
+    },
+    "profitComposition": [],
+    "performanceByShift": []
+  }
+}

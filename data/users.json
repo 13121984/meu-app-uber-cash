@@ -5,7 +5,9 @@
     "plan": "autopilot",
     "securityAnswers": [],
     "vehicles": [],
-    "preferences": {}
+    "preferences": {
+      "colorTheme": "green"
+    }
   },
   {
     "id": "Teste 1",

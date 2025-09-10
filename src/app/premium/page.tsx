@@ -23,6 +23,7 @@ const features = [
   { id: 'lembretes_manutencao', name: 'Lembretes de Manutenção', basic: false, pro: true, autopilot: true },
   { id: 'captura_auto', name: 'Captura Automática de Corridas', description: "Registra corridas finalizadas sem digitação", basic: false, pro: false, autopilot: true },
   { id: 'auditoria', name: 'Auditoria de Transparência', description: "Compara o KM da oferta com o KM real da viagem", basic: false, pro: false, autopilot: true },
+  { id: 'afiliado', name: 'Programa de Parceiros', description: "Ganhe dinheiro indicando o app", basic: false, pro: true, autopilot: true },
 ];
 
 const plans = [
@@ -123,22 +124,22 @@ export default function PremiumPage() {
       </div>
       
       {/* Seção de Afiliados */}
-       <Card className="mt-12 bg-secondary">
+       <Card className="mt-12 bg-secondary/50 border-primary/20">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <Handshake className="h-6 w-6 text-primary"/>
                     Seja um Parceiro Uber Cash
                 </CardTitle>
                 <CardDescription>
-                    Gostou do aplicativo e quer ganhar uma renda extra? Indique para seus amigos e colegas motoristas e seja recompensado por isso!
+                    Transforme sua experiência em uma nova fonte de renda. Indique nosso app e ganhe dinheiro de verdade.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                    Estamos construindo nosso programa de afiliados. Se você tem interesse em se tornar um parceiro e ganhar comissões por cada novo assinante que você indicar, entre em contato conosco para saber mais e se inscrever na lista de espera.
+                   Nós acreditamos no poder da comunidade. Ao se tornar nosso parceiro, você recebe um link exclusivo para compartilhar. A cada novo motorista que assina um plano através da sua indicação, você ganha uma comissão. É simples: você ajuda seus colegas a serem mais lucrativos e é recompensado por isso.
                 </p>
                 <Link href="/suporte?assunto=afiliado" passHref>
-                    <Button variant="outline">Quero ser um Afiliado</Button>
+                    <Button variant="outline">Quero ser um Parceiro</Button>
                 </Link>
             </CardContent>
         </Card>
