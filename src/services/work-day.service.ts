@@ -190,7 +190,6 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
 
         const deletedCount = initialLength - finalWorkDays.length;
         await writeWorkDays(userId, finalWorkDays);
-        revalidatePath('/', 'layout');
         return { success: true, count: deletedCount };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registros em massa.";
