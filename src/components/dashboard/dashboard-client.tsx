@@ -60,9 +60,9 @@ export function DashboardClient() {
 
   useEffect(() => {
     if(user) {
-        handlePeriodChange('today');
+        handlePeriodChange(period);
     }
-  }, [user]);
+  }, [user, period]);
 
   const periodMap: Record<Period, string> = {
       today: "Hoje",
