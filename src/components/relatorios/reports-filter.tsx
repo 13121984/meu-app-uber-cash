@@ -16,12 +16,14 @@ import { exportReportAction, ReportFilterValues } from '@/app/relatorios/actions
 import { generatePdf } from '@/lib/pdf-generator';
 import { getReportData, ReportData } from '@/services/summary.service';
 import { useAuth } from '@/contexts/auth-context';
+import { useSearchParams } from 'next/navigation';
 
 
 interface ReportsFilterProps {
   onApplyFilters: (filters: ReportFilterValues) => void;
   isPending: boolean;
   reportContentRef: React.RefObject<HTMLDivElement>;
+  activeFilters: ReportFilterValues | null;
 }
 
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
@@ -30,14 +32,29 @@ const months = Array.from({ length: 12 }, (_, i) => ({
   label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
 }));
 
-export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: ReportsFilterProps) {
+export function ReportsFilter({ onApplyFilters, isPending, reportContentRef, activeFilters }: ReportsFilterProps) {
   const { user } = useAuth();
-  const [filterType, setFilterType] = useState<ReportFilterValues['type'] | null>(null);
-  const [year, setYear] = useState<number>(getYear(new Date()));
-  const [month, setMonth] = useState<number>(new Date().getMonth());
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const searchParams = useSearchParams();
+
+  // Initialize state from URL params to ensure UI matches URL on load
+  const getInitialFilterType = () => searchParams.get('period') as ReportFilterValues['type'] | null;
+  const getInitialYear = () => parseInt(searchParams.get('year') || getYear(new Date()).toString());
+  const getInitialMonth = () => parseInt(searchParams.get('month') || new Date().getMonth().toString());
+  const getInitialDateRange = () => {
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
+    if (from && isValid(parseISO(from))) {
+      return { from: parseISO(from), to: to && isValid(parseISO(to)) ? parseISO(to) : undefined };
+    }
+    return undefined;
+  }
+
+  const [filterType, setFilterType] = useState<ReportFilterValues['type'] | null>(getInitialFilterType);
+  const [year, setYear] = useState<number>(getInitialYear);
+  const [month, setMonth] = useState<number>(getInitialMonth);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(getInitialDateRange);
+
   const [isExporting, startExportTransition] = useTransition();
-  const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
 
   const handleApply = () => {
     if (!filterType) {
@@ -53,18 +70,17 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
     } else if (filterType === 'custom' && dateRange?.from) {
         filters.dateRange = dateRange;
     }
-    setCurrentFilters(filters);
     onApplyFilters(filters);
   };
   
   const handleDownloadCSV = () => {
-      if (!currentFilters || !user) {
+      if (!activeFilters || !user) {
           toast({ title: "Nenhum relatório gerado", description: "Aplique um filtro primeiro para poder exportar os dados.", variant: "destructive"});
           return;
       }
       startExportTransition(async () => {
         try {
-            const result = await exportReportAction(user.id, currentFilters);
+            const result = await exportReportAction(user.id, activeFilters);
             if (result.csvContent) {
                 const blob = new Blob([result.csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
@@ -94,14 +110,14 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
   }
 
   const handleDownloadPDF = async () => {
-    if (!currentFilters || !user) {
+    if (!activeFilters || !user) {
         toast({ title: "Nenhum relatório gerado", description: "Aplique um filtro primeiro para poder exportar os dados.", variant: "destructive"});
         return;
     }
     startExportTransition(async () => {
         try {
-            const reportData: ReportData = await getReportData(user.id, currentFilters);
-            generatePdf(reportData, currentFilters);
+            const reportData: ReportData = await getReportData(user.id, activeFilters);
+            generatePdf(reportData, activeFilters);
             toast({
                 title: "Exportação PDF Iniciada",
                 description: `O arquivo será baixado.`,
@@ -214,12 +230,12 @@ export function ReportsFilter({ onApplyFilters, isPending, reportContentRef }: R
 
       <div className="flex-grow"></div>
       
-       <Button onClick={handleDownloadPDF} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !currentFilters}>
+       <Button onClick={handleDownloadPDF} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !activeFilters}>
           {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
           {isExporting ? 'Exportando...' : 'Baixar PDF'}
       </Button>
 
-      <Button onClick={handleDownloadCSV} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !currentFilters}>
+      <Button onClick={handleDownloadCSV} variant="outline" className="w-full sm:w-auto" disabled={isExporting || isPending || !activeFilters}>
           {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
           {isExporting ? 'Exportando...' : 'Baixar CSV'}
       </Button>

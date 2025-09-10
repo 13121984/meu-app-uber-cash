@@ -52,7 +52,6 @@ export function ReportsClient() {
   const handleApplyFilters = useCallback((newFilters: ReportFilterValues) => {
     if (!user) return;
     
-    // Only update URL if filters are actually changing to avoid unnecessary re-renders
     const currentQuery = new URLSearchParams(searchParams.toString());
     const newQuery = new URLSearchParams();
     newQuery.set('period', newFilters.type);
@@ -72,10 +71,8 @@ export function ReportsClient() {
     });
   }, [user, router, searchParams]);
   
-  // Effect to read filters from URL on initial load
   useEffect(() => {
-    // Only run if user is loaded and filters haven't been set yet
-    if (user && !filters && searchParams) {
+    if (user && !filters) {
         const period = searchParams.get('period');
         if (period) {
             const initialFilters: ReportFilterValues = { type: period as any };
@@ -89,7 +86,6 @@ export function ReportsClient() {
             if (from) {
                 initialFilters.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
             }
-            // Set filters and trigger data load
             handleApplyFilters(initialFilters);
         }
     }
@@ -254,6 +250,7 @@ export function ReportsClient() {
             onApplyFilters={handleApplyFilters} 
             isPending={isPending}
             reportContentRef={reportContentRef}
+            activeFilters={filters}
           />
         </CardContent>
       </Card>
