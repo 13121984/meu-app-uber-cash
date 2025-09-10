@@ -108,7 +108,9 @@ export function DashboardClient() {
       const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
       const orderedCardIds = isPro 
         ? [...new Set([...savedCardOrder, ...allStats.map(s => s.id)])] 
-        : mandatoryCards;
+        : savedCardOrder.length > 0
+          ? [...new Set([...savedCardOrder, ...mandatoryCards])]
+          : mandatoryCards;
 
       const cardsToShow = orderedCardIds.map(id => {
           if (!isPro && !mandatoryCards.includes(id)) return null;
@@ -133,16 +135,17 @@ export function DashboardClient() {
 
           return { ...cardInfo, value };
       }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
-
+      
       const savedChartOrder = user?.preferences?.reportChartOrder || [];
       const chartsToShowIds = isPro 
         ? [...new Set([...savedChartOrder, ...allCharts.map(c => c.id)])]
-        : mandatoryCharts;
+        : savedChartOrder.length > 0
+          ? [...new Set([...savedChartOrder, ...mandatoryCharts])]
+          : mandatoryCharts;
 
       const chartsToShow = chartsToShowIds.map(id => {
-        const chart = allCharts.find(c => c.id === id);
-        if (!isPro && chart && !chart.isMandatory) return null;
-        return chart;
+        if (!isPro && !mandatoryCharts.includes(id)) return null;
+        return allCharts.find(c => c.id === id);
       }).filter(Boolean);
 
 
