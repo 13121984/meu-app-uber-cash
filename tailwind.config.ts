@@ -101,6 +101,10 @@ export default {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-5px)' },
         },
+        'float-auth': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
         'shake': {
           '0%, 100%': { transform: 'translateX(0)' },
           '25%': { transform: 'translateX(-2px) rotate(-1deg)' },
@@ -111,6 +115,7 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'float': 'float 3s ease-in-out infinite',
+        'float-auth': 'float-auth 2.5s ease-in-out infinite',
         'shake': 'shake 1.5s ease-in-out infinite',
       },
     },
