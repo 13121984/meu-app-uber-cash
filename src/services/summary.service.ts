@@ -89,7 +89,7 @@ export async function updateAllSummaries(userId: string): Promise<SummaryData> {
     const allMaintenance = await getMaintenanceRecords(userId);
     const goals = await getGoals(userId);
     
-    const now = new Date();
+    const now = startOfDay(new Date());
 
     const todayWorkDays = allWorkDays.filter(day => isSameDay(day.date, now));
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
@@ -232,7 +232,7 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     }
   }
   
-  const now = new Date();
+  const now = startOfDay(new Date());
   let interval: { start: Date; end: Date } | null = null;
   const allWorkDays = await getWorkDays(userId);
   const allMaintenance = await getMaintenanceRecords(userId);
@@ -240,7 +240,7 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
 
   switch (filters.type) {
     case 'all': break;
-    case 'today': interval = { start: startOfDay(now), end: endOfDay(now) }; break;
+    case 'today': interval = { start: now, end: endOfDay(now) }; break;
     case 'thisWeek': interval = { start: startOfWeek(now), end: endOfWeek(now) }; break;
     case 'thisMonth': interval = { start: startOfMonth(now), end: endOfMonth(now) }; break;
     case 'specificMonth': if (filters.year !== undefined && filters.month !== undefined) {
@@ -252,9 +252,9 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
         interval = { start: startOfYear(specificDate), end: endOfYear(specificDate) };
     } break;
     case 'custom': if (filters.dateRange?.from) {
-        const fromDate = new Date(filters.dateRange.from);
-        const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : fromDate;
-        interval = { start: startOfDay(fromDate), end: endOfDay(toDate) };
+        const fromDate = startOfDay(new Date(filters.dateRange.from));
+        const toDate = filters.dateRange.to ? endOfDay(new Date(filters.dateRange.to)) : endOfDay(fromDate);
+        interval = { start: fromDate, end: toDate };
     } break;
   }
   

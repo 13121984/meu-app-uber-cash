@@ -5,6 +5,7 @@ import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth,
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
+import { updateAllSummaries } from './summary.service';
 
 // --- Tipos e Interfaces ---
 
@@ -69,7 +70,7 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
   try {
     const allWorkDays = await readWorkDays(userId);
     
-    // Garante que a data está no início do dia local do Brasil
+    // Garante que a data está no início do dia, ignorando fuso horário
     const finalDate = startOfDay(new Date(data.date));
 
     if (data.id && data.id !== 'today' && data.id !== 'other-day') {
@@ -114,7 +115,7 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         }
 
         for (const [dateKey, rows] of groupedByDate.entries()) {
-            const date = parseISO(dateKey);
+            const date = startOfDay(parseISO(dateKey)); // Garante a data sem fuso
             const firstRow = rows[0];
             const km = parseFloat(firstRow.km.replace(',', '.')) || 0;
             const hours = parseFloat(firstRow.hours?.toString().replace(',', '.') || 0);
@@ -158,6 +159,7 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
 
         await writeWorkDays(userId, finalWorkDays);
+        await updateAllSummaries(userId); // Centraliza a atualização aqui
         revalidatePath('/', 'layout');
         return { success: true, count: workDaysToUpsert.length };
 
@@ -237,6 +239,7 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
         });
 
         await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
+        await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
         return { success: true };
     } catch (e) {
@@ -250,6 +253,7 @@ export async function clearAllData(userId: string): Promise<{ success: boolean; 
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
         await writeWorkDays(userId, []);
+        await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
         return { success: true };
     } catch (e) {
@@ -286,13 +290,13 @@ function getFilteredWorkDays(
 ) {
   if (allWorkDays.length === 0) return [];
   
-  const now = new Date();
+  const now = startOfDay(new Date());
   let interval: { start: Date; end: Date } | null = null;
   switch (filters.type) {
     case 'all':
       return allWorkDays;
     case 'today':
-      interval = { start: startOfDay(now), end: endOfDay(now) };
+      interval = { start: now, end: endOfDay(now) };
       break;
     case 'thisWeek':
       interval = { start: startOfWeek(now), end: endOfWeek(now) };
@@ -314,9 +318,9 @@ function getFilteredWorkDays(
       break;
     case 'custom':
       if (filters.dateRange?.from) {
-        const fromDate = new Date(filters.dateRange.from);
-        const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : fromDate;
-        interval = { start: startOfDay(fromDate), end: endOfDay(toDate) };
+        const fromDate = startOfDay(new Date(filters.dateRange.from));
+        const toDate = filters.dateRange.to ? endOfDay(new Date(filters.dateRange.to)) : endOfDay(fromDate);
+        interval = { start: fromDate, end: toDate };
       }
       break;
   }
