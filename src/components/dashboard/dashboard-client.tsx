@@ -108,7 +108,7 @@ export function DashboardClient() {
       const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
       const orderedCardIds = isPro 
         ? [...new Set([...savedCardOrder, ...allStats.map(s => s.id)])] 
-        : savedCardOrder.length > 0 ? savedCardOrder : mandatoryCards;
+        : mandatoryCards;
 
       const cardsToShow = orderedCardIds.map(id => {
           if (!isPro && !mandatoryCards.includes(id)) return null;
