@@ -117,7 +117,7 @@ export function VehicleManagerCard() {
         return (
             <Link href="/premium" passHref>
                 <Button>
-                    <Lock className="mr-2 h-4 w-4" />
+                    <Lock className="mr-2 h-4 w-4 text-primary" />
                     <span>Adicionar Mais</span>
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

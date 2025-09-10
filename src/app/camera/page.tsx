@@ -32,7 +32,7 @@ function PremiumUpgradeScreen() {
             </Card>
             <Link href="/premium" passHref>
                 <Button size="lg">
-                    <Lock className="mr-2 h-4 w-4" />
+                    <Lock className="mr-2 h-4 w-4 text-primary" />
                     Desbloquear com Pro ou Autopilot
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

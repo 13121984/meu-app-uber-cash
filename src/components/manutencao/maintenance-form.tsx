@@ -234,7 +234,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
                     <BellRing className="h-5 w-5 text-primary" />
                     Lembrete de Manutenção
                  </h3>
-                 {!isAutopilot && <Link href="/premium"><Button variant="link" size="sm" className="text-amber-500"><Lock className="mr-1 h-3 w-3"/> Autopilot</Button></Link>}
+                 {!isAutopilot && <Link href="/premium"><Button variant="link" size="sm" className="text-amber-500"><Lock className="mr-1 h-3 w-3 text-primary"/> Autopilot</Button></Link>}
             </div>
             
              <FormField

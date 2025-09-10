@@ -121,7 +121,7 @@ function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings:
                         <div className="space-y-0.5">
                             <Label className="flex items-center gap-2">
                                 Habilitar Notificações de Manutenção
-                                {!isAutopilot && <Lock className="h-4 w-4 text-amber-500" />}
+                                {!isAutopilot && <Lock className="h-4 w-4 text-primary" />}
                             </Label>
                              <div className="text-xs text-muted-foreground">
                                 {isAutopilot 

@@ -197,7 +197,7 @@ export function ReportsClient() {
                    <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
-                            <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
+                            <Lock className="h-8 w-8 mx-auto text-primary mb-2"/>
                             <p className="text-sm font-semibold">Adicionar Card</p>
                              <p className="text-xs text-muted-foreground">Desbloquear com Pro</p>
                         </CardContent>
@@ -236,7 +236,7 @@ export function ReportsClient() {
              {!isPro && (
               <Link href="/configuracoes/layout-personalizado" passHref>
                 <Button variant="outline" className="w-full">
-                    <Lock className="mr-2 h-4 w-4"/>
+                    <Lock className="mr-2 h-4 w-4 text-primary"/>
                     Adicionar outro Gráfico (Desbloquear com Pro)
                 </Button>
             </Link>

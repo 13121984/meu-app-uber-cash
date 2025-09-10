@@ -126,7 +126,7 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
                 </div>
                 <div className="flex items-center gap-2">
                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(type, cat.name)} disabled={!canDelete}>
-                     {canDelete ? <Trash2 className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                     {canDelete ? <Trash2 className="h-4 w-4" /> : <Lock className="h-4 w-4 text-primary" />}
                    </Button>
                     <Switch
                         id={`switch-${type}-${cat.name}`}
@@ -189,7 +189,7 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
                         </div>
                      </div>
                      <Button onClick={handleAddItem} className="w-full sm:w-auto self-end" disabled={!isPro || !newItemName}>
-                        {!isPro ? <Lock className="mr-2 h-4 w-4"/> : <PlusCircle className="mr-2 h-4 w-4"/>}
+                        {!isPro ? <Lock className="mr-2 h-4 w-4 text-primary"/> : <PlusCircle className="mr-2 h-4 w-4"/>}
                         Adicionar
                     </Button>
                 </div>
