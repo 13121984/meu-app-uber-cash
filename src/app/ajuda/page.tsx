@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck } from "lucide-react";
+import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck, MessageSquarePlus, MessageCircleQuestion, Share2 } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -87,7 +87,7 @@ const helpTopics = [
     value: "chamadas",
     icon: Smartphone,
     title: "O que é a captura e auditoria automática de corridas?",
-    content: "Esta é a funcionalidade principal do plano Autopilot. Com sua permissão, o app consegue 'ler' a tela de apps como Uber e 99 para capturar os dados da corrida (valor, distância) automaticamente, sem precisar de prints ou digitação. Ele também compara o KM da oferta com o KM real da viagem, mostrando se a plataforma foi transparente.",
+    content: "Esta é a funcionalidade principal do plano Autopilot. Com sua permissão, o app consegue 'ler' a tela de apps como Uber e 99 para capturar os dados da corrida (valor, distância) automaticamente, sem precisar de digitação. Ele também compara o KM da oferta com o KM real da viagem, mostrando se a plataforma foi transparente.",
     isPremiumFeature: true,
   },
 ];
@@ -126,6 +126,29 @@ const devTopics = [
                 <li><strong>O que continua Pago (Pro/Autopilot):</strong> A capacidade de <strong>criar novas categorias, editar nomes e reordenar a lista</strong> continua sendo um recurso exclusivo dos planos pagos.</li>
             </ul>
             <p class="mt-2">Essa mudança melhora a experiência gratuita sem diminuir o valor da assinatura, criando um caminho natural para o upgrade quando o usuário desejar uma personalização mais profunda.</p>
+        `,
+    },
+     {
+        value: "floating_bubble",
+        icon: MessageSquarePlus,
+        title: "Visão de Futuro: Balão Flutuante 'TX IA'",
+        content: `
+            <p class="mb-2">Uma das funcionalidades mais poderosas que planejamos é um <strong>balão flutuante</strong> que fica sobre os outros aplicativos. Ele serve como um atalho rápido para as funcionalidades mais importantes do Uber Cash, mesmo quando você está na tela da Uber ou 99.</p>
+            <h4 class="font-semibold mb-2">Como vai funcionar?</h4>
+            <ol class="list-decimal pl-5 space-y-2">
+                <li>Ao habilitar a permissão de <strong>"Sobrepor a outros apps"</strong>, um pequeno balão com a logo do "TX IA" aparecerá na tela.</li>
+                <li><strong>Arrastável:</strong> Você poderá mover o balão para qualquer canto da tela para não atrapalhar.</li>
+                <li><strong>Ações Rápidas:</strong> Ao tocar no balão, um menu compacto se abrirá com botões para:
+                    <ul class="list-disc pl-5 mt-2">
+                        <li>Iniciar/parar a <strong>Câmera de Segurança</strong>.</li>
+                        <li>Acessar as <strong>configurações do TX IA</strong> (metas R$/km, R$/hora).</li>
+                        <li>Ver um resumo da <strong>análise da corrida atual</strong> (Bora/Tô Fora, R$/km).</li>
+                        <li>Abrir a <strong>página inicial</strong> do Uber Cash.</li>
+                    </ul>
+                </li>
+            </ol>
+            <h4 class="font-semibold mt-4 mb-2">Implementação Técnica (Android)</h4>
+            <p>Isso será implementado usando um <strong>Foreground Service</strong> no Android, garantindo que o balão continue ativo. A interface do balão será uma <strong>Window</strong> customizada gerenciada pelo WindowManager, permitindo que ela se sobreponha a outros aplicativos. A comunicação entre o serviço nativo e a parte web (WebView) do app será feita via um JavaScript Interface.</p>
         `,
     }
 ];
@@ -347,7 +370,7 @@ export default function AjudaPage() {
                                      <li><strong>Lógica de Extração:</strong> O serviço precisa ser inteligente para identificar os textos corretos de "valor", "distância", etc., em meio a todas as outras informações na tela.</li>
                                     <li><strong>Comunicação:</strong> Os dados extraídos pelo serviço nativo são enviados para a parte web do nosso app (WebView) para serem processados e salvos.</li>
                                  </ul>
-                                 <p className="mt-2">Esta é uma implementação complexa que exige conhecimento do SDK do Android, mas é o que diferencia um app útil de um app indispensável.</p>
+                                 <p className="mt-2">Esta é uma implementação complexa que exige conhecimento do SDK do Android, mas é o que diferencia um app útil de um app indispensível.</p>
                                </div>
                             </AccordionContent>
                         </AccordionItem>
@@ -381,13 +404,13 @@ export default function AjudaPage() {
 
             <Card>
                 <CardHeader>
-                    <h2 className="text-2xl font-bold font-headline">Ainda precisa de ajuda?</h2>
+                    <h2 className="text-2xl font-bold font-headline flex items-center gap-2"><MessageCircleQuestion className="h-6 w-6 text-primary"/>Ainda precisa de ajuda?</h2>
                 </CardHeader>
                 <CardContent>
                     <p className="text-muted-foreground mb-4">
-                        Se você não encontrou a resposta para sua dúvida, entre em contato com nosso suporte.
+                        Se você não encontrou a resposta para sua dúvida, entre em contato com nosso suporte para que possamos te ajudar.
                     </p>
-                    <Link href="mailto:pvitormc@gmail.com">
+                    <Link href="/suporte">
                       <Button>
                         Entrar em Contato
                       </Button>

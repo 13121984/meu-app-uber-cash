@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles, Car, Camera, BarChart3, ShieldCheck, Accessibility } from 'lucide-react';
+import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles, Car, Camera, BarChart3, ShieldCheck, Accessibility, Handshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
@@ -17,12 +17,12 @@ const features = [
   { id: 'registros', name: 'Registros Manuais Ilimitados', basic: true, pro: true, autopilot: true },
   { id: 'relatorios', name: 'Relatórios e Dashboard', basic: true, pro: true, autopilot: true },
   { id: 'taximetro', name: 'Taxímetro Inteligente', basic: '1 uso/semana', pro: 'Ilimitado', autopilot: 'Ilimitado' },
-  { id: 'tx_ia', name: 'TX IA: Analisador de Corridas', basic: false, pro: true, autopilot: true },
+  { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Permite ao app ler as ofertas de corrida para análise", basic: false, pro: true, autopilot: true },
   { id: 'personalizacao', name: 'Personalização do Layout', basic: 'Limitado', pro: true, autopilot: true },
   { id: 'camera', name: 'Câmera de Segurança', basic: false, pro: 'Gravações de 5 min', autopilot: 'Gravações Ilimitadas' },
   { id: 'lembretes_manutencao', name: 'Lembretes de Manutenção', basic: false, pro: true, autopilot: true },
-  { id: 'captura_auto', name: 'Captura Automática de Corridas', basic: false, pro: false, autopilot: true },
-  { id: 'auditoria', name: 'Auditoria de Transparência', basic: false, pro: false, autopilot: true },
+  { id: 'captura_auto', name: 'Captura Automática de Corridas', description: "Registra corridas finalizadas sem digitação", basic: false, pro: false, autopilot: true },
+  { id: 'auditoria', name: 'Auditoria de Transparência', description: "Compara o KM da oferta com o KM real da viagem", basic: false, pro: false, autopilot: true },
 ];
 
 const plans = [
@@ -48,14 +48,6 @@ const plans = [
 
 export default function PremiumPage() {
   const [isAnnual, setIsAnnual] = useState(true);
-
-  const getFeatureText = (planName: string, feature: typeof features[0]) => {
-      const key = planName.toLowerCase() as 'basic' | 'pro' | 'autopilot';
-      if (typeof feature[key] === 'boolean') {
-          return feature[key] ? 'Incluído' : 'Não incluído';
-      }
-      return feature[key];
-  };
 
   return (
     <div className="space-y-8 p-4 sm:p-8">
@@ -89,23 +81,25 @@ export default function PremiumPage() {
                   {isAnnual ? plan.price.annual : plan.price.monthly}
                 </p>
                 <p className="text-xs text-muted-foreground text-center mb-6">
-                  {plan.name !== 'Grátis' && (isAnnual ? 'por ano' : 'por mês')}
+                  {plan.name !== 'Básico' && (isAnnual ? 'por ano' : 'por mês')}
                 </p>
 
                 <ul className="space-y-4 pt-4">
                   {features.map(feature => {
-                    const featureText = getFeatureText(plan.name, feature);
-                    const isIncluded = typeof feature[plan.name.toLowerCase() as keyof typeof feature] === 'boolean' 
-                        ? feature[plan.name.toLowerCase() as keyof typeof feature] 
-                        : true;
+                    const planKey = plan.name.toLowerCase() as 'basic' | 'pro' | 'autopilot';
+                    const isIncluded = !!feature[planKey];
+                    const featureText = feature[planKey] === true ? 'Incluído' : feature[planKey] || 'Não incluído';
 
                     return (
                        <li key={feature.id} className="flex items-start gap-3 text-sm">
                          <Check className={cn("h-5 w-5 mt-0.5 shrink-0", isIncluded ? 'text-green-500' : 'text-muted-foreground/30')} />
                          <div>
-                            <span>{feature.name}</span>
-                            {typeof feature[plan.name.toLowerCase() as keyof typeof feature] !== 'boolean' && (
-                                <p className="text-xs text-muted-foreground">{feature[plan.name.toLowerCase() as keyof typeof feature]}</p>
+                            <span className={cn(!isIncluded && "text-muted-foreground/70")}>{feature.name}</span>
+                            {feature.description && (
+                                <p className="text-xs text-muted-foreground">{feature.description}</p>
+                            )}
+                            {typeof feature[planKey] !== 'boolean' && feature[planKey] && (
+                                <p className="text-xs text-muted-foreground font-semibold">{feature[planKey]}</p>
                             )}
                          </div>
                        </li>
@@ -127,6 +121,27 @@ export default function PremiumPage() {
             </Card>
         ))}
       </div>
+      
+      {/* Seção de Afiliados */}
+       <Card className="mt-12 bg-secondary">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-headline">
+                    <Handshake className="h-6 w-6 text-primary"/>
+                    Seja um Parceiro Uber Cash
+                </CardTitle>
+                <CardDescription>
+                    Gostou do aplicativo e quer ganhar uma renda extra? Indique para seus amigos e colegas motoristas e seja recompensado por isso!
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                    Estamos construindo nosso programa de afiliados. Se você tem interesse em se tornar um parceiro e ganhar comissões por cada novo assinante que você indicar, entre em contato conosco para saber mais e se inscrever na lista de espera.
+                </p>
+                <Link href="/suporte?assunto=afiliado" passHref>
+                    <Button variant="outline">Quero ser um Afiliado</Button>
+                </Link>
+            </CardContent>
+        </Card>
     </div>
   );
 }
