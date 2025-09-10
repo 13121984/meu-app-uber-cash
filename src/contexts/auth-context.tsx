@@ -143,10 +143,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
   }
 
-  // Para simplificar a depuração e eliminar erros de permissão, temporariamente tratamos
-  // todos os usuários como tendo o plano máximo (Autopilot).
-  const isPro = true; // user?.plan === 'pro' || user?.plan === 'autopilot';
-  const isAutopilot = true; // user?.plan === 'autopilot';
+  const isPro = user?.plan === 'pro' || user?.plan === 'autopilot';
+  const isAutopilot = user?.plan === 'autopilot';
 
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser, isPro, isAutopilot, setColorTheme, setTheme }}>
