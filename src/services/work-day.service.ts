@@ -1,4 +1,5 @@
 
+
 "use server";
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
@@ -387,17 +388,25 @@ function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
 // --- Funções de Exportação ---
 
 const CSV_HEADERS = [
-    'date', 'km', 'hours',
+    'date', 'km', 'hours', 'time_entries',
     'earnings_category', 'earnings_trips', 'earnings_amount',
     'fuel_type', 'fuel_paid', 'fuel_price',
     'maintenance_description', 'maintenance_amount'
 ];
 
 function escapeCsvValue(value: any): string {
-    if (value === null || value === undefined || value === '') return '';
+    if (value === null || value === undefined) return '';
     let stringValue = String(value);
-    if (typeof value === 'number') stringValue = stringValue.replace('.', ',');
-    if (/[",\r\n]/.test(stringValue)) return `"${stringValue.replace(/"/g, '""')}"`;
+
+    // Para números, substitui ponto por vírgula para manter consistência com Excel em português
+    if (typeof value === 'number') {
+        stringValue = stringValue.replace('.', ',');
+    }
+    
+    // Se o valor contém vírgula, aspas ou quebra de linha, envolve com aspas
+    if (/[",\r\n]/.test(stringValue)) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+    }
     return stringValue;
 }
 
@@ -408,29 +417,46 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
 
     const rows: string[][] = [];
 
-    workDays.forEach(day => {
+    // Ordena os dias de trabalho pela data, do mais antigo para o mais recente, para uma planilha lógica
+    const sortedWorkDays = workDays.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    sortedWorkDays.forEach(day => {
         const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
+        const timeEntriesStr = day.timeEntries.map(t => `${t.start}-${t.end}`).join('; ');
         
+        // Se um dia não tem ganhos, combustíveis ou manutenção, cria uma linha única para ele
         if (day.earnings.length === 0 && day.fuelEntries.length === 0 && day.maintenanceEntries.length === 0) {
              rows.push([
-                dateStr, escapeCsvValue(day.km), escapeCsvValue(day.hours),
-                '', '', '', '', '', '', '', ''
+                dateStr,
+                escapeCsvValue(day.km),
+                escapeCsvValue(day.hours),
+                escapeCsvValue(timeEntriesStr),
+                ...Array(8).fill('') // Preenche as colunas restantes
             ]);
             return;
         }
 
-        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, day.maintenanceEntries.length);
+        // Descobre o número máximo de entradas entre ganhos, combustíveis e manutenções para este dia
+        const maxEntries = Math.max(
+            day.earnings.length,
+            day.fuelEntries.length,
+            day.maintenanceEntries.length
+        );
 
+        // Cria uma linha para cada "nível" de entrada
         for (let i = 0; i < maxEntries; i++) {
             const earning = day.earnings[i];
             const fuel = day.fuelEntries[i];
             const maintenance = day.maintenanceEntries[i];
-            const isFirstRowOfDay = (i === 0);
+
+            // A primeira linha de um dia contém os dados principais (data, km, horas)
+            const isFirstRowOfDay = i === 0;
 
             rows.push([
                 isFirstRowOfDay ? dateStr : '',
                 isFirstRowOfDay ? escapeCsvValue(day.km) : '',
                 isFirstRowOfDay ? escapeCsvValue(day.hours) : '',
+                isFirstRowOfDay ? escapeCsvValue(timeEntriesStr) : '',
                 earning ? escapeCsvValue(earning.category) : '',
                 earning ? escapeCsvValue(earning.trips) : '',
                 earning ? escapeCsvValue(earning.amount) : '',
