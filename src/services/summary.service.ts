@@ -2,6 +2,7 @@
 "use server";
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay } from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
 import { getGoals, Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getMaintenanceRecords, Maintenance } from './maintenance.service';
@@ -55,6 +56,7 @@ export interface ReportData extends Omit<PeriodData, 'performanceByShift'> {
 }
 
 const FILE_NAME = 'summary.json';
+const TIME_ZONE = 'America/Sao_Paulo';
 
 const defaultPeriodData: PeriodData = {
     totalGanho: 0, totalLucro: 0, totalCombustivel: 0, totalExtras: 0,
@@ -88,7 +90,8 @@ export async function updateAllSummaries(userId: string): Promise<SummaryData> {
     const allWorkDays = await getWorkDays(userId);
     const allMaintenance = await getMaintenanceRecords(userId);
     const goals = await getGoals(userId);
-    const now = new Date();
+    
+    const now = utcToZonedTime(new Date(), TIME_ZONE);
 
     const todayWorkDays = allWorkDays.filter(day => isSameDay(day.date, now));
     const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
@@ -237,7 +240,7 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     }
   }
   
-  const now = new Date();
+  const now = utcToZonedTime(new Date(), TIME_ZONE);
   let interval: { start: Date; end: Date } | null = null;
   const allWorkDays = await getWorkDays(userId);
   const allMaintenance = await getMaintenanceRecords(userId);
@@ -248,9 +251,19 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
     case 'today': interval = { start: startOfDay(now), end: endOfDay(now) }; break;
     case 'thisWeek': interval = { start: startOfWeek(now), end: endOfWeek(now) }; break;
     case 'thisMonth': interval = { start: startOfMonth(now), end: endOfMonth(now) }; break;
-    case 'specificMonth': if (filters.year !== undefined && filters.month !== undefined) { interval = { start: startOfMonth(new Date(filters.year, filters.month)), end: endOfMonth(new Date(filters.year, filters.month)) }; } break;
-    case 'specificYear': if (filters.year !== undefined) { interval = { start: startOfYear(new Date(filters.year, 0)), end: endOfYear(new Date(filters.year, 0)) }; } break;
-    case 'custom': if (filters.dateRange?.from) { interval = { start: startOfDay(filters.dateRange.from), end: filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from) }; } break;
+    case 'specificMonth': if (filters.year !== undefined && filters.month !== undefined) {
+        const specificDate = utcToZonedTime(new Date(filters.year, filters.month), TIME_ZONE);
+        interval = { start: startOfMonth(specificDate), end: endOfMonth(specificDate) };
+    } break;
+    case 'specificYear': if (filters.year !== undefined) {
+        const specificDate = utcToZonedTime(new Date(filters.year, 0), TIME_ZONE);
+        interval = { start: startOfYear(specificDate), end: endOfYear(specificDate) };
+    } break;
+    case 'custom': if (filters.dateRange?.from) {
+        const fromDate = utcToZonedTime(filters.dateRange.from, TIME_ZONE);
+        const toDate = filters.dateRange.to ? utcToZonedTime(filters.dateRange.to, TIME_ZONE) : fromDate;
+        interval = { start: startOfDay(fromDate), end: endOfDay(toDate) };
+    } break;
   }
   
   const filteredDays = interval ? allWorkDays.filter(d => isWithinInterval(d.date, interval!)) : allWorkDays;

@@ -2,6 +2,7 @@
 "use server";
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
@@ -43,6 +44,7 @@ export interface ImportedWorkDay {
 }
 
 const FILE_NAME = 'work-days.json';
+const TIME_ZONE = 'America/Sao_Paulo';
 
 // --- Funções de Leitura/Escrita ---
 
@@ -68,10 +70,15 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
   if (!userId) return { success: false, error: "Usuário não autenticado.", operation: 'created' };
   try {
     const allWorkDays = await readWorkDays(userId);
+    
+    // Garante que a data está no início do dia local do Brasil
+    const localDate = utcToZonedTime(data.date, TIME_ZONE);
+    const finalDate = startOfDay(localDate);
+
     if (data.id && data.id !== 'today' && data.id !== 'other-day') {
       const existingDayIndex = allWorkDays.findIndex(d => d.id === data.id);
       if (existingDayIndex > -1) {
-        allWorkDays[existingDayIndex] = { ...data, date: startOfDay(data.date) };
+        allWorkDays[existingDayIndex] = { ...data, date: finalDate };
         await writeWorkDays(userId, allWorkDays);
         return { success: true, id: data.id, operation: 'updated' };
       }
@@ -80,7 +87,7 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
     const newWorkDay: WorkDay = {
       ...data,
       id: Date.now().toString(),
-      date: startOfDay(data.date),
+      date: finalDate,
     };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(userId, allWorkDays);
@@ -219,7 +226,7 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
     if (!userId) return { success: false, error: "Nenhum usuário ativo para carregar dados." };
 
     try {
-        const now = new Date();
+        const now = utcToZonedTime(new Date(), TIME_ZONE);
         const currentYear = now.getFullYear();
         const currentMonth = now.getMonth();
 
@@ -282,7 +289,7 @@ function getFilteredWorkDays(
 ) {
   if (allWorkDays.length === 0) return [];
   
-  const now = new Date();
+  const now = utcToZonedTime(new Date(), TIME_ZONE);
   let interval: { start: Date; end: Date } | null = null;
   switch (filters.type) {
     case 'all':
@@ -298,17 +305,21 @@ function getFilteredWorkDays(
       break;
     case 'specificMonth':
       if (filters.year !== undefined && filters.month !== undefined) {
-        interval = { start: startOfMonth(new Date(filters.year, filters.month)), end: endOfMonth(new Date(filters.year, filters.month)) };
+        const specificDate = utcToZonedTime(new Date(filters.year, filters.month), TIME_ZONE);
+        interval = { start: startOfMonth(specificDate), end: endOfMonth(specificDate) };
       }
       break;
     case 'specificYear':
       if (filters.year !== undefined) {
-        interval = { start: startOfYear(new Date(filters.year, 0)), end: endOfYear(new Date(filters.year, 0)) };
+        const specificDate = utcToZonedTime(new Date(filters.year, 0), TIME_ZONE);
+        interval = { start: startOfYear(specificDate), end: endOfYear(specificDate) };
       }
       break;
     case 'custom':
       if (filters.dateRange?.from) {
-        interval = { start: startOfDay(filters.dateRange.from), end: filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from) };
+        const fromDate = utcToZonedTime(filters.dateRange.from, TIME_ZONE);
+        const toDate = filters.dateRange.to ? utcToZonedTime(filters.dateRange.to, TIME_ZONE) : fromDate;
+        interval = { start: startOfDay(fromDate), end: endOfDay(toDate) };
       }
       break;
   }
