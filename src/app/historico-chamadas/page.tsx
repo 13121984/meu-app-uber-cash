@@ -89,18 +89,18 @@ export default function HistoricoChamadasPage() {
       <div className="text-center">
         <Smartphone className="mx-auto w-16 h-16 text-primary mb-4" />
         <h1 className="text-4xl font-bold font-headline">
-          Análise Automática de Corridas
+          Registro Simplificado de Corridas
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mt-2">
-          Deixe o trabalho manual para trás. Nossa próxima grande funcionalidade analisará as ofertas de corrida em tempo real, assim que elas aparecerem na sua tela.
+          Deixe o trabalho manual para trás. Nossa próxima grande funcionalidade irá registrar seus ganhos com um toque, lendo os dados da notificação de corrida finalizada.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-            <CardTitle>A Solução para a Decisão de Poucos Segundos</CardTitle>
+            <CardTitle>A Solução para a Agilidade do Dia a Dia</CardTitle>
             <CardDescription>
-                Sabemos que você tem poucos segundos para aceitar uma corrida. A análise automática resolve isso.
+                Sabemos que você não tem tempo a perder. O registro simplificado resolve isso.
             </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -108,13 +108,13 @@ export default function HistoricoChamadasPage() {
                  <div className="space-y-2">
                     <h3 className="font-semibold flex items-center gap-2"><Clock className="w-5 h-5 text-primary"/> Como vai funcionar?</h3>
                     <p className="text-sm text-muted-foreground">
-                        Através dos **Serviços de Acessibilidade do Android**, o aplicativo poderá ler os dados da tela (valor, distância, tempo) da oferta de corrida assim que ela surgir. Em seguida, uma pequena notificação aparecerá com o veredito "Bora" ou "Tô Fora", ajudando você a decidir rapidamente.
+                        Através dos **Serviços de Acessibilidade do Android**, o aplicativo poderá ler os dados da notificação de corrida finalizada (valor, distância, etc.). Com apenas um toque na notificação, a corrida será registrada no seu histórico.
                     </p>
                 </div>
                  <div className="space-y-2">
                     <h3 className="font-semibold flex items-center gap-2"><Accessibility className="w-5 h-5 text-primary"/> O que são os Serviços de Acessibilidade?</h3>
                     <p className="text-sm text-muted-foreground">
-                       É uma ferramenta do Android criada para ajudar usuários, permitindo que apps autorizados leiam o conteúdo da tela. Nosso app usará essa tecnologia de forma focada para identificar e extrair apenas os dados de ofertas de corrida dos aplicativos de transporte.
+                       É uma ferramenta do Android criada para ajudar usuários, permitindo que apps autorizados leiam o conteúdo da tela. Nosso app usará essa tecnologia de forma focada para identificar e extrair apenas os dados de corridas dos aplicativos de transporte.
                     </p>
                 </div>
             </div>
@@ -134,7 +134,7 @@ export default function HistoricoChamadasPage() {
                 <ul className="list-disc pl-5 space-y-2 text-sm text-green-800 dark:text-green-300">
                   <li>Esta funcionalidade será **100% opcional** e só funcionará com a **sua permissão explícita**.</li>
                   <li>O aplicativo **não salvará imagens** da sua tela.</li>
-                  <li>Não teremos acesso a senhas, mensagens ou qualquer outra informação pessoal. Apenas os dados da oferta de corrida serão lidos momentaneamente para a análise.</li>
+                  <li>Não teremos acesso a senhas, mensagens ou qualquer outra informação pessoal. Apenas os dados da corrida serão lidos momentaneamente para o registro.</li>
                 </ul>
             </CardContent>
        </Card>

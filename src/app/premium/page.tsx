@@ -29,11 +29,11 @@ const proFeatures = [
   { id: 'relatorios_completos', name: 'Todos os Cards e Gráficos', description: "Ganho/h, Ganho/km, Eficiência, e muito mais", basic: false, pro: true, autopilot: true },
   { id: 'personalizacao_completa', name: 'Adicionar e Ocultar Itens do Layout', basic: false, pro: true, autopilot: true },
   { id: 'taximetro', name: 'Taxímetro Inteligente', basic: '1 uso/dia', pro: 'Ilimitado', autopilot: 'Ilimitado' },
-  { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Analise prints de corridas com IA", basic: false, pro: true, autopilot: true },
+  { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Use a IA para decidir se uma corrida vale a pena", basic: false, pro: true, autopilot: true },
   { id: 'camera', name: 'Câmera de Segurança', basic: false, pro: 'Gravações de 5 min', autopilot: 'Gravações Ilimitadas' },
   { id: 'lembretes_manutencao', name: 'Lembretes de Manutenção', basic: false, pro: true, autopilot: true },
   { id: 'afiliado', name: 'Programa de Parceiros', description: "Ganhe dinheiro indicando o app", basic: false, pro: true, autopilot: true },
-  { id: 'captura_auto', name: 'Captura Automática de Corridas', description: "Registra corridas finalizadas sem digitação", basic: false, pro: false, autopilot: true },
+  { id: 'captura_auto', name: 'Registro Simplificado de Corridas', description: "Registra corridas finalizadas com um toque, lendo os dados da notificação.", basic: false, pro: false, autopilot: true },
   { id: 'auditoria', name: 'Auditoria de Transparência', description: "Compara o KM da oferta com o KM real da viagem", basic: false, pro: false, autopilot: true },
 ];
 

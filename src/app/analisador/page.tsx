@@ -18,7 +18,7 @@ function PremiumUpgradeScreen() {
              </div>
             <h1 className="text-3xl font-bold font-headline text-primary">Decida em Segundos com o TX IA</h1>
             <p className="text-lg text-foreground max-w-lg">
-                O TX IA é seu copiloto inteligente. Ele lê o print da sua corrida, analisa com base nas suas metas e te diz se vale a pena. <strong className="text-primary">Chega de aceitar corridas no prejuízo!</strong>
+                O TX IA é seu copiloto inteligente. Ele analisa os dados da corrida com base nas suas metas e te diz se vale a pena. <strong className="text-primary">Chega de aceitar corridas no prejuízo!</strong>
             </p>
             <Card className="bg-secondary/50 w-full max-w-md">
                  <CardContent className="p-6">

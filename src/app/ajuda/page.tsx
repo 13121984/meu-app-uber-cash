@@ -18,7 +18,7 @@ const helpTopics = [
     value: "planos",
     icon: Gem,
     title: "Qual a diferença entre os planos?",
-    content: "O plano Básico (Gratuito) oferece as ferramentas essenciais: registros manuais, 4 cards e 2 gráficos fixos para análise. O plano Pro eleva sua gestão com o 'TX IA' para analisar corridas por print, acesso a todos os cards e gráficos, personalização de layout, câmera de segurança (5 min) e programa de parceiros. O plano Autopilot (Premium) é a experiência definitiva, com captura 100% automática das suas corridas, auditoria de transparência das plataformas, câmera ilimitada e todos os outros benefícios.",
+    content: "O plano Básico (Gratuito) oferece as ferramentas essenciais para começar. O plano Pro eleva sua gestão com o 'TX IA' para analisar corridas, acesso a todos os cards e gráficos, e personalização. O plano Autopilot (Premium) é a experiência definitiva, com registro simplificado de corridas, auditoria de transparência, câmera ilimitada e todos os outros benefícios.",
     isPremiumFeature: true,
   },
   {
@@ -74,7 +74,7 @@ const helpTopics = [
     value: "layout",
     icon: LayoutDashboard,
     title: "Posso personalizar o layout dos relatórios?",
-    content: "Sim. Usuários do plano Básico podem reordenar os cards e gráficos padrão. Assinantes Pro podem reordenar, adicionar e remover todos os itens disponíveis para uma personalização completa.",
+    content: "Sim. Usuários do plano Básico podem reordenar os cards e gráficos padrão. Assinantes Pro e Autopilot podem reordenar, adicionar e remover todos os itens disponíveis para uma personalização completa.",
     isPremiumFeature: true
   },
   {
@@ -94,8 +94,8 @@ const helpTopics = [
    {
     value: "chamadas",
     icon: Smartphone,
-    title: "O que é a captura e auditoria automática de corridas?",
-    content: "Esta é a funcionalidade principal do plano Autopilot. Com sua permissão, o app consegue 'ler' a tela de apps como Uber e 99 para capturar os dados da corrida (valor, distância) automaticamente, sem precisar de digitação. Ele também compara o KM da oferta com o KM real da viagem, mostrando se a plataforma foi transparente.",
+    title: "O que é o Registro Simplificado de Corridas?",
+    content: "Esta é a funcionalidade principal do plano Autopilot. Com sua permissão, o app consegue 'ler' a notificação de corrida finalizada de apps como Uber e 99 para registrar o ganho com um toque. Ele também compara o KM da oferta com o KM real da viagem, mostrando se a plataforma foi transparente.",
     isPremiumFeature: true,
   },
 ];
@@ -114,7 +114,7 @@ const devTopics = [
                 <li><strong>Alto "Fator Grudento" (Stickiness):</strong> Ao se tornar o cofre do histórico financeiro do motorista, o custo para ele mudar de aplicativo se torna imenso. Seus dados estão aqui.</li>
             </ul>
             <h4 class="font-semibold mb-2">O Próximo Passo para Dominar o Mercado:</h4>
-            <p>Com essa base, a <strong>Captura Automática de Corridas com Auditoria</strong> se torna o próximo grande salto. Ela elimina a maior fricção do usuário (digitar dados), cria uma barreira competitiva intransponível e abre a porta para novos insights Premium, como a análise de decisões em tempo real ("Valeu a pena rejeitar aquela corrida?").</p>
+            <p>Com essa base, o <strong>Registro Simplificado de Corridas com Auditoria</strong> se torna o próximo grande salto. Ele elimina a maior fricção do usuário (digitar dados), cria uma barreira competitiva intransponível e abre a porta para novos insights Premium, como a análise de decisões em tempo real ("Valeu a pena rejeitar aquela corrida?").</p>
         `,
     },
     {
@@ -499,12 +499,12 @@ export default function AjudaPage() {
                                 <AccordionTrigger>
                                     <div className="flex items-center gap-2">
                                         <Accessibility className="h-5 w-5 text-primary" />
-                                        <span className="font-semibold text-left">Visão de Futuro: Captura Automática</span>
+                                        <span className="font-semibold text-left">Visão de Futuro: Registro Simplificado</span>
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                 <div className="prose prose-sm dark:prose-invert max-w-none">
-                                    <p>Esta é a evolução natural e o recurso mais poderoso do aplicativo, exclusivo do plano <strong>Autopilot</strong>. Ele permite que o app leia a tela de outros aplicativos (Uber, 99, etc.) para analisar ofertas e registrar corridas finalizadas, <strong>tudo de forma automática.</strong></p>
+                                    <p>Esta é a evolução natural e o recurso mais poderoso do aplicativo, exclusivo do plano <strong>Autopilot</strong>. Ele permite que o app leia a tela de outros aplicativos (Uber, 99, etc.) para analisar ofertas e registrar corridas finalizadas, <strong>tudo de forma semi-automática.</strong></p>
                                     <h4>Como Funciona Tecnicamente? (Android)</h4>
                                     <p>Isso é feito com um <strong>Serviço de Acessibilidade</strong> no Android, que precisa ser habilitado pelo usuário. Ele permite que o nosso app leia o texto exibido na tela de outros apps.</p>
                                     <ul className="list-disc pl-5">
