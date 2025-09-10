@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useTransition, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useTransition, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { ReportsFilter } from './reports-filter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Button } from '../ui/button';
 import { allCharts, mandatoryCharts, allStats, mandatoryCards } from '@/lib/dashboard-items';
 import { motion } from 'framer-motion';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const StatsCard = dynamic(() => import('../dashboard/stats-card').then(mod => mod.StatsCard), { ssr: false });
 const EarningsPieChart = dynamic(() => import('../dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -40,7 +41,9 @@ const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
 };
 
 export function ReportsClient() {
-  const { user, isPro, isAutopilot } = useAuth();
+  const { user, isPro } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [data, setData] = useState<ReportData | null>(null);
   const [filters, setFilters] = useState<ReportFilterValues | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -49,12 +52,42 @@ export function ReportsClient() {
 
   const handleApplyFilters = useCallback((newFilters: ReportFilterValues) => {
     if (!user) return;
+    
+    const params = new URLSearchParams();
+    params.set('period', newFilters.type);
+    if(newFilters.year) params.set('year', newFilters.year.toString());
+    if(newFilters.month !== undefined) params.set('month', newFilters.month.toString());
+    if(newFilters.dateRange?.from) params.set('from', newFilters.dateRange.from.toISOString());
+    if(newFilters.dateRange?.to) params.set('to', newFilters.dateRange.to.toISOString());
+    router.replace(`/relatorios?${params.toString()}`);
+
     setFilters(newFilters);
     startTransition(async () => {
       const reportData = await getReportData(user.id, newFilters);
       setData(reportData);
     });
-  }, [user]);
+  }, [user, router]);
+  
+  // Effect to read filters from URL on initial load
+  useEffect(() => {
+    if (searchParams && !filters) { // Only run once on initial load
+        const period = searchParams.get('period');
+        if (period) {
+            const initialFilters: ReportFilterValues = { type: period as any };
+            const year = searchParams.get('year');
+            const month = searchParams.get('month');
+            const from = searchParams.get('from');
+            const to = searchParams.get('to');
+            
+            if (year) initialFilters.year = parseInt(year);
+            if (month) initialFilters.month = parseInt(month);
+            if (from) {
+                initialFilters.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
+            }
+            handleApplyFilters(initialFilters);
+        }
+    }
+  }, [searchParams, handleApplyFilters, filters]);
   
 
   const getChartData = (reportData: ReportData, chartId: string) => {
@@ -81,7 +114,17 @@ export function ReportsClient() {
         );
     }
     
-    if (!data || data.diasTrabalhados === 0) {
+    if (!data) {
+        return (
+            <Card className="mt-6 flex flex-col items-center justify-center p-12 text-center border-dashed">
+                <Info className="w-12 h-12 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold">Gere um Relatório</h3>
+                <p className="text-muted-foreground">Selecione um período acima para visualizar suas análises.</p>
+            </Card>
+        );
+    }
+
+    if (data.diasTrabalhados === 0) {
         return (
             <Card className="mt-6 flex flex-col items-center justify-center p-12 text-center border-dashed">
                 <Info className="w-12 h-12 text-muted-foreground mb-4" />
@@ -92,16 +135,16 @@ export function ReportsClient() {
     }
     
     let orderedCardIds: string[];
-    if (!isPro) {
-        orderedCardIds = mandatoryCards;
-    } else {
+    if (isPro) {
       const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
-      const allowedCards = isAutopilot ? allStats.map(s => s.id) : mandatoryCards;
-      const filteredSavedOrder = savedCardOrder.filter(id => allowedCards.includes(id));
-      orderedCardIds = [...new Set([...filteredSavedOrder, ...mandatoryCards])];
+      orderedCardIds = [...new Set([...savedCardOrder, ...mandatoryCards])];
+    } else {
+      orderedCardIds = mandatoryCards;
     }
       
     const cardsToShow = orderedCardIds.map(id => {
+        if (!isPro && !mandatoryCards.includes(id)) return null;
+
         const cardInfo = allStats.find(s => s.id === id);
         if (!cardInfo) return null;
         
@@ -124,33 +167,35 @@ export function ReportsClient() {
     }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
     
     let chartsToShowIds: string[];
-    if (!isPro) {
-        chartsToShowIds = mandatoryCharts;
+    if (isPro) {
+      const savedChartOrder = user?.preferences?.reportChartOrder || [];
+      chartsToShowIds = [...new Set([...savedChartOrder, ...mandatoryCharts])];
     } else {
-        const savedChartOrder = user?.preferences?.reportChartOrder || [];
-        const allowedCharts = isAutopilot ? allCharts.map(c => c.id) : mandatoryCharts;
-        const filteredSavedOrder = savedChartOrder.filter(id => allowedCharts.includes(id));
-        chartsToShowIds = [...new Set([...filteredSavedOrder, ...mandatoryCharts])];
+      chartsToShowIds = mandatoryCharts;
     }
-    const chartsToShow = chartsToShowIds.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
+    const chartsToShow = chartsToShowIds.map(id => {
+      if (!isPro && !mandatoryCharts.includes(id)) return null;
+      return allCharts.find(c => c.id === id);
+    }).filter(Boolean);
 
     return (
         <motion.div 
             ref={reportContentRef} 
             className="space-y-6 mt-6 bg-background p-4 rounded-lg"
+            key={filters ? JSON.stringify(filters) : 'initial'}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
-                 {!isAutopilot && (
+                 {!isPro && (
                    <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
                             <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
                             <p className="text-sm font-semibold">Adicionar Card</p>
-                             <p className="text-xs text-muted-foreground">Exclusivo Autopilot</p>
+                             <p className="text-xs text-muted-foreground">Desbloquear com Pro</p>
                         </CardContent>
                       </Card>
                   </Link>
@@ -183,11 +228,11 @@ export function ReportsClient() {
                   </motion.div>
               );
             })}
-             {!isAutopilot && (
+             {!isPro && (
               <Link href="/configuracoes/layout-personalizado" passHref>
                 <Button variant="outline" className="w-full">
                     <Lock className="mr-2 h-4 w-4"/>
-                    Adicionar outro Gráfico (Exclusivo Autopilot)
+                    Adicionar outro Gráfico (Desbloquear com Pro)
                 </Button>
             </Link>
           )}

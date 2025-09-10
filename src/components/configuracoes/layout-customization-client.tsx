@@ -22,7 +22,7 @@ import Link from 'next/link';
 const StatsCard = dynamic(() => import('../dashboard/stats-card').then(mod => mod.StatsCard), { ssr: false });
 
 export function LayoutCustomizationClient() {
-  const { user, loading, refreshUser, isPro, isAutopilot } = useAuth();
+  const { user, loading, refreshUser, isPro } = useAuth();
   
   const [isSaving, setIsSaving] = useState(false);
   const [visibleCardIds, setVisibleCardIds] = useState<string[]>([]);
@@ -33,29 +33,21 @@ export function LayoutCustomizationClient() {
         const savedCardOrder = user.preferences?.dashboardCardOrder || [];
         const savedChartOrder = user.preferences?.reportChartOrder || [];
 
-        if (isAutopilot) {
-            // Autopilot: Usa a ordem salva, garantindo que os obrigatórios estejam lá.
+        // Para Pro e Autopilot, a lógica é a mesma: acesso total
+        if (isPro) {
             setVisibleCardIds([...new Set([...savedCardOrder, ...mandatoryCards])]);
             setVisibleChartIds([...new Set([...savedChartOrder, ...mandatoryCharts])]);
-        } else if (isPro) {
-            // Pro: Pode reordenar, mas SÓ os itens obrigatórios.
-            const filteredSavedCards = savedCardOrder.filter(id => mandatoryCards.includes(id));
-            setVisibleCardIds([...new Set([...filteredSavedCards, ...mandatoryCards])]);
-
-            const filteredSavedCharts = savedChartOrder.filter(id => mandatoryCharts.includes(id));
-            setVisibleChartIds([...new Set([...filteredSavedCharts, ...mandatoryCharts])]);
         } else {
-             // Basic: Ordem fixa, sem personalização.
+             // Basic: Ordem fixa, sem personalização de adicionar/remover, mas pode reordenar.
              setVisibleCardIds(mandatoryCards);
              setVisibleChartIds(mandatoryCharts);
         }
     }
-  }, [user, isPro, isAutopilot]);
+  }, [user, isPro]);
 
 
   const handleReorder = (type: 'card' | 'chart', index: number, direction: 'up' | 'down') => {
-    if (!isPro) return; // Apenas Pro e Autopilot podem reordenar
-
+    // A reordenação é permitida para todos os planos
     const list = type === 'card' ? visibleCardIds : visibleChartIds;
     const setter = type === 'card' ? setVisibleCardIds : setVisibleChartIds;
 
@@ -70,7 +62,8 @@ export function LayoutCustomizationClient() {
   };
   
   const handleToggleVisibility = (type: 'card' | 'chart', id: string) => {
-    if (!isAutopilot) return; // Apenas Autopilot pode adicionar/remover
+    // Adicionar/remover é apenas para Pro e Autopilot
+    if (!isPro) return; 
 
     const list = type === 'card' ? visibleCardIds : visibleChartIds;
     const setter = type === 'card' ? setVisibleCardIds : setVisibleChartIds;
@@ -88,7 +81,7 @@ export function LayoutCustomizationClient() {
   };
 
   const handleSaveLayout = async () => {
-    if (!user || !isPro) return;
+    if (!user) return;
     setIsSaving(true);
     
     const result = await updateUser(user.id, {
@@ -127,7 +120,7 @@ export function LayoutCustomizationClient() {
         <div>
           <h3 className="text-lg font-semibold">Itens Visíveis</h3>
           <p className="text-sm text-muted-foreground">
-            {isPro ? "Arraste para reordenar os itens que aparecem em suas telas." : "O plano Básico possui uma ordem fixa. Faça upgrade para personalizar."}
+            {isPro ? "Arraste para reordenar ou desative itens opcionais." : "Arraste para reordenar os itens disponíveis no seu plano."}
           </p>
           <div className="mt-2 space-y-2">
             {visibleItems.map((item, index) => (
@@ -136,17 +129,17 @@ export function LayoutCustomizationClient() {
                    <StatsCard {...item as any} value={0} isPreview={true}/>
                 </div>
                 <div className="flex flex-col">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReorder(type, index, 'up')} disabled={index === 0 || !isPro}><ArrowUp className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReorder(type, index, 'down')} disabled={index === visibleItems.length - 1 || !isPro}><ArrowDown className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReorder(type, index, 'up')} disabled={index === 0}><ArrowUp className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReorder(type, index, 'down')} disabled={index === visibleItems.length - 1}><ArrowDown className="h-4 w-4" /></Button>
                 </div>
               </div>
             ))}
           </div>
         </div>
         
-        {isAutopilot && (
+        {isPro && (
              <div>
-                <h3 className="text-lg font-semibold">Adicionar/Remover Itens</h3>
+                <h3 className="text-lg font-semibold">Adicionar/Remover Itens Opcionais</h3>
                 <p className="text-sm text-muted-foreground">Clique para ativar ou desativar itens do seu painel.</p>
                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {optionalItems.map(item => {
@@ -157,7 +150,7 @@ export function LayoutCustomizationClient() {
                                  <StatsCard {...item as any} value={0} isPreview={true} />
                                </CardContent>
                                <CardFooter className="p-2">
-                                 <Button size="sm" className="w-full" onClick={() => handleToggleVisibility(type, item.id)}>
+                                 <Button size="sm" className="w-full" onClick={() => handleToggleVisibility(type, item.id)} variant={isSelected ? 'secondary' : 'default'}>
                                     {isSelected ? 'Visível' : 'Oculto'}
                                  </Button>
                                </CardFooter>
@@ -167,13 +160,13 @@ export function LayoutCustomizationClient() {
                  </div>
              </div>
         )}
-        {!isAutopilot && (
+        {!isPro && (
              <Link href="/premium" className="w-full">
                 <Card className="mt-4 border-dashed border-primary hover:bg-primary/10 transition-colors">
                     <CardContent className="p-6 text-center">
                         <Lock className="mx-auto h-8 w-8 text-primary mb-2" />
                         <p className="font-semibold text-primary">Desbloqueie todos os cards e gráficos</p>
-                        <p className="text-sm text-muted-foreground">Assine o Autopilot para ter controle total da sua visualização.</p>
+                        <p className="text-sm text-muted-foreground">Assine o plano Pro para ter controle total da sua visualização.</p>
                     </CardContent>
                 </Card>
             </Link>
@@ -216,14 +209,12 @@ export function LayoutCustomizationClient() {
           </Card>
         </Accordion>
         
-        {isPro && (
-            <div className="flex justify-end">
-                <Button onClick={handleSaveLayout} disabled={isSaving}>
-                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Salvar Ordem
-                </Button>
-            </div>
-        )}
+        <div className="flex justify-end">
+            <Button onClick={handleSaveLayout} disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Salvar Ordem
+            </Button>
+        </div>
     </div>
   );
 }

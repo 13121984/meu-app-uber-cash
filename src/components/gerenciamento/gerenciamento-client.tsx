@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useTransition, useEffect, useCallback } from "react";
@@ -16,6 +17,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { useRouter, useSearchParams } from "next/navigation";
 
 
 export interface GroupedWorkDay {
@@ -28,6 +30,8 @@ export interface GroupedWorkDay {
 
 export function GerenciamentoClient() {
   const { user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { columns, Dialogs, setEditingDay } = useWorkDayColumns();
 
   const [isDeletingFiltered, startDeleteTransition] = useTransition();
@@ -39,6 +43,16 @@ export function GerenciamentoClient() {
 
   const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
     if (!user) return;
+    
+    // Update URL with new filters
+    const params = new URLSearchParams();
+    params.set('period', filters.type);
+    if(filters.year) params.set('year', filters.year.toString());
+    if(filters.month !== undefined) params.set('month', filters.month.toString());
+    if(filters.dateRange?.from) params.set('from', filters.dateRange.from.toISOString());
+    if(filters.dateRange?.to) params.set('to', filters.dateRange.to.toISOString());
+    router.replace(`/gerenciamento?${params.toString()}`);
+    
     setCurrentFilters(filters);
     startTransition(async () => {
       try {
@@ -49,7 +63,29 @@ export function GerenciamentoClient() {
         toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
       }
     });
-  }, [user]);
+  }, [user, router]);
+  
+  // Effect to read filters from URL on initial load
+  useEffect(() => {
+    if (searchParams && !currentFilters) { // Only run once on initial load
+        const period = searchParams.get('period');
+        if (period) {
+            const filters: ReportFilterValues = { type: period as any };
+            const year = searchParams.get('year');
+            const month = searchParams.get('month');
+            const from = searchParams.get('from');
+            const to = searchParams.get('to');
+            
+            if (year) filters.year = parseInt(year);
+            if (month) filters.month = parseInt(month);
+            if (from) {
+                filters.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
+            }
+            handleApplyFilters(filters);
+        }
+    }
+  }, [searchParams, handleApplyFilters, currentFilters]);
+
 
   const filteredCount = groupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
 
@@ -133,7 +169,7 @@ export function GerenciamentoClient() {
             <CardDescription>
                 Use os filtros para encontrar e gerenciar seus dias de trabalho.
             </CardDescription>
-             <Link href="/relatorios">
+             <Link href={`/relatorios?${searchParams.toString()}`}>
                 <Button variant="outline">
                     <BarChart3 className="mr-2 h-4 w-4" />
                     Ver Relatórios

@@ -44,7 +44,7 @@ const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
 };
 
 export function DashboardClient() {
-  const { user, isPro, isAutopilot } = useAuth();
+  const { user, isPro } = useAuth();
   const [period, setPeriod] = useState<Period>('today');
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
   const [isLoading, startTransition] = useTransition();
@@ -106,18 +106,16 @@ export function DashboardClient() {
       }
 
       let orderedCardIds: string[];
-      if (!isPro) {
-        orderedCardIds = mandatoryCards;
-      } else {
+      if (isPro) {
         const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
-        // Filtra para garantir que apenas os itens permitidos para o plano sejam exibidos
-        const allowedCards = isAutopilot ? allStats.map(s => s.id) : mandatoryCards;
-        const filteredSavedOrder = savedCardOrder.filter(id => allowedCards.includes(id));
-        // Garante que todos os cards obrigatórios estão presentes
-        orderedCardIds = [...new Set([...filteredSavedOrder, ...mandatoryCards])];
+        orderedCardIds = [...new Set([...savedCardOrder, ...mandatoryCards])];
+      } else {
+        orderedCardIds = mandatoryCards;
       }
       
       const cardsToShow = orderedCardIds.map(id => {
+          if (!isPro && !mandatoryCards.includes(id)) return null;
+
           const cardInfo = allStats.find(s => s.id === id);
           if (!cardInfo) return null;
           
@@ -140,15 +138,16 @@ export function DashboardClient() {
       }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
 
       let chartsToShowIds: string[];
-       if (!isPro) {
-        chartsToShowIds = mandatoryCharts;
-      } else {
+       if (isPro) {
         const savedChartOrder = user?.preferences?.reportChartOrder || [];
-        const allowedCharts = isAutopilot ? allCharts.map(c => c.id) : mandatoryCharts;
-        const filteredSavedOrder = savedChartOrder.filter(id => allowedCharts.includes(id));
-        chartsToShowIds = [...new Set([...filteredSavedOrder, ...mandatoryCharts])];
+        chartsToShowIds = [...new Set([...savedChartOrder, ...mandatoryCharts])];
+      } else {
+        chartsToShowIds = mandatoryCharts;
       }
-      const chartsToShow = chartsToShowIds.map(id => allCharts.find(c => c.id === id)).filter(Boolean);
+      const chartsToShow = chartsToShowIds.map(id => {
+        if (!isPro && !mandatoryCharts.includes(id)) return null;
+        return allCharts.find(c => c.id === id);
+      }).filter(Boolean);
 
       return (
         <motion.div 
@@ -160,13 +159,13 @@ export function DashboardClient() {
         >
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
-              {!isAutopilot && (
+              {!isPro && (
                    <Link href="/configuracoes/layout-personalizado" passHref>
                       <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
                         <CardContent className="p-0 text-center">
                             <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
                             <p className="text-sm font-semibold">Adicionar Card</p>
-                            <p className="text-xs text-muted-foreground">Exclusivo Autopilot</p>
+                            <p className="text-xs text-muted-foreground">Desbloquear com Pro</p>
                         </CardContent>
                       </Card>
                   </Link>
@@ -211,11 +210,11 @@ export function DashboardClient() {
           })}
 
 
-          {!isAutopilot && (
+          {!isPro && (
               <Link href="/configuracoes/layout-personalizado" passHref>
                 <Button variant="outline" className="w-full">
                     <Lock className="mr-2 h-4 w-4"/>
-                    Adicionar outro Gráfico (Exclusivo Autopilot)
+                    Adicionar outro Gráfico (Desbloquear com Pro)
                 </Button>
             </Link>
           )}
