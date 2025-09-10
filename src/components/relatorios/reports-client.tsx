@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useTransition, useMemo, useCallback, useRef, useEffect } from 'react';
@@ -70,8 +69,8 @@ export function ReportsClient() {
   
   // Effect to read filters from URL on initial load or on back/forward navigation
   useEffect(() => {
-    // Only apply filters from URL if they haven't been set yet
-    if (!filters && searchParams) {
+    // Only apply filters from URL if they haven't been set yet and user is loaded
+    if (!filters && user && searchParams) {
         const period = searchParams.get('period');
         if (period) {
             const initialFilters: ReportFilterValues = { type: period as any };
@@ -88,7 +87,7 @@ export function ReportsClient() {
             handleApplyFilters(initialFilters);
         }
     }
-  }, [searchParams, handleApplyFilters, filters]);
+  }, [searchParams, user, filters, handleApplyFilters]);
   
 
   const getChartData = (reportData: ReportData, chartId: string) => {
