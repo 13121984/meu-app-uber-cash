@@ -336,7 +336,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
                                     >
                                         <div className={cn(
                                             "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",
-                                            isCurrent ? "bg-primary border-primary text-primary-foreground" : 
+                                            isCurrent ? "bg-primary border-primary text-primary-foreground animate-float" : 
                                             isCompleted ? "bg-green-500 border-green-500 text-white" :
                                             "bg-background border-border text-muted-foreground"
                                         )}>
