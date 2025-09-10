@@ -134,7 +134,7 @@ export async function signup(userId: string, password: string, securityAnswers: 
 
 export async function login(userId: string, password: string): Promise<{ success: boolean; user?: User, error?: string }> {
     const users = await getUsers();
-    const user = users.find(u => u.id.toLowerCase() === userId.toLowerCase());
+    const user = users.find(u => u.id === userId); // Corrigido: removemos o .toLowerCase()
 
     if (!user) {
         return { success: false, error: 'Usuário ou senha inválidos.' };
@@ -154,12 +154,12 @@ export async function login(userId: string, password: string): Promise<{ success
 export async function getUserById(userId: string): Promise<User | null> {
     if (!userId) return null;
     const users = await getUsers();
-    return users.find(u => u.id.toLowerCase() === userId.toLowerCase()) || null;
+    return users.find(u => u.id === userId) || null; // Corrigido: removemos o .toLowerCase()
 }
 
 export async function updateUser(userId: string, updatedData: Partial<User>): Promise<{ success: boolean, user?: User, error?: string }> {
     const users = await getUsers();
-    const userIndex = users.findIndex(u => u.id.toLowerCase() === userId.toLowerCase());
+    const userIndex = users.findIndex(u => u.id === userId); // Corrigido: removemos o .toLowerCase()
 
     if (userIndex === -1) {
         return { success: false, error: 'Usuário não encontrado.' };
@@ -207,7 +207,7 @@ export async function verifySecurityAnswers(userId: string, answers: string[]): 
 
 export async function resetPassword(userId: string, newPassword: string): Promise<{ success: boolean, error?: string }> {
     const users = await getUsers();
-    const userIndex = users.findIndex(u => u.id.toLowerCase() === userId.toLowerCase());
+    const userIndex = users.findIndex(u => u.id === userId); // Corrigido: removemos o .toLowerCase()
     
     if (userIndex === -1) {
         return { success: false, error: 'Usuário não encontrado.' };
