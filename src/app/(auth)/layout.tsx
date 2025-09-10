@@ -12,7 +12,7 @@ export default function AuthLayout({
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center text-center">
             <div className="relative">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-shake">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 animate-float">
                 <AppLogo className="h-16 w-16 text-white" />
               </div>
               <div className="absolute -inset-2 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-3xl blur-xl opacity-60"></div>
