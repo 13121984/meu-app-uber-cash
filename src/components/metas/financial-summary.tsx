@@ -17,19 +17,28 @@ const formatCurrency = (value: number) => {
 
 const StatCard = ({ title, value, icon: Icon, description, variant }: { title: string, value: string, icon: React.ElementType, description: string, variant: 'income' | 'expense' | 'net' }) => {
     const variantClasses = {
-        income: "bg-green-500 text-green-500",
-        expense: "bg-red-500 text-red-500",
-        net: "bg-primary text-primary"
+        income: {
+            bg: "bg-green-500",
+            text: "text-green-500"
+        },
+        expense: {
+            bg: "bg-red-500",
+            text: "text-red-500"
+        },
+        net: {
+            bg: "bg-primary",
+            text: "text-primary"
+        }
     }
 
     return (
         <div className="flex items-start gap-4">
-            <div className={cn("p-3 rounded-full", variantClasses[variant])}>
+            <div className={cn("p-3 rounded-full", variantClasses[variant].bg)}>
                 <Icon className="h-6 w-6 text-white" />
             </div>
             <div>
                 <p className="text-sm text-muted-foreground">{title}</p>
-                <p className={cn("text-2xl font-bold", variantClasses[variant])}>{value}</p>
+                <p className={cn("text-2xl font-bold")}>{value}</p>
                 <p className="text-xs text-muted-foreground">{description}</p>
             </div>
         </div>
