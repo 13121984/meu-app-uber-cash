@@ -63,18 +63,15 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
       .reduce((sum, record) => sum + record.amount, 0);
   }, [records]);
 
-  const handleSuccess = async (record: PersonalExpense, operation: 'created' | 'updated') => {
-    // Apenas fecha o formulário se foi uma edição
+  const handleSuccess = (record: PersonalExpense, operation: 'created' | 'updated') => {
     if (operation === 'updated') {
-      setIsFormOpen(false);
+        setRecords(prev => prev.map(r => r.id === record.id ? record : r));
+        setIsFormOpen(false); // Close dialog only on update
+    } else {
+        setRecords(prev => [record, ...prev]);
     }
-    setSelectedRecord(null); // Limpa o registro selecionado de qualquer forma
-    if (!user) return;
-    startTransition(async () => {
-        const data = await getPersonalExpenses(user.id);
-        setRecords(data);
-        onExpensesChange(); // Notifica o componente pai
-    });
+    setSelectedRecord(null);
+    onExpensesChange();
   }
 
   const handleEdit = (record: PersonalExpense) => {
@@ -88,12 +85,8 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
     const result = await deletePersonalExpense(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Despesa apagada." });
-      if (!user) return;
-        startTransition(async () => {
-            const data = await getPersonalExpenses(user.id);
-            setRecords(data);
-            onExpensesChange();
-        });
+      setRecords(prev => prev.filter(r => r.id !== id));
+      onExpensesChange();
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }

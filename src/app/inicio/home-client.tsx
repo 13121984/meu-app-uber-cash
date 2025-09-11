@@ -22,7 +22,7 @@ const mainActions = [
   { href: "/gerenciamento", label: "Gerenciar", icon: History, iconColor: "text-orange-500" },
   { href: "/taximetro", label: "Taxímetro", icon: Calculator, iconColor: "text-teal-500" },
   { href: "/manutencao", label: "Manutenção", icon: Wrench, iconColor: "text-red-500" },
-  { href: "/metas", label: "Metas", icon: IconTargetArrow, iconColor: "text-green-500" },
+  { href: "/metas", label: "Metas", icon: IconTargetArrow, iconColor: "text-red-500" },
   { href: "/configuracoes", label: "Configurações", icon: Settings, iconColor: "text-purple-500" },
 ];
 
