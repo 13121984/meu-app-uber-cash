@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { IconTargetArrow } from "../ui/icons/target-arrow"
 
 
 const menuItems = [
@@ -27,7 +28,7 @@ const menuItems = [
   { href: "/camera", label: "Câmera", icon: Camera, showOnHome: false, showOnOthers: true, plan: 'pro' },
   { href: "/taximetro", label: "Taxímetro Inteligente", icon: Calculator, showOnHome: false, showOnOthers: true, plan: 'basic' }, // Taxímetro é básico com limites
   { href: "/manutencao", label: "Manutenção", icon: Wrench, showOnHome: false, showOnOthers: true, plan: 'basic' },
-  { href: "/metas", label: "Metas", icon: Target, showOnHome: false, showOnOthers: true, plan: 'basic' },
+  { href: "/metas", label: "Metas", icon: IconTargetArrow, showOnHome: false, showOnOthers: true, plan: 'basic' },
   { href: "/configuracoes", label: "Configurações", icon: Settings, showOnHome: false, showOnOthers: true, plan: 'basic' },
   { href: "/ajuda", label: "Ajuda", icon: LifeBuoy, showOnHome: true, showOnOthers: false, plan: 'basic' },
 ]

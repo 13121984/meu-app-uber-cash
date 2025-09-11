@@ -23,7 +23,7 @@
       }
     ],
     "preferences": {
-      "theme": "light",
+      "theme": "dark",
       "colorTheme": "blue",
       "dashboardCardOrder": [
         "viagens",
