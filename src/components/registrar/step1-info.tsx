@@ -206,7 +206,7 @@ export function Step1Info({ data, dispatch, isEditing, registrationType }: Step1
                 <div className="flex justify-between items-center">
                      <Label>Períodos de Trabalho (Opcional)</Label>
                      <Button type="button" size="sm" variant="outline" onClick={addTimeEntry}>
-                        <PlusCircle className="mr-2 h-4 w-4" /> Adicionar
+                        <PlusCircle className="mr-2 h-4 w-4 text-orange-500" /> Adicionar
                      </Button>
                 </div>
                  <p className="text-xs text-muted-foreground">Adicione os horários em que trabalhou para calcular o total de horas automaticamente.</p>
