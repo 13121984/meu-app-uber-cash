@@ -21,7 +21,7 @@ import { IconTargetArrow } from "../ui/icons/target-arrow"
 
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home, showOnHome: true, showOnOthers: true, plan: 'basic', iconColor: 'text-gray-400' },
+  { href: "/", label: "Início", icon: Home, showOnHome: true, showOnOthers: true, plan: 'basic', iconColor: 'text-primary' },
   { href: "/dashboard", label: "Painel", icon: LayoutDashboard, showOnHome: false, showOnOthers: true, plan: 'basic', iconColor: 'text-yellow-500' },
   // Botão de registro será inserido dinamicamente
   { href: "/gerenciamento", label: "Gerenciar", icon: History, showOnHome: false, showOnOthers: true, plan: 'basic', iconColor: 'text-orange-500' },
@@ -44,7 +44,7 @@ const RegisterDropdown = () => (
                             usePathname().startsWith("/registrar") && "bg-primary text-primary-foreground"
                         )}
                         >
-                        <PlusCircle className="h-5 w-5" />
+                        <PlusCircle className="h-5 w-5 text-green-500" />
                      </button>
                 </DropdownMenuTrigger>
             </TooltipTrigger>
