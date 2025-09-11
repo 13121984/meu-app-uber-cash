@@ -16,11 +16,11 @@ const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style:
 
 const ResultCard = ({ label, value, icon: Icon, iconColor }: { label: string, value: string, icon: React.ElementType, iconColor?: string }) => (
     <Card className="text-center p-4 bg-secondary">
-        <dt className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+        <dt className="text-sm text-foreground font-bold flex items-center justify-center gap-2">
             <Icon className={`w-4 h-4 ${iconColor}`}/>
             {label}
         </dt>
-        <dd className="text-2xl font-bold text-primary">{value}</dd>
+        <dd className="text-2xl font-bold text-foreground">{value}</dd>
     </Card>
 );
 
@@ -107,7 +107,7 @@ export function FinancialGoalCalculator() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="hourlyRate" className="font-bold">Seu ganho médio por hora (R$)</Label>
+                    <Label htmlFor="hourlyRate" className="font-bold flex items-center gap-2"><DollarSign className="w-4 h-4 text-green-500"/>Seu ganho médio por hora (R$)</Label>
                      <div className="relative">
                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
                         <Input id="hourlyRate" type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value === '' ? '' : Number(e.target.value))} className="pl-10"/>
