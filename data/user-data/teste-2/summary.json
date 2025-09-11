@@ -1,83 +1,200 @@
 {
   "hoje": {
-    "totalGanho": 0,
-    "totalLucro": 0,
-    "totalCombustivel": 0,
+    "totalGanho": 117.98,
+    "totalLucro": 92.98,
+    "totalCombustivel": 25,
     "totalExtras": 0,
-    "diasTrabalhados": 0,
-    "totalKm": 0,
-    "totalHoras": 0,
-    "mediaHorasPorDia": 0,
-    "mediaKmPorDia": 0,
-    "ganhoPorHora": 0,
-    "ganhoPorKm": 0,
-    "totalViagens": 0,
-    "eficiencia": 0,
-    "earningsByCategory": [],
-    "tripsByCategory": [],
+    "diasTrabalhados": 1,
+    "totalKm": 50,
+    "totalHoras": 4,
+    "totalViagens": 8,
+    "totalLitros": 5.241090146750524,
+    "mediaHorasPorDia": 4,
+    "mediaKmPorDia": 50,
+    "ganhoPorHora": 29.495,
+    "ganhoPorKm": 2.3596,
+    "eficiencia": 9.54,
+    "earningsByCategory": [
+      {
+        "name": "99 Pop",
+        "total": 42.5
+      },
+      {
+        "name": "Uber Cash",
+        "total": 75.48
+      }
+    ],
+    "tripsByCategory": [
+      {
+        "name": "99 Pop",
+        "total": 3
+      },
+      {
+        "name": "Uber Cash",
+        "total": 5
+      }
+    ],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
     },
     "meta": {
-      "target": 0,
-      "period": ""
+      "target": 166.66666666666666,
+      "period": "diária"
     },
-    "profitComposition": [],
-    "performanceByShift": []
+    "profitComposition": [
+      {
+        "name": "Lucro Líquido",
+        "value": 92.98,
+        "fill": "hsl(var(--chart-1))",
+        "totalGanho": 117.98
+      },
+      {
+        "name": "Combustível",
+        "value": 25,
+        "fill": "hsl(var(--chart-2))",
+        "totalGanho": 117.98
+      }
+    ],
+    "performanceByShift": [
+      {
+        "shift": "Manhã",
+        "profit": 92.98,
+        "hours": 4,
+        "profitPerHour": 29.495
+      }
+    ]
   },
   "semana": {
-    "totalGanho": 0,
-    "totalLucro": 0,
-    "totalCombustivel": 0,
+    "totalGanho": 117.98,
+    "totalLucro": 92.98,
+    "totalCombustivel": 25,
     "totalExtras": 0,
-    "diasTrabalhados": 0,
-    "totalKm": 0,
-    "totalHoras": 0,
-    "mediaHorasPorDia": 0,
-    "mediaKmPorDia": 0,
-    "ganhoPorHora": 0,
-    "ganhoPorKm": 0,
-    "totalViagens": 0,
-    "eficiencia": 0,
-    "earningsByCategory": [],
-    "tripsByCategory": [],
+    "diasTrabalhados": 1,
+    "totalKm": 50,
+    "totalHoras": 4,
+    "totalViagens": 8,
+    "totalLitros": 5.241090146750524,
+    "mediaHorasPorDia": 4,
+    "mediaKmPorDia": 50,
+    "ganhoPorHora": 29.495,
+    "ganhoPorKm": 2.3596,
+    "eficiencia": 9.54,
+    "earningsByCategory": [
+      {
+        "name": "99 Pop",
+        "total": 42.5
+      },
+      {
+        "name": "Uber Cash",
+        "total": 75.48
+      }
+    ],
+    "tripsByCategory": [
+      {
+        "name": "99 Pop",
+        "total": 3
+      },
+      {
+        "name": "Uber Cash",
+        "total": 5
+      }
+    ],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
     },
     "meta": {
-      "target": 0,
-      "period": ""
+      "target": 1000,
+      "period": "semanal"
     },
-    "profitComposition": [],
-    "performanceByShift": []
+    "profitComposition": [
+      {
+        "name": "Lucro Líquido",
+        "value": 92.98,
+        "fill": "hsl(var(--chart-1))",
+        "totalGanho": 117.98
+      },
+      {
+        "name": "Combustível",
+        "value": 25,
+        "fill": "hsl(var(--chart-2))",
+        "totalGanho": 117.98
+      }
+    ],
+    "performanceByShift": [
+      {
+        "shift": "Manhã",
+        "profit": 92.98,
+        "hours": 4,
+        "profitPerHour": 29.495
+      }
+    ]
   },
   "mes": {
-    "totalGanho": 0,
-    "totalLucro": 0,
-    "totalCombustivel": 0,
+    "totalGanho": 117.98,
+    "totalLucro": 92.98,
+    "totalCombustivel": 25,
     "totalExtras": 0,
-    "diasTrabalhados": 0,
-    "totalKm": 0,
-    "totalHoras": 0,
-    "mediaHorasPorDia": 0,
-    "mediaKmPorDia": 0,
-    "ganhoPorHora": 0,
-    "ganhoPorKm": 0,
-    "totalViagens": 0,
-    "eficiencia": 0,
-    "earningsByCategory": [],
-    "tripsByCategory": [],
+    "diasTrabalhados": 1,
+    "totalKm": 50,
+    "totalHoras": 4,
+    "totalViagens": 8,
+    "totalLitros": 5.241090146750524,
+    "mediaHorasPorDia": 4,
+    "mediaKmPorDia": 50,
+    "ganhoPorHora": 29.495,
+    "ganhoPorKm": 2.3596,
+    "eficiencia": 9.54,
+    "earningsByCategory": [
+      {
+        "name": "99 Pop",
+        "total": 42.5
+      },
+      {
+        "name": "Uber Cash",
+        "total": 75.48
+      }
+    ],
+    "tripsByCategory": [
+      {
+        "name": "99 Pop",
+        "total": 3
+      },
+      {
+        "name": "Uber Cash",
+        "total": 5
+      }
+    ],
     "maintenance": {
       "totalSpent": 0,
       "servicesPerformed": 0
     },
     "meta": {
-      "target": 0,
-      "period": ""
+      "target": 4000,
+      "period": "mensal"
     },
-    "profitComposition": [],
-    "performanceByShift": []
+    "profitComposition": [
+      {
+        "name": "Lucro Líquido",
+        "value": 92.98,
+        "fill": "hsl(var(--chart-1))",
+        "totalGanho": 117.98
+      },
+      {
+        "name": "Combustível",
+        "value": 25,
+        "fill": "hsl(var(--chart-2))",
+        "totalGanho": 117.98
+      }
+    ],
+    "performanceByShift": [
+      {
+        "shift": "Manhã",
+        "profit": 92.98,
+        "hours": 4,
+        "profitPerHour": 29.495
+      }
+    ]
   }
 }

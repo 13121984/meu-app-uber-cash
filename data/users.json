@@ -43,7 +43,9 @@
     "plan": "pro",
     "securityAnswers": [],
     "vehicles": [],
-    "preferences": {}
+    "preferences": {
+      "colorTheme": "purple"
+    }
   },
   {
     "id": "Teste 3",

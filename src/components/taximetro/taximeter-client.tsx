@@ -67,6 +67,14 @@ export function TaximeterClient() {
     const [isSaving, setIsSaving] = useState(false);
 
     const [rates, setRates] = useState<TaximeterRates>({ startingFare: 3.0, ratePerKm: 2.5, ratePerMinute: 0.4 });
+    
+    // State to hold the string values from the input for better UX
+    const [rateInputs, setRateInputs] = useState({
+        startingFare: String(rates.startingFare),
+        ratePerKm: String(rates.ratePerKm),
+        ratePerMinute: String(rates.ratePerMinute),
+    });
+
     const [totalCost, setTotalCost] = useState(0);
     
     // State for the confirmation dialog
@@ -78,7 +86,13 @@ export function TaximeterClient() {
 
     useEffect(() => {
         if (user?.preferences.taximeterRates) {
-            setRates(user.preferences.taximeterRates);
+            const userRates = user.preferences.taximeterRates;
+            setRates(userRates);
+            setRateInputs({
+                startingFare: String(userRates.startingFare),
+                ratePerKm: String(userRates.ratePerKm),
+                ratePerMinute: String(userRates.ratePerMinute),
+            });
         }
     }, [user]);
 
@@ -236,17 +250,32 @@ export function TaximeterClient() {
         setLastPosition(null);
     }
     
-    const handleRateChange = (field: keyof TaximeterRates, value: string) => {
-        // Permite que o campo fique vazio, tratando-o como 0 para cálculos
-        const sanitizedValue = value.replace(/,/, '.');
-        const numValue = parseFloat(sanitizedValue);
-        setRates(prev => ({...prev, [field]: isNaN(numValue) ? 0 : numValue }));
-    }
-    
+    const handleRateInputChange = (field: keyof TaximeterRates, value: string) => {
+        const sanitizedValue = value.replace(/[^0-9,.]/g, ''); // Allow comma and dot
+        
+        setRateInputs(prev => ({...prev, [field]: sanitizedValue }));
+        
+        const numericValue = parseFloat(sanitizedValue.replace(',', '.'));
+        
+        if (!isNaN(numericValue)) {
+            setRates(prev => ({...prev, [field]: numericValue }));
+        } else {
+             setRates(prev => ({...prev, [field]: 0 }));
+        }
+    };
+
     const saveRates = async () => {
         if (!user) return;
         setIsSaving(true);
-        const result = await updateUserPreferences(user.id, { taximeterRates: rates });
+        // Ensure rates are updated from the latest input state before saving
+        const finalRates: TaximeterRates = {
+            startingFare: parseFloat(rateInputs.startingFare.replace(',', '.')) || 0,
+            ratePerKm: parseFloat(rateInputs.ratePerKm.replace(',', '.')) || 0,
+            ratePerMinute: parseFloat(rateInputs.ratePerMinute.replace(',', '.')) || 0,
+        };
+        setRates(finalRates);
+
+        const result = await updateUserPreferences(user.id, { taximeterRates: finalRates });
         if(result.success) {
             toast({ title: "Tarifas Salvas!", description: "Suas novas tarifas foram salvas com sucesso."});
             await refreshUser();
@@ -345,7 +374,7 @@ export function TaximeterClient() {
                                     <Label htmlFor="startingFare">Taxa de Partida (Bandeirada)</Label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                        <Input id="startingFare" type="text" inputMode="decimal" value={rates.startingFare || ''} onChange={(e) => handleRateChange('startingFare', e.target.value)} className="pl-10" />
+                                        <Input id="startingFare" type="text" inputMode="decimal" value={rateInputs.startingFare} onChange={(e) => handleRateInputChange('startingFare', e.target.value)} className="pl-10" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -353,14 +382,14 @@ export function TaximeterClient() {
                                         <Label htmlFor="ratePerKm">Preço por KM</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                            <Input id="ratePerKm" type="text" inputMode="decimal" value={rates.ratePerKm || ''} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
+                                            <Input id="ratePerKm" type="text" inputMode="decimal" value={rateInputs.ratePerKm} onChange={(e) => handleRateInputChange('ratePerKm', e.target.value)} className="pl-10" />
                                         </div>
                                     </div>
                                     <div>
                                         <Label htmlFor="ratePerMinute">Preço por Minuto</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                            <Input id="ratePerMinute" type="text" inputMode="decimal" value={rates.ratePerMinute || ''} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
+                                            <Input id="ratePerMinute" type="text" inputMode="decimal" value={rateInputs.ratePerMinute} onChange={(e) => handleRateInputChange('ratePerMinute', e.target.value)} className="pl-10"/>
                                         </div>
                                     </div>
                                 </div>
@@ -400,5 +429,3 @@ export function TaximeterClient() {
         </>
     );
 }
-
-    
