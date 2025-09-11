@@ -63,8 +63,11 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
       .reduce((sum, record) => sum + record.amount, 0);
   }, [records]);
 
-  const handleSuccess = async () => {
-    setSelectedRecord(null); // Limpa o registro selecionado para permitir um novo em seguida
+  const handleSuccess = async (record: PersonalExpense, operation: 'created' | 'updated') => {
+    if (operation === 'updated') {
+      setIsFormOpen(false);
+    }
+    setSelectedRecord(null); // Limpa o registro selecionado
     if (!user) return;
     startTransition(async () => {
         const data = await getPersonalExpenses(user.id);
@@ -84,7 +87,12 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
     const result = await deletePersonalExpense(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Despesa apagada." });
-      handleSuccess(); // Re-fetch e notifica o pai
+      if (!user) return;
+        startTransition(async () => {
+            const data = await getPersonalExpenses(user.id);
+            setRecords(data);
+            onExpensesChange();
+        });
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }
@@ -213,7 +221,7 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
             <DialogHeader>
                 <DialogTitle>{selectedRecord ? 'Editar' : 'Adicionar'} Despesa Pessoal</DialogTitle>
                 <DialogDescription>
-                    Preencha os detalhes do seu gasto. Para adicionar outra despesa, basta preencher o formulário novamente após salvar.
+                    {selectedRecord ? 'Edite os detalhes da sua despesa.' : 'Para adicionar outra despesa, basta preencher o formulário novamente após salvar.'}
                 </DialogDescription>
             </DialogHeader>
             <PersonalExpenseForm 

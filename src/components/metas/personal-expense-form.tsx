@@ -34,7 +34,7 @@ export type PersonalExpenseFormData = z.infer<typeof personalExpenseSchema>;
 interface PersonalExpenseFormProps {
   initialData: PersonalExpense | null;
   categories: string[];
-  onSuccess: (record: PersonalExpense) => void;
+  onSuccess: (record: PersonalExpense, operation: 'created' | 'updated') => void;
 }
 
 const defaultFormValues = (categories: string[]) => ({
@@ -69,9 +69,10 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
     try {
       let result;
       const dataToSend = { ...data };
+      const operation: 'created' | 'updated' = initialData?.id ? 'updated' : 'created';
 
-      if (initialData?.id) {
-        result = await updatePersonalExpense(user.id, initialData.id, dataToSend);
+      if (operation === 'updated') {
+        result = await updatePersonalExpense(user.id, initialData!.id, dataToSend);
       } else {
         result = await addPersonalExpense(user.id, dataToSend);
       }
@@ -79,14 +80,14 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
       if (result.success && result.id) {
         toast({
           title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><span>Sucesso!</span></div>,
-          description: `Despesa ${initialData ? 'atualizada' : 'adicionada'}.`,
+          description: `Despesa ${operation === 'updated' ? 'atualizada' : 'adicionada'}.`,
         });
         
         const returnedRecord = { ...data, id: result.id };
-        onSuccess(returnedRecord as PersonalExpense);
+        onSuccess(returnedRecord as PersonalExpense, operation);
         
-        // Limpa o formulário para a próxima entrada, mas mantém a janela aberta
-        if(!initialData) {
+        // Limpa o formulário apenas se foi uma nova entrada
+        if(operation === 'created') {
            form.reset(defaultFormValues(categories));
         }
 
