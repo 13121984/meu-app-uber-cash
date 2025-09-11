@@ -8,6 +8,7 @@ import { TrendingUp, TrendingDown, Wallet, Equal } from 'lucide-react';
 import { getSummaryForPeriod } from '@/services/summary.service';
 import { getCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
 import { useAuth } from '@/contexts/auth-context';
+import { cn } from '@/lib/utils';
 
 
 const formatCurrency = (value: number) => {
@@ -15,20 +16,20 @@ const formatCurrency = (value: number) => {
 };
 
 const StatCard = ({ title, value, icon: Icon, description, variant }: { title: string, value: string, icon: React.ElementType, description: string, variant: 'income' | 'expense' | 'net' }) => {
-    const colors = {
-        income: "text-green-500",
-        expense: "text-red-500",
-        net: "text-primary"
+    const variantClasses = {
+        income: "bg-green-500 text-green-500",
+        expense: "bg-red-500 text-red-500",
+        net: "bg-primary text-primary"
     }
 
     return (
         <div className="flex items-start gap-4">
-            <div className={`p-3 rounded-full bg-secondary ${colors[variant]}`}>
-                <Icon className="h-6 w-6 text-background" />
+            <div className={cn("p-3 rounded-full", variantClasses[variant])}>
+                <Icon className="h-6 w-6 text-white" />
             </div>
             <div>
                 <p className="text-sm text-muted-foreground">{title}</p>
-                <p className={`text-2xl font-bold ${colors[variant]}`}>{value}</p>
+                <p className={cn("text-2xl font-bold", variantClasses[variant])}>{value}</p>
                 <p className="text-xs text-muted-foreground">{description}</p>
             </div>
         </div>
