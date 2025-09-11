@@ -74,7 +74,7 @@ export default function MetasPage() {
                 <AccordionItem value="item-1" className="border-b-0">
                     <AccordionTrigger className="p-6">
                         <div className="flex items-center gap-3">
-                            <Target className="w-6 h-6 text-primary" />
+                            <Target className="w-6 h-6 text-green-500" />
                             <div>
                                 <h2 className="font-semibold text-lg text-left">Plano de Metas Mensal</h2>
                                 <p className="text-sm text-muted-foreground text-left font-normal">Defina sua meta de lucro recorrente.</p>

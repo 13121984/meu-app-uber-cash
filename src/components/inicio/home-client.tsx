@@ -79,8 +79,8 @@ export function HomeClient() {
   return (
     <div className="space-y-8 animate-fade-in">
         <div className="space-y-2">
-            <h1 className="text-5xl font-bold font-headline text-foreground">Uber Cash</h1>
-            <p className="text-muted-foreground text-lg">Sua rota para o sucesso.</p>
+            <h1 className="text-5xl font-bold font-headline text-foreground">Uber Cash TX IA</h1>
+            <p className="text-muted-foreground text-lg">TX IA Soluções em Viagens</p>
         </div>
 
         <MaintenanceReminderCard />
