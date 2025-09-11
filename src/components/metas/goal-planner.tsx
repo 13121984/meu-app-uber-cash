@@ -110,7 +110,7 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
             </AlertDescription>
         </Alert>
         <div className="space-y-2">
-            <Label htmlFor="monthly" className="flex items-center gap-2 font-bold"><DollarSign className="w-4 h-4 text-green-500"/>Meta Mensal de Lucro</Label>
+            <Label htmlFor="monthly" className="font-bold text-foreground flex items-center gap-2"><DollarSign className="w-4 h-4 text-green-500"/>Meta Mensal de Lucro</Label>
             <Controller
                 name="monthly"
                 control={control}
@@ -125,7 +125,7 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
              {form.formState.errors.monthly && <p className="text-sm text-destructive">{form.formState.errors.monthly.message}</p>}
         </div>
         <div className="space-y-2">
-             <Label htmlFor="workDaysPerWeek" className="flex items-center gap-2 font-bold"><Calendar className="w-4 h-4 text-primary"/>Carga de Trabalho</Label>
+             <Label htmlFor="workDaysPerWeek" className="font-bold text-foreground flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/>Carga de Trabalho</Label>
              <Controller
                 name="workDaysPerWeek"
                 control={control}
@@ -146,12 +146,12 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
              <Card className="text-center p-4 bg-secondary">
-                <CardDescription className="flex items-center justify-center gap-2 text-foreground font-bold"><LineChart className="w-4 h-4 text-primary"/>Meta Semanal</CardDescription>
-                <p className="text-2xl font-bold">{formatCurrency(calculatedGoals.weekly)}</p>
+                <CardDescription className="flex items-center justify-center gap-2 font-bold text-foreground"><LineChart className="w-4 h-4 text-primary"/>Meta Semanal</CardDescription>
+                <p className="text-2xl font-bold text-foreground">{formatCurrency(calculatedGoals.weekly)}</p>
              </Card>
              <Card className="text-center p-4 bg-secondary">
-                <CardDescription className="flex items-center justify-center gap-2 text-foreground font-bold"><BarChart3 className="w-4 h-4 text-primary"/>Meta Diária</CardDescription>
-                <p className="text-2xl font-bold">{formatCurrency(calculatedGoals.daily)}</p>
+                <CardDescription className="flex items-center justify-center gap-2 font-bold text-foreground"><BarChart3 className="w-4 h-4 text-primary"/>Meta Diária</CardDescription>
+                <p className="text-2xl font-bold text-foreground">{formatCurrency(calculatedGoals.daily)}</p>
              </Card>
         </div>
         <div className="flex justify-end">
