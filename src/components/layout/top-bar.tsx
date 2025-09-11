@@ -62,13 +62,13 @@ const RegisterDropdown = () => (
             <DropdownMenuSeparator />
              <Link href="/registrar/today" passHref>
                 <DropdownMenuItem>
-                    <Calendar className="mr-2 h-4 w-4" />
+                    <Calendar className="mr-2 h-4 w-4 text-green-500" />
                     <span>Registrar Hoje</span>
                 </DropdownMenuItem>
              </Link>
              <Link href="/registrar/other-day" passHref>
                 <DropdownMenuItem>
-                    <CalendarPlus className="mr-2 h-4 w-4" />
+                    <CalendarPlus className="mr-2 h-4 w-4 text-green-500" />
                     <span>Registrar Outro Dia</span>
                 </DropdownMenuItem>
             </Link>
