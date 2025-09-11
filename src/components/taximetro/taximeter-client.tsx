@@ -251,27 +251,19 @@ export function TaximeterClient() {
     }
     
     const handleRateInputChange = (field: keyof TaximeterRates, value: string) => {
-        const sanitizedValue = value.replace(/[^0-9,.]/g, ''); // Allow comma and dot
-        
+        // Allow comma and dot, but sanitize to only have one dot for parsing
+        const sanitizedValue = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
         setRateInputs(prev => ({...prev, [field]: sanitizedValue }));
-        
-        const numericValue = parseFloat(sanitizedValue.replace(',', '.'));
-        
-        if (!isNaN(numericValue)) {
-            setRates(prev => ({...prev, [field]: numericValue }));
-        } else {
-             setRates(prev => ({...prev, [field]: 0 }));
-        }
     };
 
     const saveRates = async () => {
         if (!user) return;
         setIsSaving(true);
-        // Ensure rates are updated from the latest input state before saving
+        
         const finalRates: TaximeterRates = {
-            startingFare: parseFloat(rateInputs.startingFare.replace(',', '.')) || 0,
-            ratePerKm: parseFloat(rateInputs.ratePerKm.replace(',', '.')) || 0,
-            ratePerMinute: parseFloat(rateInputs.ratePerMinute.replace(',', '.')) || 0,
+            startingFare: parseFloat(rateInputs.startingFare) || 0,
+            ratePerKm: parseFloat(rateInputs.ratePerKm) || 0,
+            ratePerMinute: parseFloat(rateInputs.ratePerMinute) || 0,
         };
         setRates(finalRates);
 
