@@ -2,7 +2,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Wrench, Target, Settings, History, Calendar, LayoutDashboard, BarChart, Calculator, ArrowRight, DollarSign } from "lucide-react";
+import { PlusCircle, Wrench, Settings, History, Calendar, LayoutDashboard, BarChart, Calculator, ArrowRight, DollarSign } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { DailySummaryCard } from "./daily-summary-card";
@@ -14,6 +14,7 @@ import { Button } from "../ui/button";
 import { MaintenanceReminderCard } from "./maintenance-reminder-card";
 import { getMaintenanceRecords } from "@/services/maintenance.service";
 import { useAuth } from '@/contexts/auth-context';
+import { IconTargetArrow } from "../ui/icons/target-arrow";
 
 
 const mainActions = [
@@ -21,7 +22,7 @@ const mainActions = [
   { href: "/gerenciamento", label: "Gerenciar", icon: History, iconColor: "text-orange-500" },
   { href: "/taximetro", label: "Taxímetro", icon: Calculator, iconColor: "text-teal-500" },
   { href: "/manutencao", label: "Manutenção", icon: Wrench, iconColor: "text-red-500" },
-  { href: "/metas", label: "Metas", icon: Target, iconColor: "text-green-500" },
+  { href: "/metas", label: "Metas", icon: IconTargetArrow, iconColor: "text-red-500" },
   { href: "/configuracoes", label: "Configurações", icon: Settings, iconColor: "text-purple-500" },
 ];
 

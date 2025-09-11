@@ -21,16 +21,16 @@ import { IconTargetArrow } from "../ui/icons/target-arrow"
 
 
 const menuItems = [
-  { href: "/", label: "Início", icon: Home, showOnHome: true, showOnOthers: true, plan: 'basic' },
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, showOnHome: false, showOnOthers: true, plan: 'basic' },
+  { href: "/", label: "Início", icon: Home, showOnHome: true, showOnOthers: true, plan: 'basic', iconColor: 'text-gray-400' },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, showOnHome: false, showOnOthers: true, plan: 'basic', iconColor: 'text-yellow-500' },
   // Botão de registro será inserido dinamicamente
-  { href: "/gerenciamento", label: "Gerenciar", icon: History, showOnHome: false, showOnOthers: true, plan: 'basic' },
-  { href: "/camera", label: "Câmera", icon: Camera, showOnHome: false, showOnOthers: true, plan: 'pro' },
-  { href: "/taximetro", label: "Taxímetro Inteligente", icon: Calculator, showOnHome: false, showOnOthers: true, plan: 'basic' }, // Taxímetro é básico com limites
-  { href: "/manutencao", label: "Manutenção", icon: Wrench, showOnHome: false, showOnOthers: true, plan: 'basic' },
-  { href: "/metas", label: "Metas", icon: IconTargetArrow, showOnHome: false, showOnOthers: true, plan: 'basic' },
-  { href: "/configuracoes", label: "Configurações", icon: Settings, showOnHome: false, showOnOthers: true, plan: 'basic' },
-  { href: "/ajuda", label: "Ajuda", icon: LifeBuoy, showOnHome: true, showOnOthers: false, plan: 'basic' },
+  { href: "/gerenciamento", label: "Gerenciar", icon: History, showOnHome: false, showOnOthers: true, plan: 'basic', iconColor: 'text-orange-500' },
+  { href: "/camera", label: "Câmera", icon: Camera, showOnHome: false, showOnOthers: true, plan: 'pro', iconColor: 'text-sky-500' },
+  { href: "/taximetro", label: "Taxímetro Inteligente", icon: Calculator, showOnHome: false, showOnOthers: true, plan: 'basic', iconColor: 'text-teal-500' },
+  { href: "/manutencao", label: "Manutenção", icon: Wrench, showOnHome: false, showOnOthers: true, plan: 'basic', iconColor: 'text-red-500' },
+  { href: "/metas", label: "Metas", icon: IconTargetArrow, showOnHome: false, showOnOthers: true, plan: 'basic', iconColor: 'text-red-500' },
+  { href: "/configuracoes", label: "Configurações", icon: Settings, showOnHome: false, showOnOthers: true, plan: 'basic', iconColor: 'text-purple-500' },
+  { href: "/ajuda", label: "Ajuda", icon: LifeBuoy, showOnHome: true, showOnOthers: false, plan: 'basic', iconColor: 'text-gray-400' },
 ]
 
 const RegisterDropdown = () => (
@@ -76,7 +76,7 @@ const RegisterDropdown = () => (
     </DropdownMenu>
 );
 
-const NavButton = ({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) => {
+const NavButton = ({ href, label, icon: Icon, iconColor }: { href: string; label: string; icon: React.ElementType, iconColor: string }) => {
     const pathname = usePathname();
     const isActive = href === "/" ? pathname === href : pathname.startsWith(href);
     return (
@@ -91,7 +91,7 @@ const NavButton = ({ href, label, icon: Icon }: { href: string; label: string; i
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
                 >
-                <Icon className="h-5 w-5" />
+                <Icon className={cn("h-5 w-5", !isActive && iconColor)} />
                 </button>
             </Link>
             </TooltipTrigger>
