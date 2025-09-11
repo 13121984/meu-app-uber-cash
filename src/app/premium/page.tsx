@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/auth-context';
+import { Badge } from '@/components/ui/badge';
 
 // Substitua pelos seus links de checkout
 const PRO_CHECKOUT_LINK = "https://pay.hotmart.com/SEU_PRODUTO_PRO";
@@ -185,6 +186,7 @@ export default function PremiumPage() {
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <Handshake className="h-6 w-6 text-primary"/>
                     Seja um Parceiro Uber Cash TX IA
+                    <Badge variant="outline" className="border-amber-500 text-amber-500">Em Breve</Badge>
                 </CardTitle>
                 <CardDescription>
                     Assinantes dos planos Pro e Autopilot podem transformar sua experiência em uma nova fonte de renda.
@@ -192,10 +194,10 @@ export default function PremiumPage() {
             </CardHeader>
             <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                   Nós acreditamos no poder da comunidade. Ao se tornar nosso parceiro, você recebe um link exclusivo para compartilhar. A cada novo motorista que assina um plano através da sua indicação, você ganha uma comissão. É simples: você ajuda seus colegas a serem mais lucrativos e é recompensado por isso.
+                   Nosso programa de parceiros está em fase final de desenvolvimento. Ele permitirá que você receba um link exclusivo para compartilhar e ganhe comissões por cada novo assinante. Deixe seu e-mail com nosso suporte para entrar na lista de espera!
                 </p>
                 <Link href="/suporte?assunto=afiliado" passHref>
-                    <Button variant="outline">Quero ser um Parceiro</Button>
+                    <Button variant="outline">Tenho Interesse</Button>
                 </Link>
             </CardContent>
         </Card>
