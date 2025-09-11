@@ -27,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Label } from '../ui/label';
+import { Label } from '@/components/ui/label';
 import { addOrUpdateWorkDay } from '@/services/work-day.service';
 import { isAfter, add, formatDistanceToNowStrict } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -311,7 +311,7 @@ export function TaximeterClient() {
             <Card className="bg-card shadow-lg">
                 <CardContent className="p-6 text-center space-y-4">
                     <p className="font-bold text-foreground">Valor Estimado da Corrida</p>
-                    <p className="text-6xl font-bold font-mono text-foreground">{formatCurrency(totalCost)}</p>
+                    <p className="text-6xl font-bold font-mono text-primary">{formatCurrency(totalCost)}</p>
                     <div className="flex gap-4">
                         <DisplayCard icon={Map} label="Distância" value={distance.toFixed(2)} unit="km" />
                         <DisplayCard icon={Timer} label="Tempo" value={new Date(time * 1000).toISOString().substr(11, 8)} />
