@@ -146,11 +146,11 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
              <Card className="text-center p-4 bg-secondary">
-                <CardDescription className="flex items-center justify-center gap-2 font-bold"><LineChart className="w-4 h-4 text-primary"/>Meta Semanal</CardDescription>
+                <CardDescription className="flex items-center justify-center gap-2 text-foreground font-bold"><LineChart className="w-4 h-4 text-primary"/>Meta Semanal</CardDescription>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(calculatedGoals.weekly)}</p>
              </Card>
              <Card className="text-center p-4 bg-secondary">
-                <CardDescription className="flex items-center justify-center gap-2 font-bold"><BarChart3 className="w-4 h-4 text-primary"/>Meta Diária</CardDescription>
+                <CardDescription className="flex items-center justify-center gap-2 text-foreground font-bold"><BarChart3 className="w-4 h-4 text-primary"/>Meta Diária</CardDescription>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(calculatedGoals.daily)}</p>
              </Card>
         </div>
