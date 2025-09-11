@@ -19,15 +19,12 @@ const StatCard = ({ title, value, icon: Icon, description, variant }: { title: s
     const variantClasses = {
         income: {
             bg: "bg-green-500",
-            text: "text-green-500"
         },
         expense: {
             bg: "bg-red-500",
-            text: "text-red-500"
         },
         net: {
             bg: "bg-primary",
-            text: "text-primary"
         }
     }
 
@@ -37,7 +34,7 @@ const StatCard = ({ title, value, icon: Icon, description, variant }: { title: s
                 <Icon className="h-6 w-6 text-white" />
             </div>
             <div>
-                <p className="text-sm text-muted-foreground">{title}</p>
+                <p className="text-sm font-bold text-foreground">{title}</p>
                 <p className={cn("text-2xl font-bold")}>{value}</p>
                 <p className="text-xs text-muted-foreground">{description}</p>
             </div>

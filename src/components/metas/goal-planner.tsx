@@ -110,7 +110,7 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
             </AlertDescription>
         </Alert>
         <div className="space-y-2">
-            <Label htmlFor="monthly" className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-muted-foreground"/>Meta Mensal de Lucro</Label>
+            <Label htmlFor="monthly" className="flex items-center gap-2 font-bold"><DollarSign className="w-4 h-4 text-green-500"/>Meta Mensal de Lucro</Label>
             <Controller
                 name="monthly"
                 control={control}
@@ -125,7 +125,7 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
              {form.formState.errors.monthly && <p className="text-sm text-destructive">{form.formState.errors.monthly.message}</p>}
         </div>
         <div className="space-y-2">
-             <Label htmlFor="workDaysPerWeek" className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/>Carga de Trabalho</Label>
+             <Label htmlFor="workDaysPerWeek" className="flex items-center gap-2 font-bold"><Calendar className="w-4 h-4 text-primary"/>Carga de Trabalho</Label>
              <Controller
                 name="workDaysPerWeek"
                 control={control}

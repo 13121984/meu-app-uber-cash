@@ -107,7 +107,7 @@ export function FinancialGoalCalculator() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="hourlyRate">Seu ganho médio por hora (R$)</Label>
+                    <Label htmlFor="hourlyRate" className="font-bold">Seu ganho médio por hora (R$)</Label>
                      <div className="relative">
                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
                         <Input id="hourlyRate" type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value === '' ? '' : Number(e.target.value))} className="pl-10"/>
