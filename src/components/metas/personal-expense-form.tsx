@@ -1,8 +1,7 @@
-
 "use client";
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -174,7 +173,9 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                    disabled={(date) =>
+                      date < new Date("1900-01-01")
+                    }
                     initialFocus
                     locale={ptBR}
                   />
