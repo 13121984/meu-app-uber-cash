@@ -251,7 +251,6 @@ export function TaximeterClient() {
     }
     
     const handleRateInputChange = (field: keyof TaximeterRates, value: string) => {
-        // Allow comma and dot, but sanitize to only have one dot for parsing
         const sanitizedValue = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
         setRateInputs(prev => ({...prev, [field]: sanitizedValue }));
     };
