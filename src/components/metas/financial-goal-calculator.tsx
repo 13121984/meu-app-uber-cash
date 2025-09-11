@@ -37,35 +37,12 @@ const minutesToDecimal = (minutes: number): number => {
 
 export function FinancialGoalCalculator() {
     const { user } = useAuth();
-    const [reportData, setReportData] = useState<PeriodData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [goalAmount, setGoalAmount] = useState<number | ''>('');
-    const [hourlyRate, setHourlyRate] = useState<number | ''>(30);
-    const [hoursPerDayInput, setHoursPerDayInput] = useState('08:00'); // HH:MM format
+    const [hourlyRate, setHourlyRate] = useState<number | ''>('');
+    const [hoursPerDayInput, setHoursPerDayInput] = useState(''); // HH:MM format
 
-    useEffect(() => {
-        if (!user) {
-            setIsLoading(false);
-            return;
-        };
-
-        const loadData = async () => {
-            try {
-                // Using last 7 days for a more stable average
-                const data = await getReportData(user.id, { type: 'thisWeek' });
-                setReportData(data);
-                if (data && data.ganhoPorHora > 0) {
-                    setHourlyRate(parseFloat(data.ganhoPorHora.toFixed(2)));
-                }
-            } catch (error) {
-                console.error("Failed to load today's data for calculator", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        loadData();
-    }, [user]);
     
     const hoursPerDayDecimal = useMemo(() => {
         return minutesToDecimal(timeToMinutes(hoursPerDayInput));
@@ -89,15 +66,6 @@ export function FinancialGoalCalculator() {
 
     return (
         <div className="space-y-6">
-            <Alert variant="default" className="bg-secondary">
-                 <TrendingUp className="h-4 w-4 text-green-500" />
-                 <AlertDescription>
-                    {reportData && reportData.ganhoPorHora > 0 
-                        ? `Seu ganho bruto por hora (últimos 7 dias) é de ${formatCurrency(reportData.ganhoPorHora)}. Usamos esse valor para o cálculo, mas você pode ajustá-lo.`
-                        : "Não encontramos um ganho/hora recente. Usamos um valor padrão que você pode ajustar."
-                    }
-                 </AlertDescription>
-            </Alert>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="goalAmount" className="font-bold text-foreground">Qual o seu objetivo (R$)?</Label>
@@ -110,7 +78,7 @@ export function FinancialGoalCalculator() {
                     <Label htmlFor="hourlyRate" className="font-bold text-foreground">Seu ganho médio por hora (R$)</Label>
                      <div className="relative">
                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                        <Input id="hourlyRate" type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value === '' ? '' : Number(e.target.value))} className="pl-10"/>
+                        <Input id="hourlyRate" type="number" placeholder="Ex: 30" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value === '' ? '' : Number(e.target.value))} className="pl-10"/>
                     </div>
                 </div>
                  <div className="space-y-2">
