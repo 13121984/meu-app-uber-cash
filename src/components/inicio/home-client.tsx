@@ -99,13 +99,13 @@ export function HomeClient() {
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <Link href="/registrar/today" className="w-full">
                         <Button className="w-full" variant="secondary">
-                            <Calendar className="mr-2 h-4 w-4" />
+                            <Calendar className="mr-2 h-4 w-4 text-green-500" />
                             Registrar Hoje
                         </Button>
                     </Link>
                      <Link href="/registrar/other-day" className="w-full">
                         <Button className="w-full" variant="secondary">
-                            <PlusCircle className="mr-2 h-4 w-4"/>
+                            <PlusCircle className="mr-2 h-4 w-4 text-green-500"/>
                             Outro Dia
                         </Button>
                     </Link>
