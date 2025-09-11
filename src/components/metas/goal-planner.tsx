@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DollarSign, CheckCircle, AlertTriangle, Loader2, Target, Calendar, Info, BarChart3, LineChart, Clock } from 'lucide-react';
+import { DollarSign, CheckCircle, AlertTriangle, Loader2, Calendar, Info, BarChart3, LineChart, Clock } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { Goals, saveGoals, getGoals } from '@/services/goal.service';
 import { useRouter } from 'next/navigation';
@@ -17,6 +17,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Alert, AlertDescription } from '../ui/alert';
 import { useAuth } from '@/contexts/auth-context';
+import { IconTargetArrow } from '../ui/icons/target-arrow';
 
 
 const plannerSchema = z.object({

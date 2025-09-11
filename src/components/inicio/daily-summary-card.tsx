@@ -3,9 +3,9 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { DollarSign, Clock, TrendingUp, Target, Flag, Rocket, Trophy } from "lucide-react";
+import { DollarSign, Clock, TrendingUp, Flag, Rocket, Trophy } from "lucide-react";
 import type { PeriodData } from "@/services/summary.service";
-import { AppLogo } from "../ui/app-logo";
+import { IconTargetArrow } from "../ui/icons/target-arrow";
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -94,7 +94,7 @@ export function DailySummaryCard({ data }: DailySummaryCardProps) {
         
         <div className="space-y-4 pt-4">
             <div className="flex justify-between items-center text-sm">
-                <p className="text-muted-foreground flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> Meta Diária</p>
+                <p className="text-muted-foreground flex items-center gap-2"><IconTargetArrow className="h-4 w-4 text-primary" /> Meta Diária</p>
                 <p className="font-semibold">{formatCurrency(data.meta.target)}</p>
             </div>
              <div className="w-full h-10 flex items-center">

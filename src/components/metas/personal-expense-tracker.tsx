@@ -64,10 +64,11 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
   }, [records]);
 
   const handleSuccess = async (record: PersonalExpense, operation: 'created' | 'updated') => {
+    // Apenas fecha o formulário se foi uma edição
     if (operation === 'updated') {
       setIsFormOpen(false);
     }
-    setSelectedRecord(null); // Limpa o registro selecionado
+    setSelectedRecord(null); // Limpa o registro selecionado de qualquer forma
     if (!user) return;
     startTransition(async () => {
         const data = await getPersonalExpenses(user.id);
@@ -128,7 +129,7 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
                 iconClassName="text-red-500"
             />
             <DialogTrigger asChild>
-                <Button className="w-full h-full text-base">
+                <Button className="w-full h-full text-base" onClick={() => setSelectedRecord(null)}>
                     <PlusCircle className="mr-2 h-5 w-5" />
                     Adicionar Despesa
                 </Button>
