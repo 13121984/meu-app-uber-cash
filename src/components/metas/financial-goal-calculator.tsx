@@ -100,7 +100,7 @@ export function FinancialGoalCalculator() {
             </Alert>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="goalAmount">Qual o seu objetivo (R$)?</Label>
+                    <Label htmlFor="goalAmount" className="font-bold">Qual o seu objetivo (R$)?</Label>
                      <div className="relative">
                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                         <Input id="goalAmount" type="number" placeholder="Ex: 500" value={goalAmount} onChange={(e) => setGoalAmount(e.target.value === '' ? '' : Number(e.target.value))} className="pl-10"/>
@@ -114,7 +114,7 @@ export function FinancialGoalCalculator() {
                     </div>
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="hoursPerDay">Horas de trabalho por dia</Label>
+                    <Label htmlFor="hoursPerDay" className="font-bold">Horas de trabalho por dia</Label>
                      <div className="relative">
                         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-500" />
                         <Input id="hoursPerDay" type="time" value={hoursPerDayInput} onChange={(e) => setHoursPerDayInput(e.target.value)} className="pl-10" />
@@ -130,5 +130,3 @@ export function FinancialGoalCalculator() {
         </div>
     );
 }
-
-    
