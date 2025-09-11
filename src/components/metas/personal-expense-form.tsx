@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -35,19 +36,31 @@ interface PersonalExpenseFormProps {
   onSuccess: (record: PersonalExpense) => void;
 }
 
+const defaultFormValues = (categories: string[]) => ({
+      date: new Date(),
+      description: '',
+      category: categories[0] || '',
+      amount: 0,
+});
+
+
 export function PersonalExpenseForm({ initialData, categories, onSuccess }: PersonalExpenseFormProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<PersonalExpenseFormData>({
     resolver: zodResolver(personalExpenseSchema),
-    defaultValues: initialData ? { ...initialData, date: new Date(initialData.date) } : {
-      date: new Date(),
-      description: '',
-      category: categories[0],
-      amount: 0,
-    },
+    defaultValues: initialData ? { ...initialData, date: new Date(initialData.date) } : defaultFormValues(categories),
   });
+  
+  // Efeito para resetar o formulário quando o `initialData` mudar (ex: ao editar um item e depois adicionar um novo)
+  React.useEffect(() => {
+    if (initialData) {
+        form.reset({ ...initialData, date: new Date(initialData.date) });
+    } else {
+        form.reset(defaultFormValues(categories));
+    }
+  }, [initialData, form, categories]);
 
   const onSubmit = async (data: PersonalExpenseFormData) => {
     if (!user) return;
@@ -70,6 +83,11 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
         
         const returnedRecord = { ...data, id: result.id };
         onSuccess(returnedRecord as PersonalExpense);
+        
+        // Limpa o formulário para a próxima entrada, mas mantém a janela aberta
+        if(!initialData) {
+           form.reset(defaultFormValues(categories));
+        }
 
       } else {
         throw new Error(result.error || "Ocorreu um erro desconhecido.");
@@ -128,7 +146,7 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Categoria</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma categoria" />

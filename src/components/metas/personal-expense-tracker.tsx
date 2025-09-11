@@ -64,8 +64,7 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
   }, [records]);
 
   const handleSuccess = async () => {
-    setIsFormOpen(false);
-    setSelectedRecord(null);
+    setSelectedRecord(null); // Limpa o registro selecionado para permitir um novo em seguida
     if (!user) return;
     startTransition(async () => {
         const data = await getPersonalExpenses(user.id);
@@ -214,7 +213,7 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
             <DialogHeader>
                 <DialogTitle>{selectedRecord ? 'Editar' : 'Adicionar'} Despesa Pessoal</DialogTitle>
                 <DialogDescription>
-                    Preencha os detalhes do seu gasto.
+                    Preencha os detalhes do seu gasto. Para adicionar outra despesa, basta preencher o formulário novamente após salvar.
                 </DialogDescription>
             </DialogHeader>
             <PersonalExpenseForm 
