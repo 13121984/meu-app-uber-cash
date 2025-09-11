@@ -14,7 +14,7 @@ import { Button } from "../ui/button";
 import { MaintenanceReminderCard } from "./maintenance-reminder-card";
 import { getMaintenanceRecords } from "@/services/maintenance.service";
 import { useAuth } from '@/contexts/auth-context';
-import { IconTargetArrow } from "@/components/ui/icons/target-arrow";
+import { IconTargetArrow } from "../ui/icons/target-arrow";
 
 
 const mainActions = [
@@ -99,13 +99,13 @@ export function HomeClient() {
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <Link href="/registrar/today" className="w-full">
                         <Button className="w-full" variant="secondary">
-                            <Calendar className="mr-2 h-4 w-4" />
+                            <Calendar className="mr-2 h-4 w-4 text-green-500" />
                             Registrar Hoje
                         </Button>
                     </Link>
                      <Link href="/registrar/other-day" className="w-full">
                         <Button className="w-full" variant="secondary">
-                            <PlusCircle className="mr-2 h-4 w-4"/>
+                            <PlusCircle className="mr-2 h-4 w-4 text-green-500"/>
                             Outro Dia
                         </Button>
                     </Link>
