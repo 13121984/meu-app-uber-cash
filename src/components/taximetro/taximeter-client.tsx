@@ -96,10 +96,10 @@ export function TaximeterClient() {
         if (!lastUse) return { canUse: true, timeLeft: '' }; // Never used before
 
         const lastUseDate = new Date(lastUse);
-        const nextAllowedUse = add(lastUseDate, { weeks: 1 });
+        const nextAllowedUse = add(lastUseDate, { days: 1 });
         
         const canUse = isAfter(new Date(), nextAllowedUse);
-        const timeLeft = canUse ? '' : formatDistanceToNowStrict(nextAllowedUse, { locale: ptBR, unit: 'day' });
+        const timeLeft = canUse ? '' : formatDistanceToNowStrict(nextAllowedUse, { locale: ptBR, unit: 'hour' });
 
         return { canUse, timeLeft };
     };
@@ -237,7 +237,7 @@ export function TaximeterClient() {
     }
     
     const handleRateChange = (field: keyof TaximeterRates, value: string) => {
-        const numValue = parseFloat(value) || 0;
+        const numValue = parseFloat(value.replace(',', '.')) || 0;
         setRates(prev => ({...prev, [field]: numValue }));
     }
     
@@ -266,9 +266,9 @@ export function TaximeterClient() {
         return (
              <Card className="text-center p-8 space-y-4">
                  <Lock className="mx-auto h-12 w-12 text-primary mb-4"/>
-                <CardTitle>Uso Semanal Esgotado</CardTitle>
+                <CardTitle>Uso Diário Esgotado</CardTitle>
                 <CardDescription className="my-2">
-                    Usuários do plano Básico podem usar o taxímetro uma vez por semana para corridas particulares.
+                    Usuários do plano Básico podem usar o taxímetro uma vez por dia para corridas particulares.
                     <br/>
                     Seu próximo uso estará disponível em aproximadamente <strong className="text-primary">{usageStatus.timeLeft}</strong>.
                 </CardDescription>
@@ -343,7 +343,7 @@ export function TaximeterClient() {
                                     <Label htmlFor="startingFare">Taxa de Partida (Bandeirada)</Label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                        <Input id="startingFare" type="number" value={rates.startingFare || ''} onChange={(e) => handleRateChange('startingFare', e.target.value)} className="pl-10" />
+                                        <Input id="startingFare" type="text" value={rates.startingFare || ''} onChange={(e) => handleRateChange('startingFare', e.target.value)} className="pl-10" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -351,14 +351,14 @@ export function TaximeterClient() {
                                         <Label htmlFor="ratePerKm">Preço por KM</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                            <Input id="ratePerKm" type="number" value={rates.ratePerKm || ''} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
+                                            <Input id="ratePerKm" type="text" value={rates.ratePerKm || ''} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
                                         </div>
                                     </div>
                                     <div>
                                         <Label htmlFor="ratePerMinute">Preço por Minuto</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                            <Input id="ratePerMinute" type="number" value={rates.ratePerMinute || ''} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
+                                            <Input id="ratePerMinute" type="text" value={rates.ratePerMinute || ''} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
                                         </div>
                                     </div>
                                 </div>
@@ -398,3 +398,5 @@ export function TaximeterClient() {
         </>
     );
 }
+
+    
