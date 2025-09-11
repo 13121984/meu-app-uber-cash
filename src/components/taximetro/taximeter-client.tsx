@@ -237,8 +237,10 @@ export function TaximeterClient() {
     }
     
     const handleRateChange = (field: keyof TaximeterRates, value: string) => {
-        const numValue = parseFloat(value.replace(',', '.')) || 0;
-        setRates(prev => ({...prev, [field]: numValue }));
+        // Permite que o campo fique vazio, tratando-o como 0 para cálculos
+        const sanitizedValue = value.replace(/,/, '.');
+        const numValue = parseFloat(sanitizedValue);
+        setRates(prev => ({...prev, [field]: isNaN(numValue) ? 0 : numValue }));
     }
     
     const saveRates = async () => {
@@ -288,7 +290,7 @@ export function TaximeterClient() {
             {/* Display */}
             <Card className="bg-card shadow-lg">
                 <CardContent className="p-6 text-center space-y-4">
-                    <p className="text-muted-foreground font-bold text-foreground">Valor Estimado da Corrida</p>
+                    <p className="font-bold text-foreground">Valor Estimado da Corrida</p>
                     <p className="text-6xl font-bold font-mono text-foreground">{formatCurrency(totalCost)}</p>
                     <div className="flex gap-4">
                         <DisplayCard icon={Map} label="Distância" value={distance.toFixed(2)} unit="km" />
@@ -343,7 +345,7 @@ export function TaximeterClient() {
                                     <Label htmlFor="startingFare">Taxa de Partida (Bandeirada)</Label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                        <Input id="startingFare" type="text" value={rates.startingFare || ''} onChange={(e) => handleRateChange('startingFare', e.target.value)} className="pl-10" />
+                                        <Input id="startingFare" type="text" inputMode="decimal" value={rates.startingFare || ''} onChange={(e) => handleRateChange('startingFare', e.target.value)} className="pl-10" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -351,14 +353,14 @@ export function TaximeterClient() {
                                         <Label htmlFor="ratePerKm">Preço por KM</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                            <Input id="ratePerKm" type="text" value={rates.ratePerKm || ''} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
+                                            <Input id="ratePerKm" type="text" inputMode="decimal" value={rates.ratePerKm || ''} onChange={(e) => handleRateChange('ratePerKm', e.target.value)} className="pl-10" />
                                         </div>
                                     </div>
                                     <div>
                                         <Label htmlFor="ratePerMinute">Preço por Minuto</Label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                                            <Input id="ratePerMinute" type="text" value={rates.ratePerMinute || ''} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
+                                            <Input id="ratePerMinute" type="text" inputMode="decimal" value={rates.ratePerMinute || ''} onChange={(e) => handleRateChange('ratePerMinute', e.target.value)} className="pl-10"/>
                                         </div>
                                     </div>
                                 </div>
