@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck, MessageSquarePlus, MessageCircleQuestion, Share2, Handshake, Users, Trash } from "lucide-react";
+import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck, MessageSquarePlus, MessageCircleQuestion, Share2, Handshake, Users, Trash, Eye, Notebook, FileDown } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -13,12 +13,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 
+// Dynamic Imports for Admin View
+import PremiumPage from '../premium/page';
+import LandingPage from '../landing/page';
+
 const helpTopics = [
   {
     value: "planos",
     icon: Gem,
     title: "Qual a diferença entre os planos?",
-    content: "O plano Básico (Gratuito) oferece as ferramentas essenciais para começar. O plano Pro eleva sua gestão com o 'TX IA' para analisar corridas, acesso a todos os cards e gráficos, e personalização. O plano Autopilot (Premium) é a experiência definitiva, com registro simplificado de corridas, auditoria de transparência, câmera ilimitada e todos os outros benefícios.",
+    content: "O plano Básico (Gratuito) oferece as ferramentas essenciais para começar. O plano Pro eleva sua gestão com o 'TX IA' para analisar corridas, acesso a todos os cards e gráficos, personalização e a nova Auditoria de Rentabilidade. O plano Autopilot (Premium) é a experiência definitiva, com registro simplificado de corridas e todos os outros benefícios.",
     isPremiumFeature: true,
   },
   {
@@ -46,10 +50,17 @@ const helpTopics = [
     content: "Em 'Planejamento Financeiro', no card 'Plano de Metas Mensal', defina seu objetivo de lucro líquido mensal e quantos dias por semana você pretende trabalhar. O sistema calculará automaticamente suas metas diárias e semanais para acompanhar seu progresso no Dashboard e na tela inicial."
   },
   {
+    value: "auditoria_rentabilidade",
+    icon: BarChart3,
+    title: "O que é a Auditoria de Rentabilidade?",
+    content: "Disponível nos planos Pro e Autopilot, esta ferramenta em 'Planejamento Financeiro' é seu consultor pessoal. Ela analisa seus dados e mostra qual foi o dia mais lucrativo do mês, qual plataforma (Uber, 99, etc.) te pagou melhor por hora, e te dá insights para você focar onde ganha mais.",
+    isPremiumFeature: true,
+  },
+  {
     value: "ganhar_dinheiro",
     icon: Handshake,
-    title: "Posso ganhar dinheiro com o Uber Cash?",
-    content: "Com certeza! Acreditamos que o sucesso é melhor quando compartilhado. Por isso, criamos o Programa de Parceiros Uber Cash. Ao se tornar um assinante Pro ou Autopilot, você não apenas desbloqueia todo o potencial do aplicativo para si mesmo, mas também recebe um link exclusivo para indicar a outros motoristas. Cada novo assinante que usar seu link se traduz em uma recompensa para você. É uma chance de criar uma nova fonte de renda enquanto ajuda seus colegas a se tornarem mais lucrativos e a tomarem o controle de suas finanças.",
+    title: "Posso ganhar dinheiro com o Uber Cash TX IA?",
+    content: "Com certeza! Acreditamos que o sucesso é melhor quando compartilhado. Por isso, criamos o Programa de Parceiros. Ao se tornar um assinante Pro ou Autopilot, você não apenas desbloqueia todo o potencial do aplicativo para si mesmo, mas também recebe um link exclusivo para indicar a outros motoristas. Cada novo assinante que usar seu link se traduz em uma recompensa para você. É uma chance de criar uma nova fonte de renda enquanto ajuda seus colegas a se tornarem mais lucrativos e a tomarem o controle de suas finanças.",
     isPremiumFeature: true,
   },
   {
@@ -102,9 +113,31 @@ const helpTopics = [
 
 const devTopics = [
     {
+        value: "admin_view",
+        icon: Eye,
+        title: "Visão do Administrador",
+        content: `
+            <p class="mb-2">Abaixo estão as visualizações das páginas de Venda (Premium) e de Apresentação (Landing Page) para que você possa revisá-las e solicitar alterações diretamente daqui.</p>
+        `,
+    },
+    {
+        value: "sales_page_view",
+        icon: FileDown,
+        title: "Visualização: Página de Vendas (Premium)",
+        isComponent: true,
+        component: PremiumPage
+    },
+    {
+        value: "landing_page_view",
+        icon: Notebook,
+        title: "Visualização: Página de Apresentação (Landing)",
+        isComponent: true,
+        component: LandingPage
+    },
+    {
         value: "investor_view",
         icon: Rocket,
-        title: "Análise de Investidor: O Futuro do Uber Cash",
+        title: "Análise de Investidor: O Futuro do Uber Cash TX IA",
         content: `
             <p class="mb-2">Você me perguntou se, como investidor, eu apostaria no aplicativo. A resposta é um grande <strong>sim</strong>, e a razão é a visão estratégica que estamos construindo:</p>
             <ul class="list-disc pl-5 space-y-2 mb-4">
@@ -141,7 +174,7 @@ const devTopics = [
         icon: MessageSquarePlus,
         title: "Visão de Futuro: Balão Flutuante 'TX IA'",
         content: `
-            <p class="mb-2">Uma das funcionalidades mais poderosas que planejamos é um <strong>balão flutuante</strong> que fica sobre os outros aplicativos. Ele serve como um atalho rápido para as funcionalidades mais importantes do Uber Cash, mesmo quando você está na tela da Uber ou 99.</p>
+            <p class="mb-2">Uma das funcionalidades mais poderosas que planejamos é um <strong>balão flutuante</strong> que fica sobre os outros aplicativos. Ele serve como um atalho rápido para as funcionalidades mais importantes do Uber Cash TX IA, mesmo quando você está na tela da Uber ou 99.</p>
             <h4 class="font-semibold mb-2">Como vai funcionar?</h4>
             <ol class="list-decimal pl-5 space-y-2">
                 <li>Ao habilitar a permissão de <strong>"Sobrepor a outros apps"</strong>, um pequeno balão com a logo do "TX IA" aparecerá na tela.</li>
@@ -151,7 +184,7 @@ const devTopics = [
                         <li>Iniciar/parar a <strong>Câmera de Segurança</strong>.</li>
                         <li>Acessar as <strong>configurações do TX IA</strong> (metas R$/km, R$/hora).</li>
                         <li>Ver um resumo da <strong>análise da corrida atual</strong> (Bora/Tô Fora, R$/km).</li>
-                        <li>Abrir a <strong>página inicial</strong> do Uber Cash.</li>
+                        <li>Abrir a <strong>página inicial</strong> do Uber Cash TX IA.</li>
                     </ul>
                 </li>
             </ol>
@@ -221,7 +254,40 @@ export default function AjudaPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Accordion type="single" collapsible className="w-full">
+                        <Accordion type="multiple" defaultValue={['admin_view']} className="w-full">
+                             {devTopics.map((topic) => {
+                                 if (topic.isComponent && topic.component) {
+                                     const AdminViewComponent = topic.component;
+                                     return (
+                                        <AccordionItem value={topic.value} key={topic.value}>
+                                            <AccordionTrigger>
+                                                <div className="flex items-center gap-2">
+                                                    <topic.icon className="h-5 w-5 text-primary" />
+                                                    <span className="font-semibold text-left">{topic.title}</span>
+                                                </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent>
+                                                <div className="border-2 border-dashed border-primary/30 p-4 rounded-lg bg-secondary">
+                                                    <AdminViewComponent />
+                                                </div>
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                     )
+                                 }
+                                 return (
+                                     <AccordionItem value={topic.value} key={topic.value}>
+                                        <AccordionTrigger>
+                                            <div className="flex items-center gap-2">
+                                                <topic.icon className="h-5 w-5 text-primary" />
+                                                <span className="font-semibold text-left">{topic.title}</span>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: topic.content }} />
+                                        </AccordionContent>
+                                     </AccordionItem>
+                                 )
+                             })}
                             <AccordionItem value="structure">
                                 <AccordionTrigger>
                                     <div className="flex items-center gap-2">
@@ -347,6 +413,7 @@ export default function AjudaPage() {
                                             <AccordionTrigger className="font-semibold">Visão Geral do Processo</AccordionTrigger>
                                             <AccordionContent className="prose prose-sm dark:prose-invert max-w-none">
                                                 <p>O fluxo para transformar seu site em um app Android é: <strong>Seu Código → Build do Next.js → Capacitor → Android Studio → App Android.</strong></p>
+                                                 <p className="mt-2">Requisito mínimo recomendado: <strong>Android 6.0 (Marshmallow)</strong></p>
                                             </AccordionContent>
                                         </AccordionItem>
                                         <AccordionItem value="android-prereqs">
@@ -521,30 +588,6 @@ export default function AjudaPage() {
                     </CardContent>
                 </Card>
             )}
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Visão do Produto</CardTitle>
-                    <p className="text-sm text-muted-foreground">Notas sobre a estratégia e visão de futuro.</p>
-                </CardHeader>
-                 <CardContent className="p-6 pt-0">
-                    <Accordion type="single" collapsible className="w-full">
-                        {devTopics.map((topic) => (
-                             <AccordionItem value={topic.value} key={topic.value}>
-                                <AccordionTrigger>
-                                    <div className="flex items-center gap-3 text-left">
-                                        <topic.icon className="h-5 w-5 text-primary shrink-0" />
-                                        <span className="font-semibold">{topic.title}</span>
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{ __html: topic.content }} />
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                </CardContent>
-            </Card>
 
             <Card>
                 <CardHeader>

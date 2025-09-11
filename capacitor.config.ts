@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.uber.cash',
-  appName: 'Uber Cash',
+  appName: 'Uber Cash TX IA',
   webDir: 'out',
   bundledWebRuntime: false,
   server: {

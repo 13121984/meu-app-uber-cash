@@ -134,7 +134,7 @@ export async function signup(userId: string, password: string, securityAnswers: 
 
 export async function login(userId: string, password: string): Promise<{ success: boolean; user?: User, error?: string }> {
     const users = await getUsers();
-    const user = users.find(u => u.id.trim() === userId.trim());
+    const user = users.find(u => u.id.trim().toLowerCase() === userId.trim().toLowerCase());
 
     if (!user) {
         return { success: false, error: 'Usuário ou senha inválidos.' };

@@ -5,13 +5,14 @@ import { GoalPlanner } from '@/components/metas/goal-planner';
 import { FinancialGoalCalculator } from '@/components/metas/financial-goal-calculator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card } from '@/components/ui/card';
-import { Target, Calculator, Wallet, Loader2 } from 'lucide-react';
+import { Target, Calculator, Wallet, Loader2, Gem, BarChart3 } from 'lucide-react';
 import { PersonalExpenseTracker } from '@/components/metas/personal-expense-tracker';
 import { FinancialSummary } from '@/components/metas/financial-summary';
+import { ProfitabilityAudit } from '@/components/metas/profitability-audit';
 import { useAuth } from '@/contexts/auth-context';
 
 export default function MetasPage() {
-    const { loading } = useAuth();
+    const { loading, isPro } = useAuth();
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -49,6 +50,25 @@ export default function MetasPage() {
                 </AccordionItem>
             </Card>
             
+            {isPro && (
+                <Card>
+                    <AccordionItem value="item-4" className="border-b-0">
+                        <AccordionTrigger className="p-6">
+                             <div className="flex items-center gap-3">
+                                <Gem className="w-6 h-6 text-primary" />
+                                <div>
+                                    <h2 className="font-semibold text-lg text-left">Auditoria de Rentabilidade</h2>
+                                    <p className="text-sm text-muted-foreground text-left font-normal">Descubra seus dias e apps mais lucrativos.</p>
+                                </div>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="p-6 pt-0">
+                            <ProfitabilityAudit />
+                        </AccordionContent>
+                    </AccordionItem>
+                </Card>
+            )}
+
             <Card>
                 <AccordionItem value="item-2" className="border-b-0">
                     <AccordionTrigger className="p-6">

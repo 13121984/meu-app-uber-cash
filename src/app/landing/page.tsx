@@ -44,10 +44,10 @@ export default function LandingPage() {
             <Car className="h-16 w-16 text-white" />
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold font-headline tracking-tight text-foreground">
-            Uber Cash
+            Uber Cash TX IA
           </h1>
           <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Sua rota para o sucesso. O copiloto financeiro que todo motorista de aplicativo precisa para maximizar os lucros e tomar decisões inteligentes.
+            TX IA Soluções em Viagens. O copiloto financeiro que todo motorista de aplicativo precisa para maximizar os lucros e tomar decisões inteligentes.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
             <Button size="lg" asChild className="w-full sm:w-auto">
@@ -67,7 +67,7 @@ export default function LandingPage() {
       <section className="py-20 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold font-headline">Por que o Uber Cash?</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold font-headline">Por que o Uber Cash TX IA?</h2>
             <p className="mt-2 text-muted-foreground">Ferramentas poderosas para quem vive na estrada.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -142,15 +142,16 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold font-headline">Pronto para Assumir o Controle?</h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Baixe o Uber Cash agora e comece a transformar sua rotina, uma corrida de cada vez.
+            Baixe o Uber Cash TX IA agora e comece a transformar sua rotina, uma corrida de cada vez.
           </p>
           <div className="mt-8">
             <Button size="lg" className="w-full sm:w-auto" asChild>
                 <a href="#">
                     <Download className="mr-2"/>
-                    Download para Android (Em Breve)
+                    Download para Android
                 </a>
             </Button>
+            <p className="text-xs text-muted-foreground mt-2">Requisito Mínimo: Android 6.0 (Marshmallow) ou superior.</p>
           </div>
         </div>
       </section>
@@ -158,7 +159,8 @@ export default function LandingPage() {
        {/* Footer */}
        <footer className="bg-secondary py-8">
             <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-                <p>&copy; {new Date().getFullYear()} Uber Cash. Todos os direitos reservados.</p>
+                <p>&copy; {new Date().getFullYear()} Uber Cash TX IA. Todos os direitos reservados.</p>
+                 <p className="mt-2">Contato: ubercashtxia@gmail.com | Instagram: @ubercashtxia</p>
                  <p className="mt-2">Desenvolvido com IA no Firebase Studio.</p>
             </div>
        </footer>

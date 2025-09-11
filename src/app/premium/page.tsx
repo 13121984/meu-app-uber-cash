@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles, Car, Camera, BarChart3, ShieldCheck, Accessibility, Handshake, X, DollarSign, Target, Wrench, Calculator, FileDown } from 'lucide-react';
+import { BotMessageSquare, Check, Crown, PartyPopper, Sparkles, Car, Camera, BarChart3, ShieldCheck, Accessibility, Handshake, X, DollarSign, Target, Wrench, Calculator, FileDown, Gem } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
@@ -27,11 +27,12 @@ const basicFeatures = [
 const proFeatures = [
   { id: 'registros', name: 'Controle de Ganhos', basic: true, pro: true, autopilot: true },
   { id: 'relatorios_completos', name: 'Todos os Cards e Gráficos', description: "Ganho/h, Ganho/km, Eficiência, e muito mais", basic: false, pro: true, autopilot: true },
+  { id: 'auditoria_rentabilidade', name: 'Auditoria de Rentabilidade', description: "Descubra seus dias e apps mais lucrativos.", basic: false, pro: true, autopilot: true },
   { id: 'personalizacao_completa', name: 'Adicionar e Ocultar Itens do Layout', basic: false, pro: true, autopilot: true },
   { id: 'taximetro', name: 'Taxímetro Inteligente', basic: '1 uso/dia', pro: 'Ilimitado', autopilot: 'Ilimitado' },
   { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Use a IA para decidir se uma corrida vale a pena", basic: false, pro: true, autopilot: true },
   { id: 'camera', name: 'Câmera de Segurança', basic: false, pro: 'Gravações de 5 min', autopilot: 'Gravações Ilimitadas' },
-  { id: 'lembretes_manutencao', name: 'Lembretes de Manutenção', basic: false, pro: true, autopilot: true },
+  { id: 'lembretes_manutencao', name: 'Lembretes de Manutenção', basic: false, pro: false, autopilot: true }, // Mudado para Autopilot
   { id: 'afiliado', name: 'Programa de Parceiros', description: "Ganhe dinheiro indicando o app", basic: false, pro: true, autopilot: true },
   { id: 'captura_auto', name: 'Registro Simplificado de Corridas', description: "Registra corridas finalizadas com um toque, lendo os dados da notificação.", basic: false, pro: false, autopilot: true },
   { id: 'auditoria', name: 'Auditoria de Transparência', description: "Compara o KM da oferta com o KM real da viagem", basic: false, pro: false, autopilot: true },
@@ -51,6 +52,7 @@ const plans = [
         price: { monthly: 'R$ 9,90', annual: 'R$ 99,90' },
         link: PRO_CHECKOUT_LINK,
         featured: true,
+        icon: Gem
     },
     { 
         name: 'Autopilot', 
@@ -58,6 +60,7 @@ const plans = [
         price: { monthly: 'R$ 19,90', annual: 'R$ 199,90' },
         link: AUTOPILOT_CHECKOUT_LINK,
         featured: false,
+        icon: Crown
     }
 ];
 
@@ -122,7 +125,7 @@ export default function PremiumPage() {
   return (
     <div className="space-y-8 p-4 sm:p-8">
       <div className="text-center space-y-4">
-        <Crown className="mx-auto h-16 w-16 text-yellow-500" />
+        <Sparkles className="mx-auto h-16 w-16 text-yellow-500" />
         <h1 className="text-5xl font-bold font-headline text-foreground">Desbloqueie seu Potencial</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Escolha o plano que se encaixa na sua necessidade e transforme a gestão da sua vida de motorista.
@@ -145,6 +148,7 @@ export default function PremiumPage() {
              isCurrentPlan && "border-2 border-primary"
            )}>
               <CardHeader className="text-center">
+                {plan.icon && <plan.icon className={cn("mx-auto h-8 w-8 mb-2", plan.name === 'Pro' ? 'text-blue-500' : 'text-yellow-500')} />}
                 {plan.featured && <div className="text-sm font-bold text-primary -mt-2 mb-2">MAIS POPULAR</div>}
                 <CardTitle className="font-headline text-2xl">{plan.name}</CardTitle>
                 <CardDescription>{plan.description}</CardDescription>
@@ -180,7 +184,7 @@ export default function PremiumPage() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-headline">
                     <Handshake className="h-6 w-6 text-primary"/>
-                    Seja um Parceiro Uber Cash
+                    Seja um Parceiro Uber Cash TX IA
                 </CardTitle>
                 <CardDescription>
                     Assinantes dos planos Pro e Autopilot podem transformar sua experiência em uma nova fonte de renda.

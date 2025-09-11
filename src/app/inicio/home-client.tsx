@@ -7,7 +7,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { DailySummaryCard } from "./daily-summary-card";
 import { ShiftPerformance } from "./shift-performance";
-import { getReportData, PeriodData } from "@/services/summary.service";
+import { getTodayData, PeriodData } from "@/services/summary.service";
 import { Skeleton } from "../ui/skeleton";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
@@ -65,7 +65,7 @@ export function HomeClient() {
 
     async function loadData() {
         try {
-            const data = await getReportData(user!.id, { type: 'today' });
+            const data = await getTodayData(user!.id);
             setTodayData(data as PeriodData);
         } catch (error) {
             console.error("Failed to load today's data", error);
@@ -79,8 +79,8 @@ export function HomeClient() {
   return (
     <div className="space-y-8 animate-fade-in">
         <div className="space-y-2">
-            <h1 className="text-5xl font-bold font-headline text-foreground">Uber Cash</h1>
-            <p className="text-muted-foreground text-lg">Sua rota para o sucesso.</p>
+            <h1 className="text-5xl font-bold font-headline text-foreground">Uber Cash TX IA</h1>
+            <p className="text-muted-foreground text-lg">TX IA Soluções em Viagens</p>
         </div>
 
         <MaintenanceReminderCard />

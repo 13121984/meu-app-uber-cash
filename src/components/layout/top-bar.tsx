@@ -3,7 +3,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus, DollarSign, Crown, Camera, Car } from "lucide-react"
+import { Home, LayoutDashboard, PlusCircle, History, Target, BarChart, Wrench, Settings, LogOut, Calculator, Smartphone, LifeBuoy, Calendar, CalendarPlus, DollarSign, Crown, Camera, Car, Gem } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import React, { useState, useEffect } from 'react';
@@ -127,6 +127,18 @@ export function TopBar() {
       return true;
   });
 
+  const getPlanIcon = () => {
+      if (user?.plan === 'pro') return <Gem className="h-6 w-6 text-blue-500" />;
+      if (user?.plan === 'autopilot') return <Crown className="h-6 w-6 text-yellow-500" />;
+      return null;
+  }
+
+  const getPlanTooltip = () => {
+      if (user?.plan === 'pro') return "Plano Pro Ativo";
+      if (user?.plan === 'autopilot') return "Plano Autopilot Ativo";
+      return "";
+  }
+  
   return (
     <TooltipProvider>
         <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
@@ -135,15 +147,15 @@ export function TopBar() {
                     <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center border-2 border-primary-foreground/50 shadow-md">
                        <Car className="h-6 w-6 text-primary-foreground" />
                     </div>
-                    <span className="sr-only">Uber Cash</span>
+                    <span className="sr-only">Uber Cash TX IA</span>
                 </Link>
-                {user?.plan && user.plan !== 'basic' && (
+                {getPlanIcon() && (
                     <Tooltip>
                         <TooltipTrigger>
-                            <Crown className="h-6 w-6 text-yellow-500" />
+                            {getPlanIcon()}
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Plano {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} Ativo</p>
+                            <p>{getPlanTooltip()}</p>
                         </TooltipContent>
                     </Tooltip>
                 )}

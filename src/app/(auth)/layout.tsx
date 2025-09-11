@@ -23,8 +23,8 @@ export default function AuthLayout({
               </div>
               <div className="absolute -inset-2 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-3xl blur-xl opacity-60"></div>
             </div>
-            <h1 className="text-4xl font-bold font-headline mt-6">Uber Cash</h1>
-            <p className="text-muted-foreground">Sua rota para o sucesso.</p>
+            <h1 className="text-4xl font-bold font-headline mt-6">Uber Cash TX IA</h1>
+            <p className="text-muted-foreground">TX IA Soluções em Viagens</p>
         </div>
         {children}
       </div>

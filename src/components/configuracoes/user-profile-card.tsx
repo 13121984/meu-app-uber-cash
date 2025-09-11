@@ -3,9 +3,10 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { User, Crown, LogOut } from "lucide-react";
+import { User, Crown, LogOut, Gem } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export function UserProfileCard() {
     const { user, logout } = useAuth();
@@ -20,8 +21,18 @@ export function UserProfileCard() {
         return null; // ou um skeleton
     }
     
-    const isPremiumUser = user.plan && user.plan !== 'basic';
-    const planName = user.plan ? user.plan.charAt(0).toUpperCase() + user.plan.slice(1) : 'Básico';
+    const getPlanInfo = () => {
+        switch (user.plan) {
+            case 'pro':
+                return { name: 'Pro', icon: Gem, className: 'text-blue-500' };
+            case 'autopilot':
+                return { name: 'Autopilot', icon: Crown, className: 'text-yellow-500' };
+            default:
+                return { name: 'Básico', icon: null, className: '' };
+        }
+    };
+    
+    const planInfo = getPlanInfo();
 
     return (
         <Card>
@@ -45,15 +56,9 @@ export function UserProfileCard() {
                     <p className="text-lg font-bold">{user.id}</p>
                     <p className="text-sm text-muted-foreground">Usuário</p>
                 </div>
-                <div className="flex items-center gap-2 mt-4 sm:mt-0 p-3 rounded-full bg-background">
-                    {isPremiumUser ? (
-                        <>
-                            <Crown className="h-5 w-5 text-yellow-500" />
-                            <span className="font-semibold text-yellow-500">Plano {planName}</span>
-                        </>
-                    ) : (
-                        <span className="font-semibold text-foreground">Plano Básico</span>
-                    )}
+                <div className={cn("flex items-center gap-2 mt-4 sm:mt-0 p-3 rounded-full bg-background", planInfo.className)}>
+                    {planInfo.icon && <planInfo.icon className="h-5 w-5" />}
+                    <span className="font-semibold">Plano {planInfo.name}</span>
                 </div>
             </CardContent>
         </Card>

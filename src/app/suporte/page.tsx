@@ -20,7 +20,7 @@ function SupportForm() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const mailtoLink = `mailto:pvitormc@gmail.com?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(mensagem)}`;
+        const mailtoLink = `mailto:ubercashtxia@gmail.com?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(mensagem)}`;
         window.location.href = mailtoLink;
     };
 
