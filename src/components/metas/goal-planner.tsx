@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DollarSign, CheckCircle, AlertTriangle, Loader2, Target, Calendar, Info, BarChart3, LineChart } from 'lucide-react';
+import { DollarSign, CheckCircle, AlertTriangle, Loader2, Target, Calendar, Info, BarChart3, LineChart, Clock } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { Goals, saveGoals, getGoals } from '@/services/goal.service';
 import { useRouter } from 'next/navigation';
@@ -147,11 +147,11 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
              <Card className="text-center p-4 bg-secondary">
                 <CardDescription className="flex items-center justify-center gap-2 text-foreground font-bold"><LineChart className="w-4 h-4 text-primary"/>Meta Semanal</CardDescription>
-                <p className="text-2xl font-bold text-foreground">{formatCurrency(calculatedGoals.weekly)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(calculatedGoals.weekly)}</p>
              </Card>
              <Card className="text-center p-4 bg-secondary">
                 <CardDescription className="flex items-center justify-center gap-2 text-foreground font-bold"><BarChart3 className="w-4 h-4 text-primary"/>Meta Diária</CardDescription>
-                <p className="text-2xl font-bold text-foreground">{formatCurrency(calculatedGoals.daily)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(calculatedGoals.daily)}</p>
              </Card>
         </div>
         <div className="flex justify-end">
