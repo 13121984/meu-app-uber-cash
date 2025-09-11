@@ -1,15 +1,9 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown, Wallet, Equal } from 'lucide-react';
-import { getSummaryForPeriod } from '@/services/summary.service';
-import { getCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
-import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
-
 
 const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -17,16 +11,10 @@ const formatCurrency = (value: number) => {
 
 const StatCard = ({ title, value, icon: Icon, description, variant }: { title: string, value: string, icon: React.ElementType, description: string, variant: 'income' | 'expense' | 'net' }) => {
     const variantClasses = {
-        income: {
-            bg: "bg-green-500",
-        },
-        expense: {
-            bg: "bg-red-500",
-        },
-        net: {
-            bg: "bg-primary",
-        }
-    }
+        income: { bg: "bg-green-500" },
+        expense: { bg: "bg-red-500" },
+        net: { bg: "bg-primary" },
+    };
 
     return (
         <div className="flex items-start gap-4">
@@ -39,76 +27,16 @@ const StatCard = ({ title, value, icon: Icon, description, variant }: { title: s
                 <p className="text-xs text-muted-foreground">{description}</p>
             </div>
         </div>
-    )
+    );
 };
 
+interface FinancialSummaryProps {
+    monthlyProfit: number;
+    personalExpenses: number;
+}
 
-export function FinancialSummary() {
-    const { user } = useAuth();
-    const [monthlyProfit, setMonthlyProfit] = useState(0);
-    const [personalExpenses, setPersonalExpenses] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        if (!user) {
-            setIsLoading(false);
-            return;
-        };
-
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                const [summary, expenses] = await Promise.all([
-                    getSummaryForPeriod(user.id),
-                    getCurrentMonthPersonalExpensesTotal(user.id)
-                ]);
-                setMonthlyProfit(summary.mes.totalLucro);
-                setPersonalExpenses(expenses);
-            } catch (error) {
-                console.error("Failed to load financial summary data", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchData();
-    }, [user]);
-
+export function FinancialSummary({ monthlyProfit, personalExpenses }: FinancialSummaryProps) {
     const netResult = monthlyProfit - personalExpenses;
-
-    if (isLoading) {
-        return (
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-8 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="flex gap-4 items-center">
-                        <Skeleton className="h-14 w-14 rounded-full" />
-                        <div className="space-y-2">
-                             <Skeleton className="h-4 w-24" />
-                             <Skeleton className="h-6 w-32" />
-                        </div>
-                    </div>
-                     <div className="flex gap-4 items-center">
-                        <Skeleton className="h-14 w-14 rounded-full" />
-                        <div className="space-y-2">
-                             <Skeleton className="h-4 w-24" />
-                             <Skeleton className="h-6 w-32" />
-                        </div>
-                    </div>
-                    <hr/>
-                    <div className="flex gap-4 items-center">
-                        <Skeleton className="h-14 w-14 rounded-full" />
-                        <div className="space-y-2">
-                             <Skeleton className="h-4 w-24" />
-                             <Skeleton className="h-6 w-32" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
     
     return (
         <Card className="shadow-lg">

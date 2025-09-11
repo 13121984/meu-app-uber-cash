@@ -35,8 +35,11 @@ const SummaryCard = ({ title, value, description, icon: Icon, iconClassName }: {
     </Card>
 );
 
-export function PersonalExpenseTracker() {
-  const router = useRouter();
+interface PersonalExpenseTrackerProps {
+  onExpensesChange: () => void;
+}
+
+export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrackerProps) {
   const { user } = useAuth();
   const [records, setRecords] = useState<PersonalExpense[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -60,13 +63,14 @@ export function PersonalExpenseTracker() {
       .reduce((sum, record) => sum + record.amount, 0);
   }, [records]);
 
-  const handleSuccess = () => {
+  const handleSuccess = async () => {
     setIsFormOpen(false);
     setSelectedRecord(null);
     if (!user) return;
     startTransition(async () => {
         const data = await getPersonalExpenses(user.id);
         setRecords(data);
+        onExpensesChange(); // Notifica o componente pai
     });
   }
 
@@ -81,10 +85,7 @@ export function PersonalExpenseTracker() {
     const result = await deletePersonalExpense(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Despesa apagada." });
-      startTransition(async () => {
-          const data = await getPersonalExpenses(user.id);
-          setRecords(data);
-      });
+      handleSuccess(); // Re-fetch e notifica o pai
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }
@@ -98,6 +99,7 @@ export function PersonalExpenseTracker() {
     if(result.success) {
       toast({ title: "Sucesso!", description: "Todas as despesas foram apagadas." });
       setRecords([]);
+      onExpensesChange(); // Notifica o pai
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }

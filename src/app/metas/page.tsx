@@ -1,26 +1,63 @@
 
 "use client";
 
-import { GoalPlanner } from '@/components/metas/goal-planner';
-import { FinancialGoalCalculator } from '@/components/metas/financial-goal-calculator';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/auth-context';
+import { Loader2, Target, Calculator, Wallet, Gem, BarChart3 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card } from '@/components/ui/card';
-import { Target, Calculator, Wallet, Loader2, Gem, BarChart3 } from 'lucide-react';
+import { GoalPlanner } from '@/components/metas/goal-planner';
+import { FinancialGoalCalculator } from '@/components/metas/financial-goal-calculator';
 import { PersonalExpenseTracker } from '@/components/metas/personal-expense-tracker';
 import { FinancialSummary } from '@/components/metas/financial-summary';
 import { ProfitabilityAudit } from '@/components/metas/profitability-audit';
-import { useAuth } from '@/contexts/auth-context';
+import { getSummaryForPeriod } from '@/services/summary.service';
+import { getCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
 
 export default function MetasPage() {
-    const { loading, isPro } = useAuth();
-    if (loading) {
+    const { user, loading, isPro } = useAuth();
+    const [monthlyProfit, setMonthlyProfit] = useState(0);
+    const [personalExpenses, setPersonalExpenses] = useState(0);
+    const [isDataLoading, setIsDataLoading] = useState(true);
+
+    const fetchData = async () => {
+        if (!user) {
+            setIsDataLoading(false);
+            return;
+        }
+        setIsDataLoading(true);
+        try {
+            const [summary, expenses] = await Promise.all([
+                getSummaryForPeriod(user.id),
+                getCurrentMonthPersonalExpensesTotal(user.id)
+            ]);
+            setMonthlyProfit(summary.mes.totalLucro);
+            setPersonalExpenses(expenses);
+        } catch (error) {
+            console.error("Failed to load financial data for MetasPage", error);
+        } finally {
+            setIsDataLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [user]);
+
+    const handleExpensesChange = () => {
+        // This function is called by the child component to trigger a data refresh.
+        fetchData();
+    };
+
+    if (loading || isDataLoading) {
         return (
             <div className="flex justify-center items-center h-64">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
         );
     }
-  return (
+  
+    return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold font-headline">Planejamento Financeiro</h1>
@@ -28,7 +65,7 @@ export default function MetasPage() {
       </div>
 
       {/* Resumo do Mês no topo, sempre visível */}
-      <FinancialSummary />
+      <FinancialSummary monthlyProfit={monthlyProfit} personalExpenses={personalExpenses} />
 
       {/* Ferramentas abaixo, dentro de acordeões */}
       <div className="space-y-4">
@@ -98,7 +135,7 @@ export default function MetasPage() {
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="p-6 pt-0">
-                    <PersonalExpenseTracker />
+                        <PersonalExpenseTracker onExpensesChange={handleExpensesChange} />
                     </AccordionContent>
                 </AccordionItem>
             </Card>
