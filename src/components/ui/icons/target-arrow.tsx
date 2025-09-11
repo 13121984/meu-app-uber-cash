@@ -9,23 +9,18 @@ export function IconTargetArrow(props: SVGProps<SVGSVGElement>) {
       height="1em" 
       viewBox="0 0 24 24" 
       {...props}
-      fill="none" // Garantir que não haja preenchimento padrão
-      stroke="currentColor" // Usar a cor do texto por padrão
     >
         {/* Círculo externo vermelho */}
-        <circle cx="12" cy="12" r="10" stroke="#ef4444" strokeWidth="2" fill="none" />
+        <circle cx="12" cy="12" r="10" fill="#ef4444"/>
         
-        {/* Círculo do meio vermelho */}
-        <circle cx="12" cy="12" r="6" stroke="#ef4444" strokeWidth="2" fill="none"/>
+        {/* Círculo do meio branco */}
+        <circle cx="12" cy="12" r="7" fill="white"/>
         
-        {/* Círculo interno (alvo) vermelho */}
-        <circle cx="12" cy="12" r="2" fill="#ef4444" stroke="#ef4444" strokeWidth="1"/>
-
-        {/* Flecha preta */}
-        <path d="M12 14L12 22" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        {/* Círculo interno vermelho */}
+        <circle cx="12" cy="12" r="4" fill="#ef4444"/>
         
-        {/* Penas da flecha (vermelhas) */}
-        <path d="M15 19L12 22L9 19" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        {/* Alvo central (ponta da flecha) */}
+        <circle cx="12" cy="12" r="1.5" fill="black"/>
     </svg>
   );
 }
