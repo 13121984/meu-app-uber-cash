@@ -6,7 +6,12 @@
     "securityAnswers": [],
     "vehicles": [],
     "preferences": {
-      "colorTheme": "green"
+      "colorTheme": "purple",
+      "taximeterRates": {
+        "startingFare": 3,
+        "ratePerKm": 2.5,
+        "ratePerMinute": 0
+      }
     }
   },
   {

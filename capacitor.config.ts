@@ -1,13 +1,15 @@
+
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.uber.cash',
-  appName: 'Uber Cash TX IA',
+  appName: 'Uber Cash', // Nome mais curto para a home screen do celular
   webDir: 'out',
   bundledWebRuntime: false,
   server: {
-    // Isso é para desenvolvimento com live reload. Para produção, o webDir é usado.
-    // url: 'http://192.168.0.10:3000', // Substitua pelo seu IP local
+    // A configuração do servidor é usada para desenvolvimento com live reload.
+    // Para a versão de produção, o Capacitor usa o conteúdo da pasta `out`.
+    // url: 'http://192.168.0.10:3000', // Exemplo: Substitua pelo seu IP local para testes
     // cleartext: true
   },
    plugins: {
