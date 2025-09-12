@@ -1,7 +1,7 @@
 
 "use client";
 
-import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck, MessageSquarePlus, MessageCircleQuestion, Share2, Handshake, Users, Trash, Eye, Notebook, FileDown } from "lucide-react";
+import { LifeBuoy, PlusCircle, History, BarChart3, Target, Calculator, LayoutDashboard, Gem, Sparkles, Wallet, Smartphone, Rocket, Lightbulb, UserCog, CodeXml, DollarSign, Link as LinkIcon, Compass, Accessibility, BotMessageSquare, ShieldCheck, MessageSquarePlus, MessageCircleQuestion, Share2, Handshake, Users, Trash, Eye, Notebook, FileDown, Github } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -309,6 +309,79 @@ export default function AjudaPage() {
                                     <h4>Como Falar Comigo</h4>
                                     <p>Para me pedir para fazer alterações, basta me dizer o que você quer em linguagem natural. Por exemplo: "Adicione um novo card no dashboard para mostrar o total de viagens." Eu vou entender, criar um plano e gerar o código XML necessário para aplicar as mudanças. Você não precisa escrever o XML.</p>
                                 </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="github-sync">
+                                <AccordionTrigger>
+                                    <div className="flex items-center gap-2">
+                                        <Github className="h-5 w-5 text-primary" />
+                                        <span className="font-semibold text-left">Manual: Backup do Código no GitHub</span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                                        <p>Salvar seu código em uma fonte externa como o GitHub é a melhor forma de garantir que você nunca perca seu trabalho. Este guia mostra como fazer isso pela primeira vez.</p>
+                                        <h5 className="font-semibold mt-2">Parte 1: Preparando o GitHub</h5>
+                                        <ol>
+                                            <li><strong>Crie uma Conta:</strong> Se ainda não tiver, acesse <a href="https://github.com/join" target="_blank" rel="noopener noreferrer">github.com/join</a> e crie uma conta gratuita.</li>
+                                            <li>
+                                                <strong>Crie um Novo Repositório:</strong>
+                                                <ul>
+                                                   <li>No canto superior direito, clique no sinal de "+" e selecione <strong>"New repository"</strong>.</li>
+                                                   <li>Dê um nome para seu repositório (ex: <code>meu-app-uber-cash</code>).</li>
+                                                   <li>Deixe a opção <strong>"Public"</strong> marcada por enquanto (é mais fácil para começar).</li>
+                                                   <li><strong>Importante:</strong> NÃO marque nenhuma das caixas "Initialize this repository with". Deixe-as desmarcadas.</li>
+                                                   <li>Clique em <strong>"Create repository"</strong>.</li>
+                                                </ul>
+                                            </li>
+                                             <li><strong>Copie a URL do Repositório:</strong> Na próxima página, o GitHub mostrará alguns comandos. Copie a URL que aparece na seção "...or push an existing repository from the command line". Ela será algo como <code>https://github.com/seu-usuario/seu-repositorio.git</code>.</li>
+                                        </ol>
+                                        
+                                        <h5 className="font-semibold mt-4">Parte 2: Sincronizando seu Projeto (Primeira Vez)</h5>
+                                        <p>Agora, vamos enviar o código do Firebase Studio para o seu novo repositório no GitHub. Você fará isso usando o terminal aqui no ambiente de desenvolvimento.</p>
+                                        <ol>
+                                            <li><strong>Abra o Terminal:</strong> Use o terminal integrado do Firebase Studio.</li>
+                                            <li>
+                                                <strong>Inicialize o Git:</strong> O Git é o sistema que controla as versões do seu código. Se for a primeira vez, rode este comando:
+                                                <br/>
+                                                <code className="bg-muted px-1 py-0.5 rounded">git init</code>
+                                            </li>
+                                             <li>
+                                                <strong>Configure seu Nome e Email (se for a primeira vez):</strong>
+                                                <br/>
+                                                <code className="block bg-muted px-1 py-0.5 rounded">git config --global user.name "Seu Nome"</code>
+                                                <code className="block bg-muted px-1 py-0.5 rounded">git config --global user.email "seu-email@exemplo.com"</code>
+                                            </li>
+                                            <li>
+                                                <strong>Adicione a URL do seu Repositório:</strong> Diga ao Git para onde enviar o código. Substitua a URL pela que você copiou do GitHub:
+                                                <br/>
+                                                <code className="bg-muted px-1 py-0.5 rounded">git remote add origin https://github.com/seu-usuario/seu-repositorio.git</code>
+                                            </li>
+                                             <li>
+                                                <strong>Adicione Todos os Arquivos:</strong> Prepare todos os arquivos do projeto para serem enviados:
+                                                <br/>
+                                                <code className="bg-muted px-1 py-0.5 rounded">git add .</code>
+                                            </li>
+                                            <li>
+                                                <strong>Crie um "Pacote" (Commit):</strong> Crie um ponto na história do seu projeto com uma mensagem descritiva:
+                                                <br/>
+                                                <code className="bg-muted px-1 py-0.5 rounded">git commit -m "Primeiro commit: versão inicial do projeto"</code>
+                                            </li>
+                                            <li>
+                                                <strong>Envie para o GitHub:</strong> Finalmente, envie tudo para o seu repositório online.
+                                                <br/>
+                                                <code className="bg-muted px-1 py-0.5 rounded">git push -u origin master</code>
+                                                <br/>
+                                                <em>Pode ser que o nome da branch principal seja `main`. Se `master` der erro, tente `git push -u origin main`.</em>
+                                            </li>
+                                        </ol>
+                                        <p className="mt-4"><strong>Pronto!</strong> Se você atualizar a página do seu repositório no GitHub, verá todos os arquivos do seu projeto lá. Agora seu trabalho está seguro.</p>
+                                         <h5 className="font-semibold mt-4">Como Manter Sincronizado</h5>
+                                         <p>Após fazer novas alterações aqui no Firebase Studio, para salvar a nova versão no GitHub, basta rodar os seguintes comandos no terminal:</p>
+                                          <code className="block bg-muted px-1 py-0.5 rounded">git add .</code>
+                                          <code className="block bg-muted px-1 py-0.5 rounded">git commit -m "Descreva o que você mudou aqui"</code>
+                                          <code className="block bg-muted px-1 py-0.5 rounded">git push</code>
+                                    </div>
                                 </AccordionContent>
                             </AccordionItem>
                              <AccordionItem value="user-management">
