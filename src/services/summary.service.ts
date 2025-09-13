@@ -1,6 +1,4 @@
 
-'use server';
-
 import { getFile, saveFile } from './storage.service';
 
 // --- Interfaces ---
@@ -61,7 +59,7 @@ export const defaultSummaryData: SummaryData = {
 };
 
 
-// --- Funções do Serviço ---
+// --- Funções do Serviço (Puras) ---
 
 export async function getSummaryData(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
@@ -82,9 +80,4 @@ export async function getTodayData(userId: string): Promise<PeriodData> {
     if (!userId) return defaultPeriodData;
     const summary = await getSummaryData(userId);
     return summary.hoje;
-}
-
-export async function getSummaryForPeriod(userId: string): Promise<SummaryData> {
-    if (!userId) return defaultSummaryData;
-    return await getSummaryData(userId);
 }

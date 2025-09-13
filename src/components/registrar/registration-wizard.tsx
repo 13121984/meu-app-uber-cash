@@ -1,6 +1,5 @@
 
-
-"use client";
+'use client';
 
 import React, { useState, useReducer, useEffect } from 'react';
 import { Check, Loader2, CheckCircle, AlertTriangle, Edit, Trash2, PlusCircle, Car, MapPin, DollarSign, Gauge, Pencil } from 'lucide-react';
@@ -14,7 +13,7 @@ import { toast } from "@/hooks/use-toast"
 import { useRouter } from 'next/navigation';
 import { parseISO, startOfDay } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
-import { updateWorkDayAction, deleteWorkDayEntryAction } from '@/app/gerenciamento/actions';
+import { addOrUpdateWorkDayAction, deleteWorkDayEntryAction } from '@/app/gerenciamento/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,7 +67,7 @@ const getInitialState = (initialData?: Partial<WorkDay>, registrationType: 'toda
     if(initialData?.date) {
         date = typeof initialData.date === 'string' ? parseISO(initialData.date) : initialData.date;
     } else {
-        date = registrationType === 'today' ? startOfDay(new Date()) : new Date(); // Use new Date() for 'other-day' to allow user input
+        date = registrationType === 'today' ? startOfDay(new Date()) : startOfDay(new Date());
     }
 
     return {
@@ -187,8 +186,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     
     try {
       const { maintenanceEntries, ...workDayData } = state;
-      // Use the server action to ensure sequential updates
-      const result = await updateWorkDayAction(user.id, workDayData as WorkDay);
+      const result = await addOrUpdateWorkDayAction(user.id, workDayData as WorkDay);
       
       if (result.success) {
         toast({
@@ -305,7 +303,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
              <CardHeader>
                 <CardTitle className="font-headline">{entryBeingEdited ? 'Editando Período' : 'Novo Registro'}</CardTitle>
                 <CardDescription>Percorra a estrada do registro em {steps.length} etapas.</CardDescription>
-                {/* Stepper */}
                 <div className="pt-4">
                     <div className="relative">
                         <div className="absolute top-1/2 left-0 w-full h-0.5 bg-border -translate-y-1/2"></div>

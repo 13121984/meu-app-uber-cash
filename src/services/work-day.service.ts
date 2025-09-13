@@ -1,6 +1,4 @@
 
-'use server';
-
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
@@ -68,7 +66,6 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
   try {
     const allWorkDays = await readWorkDays(userId);
     
-    // Garante que a data está no início do dia, ignorando fuso horário
     const finalDate = startOfDay(new Date(data.date));
 
     if (data.id && data.id !== 'today' && data.id !== 'other-day') {
@@ -102,10 +99,9 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         let allWorkDays = await readWorkDays(userId);
         const workDaysToUpsert: WorkDay[] = [];
 
-        // Agrupa todas as linhas do CSV pela data
         const groupedByDate = new Map<string, ImportedWorkDay[]>();
         for (const row of importedData) {
-            if (!row.date) continue; // Pula linhas sem data
+            if (!row.date) continue;
             const dateKey = row.date;
             if (!groupedByDate.has(dateKey)) {
                 groupedByDate.set(dateKey, []);
@@ -113,11 +109,9 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
             groupedByDate.get(dateKey)!.push(row);
         }
 
-        // Processa cada grupo de data
         for (const [dateKey, rows] of groupedByDate.entries()) {
-            const date = startOfDay(parseISO(dateKey)); // Garante a data sem fuso
+            const date = startOfDay(parseISO(dateKey));
 
-            // Junta os dados de todas as linhas de um mesmo dia
             const dailyKm = rows.reduce((max, row) => Math.max(max, parseFloat(row.km?.replace(',', '.')) || 0), 0);
             const dailyHours = rows.reduce((max, row) => Math.max(max, parseFloat(row.hours?.replace(',', '.')) || 0), 0);
 
@@ -147,7 +141,6 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
                     amount: parseFloat(row.maintenance_amount.replace(',', '.')) || 0
                 }));
 
-            // Cria um único WorkDay para a data, consolidando todos os dados
             workDaysToUpsert.push({
                 id: Date.now().toString() + dateKey,
                 date: date,
@@ -156,7 +149,7 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
                 earnings,
                 fuelEntries,
                 maintenanceEntries,
-                timeEntries: [], // timeEntries não são importados por CSV
+                timeEntries: [],
             });
         }
         
@@ -209,7 +202,6 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
 
 // --- Funções de Gerenciamento de Dados ---
 
-// Internal demo data, to avoid file system issues during build
 const demoData: Omit<WorkDay, 'date'> & { date: string }[] = [
   { "id": "demo-1", "date": "2024-12-31", "km": 120.8, "hours": 10, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 19, "amount": 172 }, { "id": 2, "category": "Uber Cash", "trips": 4, "amount": 55.46 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 56.33, "price": 4.99 }, { "id": 2, "type": "Etanol", "paid": 50.9, "price": 5.09 } ], "maintenanceEntries": [] },
   { "id": "demo-2", "date": "2024-12-30", "km": 88, "hours": 6, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 16, "amount": 168.8 } ], "fuelEntries": [], "maintenanceEntries": [] },
@@ -389,12 +381,10 @@ function escapeCsvValue(value: any): string {
     if (value === null || value === undefined) return '';
     let stringValue = String(value);
 
-    // Para números, substitui ponto por vírgula para manter consistência com Excel em português
     if (typeof value === 'number') {
         stringValue = stringValue.replace('.', ',');
     }
     
-    // Se o valor contém vírgula, aspas ou quebra de linha, envolve com aspas
     if (/[",\r\n]/.test(stringValue)) {
         return `"${stringValue.replace(/"/g, '""')}"`;
     }
@@ -408,7 +398,6 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
 
     const rows: string[][] = [];
 
-    // Ordena os dias de trabalho pela data, do mais antigo para o mais recente, para uma planilha lógica
     const sortedWorkDays = workDays.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     sortedWorkDays.forEach(day => {
@@ -418,7 +407,7 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
             day.earnings.length,
             day.fuelEntries.length,
             day.maintenanceEntries.length,
-            1 // Garante pelo menos uma linha para o dia
+            1
         );
 
         for (let i = 0; i < maxEntries; i++) {
@@ -449,6 +438,5 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
         ...rows.map(row => row.join(','))
     ].join('\n');
 
-    // Retornamos o conteúdo em vez de acionar o download no servidor
     return csvContent;
 }

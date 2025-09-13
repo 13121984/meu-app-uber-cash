@@ -1,6 +1,5 @@
 
-
-"use client";
+'use client';
 
 import { useState, useTransition, useEffect, useCallback } from "react";
 import { useWorkDayColumns } from "./columns";
@@ -75,7 +74,7 @@ export function GerenciamentoClient() {
         const to = searchParams.get('to');
         const filtersFromUrl: ReportFilterValues = { type: period as any };
         if (year) filtersFromUrl.year = parseInt(year);
-        if (month) filtersFromUrl.month = parseInt(month);
+        if (month !== null) filtersFromUrl.month = parseInt(month);
         if (from) {
             filtersFromUrl.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
         }
@@ -83,6 +82,10 @@ export function GerenciamentoClient() {
         if (JSON.stringify(filtersFromUrl) !== JSON.stringify(currentFilters)) {
             handleApplyFilters(filtersFromUrl);
         }
+    } else if (user && !period) {
+        // Aplica um filtro padrão (Este Mês) se nenhum filtro estiver na URL
+        const defaultFilters: ReportFilterValues = { type: 'thisMonth' };
+        handleApplyFilters(defaultFilters);
     }
   }, [user, searchParams, currentFilters, handleApplyFilters]);
 

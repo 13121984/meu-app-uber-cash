@@ -2,16 +2,24 @@
 'use server';
 
 import { revalidatePath } from "next/cache";
-import { deleteWorkDaysByFilter, addOrUpdateWorkDay, deleteWorkDayEntry, getWorkDays, WorkDay } from "@/services/work-day.service";
+import { 
+    getWorkDays, 
+    addOrUpdateWorkDay as serviceAddOrUpdateWorkDay, 
+    deleteWorkDayEntry as serviceDeleteWorkDayEntry, 
+    deleteWorkDaysByFilter as serviceDeleteWorkDaysByFilter, 
+    WorkDay 
+} from "@/services/work-day.service";
 import type { ReportFilterValues } from "@/app/relatorios/actions";
-import { getGoals, Goals, saveGoals } from "@/services/goal.service";
+import { getGoals, Goals, saveGoals as serviceSaveGoals } from "@/services/goal.service";
 import { getMaintenanceRecords, Maintenance } from "@/services/maintenance.service";
-import { SummaryData, saveSummaryData, PeriodData } from "@/services/summary.service";
+import { SummaryData, saveSummaryData, PeriodData, getSummaryData, defaultSummaryData } from "@/services/summary.service";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { getCatalog, Catalog, saveCatalog as serviceSaveCatalog } from "@/services/catalog.service";
+import { runBackupAction as serviceRunBackupAction, BackupInput, BackupOutput } from "@/ai/flows/backup-flow";
 
-// --- Funções de Cálculo Internas ---
+// --- Lógica de Cálculo Centralizada ---
 
-// Esta função agora vive aqui para evitar dependências cíclicas.
+// Esta função agora vive aqui e é a única fonte da verdade para cálculos.
 async function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): Promise<PeriodData> {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
@@ -122,7 +130,6 @@ async function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'sem
     };
 }
 
-
 async function updateAllSummaries(userId: string) {
     const allWorkDays = await getWorkDays(userId);
     const allMaintenance = await getMaintenanceRecords(userId);
@@ -147,10 +154,10 @@ async function updateAllSummaries(userId: string) {
     await saveSummaryData(userId, newSummaryData);
 }
 
-// --- Server Actions Exportadas ---
+// --- Server Actions Exportadas (Wrappers) ---
 
-export async function updateWorkDayAction(userId: string, workDay: WorkDay) {
-    const result = await addOrUpdateWorkDay(userId, workDay);
+export async function addOrUpdateWorkDayAction(userId: string, workDay: WorkDay) {
+    const result = await serviceAddOrUpdateWorkDay(userId, workDay);
     if (result.success) {
         await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
@@ -159,7 +166,7 @@ export async function updateWorkDayAction(userId: string, workDay: WorkDay) {
 }
 
 export async function deleteWorkDayEntryAction(userId: string, workDayId: string) {
-    const result = await deleteWorkDayEntry(userId, workDayId);
+    const result = await serviceDeleteWorkDayEntry(userId, workDayId);
     if (result.success) {
         await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
@@ -168,10 +175,36 @@ export async function deleteWorkDayEntryAction(userId: string, workDayId: string
 }
 
 export async function deleteFilteredWorkDaysAction(userId: string, filters: ReportFilterValues) {
-    const result = await deleteWorkDaysByFilter(userId, filters);
+    const result = await serviceDeleteWorkDaysByFilter(userId, filters);
     if (result.success) {
         await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
+    }
+    return result;
+}
+
+export async function saveGoalsAction(userId: string, goals: Goals): Promise<{ success: boolean; error?: string }> {
+    const result = await serviceSaveGoals(userId, goals);
+    if (result.success) {
+        await updateAllSummaries(userId);
+        revalidatePath('/', 'layout');
+    }
+    return result;
+}
+
+export async function saveCatalogAction(catalog: Catalog): Promise<{ success: boolean; error?: string }> {
+    const result = await serviceSaveCatalog(catalog);
+    if (result.success) {
+        revalidatePath('/configuracoes/catalogos');
+        revalidatePath('/registrar', 'layout');
+    }
+    return result;
+}
+
+export async function runBackupAction(input: BackupInput): Promise<BackupOutput> {
+    const result = await serviceRunBackupAction(input);
+    if (result.success) {
+        revalidatePath('/configuracoes/backup');
     }
     return result;
 }
@@ -179,32 +212,4 @@ export async function deleteFilteredWorkDaysAction(userId: string, filters: Repo
 export async function updateAllSummariesAction(userId: string) {
     await updateAllSummaries(userId);
     revalidatePath('/', 'layout');
-}
-
-export async function saveGoalsAction(userId: string, goals: Goals): Promise<{ success: boolean; error?: string }> {
-    const result = await saveGoals(userId, goals);
-    if (result.success) {
-        await updateAllSummaries(userId);
-        revalidatePath('/', 'layout');
-    }
-    return result;
-}
-
-export async function saveCatalogAction(catalog: import("@/services/catalog.service").Catalog): Promise<{ success: boolean; error?: string }> {
-    const result = await require('@/services/catalog.service').saveCatalog(catalog);
-    if (result.success) {
-        revalidatePath('/configuracoes', 'layout');
-        revalidatePath('/registrar', 'layout');
-        revalidatePath('/dashboard');
-        revalidatePath('/relatorios');
-    }
-    return result;
-}
-
-export async function runBackupAction(input: import("@/ai/flows/backup-flow").BackupInput): Promise<import("@/ai/flows/backup-flow").BackupOutput> {
-    const result = await require('@/ai/flows/backup-flow').runBackupAction(input);
-    if (result.success) {
-        revalidatePath('/configuracoes/backup');
-    }
-    return result;
 }

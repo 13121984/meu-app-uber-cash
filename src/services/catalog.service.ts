@@ -1,6 +1,4 @@
 
-"use server";
-
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -17,7 +15,6 @@ export interface Catalog {
 
 const dataFilePath = path.join(process.cwd(), 'data', 'catalog.json');
 
-// Defines the base, non-deletable categories.
 const defaultCatalog: Catalog = {
   earnings: [
     { name: "99 Pop", active: true, isDefault: true },
@@ -42,26 +39,17 @@ async function readCatalogFile(): Promise<Partial<Catalog>> {
     try {
         await fs.access(dataFilePath);
         const fileContent = await fs.readFile(dataFilePath, 'utf8');
-        if (!fileContent) {
-            return {};
-        }
-        // Adiciona um bloco try-catch em volta do JSON.parse
-        try {
-            return JSON.parse(fileContent);
-        } catch (parseError) {
-            console.error("Error parsing catalog.json, returning empty object:", parseError);
-            return {}; // Retorna objeto vazio se o JSON for inválido
-        }
+        return fileContent ? JSON.parse(fileContent) : {};
     } catch (error) {
-        // If file doesn't exist, return empty object
+        if (error instanceof SyntaxError) {
+             console.error("Error parsing catalog.json, returning empty object:", error);
+             return {};
+        }
+        // If file doesn't exist or other read error
         return {};
     }
 }
 
-
-/**
- * Busca o catálogo de categorias do arquivo local.
- */
 export async function getCatalog(): Promise<Catalog> {
   const data = await readCatalogFile();
   
@@ -70,25 +58,21 @@ export async function getCatalog(): Promise<Catalog> {
       const finalItems: CatalogItem[] = [];
       const usedNames = new Set<string>();
 
-      // 1. Iterate through the hardcoded defaults
       defaults.forEach(defaultItem => {
           const savedItem = savedMap.get(defaultItem.name);
           finalItems.push({
               name: defaultItem.name,
-              // isDefault is the source of truth from the hardcoded list
               isDefault: defaultItem.isDefault, 
-              // active state is preserved from the user's saved data, otherwise use default
               active: savedItem?.active ?? defaultItem.active, 
           });
           usedNames.add(defaultItem.name);
       });
 
-      // 2. Add custom items created by premium users that are not in the default list
       saved.forEach(savedItem => {
           if (!usedNames.has(savedItem.name)) {
               finalItems.push({
                   ...savedItem,
-                  isDefault: false, // Ensure custom items are never default
+                  isDefault: false,
               });
           }
       });
@@ -100,14 +84,18 @@ export async function getCatalog(): Promise<Catalog> {
       earnings: mergeCatalogs(defaultCatalog.earnings, data.earnings),
       fuel: mergeCatalogs(defaultCatalog.fuel, data.fuel)
   };
+  
+  // Ensure the file is created with default data if it was missing or corrupt
+  try {
+    await fs.access(dataFilePath);
+    // If access is fine, we do nothing.
+  } catch {
+    await saveCatalog(finalCatalog);
+  }
 
   return finalCatalog;
 }
 
-
-/**
- * Salva o catálogo de categorias no arquivo local.
- */
 export async function saveCatalog(catalog: Catalog): Promise<{ success: boolean, error?: string }> {
   try {
     await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
