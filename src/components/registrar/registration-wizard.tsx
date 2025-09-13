@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useReducer, useEffect } from 'react';
-import { Check, Loader2, CheckCircle, AlertTriangle, Edit, Trash2, PlusCircle, Car, MapPin, DollarSign, Gauge, Pencil } from 'lucide-react';
+import { Check, Loader2, CheckCircle, AlertTriangle, Edit, Trash2, PlusCircle, Car, MapPin, DollarSign, Gauge, Pencil, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Step1Info } from './step1-info';
@@ -351,12 +351,17 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         
         <div className="flex justify-between items-center">
             {entryBeingEdited ? (
-                <Button variant="outline" onClick={() => setEntryBeingEdited(null)} disabled={isSubmitting}>
-                    Cancelar Edição
-                </Button>
+                <div>
+                    <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
+                        <ArrowLeft className="mr-2" /> Voltar
+                    </Button>
+                     <Button variant="ghost" className="ml-2" onClick={() => setEntryBeingEdited(null)} disabled={isSubmitting}>
+                        Cancelar Edição
+                    </Button>
+                </div>
             ) : (
                 <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
-                    Voltar
+                    <ArrowLeft className="mr-2" /> Voltar
                 </Button>
             )}
 

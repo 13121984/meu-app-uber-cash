@@ -200,7 +200,7 @@ export async function updateAllSummaries(userId: string): Promise<void> {
     if (!userId) return;
 
     const allWorkDays = await getWorkDays(userId);
-    const allMaintenance = await getMaintenanceRecords(userId);
+    const allMaintenance = await getFilteredMaintenanceRecords(userId); // Use getFiltered sem filtros para pegar todos.
     const goals = await getGoals(userId);
 
     const hojeWorkDays = getFilteredWorkDays(allWorkDays, { type: 'today' });
@@ -228,7 +228,7 @@ export async function updateAllSummaries(userId: string): Promise<void> {
 
 export async function generateReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
     const allWorkDays = await getWorkDays(userId);
-    const allMaintenance = await getMaintenanceRecords(userId);
+    const allMaintenance = await getFilteredMaintenanceRecords(userId);
 
     const filteredWorkDays = getFilteredWorkDays(allWorkDays, filters);
     const filteredMaintenance = getFilteredMaintenanceRecords(allMaintenance, filters);
