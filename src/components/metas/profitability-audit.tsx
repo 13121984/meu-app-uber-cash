@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { getReportData, PeriodData, AverageEarningByCategory } from '@/services/summary.service';
+import { generateReportData, AverageEarningByCategory } from '@/services/summary.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, TrendingUp, TrendingDown, CheckCircle, BarChart3, Calendar, Award } from 'lucide-react';
@@ -58,11 +58,11 @@ export function ProfitabilityAudit() {
                 // CORREÇÃO: Construir filtro explícito para o mês atual
                 const now = new Date();
                 const filters = {
-                    type: 'specificMonth',
+                    type: 'specificMonth' as const,
                     month: getMonth(now),
                     year: getYear(now),
                 };
-                const report = await getReportData(user!.id, filters);
+                const report = await generateReportData(user!.id, filters);
                 
                 let bestDay: Insight['bestDay'] = null;
                 let worstDay: Insight['worstDay'] = null;
