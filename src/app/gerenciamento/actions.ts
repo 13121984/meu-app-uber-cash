@@ -24,7 +24,6 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getSettings as serviceGetSettings } from '@/services/settings.service';
 import type { Settings } from '@/types/settings';
 import { getMaintenanceRemindersAction as serviceGetMaintenanceReminders } from '@/app/inicio/actions';
-import { runBackupFlow as runBackupFlowAction } from '@/app/configuracoes/backup/actions';
 import type { BackupInput, BackupOutput } from '@/ai/flows/backup-flow';
 
 
@@ -151,10 +150,6 @@ export async function saveCatalogAction(catalog: Catalog) {
 
 export async function getCatalogAction(): Promise<Catalog> {
     return await serviceGetCatalogData();
-}
-
-export async function runBackupAction(input: BackupInput): Promise<BackupOutput> {
-    return await runBackupFlowAction(input);
 }
 
 export async function clearAllDataForUserAction(userId: string) {
