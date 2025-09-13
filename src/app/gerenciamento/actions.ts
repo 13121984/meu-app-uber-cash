@@ -19,12 +19,14 @@ import { getGoals, Goals, saveGoals as serviceSaveGoals } from '@/services/goal.
 import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUpdateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance as serviceDeleteAllMaintenance } from '@/services/maintenance.service';
 import { addPersonalExpense as serviceAddPersonalExpense, updatePersonalExpense as serviceUpdatePersonalExpense, deletePersonalExpense as serviceDeletePersonalExpense, deleteAllPersonalExpenses as serviceDeleteAllPersonalExpenses } from '@/services/personal-expense.service';
 import { saveCatalogData, getCatalogData as serviceGetCatalogData, Catalog } from '@/services/catalog.service';
-import { runBackupAction as serviceRunBackupAction, BackupInput, BackupOutput } from "@/ai/flows/backup-flow";
 import { updateAllSummaries as serviceUpdateAllSummaries } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getSettings as serviceGetSettings } from '@/services/settings.service';
 import type { Settings } from '@/types/settings';
 import { getMaintenanceRemindersAction as serviceGetMaintenanceReminders } from '@/app/inicio/actions';
+import { runBackupFlow as runBackupFlowAction } from '@/app/configuracoes/backup/actions';
+import type { BackupInput, BackupOutput } from '@/ai/flows/backup-flow';
+
 
 export async function addOrUpdateWorkDayAction(userId: string, workDay: any) {
     const result = await serviceAddOrUpdate(userId, workDay);
@@ -152,11 +154,7 @@ export async function getCatalogAction(): Promise<Catalog> {
 }
 
 export async function runBackupAction(input: BackupInput): Promise<BackupOutput> {
-    const result = await serviceRunBackupAction(input);
-    if (result.success) {
-        revalidatePath('/configuracoes/backup');
-    }
-    return result;
+    return await runBackupFlowAction(input);
 }
 
 export async function clearAllDataForUserAction(userId: string) {
