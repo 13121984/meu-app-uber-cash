@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useState, useTransition } from 'react';
@@ -90,13 +92,23 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
           }
 
           toast({
-            title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Catálogos Salvos!</span></div>,
-            description: "Suas categorias foram atualizadas com sucesso.",
+            title: "Catálogos Salvos!",
+            description: (
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>Suas categorias foram atualizadas com sucesso.</span>
+              </div>
+            ),
           });
         } catch (error) {
           toast({
-            title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,
-            description: "Não foi possível salvar os catálogos.",
+            title: "Erro ao Salvar",
+            description: (
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <span>Não foi possível salvar os catálogos.</span>
+              </div>
+            ),
             variant: "destructive",
           });
         }
