@@ -1,3 +1,6 @@
+
+"use server";
+
 import { getFile, saveFile } from './storage.service';
 
 // --- Interfaces ---
@@ -67,7 +70,7 @@ export const defaultSummaryData: SummaryData = {
     mes: { ...defaultPeriodData, meta: { target: 0, period: 'mensal' } },
 };
 
-// --- Funções do Serviço Puras ---
+// --- Funções de Leitura/Escrita ---
 
 export async function getSummaryData(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
@@ -77,4 +80,20 @@ export async function getSummaryData(userId: string): Promise<SummaryData> {
 export async function saveSummaryData(userId: string, data: SummaryData): Promise<void> {
     if (!userId) return;
     await saveFile(userId, FILE_NAME, data);
+}
+
+/**
+ * Retorna os dados de resumo pré-calculados para um usuário.
+ * Esta função apenas lê os dados do arquivo summary.json.
+ */
+export async function getSummaryForPeriod(userId: string): Promise<SummaryData> {
+    return await getSummaryData(userId);
+}
+
+/**
+ * Retorna apenas os dados de resumo do dia atual.
+ */
+export async function getTodayData(userId: string): Promise<PeriodData> {
+    const summary = await getSummaryData(userId);
+    return summary.hoje;
 }
