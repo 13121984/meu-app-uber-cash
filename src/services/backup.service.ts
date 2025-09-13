@@ -26,7 +26,6 @@ export async function getBackupData(userId: string): Promise<Omit<BackupData, 'c
   return {
     lastBackupDate: data.lastBackupDate,
     fileName: data.fileName,
-    csvContent: null,
   };
 }
 
