@@ -1,15 +1,12 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DollarSign, Clock, CalendarDays, TrendingUp } from 'lucide-react';
-import { getReportData, PeriodData } from '@/services/summary.service';
+import { DollarSign, Clock, CalendarDays } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
-import { Alert, AlertDescription } from '../ui/alert';
-import { useAuth } from '@/contexts/auth-context';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -36,9 +33,6 @@ const minutesToDecimal = (minutes: number): number => {
 
 
 export function FinancialGoalCalculator() {
-    const { user } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
-
     const [goalAmount, setGoalAmount] = useState<number | ''>('');
     const [hourlyRate, setHourlyRate] = useState<number | ''>('');
     const [hoursPerDayInput, setHoursPerDayInput] = useState(''); // HH:MM format
@@ -59,10 +53,6 @@ export function FinancialGoalCalculator() {
         const days = hoursPerDayDecimal > 0 ? hours / hoursPerDayDecimal : 0;
         return { totalHoursNeeded: hours, totalDaysNeeded: days };
     }, [goalAmount, hourlyRate, hoursPerDayDecimal]);
-
-    if (isLoading) {
-        return <Skeleton className="h-64 w-full" />;
-    }
 
     return (
         <div className="space-y-6">
