@@ -10,7 +10,7 @@ import { getMaintenanceRecords, Maintenance } from "@/services/maintenance.servi
 import { SummaryData, defaultSummaryData, saveSummaryData, PeriodData } from "@/services/summary.service";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 
-// --- Internal Calculation Logic (Moved from summary.service) ---
+// --- Funções de Cálculo Internas ---
 
 function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
     const earningsByCategoryMap = new Map<string, number>();
@@ -123,7 +123,7 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
 }
 
 
-export async function updateAllSummariesAction(userId: string) {
+async function updateAllSummaries(userId: string) {
     const allWorkDays = await getWorkDays(userId);
     const allMaintenance = await getMaintenanceRecords(userId);
     const goals = await getGoals(userId);
@@ -147,12 +147,12 @@ export async function updateAllSummariesAction(userId: string) {
     await saveSummaryData(userId, newSummaryData);
 }
 
-// --- Server Actions ---
+// --- Server Actions Exportadas ---
 
 export async function updateWorkDayAction(userId: string, workDay: WorkDay) {
     const result = await addOrUpdateWorkDay(userId, workDay);
     if (result.success) {
-        await updateAllSummariesAction(userId);
+        await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
     }
     return result;
@@ -161,7 +161,7 @@ export async function updateWorkDayAction(userId: string, workDay: WorkDay) {
 export async function deleteWorkDayEntryAction(userId: string, workDayId: string) {
     const result = await deleteWorkDayEntry(userId, workDayId);
     if (result.success) {
-        await updateAllSummariesAction(userId);
+        await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
     }
     return result;
@@ -170,8 +170,13 @@ export async function deleteWorkDayEntryAction(userId: string, workDayId: string
 export async function deleteFilteredWorkDaysAction(userId: string, filters: ReportFilterValues) {
     const result = await deleteWorkDaysByFilter(userId, filters);
     if (result.success) {
-        await updateAllSummariesAction(userId);
+        await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
     }
     return result;
+}
+
+export async function updateAllSummariesAction(userId: string) {
+    await updateAllSummaries(userId);
+    revalidatePath('/', 'layout');
 }

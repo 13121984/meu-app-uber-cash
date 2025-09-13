@@ -456,3 +456,4 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
         ...rows.map(row => row.join(';'))
     ].join('\n');
 }
+

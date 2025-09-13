@@ -81,9 +81,9 @@ export async function getSummaryData(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
     const data = await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
     // Ensure the meta period is set correctly if files are old
-    data.hoje.meta.period = 'diária';
-    data.semana.meta.period = 'semanal';
-    data.mes.meta.period = 'mensal';
+    if (data.hoje) data.hoje.meta.period = 'diária';
+    if (data.semana) data.semana.meta.period = 'semanal';
+    if (data.mes) data.mes.meta.period = 'mensal';
     return data;
 }
 
@@ -105,14 +105,11 @@ export async function getSummaryForPeriod(userId: string): Promise<SummaryData> 
 
 
 // --- Funções de Relatório ---
-// Estas funções dependem dos dados já calculados e salvos no summary.json,
-// ou calculam dados adicionais que não criam ciclos.
+// Esta função agora apenas lê os dados de resumo pré-calculados.
 
 export async function getReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
-    // Placeholder, a lógica de cálculo detalhada foi movida para `gerenciamento/actions.ts`
-    // para ser chamada pelo cliente, evitando ciclos no servidor.
-    // No futuro, podemos criar um serviço de relatório mais robusto aqui.
-
+    // Esta função agora é um placeholder e retorna dados básicos do resumo.
+    // A lógica de cálculo real foi movida para as actions para evitar dependências cíclicas.
     const summary = await getSummaryData(userId);
     let periodData: PeriodData;
 
@@ -129,18 +126,16 @@ export async function getReportData(userId: string, filters: ReportFilterValues)
             break;
     }
 
-    // Retorna uma estrutura ReportData básica, pois os cálculos complexos
-    // que dependem de outros serviços foram removidos daqui.
     const { performanceByShift, ...restOfPeriodData } = periodData;
 
     return {
         ...restOfPeriodData,
         totalGastos: periodData.totalCombustivel + periodData.maintenance.totalSpent,
-        fuelExpenses: [], // Cálculo movido
-        profitEvolution: [], // Cálculo movido
-        dailyTrips: [], // Cálculo movido
-        averageEarningPerTrip: [], // Cálculo movido
-        averageEarningPerHour: [], // Cálculo movido
-        rawWorkDays: [], // Deve ser preenchido pela action que chama isso
+        fuelExpenses: [],
+        profitEvolution: [],
+        dailyTrips: [],
+        averageEarningPerTrip: [],
+        averageEarningPerHour: [],
+        rawWorkDays: [],
     };
 }
