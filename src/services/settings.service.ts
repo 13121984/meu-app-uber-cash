@@ -1,6 +1,9 @@
+
+"use server";
+
 import type { Settings } from "@/types/settings";
 import { getFile, saveFile } from './storage.service';
-import { getCatalog } from './catalog.service';
+import { getCatalogData } from './catalog.service';
 
 const defaultSettings: Settings = {
     theme: 'dark',
@@ -16,7 +19,7 @@ export async function getSettings(userId: string): Promise<Settings> {
   if (!userId) return defaultSettings;
   try {
     const savedSettings = await getFile<Settings>(userId, FILE_NAME, defaultSettings);
-    const catalog = await getCatalog();
+    const catalog = await getCatalogData();
     const activeFuelTypes = catalog.fuel.filter(f => f.active).map(f => f.name);
 
     if (!activeFuelTypes.includes(savedSettings.defaultFuelType) && activeFuelTypes.length > 0) {

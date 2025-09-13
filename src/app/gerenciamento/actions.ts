@@ -7,11 +7,13 @@ import {
   deleteWorkDay as serviceDeleteWorkDay,
   deleteWorkDaysByFilter as serviceDeleteWorkDaysByFilter,
   clearAllDataForUser as serviceClearAllData,
-  WorkDay,
   getWorkDays as serviceGetWorkDays,
   getFilteredWorkDays,
   groupWorkDays,
   getWorkDaysForDate as serviceGetWorkDaysForDate,
+  addMultipleWorkDays as serviceAddMultipleWorkDays,
+  loadDemoData as serviceLoadDemoData,
+  WorkDay,
 } from '@/services/work-day.service';
 import { getGoals, Goals, saveGoals as serviceSaveGoals } from '@/services/goal.service';
 import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUpdateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance as serviceDeleteAllMaintenance } from '@/services/maintenance.service';
@@ -20,6 +22,9 @@ import { saveCatalogData, getCatalogData as serviceGetCatalogData, Catalog } fro
 import { runBackupAction as serviceRunBackupAction, BackupInput, BackupOutput } from "@/ai/flows/backup-flow";
 import { updateAllSummaries as serviceUpdateAllSummaries } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
+import { getSettings as serviceGetSettings } from '@/services/settings.service';
+import type { Settings } from '@/types/settings';
+import { getMaintenanceRemindersAction as serviceGetMaintenanceReminders } from '@/app/inicio/actions';
 
 export async function addOrUpdateWorkDayAction(userId: string, workDay: any) {
     const result = await serviceAddOrUpdate(userId, workDay);
@@ -177,3 +182,17 @@ export async function updateAllSummariesAction(userId: string) {
     await serviceUpdateAllSummaries(userId);
     revalidatePath('/', 'layout');
 }
+
+export async function getSettingsForUserAction(userId: string): Promise<Settings> {
+    return await serviceGetSettings(userId);
+}
+
+export async function importWorkDaysAction(userId: string, csvContent: string): Promise<{ success: boolean; count?: number; error?: string }> {
+    return await serviceAddMultipleWorkDays(userId, csvContent);
+}
+
+export async function loadDemoDataAction(userId: string): Promise<{ success: boolean; error?: string }> {
+    return await serviceLoadDemoData(userId);
+}
+
+export { serviceGetMaintenanceReminders as getMaintenanceRemindersAction };

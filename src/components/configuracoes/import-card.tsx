@@ -6,9 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen, Download } from 'lucide-react';
-import { addMultipleWorkDays, type ImportedWorkDay } from '@/services/work-day.service';
+import { Upload, Loader2, CheckCircle, AlertTriangle, BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { importWorkDaysAction } from '@/app/gerenciamento/actions';
 import {
   Accordion,
   AccordionContent,
@@ -16,31 +16,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useAuth } from '@/contexts/auth-context';
-
-
-function parseCsvToWorkDays(rawCsvText: string): ImportedWorkDay[] {
-    const lines = rawCsvText.split(/\r?\n/).filter(line => line.trim() !== '');
-    if (lines.length < 2) throw new Error("O arquivo CSV está vazio ou contém apenas o cabeçalho.");
-
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    const requiredHeaders = ['date', 'km', 'hours'];
-    if (!requiredHeaders.every(h => headers.includes(h))) {
-        throw new Error("O arquivo CSV precisa ter as colunas 'date', 'km', e 'hours' no cabeçalho.");
-    }
-    
-    const rows = lines.slice(1);
-    
-    return rows.map(row => {
-        const values = row.split(',');
-        const rowData: { [key: string]: string } = {};
-        headers.forEach((header, index) => {
-            if (values[index]) {
-                rowData[header] = values[index].trim();
-            }
-        });
-        return rowData as unknown as ImportedWorkDay;
-    });
-}
 
 
 export function ImportCard() {
@@ -87,13 +62,7 @@ export function ImportCard() {
                     description: "Analisando e formatando seu arquivo. Isso pode levar um momento.",
                 });
 
-                const processedData = parseCsvToWorkDays(rawCsvText);
-                
-                if (processedData.length === 0) {
-                    throw new Error("Nenhum dado válido encontrado na planilha. Verifique o formato e os cabeçalhos.");
-                }
-
-                const result = await addMultipleWorkDays(user.id, processedData);
+                const result = await importWorkDaysAction(user.id, rawCsvText);
                 
                 if (result.success) {
                     toast({

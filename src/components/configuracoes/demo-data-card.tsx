@@ -17,19 +17,22 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { loadDemoData, clearAllData } from "@/services/work-day.service";
+import { loadDemoDataAction, clearAllDataForUserAction } from "@/app/gerenciamento/actions";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 
 
 export function DemoDataCard() {
     const router = useRouter();
+    const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleLoadDemo = async () => {
+        if (!user) return;
         setIsLoading(true);
         try {
-            await loadDemoData();
+            await loadDemoDataAction(user.id);
             toast({ title: "Sucesso!", description: "Dados de demonstração foram carregados."});
             router.refresh();
         } catch(e) {
@@ -39,9 +42,10 @@ export function DemoDataCard() {
     };
 
     const handleClearData = async () => {
+        if (!user) return;
         setIsDeleting(true);
          try {
-            await clearAllData();
+            await clearAllDataForUserAction(user.id);
             toast({ title: "Sucesso!", description: "Todos os seus registros foram apagados."});
             router.refresh();
         } catch(e) {

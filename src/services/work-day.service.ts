@@ -4,6 +4,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile, getUserDataPath } from './storage.service';
 import { getMaintenanceRecords, Maintenance } from './maintenance.service';
 import { Goals, getGoals } from './goal.service';
+import { updateAllSummaries } from './summary.service';
 
 // --- Tipos e Interfaces ---
 
@@ -65,7 +66,7 @@ async function writeWorkDays(userId: string, data: WorkDay[]): Promise<void> {
     await saveFile(userId, FILE_NAME, sortedData);
 }
 
-// --- Funções CRUD (ainda puras) ---
+// --- Funções CRUD ---
 
 export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
   try {
@@ -77,6 +78,7 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
       if (existingDayIndex > -1) {
         allWorkDays[existingDayIndex] = { ...data, date: finalDate };
         await writeWorkDays(userId, allWorkDays);
+        await updateAllSummaries(userId);
         return { success: true, id: data.id, operation: 'updated' };
       }
     }
@@ -84,6 +86,7 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
     const newWorkDay: WorkDay = { ...data, id: Date.now().toString(), date: finalDate };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(userId, allWorkDays);
+    await updateAllSummaries(userId);
     return { success: true, id: newWorkDay.id, operation: 'created' };
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : "Failed to save work day.", operation: 'created' };
@@ -95,6 +98,7 @@ export async function deleteWorkDay(userId: string, id: string): Promise<{ succe
     let allWorkDays = await readWorkDays(userId);
     allWorkDays = allWorkDays.filter(r => r.id !== id);
     await writeWorkDays(userId, allWorkDays);
+    await updateAllSummaries(userId);
     return { success: true };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : "Falha ao apagar registro." };
@@ -109,6 +113,7 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
         const finalWorkDays = allWorkDays.filter(day => !workDaysToDelete.some(toDelete => toDelete.id === day.id));
         const deletedCount = initialLength - finalWorkDays.length;
         await writeWorkDays(userId, finalWorkDays);
+        await updateAllSummaries(userId);
         return { success: true, count: deletedCount };
     } catch (error) {
         return { success: false, error: error instanceof Error ? error.message : "Falha ao apagar registros em massa." };
@@ -120,6 +125,12 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
 export async function getWorkDays(userId: string): Promise<WorkDay[]> {
     if (!userId) return [];
     return await readWorkDays(userId);
+}
+
+export async function getWorkDaysForDate(userId: string, date: Date): Promise<WorkDay[]> {
+    if (!userId) return [];
+    const allDays = await readWorkDays(userId);
+    return allDays.filter(day => isSameDay(day.date, date));
 }
 
 export function getFilteredWorkDays(allWorkDays: WorkDay[], filters: ReportFilterValues): WorkDay[] {
@@ -218,7 +229,103 @@ export function generateCsvContent(workDays: WorkDay[]): string {
     return [CSV_HEADERS.join(','), ...rows.map(row => row.join(','))].join('\n');
 }
 
-// --- Funções de Gerenciamento de Dados (ex: Demo) ---
+// --- Funções de Gerenciamento de Dados (ex: Demo, Import) ---
+
+function parseCsvToWorkDays(rawCsvText: string): ImportedWorkDay[] {
+    const lines = rawCsvText.split(/\r?\n/).filter(line => line.trim() !== '');
+    if (lines.length < 2) throw new Error("O arquivo CSV está vazio ou contém apenas o cabeçalho.");
+
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const requiredHeaders = ['date', 'km', 'hours'];
+    if (!requiredHeaders.every(h => headers.includes(h))) {
+        throw new Error("O arquivo CSV precisa ter as colunas 'date', 'km', e 'hours' no cabeçalho.");
+    }
+    
+    const rows = lines.slice(1);
+    
+    return rows.map(row => {
+        const values = row.split(',');
+        const rowData: { [key: string]: string } = {};
+        headers.forEach((header, index) => {
+            if (values[index]) {
+                rowData[header] = values[index].trim();
+            }
+        });
+        return rowData as unknown as ImportedWorkDay;
+    });
+}
+
+export async function addMultipleWorkDays(userId: string, csvContent: string): Promise<{ success: boolean, count?: number, error?: string }> {
+    if (!userId) return { success: false, error: "Usuário não autenticado." };
+    try {
+        const importedRows = parseCsvToWorkDays(csvContent);
+        if(importedRows.length === 0) {
+            throw new Error("Nenhum dado válido encontrado na planilha. Verifique o formato e os cabeçalhos.");
+        }
+        
+        const allWorkDays = await readWorkDays(userId);
+        
+        const workDaysMap = new Map<string, WorkDay>();
+
+        importedRows.forEach(row => {
+            const dateStr = row.date;
+            if(!dateStr) return;
+
+            let day = workDaysMap.get(dateStr);
+            if (!day) {
+                day = {
+                    id: `import-${dateStr}-${Date.now()}`,
+                    date: parseISO(dateStr),
+                    km: parseFloat(row.km.replace(',', '.')) || 0,
+                    hours: parseFloat(row.hours.replace(',', '.')) || 0,
+                    timeEntries: [],
+                    earnings: [],
+                    fuelEntries: [],
+                    maintenanceEntries: [],
+                };
+                workDaysMap.set(dateStr, day);
+            }
+
+            if (row.earnings_category && row.earnings_amount) {
+                day.earnings.push({
+                    id: Math.random(),
+                    category: row.earnings_category,
+                    trips: parseInt(row.earnings_trips) || 0,
+                    amount: parseFloat(row.earnings_amount.replace(',', '.')) || 0,
+                });
+            }
+
+            if (row.fuel_type && row.fuel_paid) {
+                day.fuelEntries.push({
+                    id: Math.random(),
+                    type: row.fuel_type,
+                    paid: parseFloat(row.fuel_paid.replace(',', '.')) || 0,
+                    price: parseFloat(row.fuel_price?.replace(',', '.')) || 0,
+                });
+            }
+            
+             if (row.maintenance_description && row.maintenance_amount) {
+                day.maintenanceEntries.push({
+                    id: Math.random(),
+                    description: row.maintenance_description,
+                    amount: parseFloat(row.maintenance_amount.replace(',', '.')) || 0,
+                });
+            }
+        });
+
+        const newWorkDays = Array.from(workDaysMap.values());
+        const updatedWorkDays = [...allWorkDays, ...newWorkDays];
+
+        await writeWorkDays(userId, updatedWorkDays);
+        await updateAllSummaries(userId);
+
+        return { success: true, count: newWorkDays.length };
+
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Falha ao importar dados." };
+    }
+}
+
 
 async function getDemoData(): Promise<WorkDay[]> {
     try {
@@ -226,29 +333,29 @@ async function getDemoData(): Promise<WorkDay[]> {
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const backupData = JSON.parse(fileContent);
         const csvContent = backupData.csvContent;
-        const lines = csvContent.split('\n').slice(1);
+        const importedRows = parseCsvToWorkDays(csvContent);
 
         const workDaysMap = new Map<string, WorkDay>();
 
-        lines.forEach(line => {
-            const values = line.split(',');
-            const date = values[0];
-            if (!date) return;
+        importedRows.forEach(row => {
+            const dateStr = row.date;
+            if(!dateStr) return;
 
-            if (!workDaysMap.has(date)) {
-                workDaysMap.set(date, {
-                    id: `demo-${date}`, date: parseISO(date),
-                    km: parseFloat(values[1]) || 0, hours: parseFloat(values[2]) || 0,
+            let day = workDaysMap.get(dateStr);
+            if (!day) {
+                day = {
+                    id: `demo-${dateStr}`, date: parseISO(dateStr),
+                    km: parseFloat(row.km.replace(',', '.')) || 0, hours: parseFloat(row.hours.replace(',', '.')) || 0,
                     earnings: [], fuelEntries: [], maintenanceEntries: [], timeEntries: []
-                });
+                };
+                workDaysMap.set(dateStr, day);
             }
 
-            const day = workDaysMap.get(date)!;
-            if (values[3] && values[5]) { // earnings
-                day.earnings.push({ id: Math.random(), category: values[3], trips: parseInt(values[4]) || 0, amount: parseFloat(values[5]) || 0 });
+            if (row.earnings_category && row.earnings_amount) { // earnings
+                day.earnings.push({ id: Math.random(), category: row.earnings_category, trips: parseInt(row.earnings_trips) || 0, amount: parseFloat(row.earnings_amount.replace(',', '.')) || 0 });
             }
-            if (values[6] && values[7]) { // fuel
-                day.fuelEntries.push({ id: Math.random(), type: values[6], paid: parseFloat(values[7]) || 0, price: parseFloat(values[8]) || 0 });
+            if (row.fuel_type && row.fuel_paid) { // fuel
+                day.fuelEntries.push({ id: Math.random(), type: row.fuel_type, paid: parseFloat(row.fuel_paid.replace(',', '.')) || 0, price: parseFloat(row.fuel_price?.replace(',', '.')) || 0 });
             }
         });
         return Array.from(workDaysMap.values());
@@ -262,6 +369,7 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
     try {
         const demoWorkDays = await getDemoData();
         await writeWorkDays(userId, demoWorkDays);
+        await updateAllSummaries(userId);
         return { success: true };
     } catch (e) {
         return { success: false, error: e instanceof Error ? e.message : "Failed to load demo data." };
@@ -272,6 +380,7 @@ export async function clearAllDataForUser(userId: string): Promise<{ success: bo
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
         await writeWorkDays(userId, []);
+        await updateAllSummaries(userId);
         return { success: true };
     } catch (e) {
         return { success: false, error: e instanceof Error ? e.message : "Failed to clear data." };
