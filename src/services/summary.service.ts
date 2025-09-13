@@ -252,13 +252,14 @@ export async function generateReportData(userId: string, filters: ReportFilterVa
 
     const categoryStats = new Map<string, { totalAmount: number, totalHours: number, totalTrips: number }>();
     filteredWorkDays.forEach(day => {
+        const dayTotalEarnings = day.earnings.reduce((s, e) => s + e.amount, 0);
         day.earnings.forEach(earning => {
             const stats = categoryStats.get(earning.category) || { totalAmount: 0, totalHours: 0, totalTrips: 0 };
             stats.totalAmount += earning.amount;
             stats.totalTrips += earning.trips;
-            if (day.hours > 0) {
-                const dayTotalEarnings = day.earnings.reduce((s, e) => s + e.amount, 0);
-                stats.totalHours += dayTotalEarnings > 0 ? day.hours * (earning.amount / dayTotalEarnings) : 0;
+            // CORREÇÃO: Pro-rata de horas com base na participação do ganho no dia
+            if (day.hours > 0 && dayTotalEarnings > 0) {
+                stats.totalHours += day.hours * (earning.amount / dayTotalEarnings);
             }
             categoryStats.set(earning.category, stats);
         });

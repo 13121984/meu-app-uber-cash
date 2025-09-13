@@ -7,7 +7,7 @@ import { getReportData, PeriodData, AverageEarningByCategory } from '@/services/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, TrendingUp, TrendingDown, CheckCircle, BarChart3, Calendar, Award } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, getMonth, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -55,8 +55,14 @@ export function ProfitabilityAudit() {
         async function fetchInsights() {
             setIsLoading(true);
             try {
-                // We'll analyze the current month's data
-                const report = await getReportData(user!.id, { type: 'thisMonth' });
+                // CORREÇÃO: Construir filtro explícito para o mês atual
+                const now = new Date();
+                const filters = {
+                    type: 'specificMonth',
+                    month: getMonth(now),
+                    year: getYear(now),
+                };
+                const report = await getReportData(user!.id, filters);
                 
                 let bestDay: Insight['bestDay'] = null;
                 let worstDay: Insight['worstDay'] = null;
