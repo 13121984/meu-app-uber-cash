@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { PlusCircle, Trash2, Loader2, CheckCircle, AlertTriangle, UploadCloud, ArrowUp, ArrowDown, Lock } from 'lucide-react';
-import { saveCatalog, type Catalog, type CatalogItem } from '@/services/catalog.service';
+import { saveCatalogAction } from '@/app/gerenciamento/actions'; // Importar a nova action
+import type { Catalog, CatalogItem } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -80,15 +81,20 @@ export function CatalogManager({ initialCatalog }: CatalogManagerProps) {
   const handleSaveChanges = async () => {
     startSavingTransition(async () => {
         try {
-          await saveCatalog({
+          const result = await saveCatalogAction({ // Chamar a nova action centralizada
             earnings: earningsCategories,
             fuel: fuelCategories
           });
+
+          if (!result.success) {
+              throw new Error(result.error);
+          }
+
           toast({
             title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Catálogos Salvos!</span></div>,
             description: "Suas categorias foram atualizadas com sucesso.",
           });
-          router.refresh(); 
+          // Não precisamos mais do router.refresh(), pois revalidatePath na action cuidará disso
         } catch (error) {
           toast({
             title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,

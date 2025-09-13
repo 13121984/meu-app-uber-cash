@@ -2,8 +2,6 @@
 "use server";
 
 import fs from 'fs/promises';
-import path from 'path';
-import { revalidatePath } from 'next/cache';
 import { getFile, saveFile } from './storage.service';
 
 export interface BackupData {
@@ -42,7 +40,6 @@ export async function saveBackupData(userId: string, data: Omit<BackupData, 'las
       lastBackupDate: new Date().toISOString(),
     };
     await saveFile(userId, FILE_NAME, backupData);
-    revalidatePath(`/configuracoes/backup`);
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao salvar dados de backup.";

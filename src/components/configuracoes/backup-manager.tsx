@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Download, Loader2, CheckCircle, AlertTriangle, HardDriveUpload } from 'lucide-react';
-import { runBackupAction } from '@/ai/flows/backup-flow';
+import { runBackupAction } from '@/app/gerenciamento/actions'; // Importar a nova action
 import type { BackupData } from '@/services/backup.service';
 import { getBackupForDownload } from '@/services/backup.service';
 import { format, parseISO } from 'date-fns';

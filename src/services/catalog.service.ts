@@ -3,7 +3,6 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { revalidatePath } from 'next/cache';
 
 export interface CatalogItem {
   name: string;
@@ -46,12 +45,19 @@ async function readCatalogFile(): Promise<Partial<Catalog>> {
         if (!fileContent) {
             return {};
         }
-        return JSON.parse(fileContent);
+        // Adiciona um bloco try-catch em volta do JSON.parse
+        try {
+            return JSON.parse(fileContent);
+        } catch (parseError) {
+            console.error("Error parsing catalog.json, returning empty object:", parseError);
+            return {}; // Retorna objeto vazio se o JSON for inválido
+        }
     } catch (error) {
-        // If file doesn't exist or is invalid JSON, return empty object
+        // If file doesn't exist, return empty object
         return {};
     }
 }
+
 
 /**
  * Busca o catálogo de categorias do arquivo local.
@@ -95,11 +101,6 @@ export async function getCatalog(): Promise<Catalog> {
       fuel: mergeCatalogs(defaultCatalog.fuel, data.fuel)
   };
 
-  // If the file was empty, write the defaults back to it
-  if (!data.earnings && !data.fuel) {
-      await saveCatalog(finalCatalog);
-  }
-
   return finalCatalog;
 }
 
@@ -112,12 +113,6 @@ export async function saveCatalog(catalog: Catalog): Promise<{ success: boolean,
     await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
     await fs.writeFile(dataFilePath, JSON.stringify(catalog, null, 2), 'utf8');
     
-    // Revalidate all relevant paths that might use this catalog data
-    revalidatePath('/configuracoes', 'layout');
-    revalidatePath('/registrar', 'layout');
-    revalidatePath('/dashboard');
-    revalidatePath('/relatorios');
-
     return { success: true };
   } catch (error) {
      const errorMessage = error instanceof Error ? error.message : "Falha ao salvar catálogo.";

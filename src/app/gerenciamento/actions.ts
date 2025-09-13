@@ -189,3 +189,22 @@ export async function saveGoalsAction(userId: string, goals: Goals): Promise<{ s
     }
     return result;
 }
+
+export async function saveCatalogAction(catalog: import("@/services/catalog.service").Catalog): Promise<{ success: boolean; error?: string }> {
+    const result = await require('@/services/catalog.service').saveCatalog(catalog);
+    if (result.success) {
+        revalidatePath('/configuracoes', 'layout');
+        revalidatePath('/registrar', 'layout');
+        revalidatePath('/dashboard');
+        revalidatePath('/relatorios');
+    }
+    return result;
+}
+
+export async function runBackupAction(input: import("@/ai/flows/backup-flow").BackupInput): Promise<import("@/ai/flows/backup-flow").BackupOutput> {
+    const result = await require('@/ai/flows/backup-flow').runBackupAction(input);
+    if (result.success) {
+        revalidatePath('/configuracoes/backup');
+    }
+    return result;
+}

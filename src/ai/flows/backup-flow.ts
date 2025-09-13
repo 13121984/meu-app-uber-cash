@@ -27,6 +27,7 @@ export type BackupOutput = z.infer<typeof BackupOutputSchema>;
 
 /**
  * A server action to securely call the Genkit flow for creating a backup.
+ * This is now wrapped by a new action in gerenciamento/actions.ts
  */
 export async function runBackupAction(input: BackupInput): Promise<BackupOutput> {
     const validatedInput = BackupInputSchema.parse(input);

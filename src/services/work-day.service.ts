@@ -4,7 +4,6 @@
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
-import { revalidatePath } from 'next/cache';
 
 // --- Tipos e Interfaces ---
 
@@ -166,7 +165,6 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
 
         await writeWorkDays(userId, finalWorkDays);
-        revalidatePath('/', 'layout');
         return { success: true, count: workDaysToUpsert.length };
 
     } catch(e) {
