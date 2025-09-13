@@ -1,10 +1,11 @@
+
 // /src/app/api/hotmart-webhook/route.ts
 // ATENÇÃO: Este é um arquivo de exemplo e esqueleto.
 // Ele NÃO FUNCIONARÁ diretamente neste projeto estático.
 // Ele serve como guia para ser adaptado e implantado como uma Cloud Function no Firebase.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { updateUser } from '@/services/auth.service'; // Supondo que isso possa ser adaptado para o ambiente do Firebase
+import { updateUser, Plan } from '@/services/auth.service'; // Supondo que isso possa ser adaptado para o ambiente do Firebase
 
 // Esta é a sua chave secreta do webhook da Hotmart.
 // No Firebase, isso DEVE ser armazenado como uma variável de ambiente segura.
@@ -38,23 +39,29 @@ export async function POST(req: NextRequest) {
     const event = payload.event;
     const data = payload.data;
     const userEmail = data?.buyer?.email;
+    const productName = data?.product?.name; // Exemplo de como pegar o nome do produto
 
     if (!userEmail) {
       return NextResponse.json({ success: false, message: 'E-mail do comprador não encontrado no payload.' }, { status: 400 });
     }
 
-    let isPremiumStatus: boolean;
+    let newPlan: Plan;
 
     switch (event) {
         case 'PURCHASE_APPROVED':
         case 'PURCHASE_COMPLETE':
-            isPremiumStatus = true;
+            // Lógica para determinar o plano com base no produto comprado
+            if (productName && productName.toLowerCase().includes('autopilot')) {
+                newPlan = 'autopilot';
+            } else {
+                newPlan = 'pro'; // Plano padrão se não for autopilot
+            }
             break;
 
         case 'PURCHASE_REFUNDED':
         case 'PURCHASE_CANCELED':
         case 'PURCHASE_CHARGEBACK':
-            isPremiumStatus = false;
+            newPlan = 'basic';
             break;
         
         default:
@@ -68,13 +75,13 @@ export async function POST(req: NextRequest) {
     // IMPORTANTE: Acessar o sistema de arquivos diretamente de uma função serverless é complexo e
     // geralmente requer o uso de um banco de dados como Firestore ou Realtime Database.
     
-    console.log(`[Webhook Simulado] Evento: ${event}. Atualizando usuário ${userEmail} para isPremium: ${isPremiumStatus}`);
+    console.log(`[Webhook Simulado] Evento: ${event}. Atualizando usuário ${userEmail} para o plano: ${newPlan}`);
     
     // O ideal é que o `id` do usuário no seu sistema seja o e-mail dele para facilitar a busca.
     // Como nosso `id` é um nome de usuário, a lógica real precisaria de um campo de e-mail no perfil do usuário.
     // Por enquanto, vamos assumir que o ID do usuário é o e-mail para fins de demonstração.
     
-    const result = await updateUser(userEmail, { isPremium: isPremiumStatus });
+    const result = await updateUser(userEmail, { plan: newPlan });
 
     if (result.success) {
       console.log(`[Webhook Simulado] Usuário ${userEmail} atualizado com sucesso.`);
