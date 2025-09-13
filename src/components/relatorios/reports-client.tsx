@@ -150,7 +150,7 @@ export function ReportsClient() {
               if (!ChartComponent) return null;
               const chartData = getChartData(data, chart.id);
               if(!chartData || (Array.isArray(chartData) && chartData.length === 0)) return null;
-              return <motion.div key={chart.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, delay: 0.2 }} ref={(el) => (chartRefs.current[chart.id] = el)}><Card><CardHeader><CardTitle className="font-headline text-lg">{chart.title}</CardTitle><CardDescription>{chart.description}</CardDescription></CardHeader><CardContent><ChartComponent key={`${chart.id}-${filters?.type}`} data={chartData} /></CardContent></Card></motion.div>;
+              return <motion.div key={chart.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, delay: 0.2 }} ref={(el) => { chartRefs.current[chart.id] = el; }}><Card><CardHeader><CardTitle className="font-headline text-lg">{chart.title}</CardTitle><CardDescription>{chart.description}</CardDescription></CardHeader><CardContent><ChartComponent key={`${chart.id}-${filters?.type}`} data={chartData} /></CardContent></Card></motion.div>;
             })}
              {!isPro && <Link href="/configuracoes/layout-personalizado" passHref><Button variant="outline" className="w-full"><Lock className="mr-2 h-4 w-4 text-primary"/>Adicionar outro Gráfico (Desbloquear com Pro)</Button></Link>}
         </motion.div>
