@@ -11,8 +11,7 @@ import { FinancialGoalCalculator } from '@/components/metas/financial-goal-calcu
 import { PersonalExpenseTracker } from '@/components/metas/personal-expense-tracker';
 import { FinancialSummary } from '@/components/metas/financial-summary';
 import { ProfitabilityAudit } from '@/components/metas/profitability-audit';
-import { getSummaryForPeriod } from '@/services/summary.service';
-import { getCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
+import { getSummaryForPeriodAction, getCurrentMonthPersonalExpensesTotalAction } from '@/app/gerenciamento/actions';
 import { IconTargetArrow } from '@/components/ui/icons/target-arrow';
 import { Badge } from '@/components/ui/badge';
 
@@ -30,8 +29,8 @@ export default function MetasPage() {
         setIsDataLoading(true);
         try {
             const [summary, expenses] = await Promise.all([
-                getSummaryForPeriod(user.id),
-                getCurrentMonthPersonalExpensesTotal(user.id)
+                getSummaryForPeriodAction(user.id),
+                getCurrentMonthPersonalExpensesTotalAction(user.id)
             ]);
             setMonthlyProfit(summary.mes.totalLucro);
             setPersonalExpenses(expenses);

@@ -17,9 +17,9 @@ import {
 } from '@/services/work-day.service';
 import { getGoals, Goals, saveGoals as serviceSaveGoals } from '@/services/goal.service';
 import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUpdateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance as serviceDeleteAllMaintenance } from '@/services/maintenance.service';
-import { addPersonalExpense as serviceAddPersonalExpense, updatePersonalExpense as serviceUpdatePersonalExpense, deletePersonalExpense as serviceDeletePersonalExpense, deleteAllPersonalExpenses as serviceDeleteAllPersonalExpenses } from '@/services/personal-expense.service';
+import { addPersonalExpense as serviceAddPersonalExpense, updatePersonalExpense as serviceUpdatePersonalExpense, deletePersonalExpense as serviceDeletePersonalExpense, deleteAllPersonalExpenses as serviceDeleteAllPersonalExpenses, getCurrentMonthPersonalExpensesTotal as serviceGetCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
 import { saveCatalogData, getCatalogData as serviceGetCatalogData, Catalog } from '@/services/catalog.service';
-import { updateAllSummaries as serviceUpdateAllSummaries } from '@/services/summary.service';
+import { updateAllSummaries as serviceUpdateAllSummaries, getSummaryForPeriod as serviceGetSummaryForPeriod } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getSettings as serviceGetSettings } from '@/services/settings.service';
 import type { Settings } from '@/types/settings';
@@ -187,5 +187,14 @@ export async function importWorkDaysAction(userId: string, csvContent: string): 
 export async function loadDemoDataAction(userId: string): Promise<{ success: boolean; error?: string }> {
     return await serviceLoadDemoData(userId);
 }
+
+export async function getSummaryForPeriodAction(userId: string) {
+    return await serviceGetSummaryForPeriod(userId);
+}
+
+export async function getCurrentMonthPersonalExpensesTotalAction(userId: string) {
+    return await serviceGetCurrentMonthPersonalExpensesTotal(userId);
+}
+
 
 export { serviceGetMaintenanceReminders as getMaintenanceRemindersAction };
