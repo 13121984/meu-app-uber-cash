@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useReducer, useEffect } from 'react';
@@ -11,8 +12,8 @@ import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { useRouter } from 'next/navigation';
 import { parseISO, startOfDay } from 'date-fns';
-import { getWorkDaysForDate, WorkDay } from '@/services/work-day.service';
-import { addOrUpdateWorkDayAction, deleteWorkDayAction } from '@/app/gerenciamento/actions';
+import { WorkDay } from '@/services/work-day.service';
+import { addOrUpdateWorkDayAction, deleteWorkDayAction, getWorkDaysForDateAction } from '@/app/gerenciamento/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -139,7 +140,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
     async function loadInitialData() {
       if (user && registrationType === 'today' && !propsInitialData) {
         try {
-          const entries = await getWorkDaysForDate(user.id, startOfDay(new Date()));
+          const entries = await getWorkDaysForDateAction(user.id, startOfDay(new Date()));
           setExistingEntries(entries);
         } catch (err) {
           console.error("Failed to load today's entries:", err);

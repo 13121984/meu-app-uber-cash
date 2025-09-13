@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, useEffect, useCallback } from "react";
@@ -42,14 +43,18 @@ export function GerenciamentoClient() {
   const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
     if (!user) return;
     
-    const params = new URLSearchParams();
-    params.set('period', filters.type);
-    if(filters.year) params.set('year', filters.year.toString());
-    if(filters.month !== undefined) params.set('month', filters.month.toString());
-    if(filters.dateRange?.from) params.set('from', filters.dateRange.from.toISOString());
-    if(filters.dateRange?.to) params.set('to', filters.dateRange.to.toISOString());
-    
-    router.replace(`/gerenciamento?${params.toString()}`);
+    // Constrói a nova query string
+    const newQuery = new URLSearchParams();
+    newQuery.set('period', filters.type);
+    if (filters.year) newQuery.set('year', filters.year.toString());
+    if (filters.month !== undefined) newQuery.set('month', filters.month.toString());
+    if (filters.dateRange?.from) newQuery.set('from', filters.dateRange.from.toISOString());
+    if (filters.dateRange?.to) newQuery.set('to', filters.dateRange.to.toISOString());
+
+    // Compara a nova query com a atual para evitar loops
+    if (newQuery.toString() !== searchParams.toString()) {
+        router.replace(`/gerenciamento?${newQuery.toString()}`);
+    }
     
     setCurrentFilters(filters);
     startTransition(async () => {
@@ -61,7 +66,7 @@ export function GerenciamentoClient() {
         toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
       }
     });
-  }, [user, router]);
+  }, [user, router, searchParams]);
   
   useEffect(() => {
     const period = searchParams.get('period');

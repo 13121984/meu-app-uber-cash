@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -10,6 +11,7 @@ import {
   getWorkDays as serviceGetWorkDays,
   getFilteredWorkDays,
   groupWorkDays,
+  getWorkDaysForDate as serviceGetWorkDaysForDate,
 } from '@/services/work-day.service';
 import { getGoals, Goals, saveGoals as serviceSaveGoals } from '@/services/goal.service';
 import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUpdateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance as serviceDeleteAllMaintenance } from '@/services/maintenance.service';
@@ -164,4 +166,8 @@ export async function getFilteredWorkDaysAction(userId: string, filters: ReportF
     const filtered = getFilteredWorkDays(allWorkDays, filters);
     const grouped = groupWorkDays(filtered);
     return grouped;
+}
+
+export async function getWorkDaysForDateAction(userId: string, date: Date): Promise<WorkDay[]> {
+    return await serviceGetWorkDaysForDate(userId, date);
 }
