@@ -42,12 +42,36 @@ export function GerenciamentoClient() {
   const [groupedWorkDays, setGroupedWorkDays] = useState<GroupedWorkDay[]>([]);
   const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
 
-  // This effect runs ONLY ONCE on component mount to set the initial state from URL
-  useEffect(() => {
-    if (user && !currentFilters) {
-        const periodParam = searchParams.get('period') as ReportFilterValues['type'] | null;
-        let initialFilters: ReportFilterValues;
+  const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
+    if (!user) return;
+    
+    setCurrentFilters(filters);
+    startTransition(async () => {
+      try {
+        const groupedData = await getFilteredWorkDaysAction(user.id, filters);
+        setGroupedWorkDays(groupedData);
+        
+        // Update URL once after fetching
+        const newQuery = new URLSearchParams();
+        newQuery.set('period', filters.type);
+        if (filters.year) newQuery.set('year', filters.year.toString());
+        if (filters.month !== undefined) newQuery.set('month', filters.month.toString());
+        if (filters.dateRange?.from) newQuery.set('from', filters.dateRange.from.toISOString());
+        if (filters.dateRange?.to) newQuery.set('to', filters.dateRange.to.toISOString());
+        router.replace(`/gerenciamento?${newQuery.toString()}`);
 
+      } catch (e) {
+        console.error("Failed to fetch work days", e);
+        toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
+      }
+    });
+  }, [user, router]);
+
+  // Effect to load initial data based on URL on first mount
+  useEffect(() => {
+      if (user && !currentFilters) {
+        let initialFilters: ReportFilterValues = { type: 'thisMonth' };
+        const periodParam = searchParams.get('period') as ReportFilterValues['type'] | null;
         if (periodParam) {
             const yearParam = searchParams.get('year');
             const monthParam = searchParams.get('month');
@@ -60,42 +84,11 @@ export function GerenciamentoClient() {
             if (fromParam && isValid(parseISO(fromParam))) {
                  initialFilters.dateRange = { from: parseISO(fromParam), to: toParam && isValid(parseISO(toParam)) ? parseISO(toParam) : undefined };
             }
-        } else {
-            // Default to 'thisMonth' if no params are present
-            initialFilters = { type: 'thisMonth' };
         }
         handleApplyFilters(initialFilters);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
-    if (!user) return;
-    
-    // 1. Update the component's state
-    setCurrentFilters(filters);
-
-    // 2. Fetch data based on the new filters
-    startTransition(async () => {
-      try {
-        const groupedData = await getFilteredWorkDaysAction(user.id, filters);
-        setGroupedWorkDays(groupedData);
-
-        // 3. Update the URL once after fetching data
-        const newQuery = new URLSearchParams();
-        newQuery.set('period', filters.type);
-        if (filters.year) newQuery.set('year', filters.year.toString());
-        if (filters.month !== undefined) newQuery.set('month', filters.month.toString());
-        if (filters.dateRange?.from) newQuery.set('from', filters.dateRange.from.toISOString());
-        if (filters.dateRange?.to) newQuery.set('to', filters.dateRange.to.toISOString());
-        router.replace(`/gerenciamento?${newQuery.toString()}`);
-        
-      } catch (e) {
-        console.error("Failed to fetch work days", e);
-        toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
       }
-    });
-  }, [user, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
 
   const filteredCount = groupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
