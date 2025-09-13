@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -12,11 +12,12 @@ import type { GroupedWorkDay } from "@/components/gerenciamento/gerenciamento-cl
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Edit, Trash2, Loader2, PlusCircle } from "lucide-react";
-import { deleteWorkDayEntryAction } from "@/app/gerenciamento/actions";
+import { deleteWorkDayEntryAction, getCatalogAction } from "@/app/gerenciamento/actions";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { ScrollArea } from "../ui/scroll-area";
 import { useAuth } from "@/contexts/auth-context";
+import { Catalog } from "@/services/catalog.service";
 
 interface EditWorkDayDialogProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ interface EditWorkDayDialogProps {
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 // Sub-componente para o formulário de edição de um único turno
-function EditSingleEntryForm({ workDay, onCancel, onSuccess }: { workDay: WorkDay, onCancel: () => void, onSuccess: () => void }) {
+function EditSingleEntryForm({ workDay, onCancel, onSuccess, catalog }: { workDay: WorkDay, onCancel: () => void, onSuccess: () => void, catalog: Catalog }) {
     return (
         <div className="my-4">
             <h3 className="text-lg font-semibold mb-2">Editando Período</h3>
@@ -38,6 +39,8 @@ function EditSingleEntryForm({ workDay, onCancel, onSuccess }: { workDay: WorkDa
                     onSuccess();
                     onCancel(); // Fecha o formulário de edição após o sucesso
                 }}
+                registrationType="other-day"
+                catalog={catalog}
             />
              <Button variant="outline" className="mt-4" onClick={onCancel}>Cancelar Edição</Button>
         </div>
@@ -51,6 +54,20 @@ export function EditWorkDayDialog({ isOpen, onOpenChange, groupedWorkDay }: Edit
   const [editingEntry, setEditingEntry] = useState<WorkDay | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [catalog, setCatalog] = useState<Catalog | null>(null);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCatalog() {
+        if (isOpen) {
+            setIsCatalogLoading(true);
+            const data = await getCatalogAction();
+            setCatalog(data);
+            setIsCatalogLoading(false);
+        }
+    }
+    loadCatalog();
+  }, [isOpen]);
 
   const handleClose = () => {
     setEditingEntry(null);
@@ -91,7 +108,13 @@ export function EditWorkDayDialog({ isOpen, onOpenChange, groupedWorkDay }: Edit
         </DialogHeader>
 
         <ScrollArea className="flex-1 min-h-0 -mx-6 px-6">
-            {!editingEntry && !isAdding && (
+            {isCatalogLoading && (
+                 <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                 </div>
+            )}
+
+            {!isCatalogLoading && catalog && !editingEntry && !isAdding && (
                 <div className="space-y-4 py-4">
                     {entries.map(entry => {
                         const earnings = entry.earnings.reduce((sum, e) => sum + e.amount, 0);
@@ -126,15 +149,16 @@ export function EditWorkDayDialog({ isOpen, onOpenChange, groupedWorkDay }: Edit
                 </div>
             )}
             
-            {editingEntry && (
+            {!isCatalogLoading && catalog && editingEntry && (
                 <EditSingleEntryForm 
                     workDay={editingEntry}
                     onCancel={() => setEditingEntry(null)}
                     onSuccess={handleSuccess}
+                    catalog={catalog}
                 />
             )}
 
-            {isAdding && (
+            {!isCatalogLoading && catalog && isAdding && (
                  <div className="my-4">
                     <h3 className="text-lg font-semibold mb-2">Adicionando Novo Período</h3>
                     <RegistrationWizard 
@@ -145,6 +169,7 @@ export function EditWorkDayDialog({ isOpen, onOpenChange, groupedWorkDay }: Edit
                             handleSuccess();
                             setIsAdding(false);
                         }}
+                        catalog={catalog}
                     />
                     <Button variant="outline" className="mt-4" onClick={() => setIsAdding(false)}>Cancelar</Button>
                 </div>
