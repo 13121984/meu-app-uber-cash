@@ -62,7 +62,8 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
             const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
             return { ...f, [field]: isNaN(numValue) ? 0 : numValue };
         }
-        return { ...f, [field]: value };
+        // Garante que o tipo seja sempre uma string
+        return { ...f, [field]: String(value) };
       }
       return f;
     });
