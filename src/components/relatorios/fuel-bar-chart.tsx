@@ -3,7 +3,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import type { FuelExpense } from "@/services/work-day.service"
+import type { FuelExpense } from "@/services/summary.service"
 
 interface FuelBarChartProps {
   data: FuelExpense[];
@@ -36,4 +36,3 @@ export function FuelBarChart({ data }: FuelBarChartProps) {
     </ChartContainer>
   )
 }
-
