@@ -11,6 +11,7 @@ import path from 'path';
  * @returns A safe string for use as a directory name.
  */
 function sanitizeUserId(userId: string): string {
+    if (!userId) return '';
     // Replace spaces and special characters with a hyphen, and remove anything that isn't alphanumeric or a hyphen.
     return userId.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 }
