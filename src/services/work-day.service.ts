@@ -1,6 +1,5 @@
 
 import fs from 'fs/promises';
-import path from 'path';
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile, getUserDataPath } from './storage.service';
@@ -334,6 +333,7 @@ export async function addMultipleWorkDays(userId: string, csvContent: string): P
 
 async function getDemoData(): Promise<WorkDay[]> {
     try {
+        const path = (await import('path')).default;
         const filePath = path.join(process.cwd(), 'data', 'user-data', 'paulo-vitor-tiburcio', 'backup.json'); // Usando um backup como fonte
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const backupData = JSON.parse(fileContent);
