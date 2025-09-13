@@ -1,4 +1,3 @@
-
 "use client"
 
 import Link from "next/link";
@@ -19,11 +18,13 @@ export function CatalogManagerCard() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <Link href="/configuracoes/catalogos" passHref legacyBehavior>
-                    <Button as="a">
-                         <span>Editar Catálogos</span>
-                         <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                <Link href="/configuracoes/catalogos" passHref>
+                  <Button asChild>
+                    <span>
+                        Editar Catálogos
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </span>
+                  </Button>
                 </Link>
             </CardContent>
         </Card>
