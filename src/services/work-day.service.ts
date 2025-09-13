@@ -1,6 +1,5 @@
 
-
-"use server";
+'use server';
 
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
@@ -246,7 +245,6 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
         });
 
         await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
-        revalidatePath('/', 'layout');
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to load demo data.";
@@ -259,7 +257,6 @@ export async function clearAllData(userId: string): Promise<{ success: boolean; 
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
         await writeWorkDays(userId, []);
-        revalidatePath('/', 'layout');
         return { success: true };
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Failed to clear data.";
@@ -451,8 +448,11 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
         }
     });
 
-    return [
+    const csvContent = [
         CSV_HEADERS.join(';'),
         ...rows.map(row => row.join(';'))
     ].join('\n');
+
+    // Retornamos o conteúdo em vez de acionar o download no servidor
+    return csvContent;
 }

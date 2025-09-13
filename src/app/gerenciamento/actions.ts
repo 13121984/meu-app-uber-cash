@@ -1,6 +1,6 @@
 
 
-"use server"
+'use server';
 
 import { revalidatePath } from "next/cache";
 import { deleteWorkDaysByFilter, addOrUpdateWorkDay, deleteWorkDayEntry, getWorkDays, WorkDay } from "@/services/work-day.service";

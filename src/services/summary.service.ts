@@ -80,6 +80,7 @@ export const defaultSummaryData: SummaryData = {
 export async function getSummaryData(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
     const data = await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
+    // Garantir que os períodos estejam corretos, caso o arquivo salvo esteja desatualizado
     if (data.hoje) data.hoje.meta.period = 'diária';
     if (data.semana) data.semana.meta.period = 'semanal';
     if (data.mes) data.mes.meta.period = 'mensal';
