@@ -7,7 +7,7 @@ import { deleteWorkDaysByFilter, addOrUpdateWorkDay, deleteWorkDayEntry, getWork
 import type { ReportFilterValues } from "@/app/relatorios/actions";
 import { getGoals, Goals } from "@/services/goal.service";
 import { getMaintenanceRecords, Maintenance } from "@/services/maintenance.service";
-import { SummaryData, defaultSummaryData, saveSummaryData, PeriodData } from "@/services/summary.service";
+import { SummaryData, saveSummaryData, PeriodData } from "@/services/summary.service";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 
 // --- Funções de Cálculo Internas ---

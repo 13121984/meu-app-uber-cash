@@ -2,11 +2,10 @@
 'use server';
 
 import { getFile, saveFile } from './storage.service';
+import type { WorkDay } from './work-day.service';
+import type { Goals } from './goal.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import { WorkDay } from './work-day.service';
-import { Goals } from './goal.service';
-import { Maintenance } from './maintenance.service';
-import { startOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format } from 'date-fns';
+import type { Maintenance } from './maintenance.service';
 
 // --- Interfaces ---
 
@@ -31,13 +30,14 @@ export interface PeriodData {
   ganhoPorHora: number;
   ganhoPorKm: number;
   totalViagens: number;
+  totalLitros: number;
   eficiencia: number;
   earningsByCategory: EarningsByCategory[];
   tripsByCategory: TripsByCategory[];
   maintenance: { totalSpent: number; servicesPerformed: number; };
   meta: { target: number; period: string };
   profitComposition: { name: string; value: number; fill: string; totalGanho: number; }[];
-  performanceByShift?: PerformanceByShift[];
+  performanceByShift: PerformanceByShift[];
 }
 
 export interface SummaryData {
@@ -60,7 +60,7 @@ const FILE_NAME = 'summary.json';
 
 export const defaultPeriodData: PeriodData = {
     totalGanho: 0, totalLucro: 0, totalCombustivel: 0, totalExtras: 0,
-    diasTrabalhados: 0, totalKm: 0, totalHoras: 0, mediaHorasPorDia: 0, mediaKmPorDia: 0,
+    diasTrabalhados: 0, totalKm: 0, totalHoras: 0, totalLitros: 0, mediaHorasPorDia: 0, mediaKmPorDia: 0,
     ganhoPorHora: 0, ganhoPorKm: 0, totalViagens: 0, eficiencia: 0,
     earningsByCategory: [], tripsByCategory: [],
     maintenance: { totalSpent: 0, servicesPerformed: 0 },
@@ -80,7 +80,6 @@ export const defaultSummaryData: SummaryData = {
 export async function getSummaryData(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
     const data = await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
-    // Ensure the meta period is set correctly if files are old
     if (data.hoje) data.hoje.meta.period = 'diária';
     if (data.semana) data.semana.meta.period = 'semanal';
     if (data.mes) data.mes.meta.period = 'mensal';
@@ -104,12 +103,7 @@ export async function getSummaryForPeriod(userId: string): Promise<SummaryData> 
 }
 
 
-// --- Funções de Relatório ---
-// Esta função agora apenas lê os dados de resumo pré-calculados.
-
 export async function getReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
-    // Esta função agora é um placeholder e retorna dados básicos do resumo.
-    // A lógica de cálculo real foi movida para as actions para evitar dependências cíclicas.
     const summary = await getSummaryData(userId);
     let periodData: PeriodData;
 
