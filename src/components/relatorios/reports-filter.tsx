@@ -103,7 +103,7 @@ export function ReportsFilter({ onApplyFilters, isPending, reportData, activeFil
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro inesperado.";
             toast({
-                title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span className="font-bold">Erro na Exportação</span></div>,
+                title: "Erro na Exportação",
                 description: errorMessage,
                 variant: "destructive",
             });
@@ -126,7 +126,7 @@ export function ReportsFilter({ onApplyFilters, isPending, reportData, activeFil
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro inesperado ao gerar o PDF.";
             toast({
-                title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span className="font-bold">Erro na Exportação</span></div>,
+                title: "Erro na Exportação",
                 description: errorMessage,
                 variant: "destructive",
             });
