@@ -42,36 +42,10 @@ export function GerenciamentoClient() {
   const [groupedWorkDays, setGroupedWorkDays] = useState<GroupedWorkDay[]>([]);
   const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
 
-  const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
-    if (!user) return;
-    
-    setCurrentFilters(filters);
-    
-    startTransition(async () => {
-      try {
-        const groupedData = await getFilteredWorkDaysAction(user.id, filters);
-        setGroupedWorkDays(groupedData);
-
-        const newQuery = new URLSearchParams();
-        newQuery.set('period', filters.type);
-        if (filters.year) newQuery.set('year', filters.year.toString());
-        if (filters.month !== undefined) newQuery.set('month', filters.month.toString());
-        if (filters.dateRange?.from) newQuery.set('from', filters.dateRange.from.toISOString());
-        if (filters.dateRange?.to) newQuery.set('to', filters.dateRange.to.toISOString());
-        router.replace(`/gerenciamento?${newQuery.toString()}`);
-      } catch (e) {
-        console.error("Failed to fetch work days", e);
-        toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
-      }
-    });
-  }, [user, router]);
-  
-   useEffect(() => {
-    // This effect now only runs once on mount if no filters are set
-    // to initialize the view from URL params if they exist.
+  // This effect runs ONLY ONCE on component mount to set the initial state from URL
+  useEffect(() => {
     if (user && !currentFilters) {
         const periodParam = searchParams.get('period') as ReportFilterValues['type'] | null;
-        
         let initialFilters: ReportFilterValues;
 
         if (periodParam) {
@@ -92,7 +66,36 @@ export function GerenciamentoClient() {
         }
         handleApplyFilters(initialFilters);
     }
-  }, [user, searchParams, currentFilters, handleApplyFilters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
+    if (!user) return;
+    
+    // 1. Update the component's state
+    setCurrentFilters(filters);
+
+    // 2. Fetch data based on the new filters
+    startTransition(async () => {
+      try {
+        const groupedData = await getFilteredWorkDaysAction(user.id, filters);
+        setGroupedWorkDays(groupedData);
+
+        // 3. Update the URL once after fetching data
+        const newQuery = new URLSearchParams();
+        newQuery.set('period', filters.type);
+        if (filters.year) newQuery.set('year', filters.year.toString());
+        if (filters.month !== undefined) newQuery.set('month', filters.month.toString());
+        if (filters.dateRange?.from) newQuery.set('from', filters.dateRange.from.toISOString());
+        if (filters.dateRange?.to) newQuery.set('to', filters.dateRange.to.toISOString());
+        router.replace(`/gerenciamento?${newQuery.toString()}`);
+        
+      } catch (e) {
+        console.error("Failed to fetch work days", e);
+        toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
+      }
+    });
+  }, [user, router]);
 
 
   const filteredCount = groupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
@@ -235,5 +238,3 @@ export function GerenciamentoClient() {
     </div>
   );
 }
-
-    
