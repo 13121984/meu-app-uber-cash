@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from "react";
@@ -11,7 +12,7 @@ import type { GroupedWorkDay } from "@/components/gerenciamento/gerenciamento-cl
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Edit, Trash2, Loader2, PlusCircle } from "lucide-react";
-import { deleteWorkDayEntryAction } from "../gerenciamento/actions";
+import { deleteWorkDayEntryAction } from "@/app/gerenciamento/actions";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { ScrollArea } from "../ui/scroll-area";

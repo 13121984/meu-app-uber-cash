@@ -20,7 +20,7 @@ import {
 import { format, parseISO } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from "@/contexts/auth-context"
-import { deleteFilteredWorkDaysAction } from "./actions"
+import { deleteFilteredWorkDaysAction } from "@/app/gerenciamento/actions"
 import type { GroupedWorkDay } from '@/components/gerenciamento/gerenciamento-client'
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

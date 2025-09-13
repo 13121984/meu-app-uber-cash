@@ -381,7 +381,7 @@ function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
 // --- Funções de Exportação ---
 
 const CSV_HEADERS = [
-    'date', 'km', 'hours', 'time_entries',
+    'date', 'km', 'hours',
     'earnings_category', 'earnings_trips', 'earnings_amount',
     'fuel_type', 'fuel_paid', 'fuel_price',
     'maintenance_description', 'maintenance_amount'
@@ -397,7 +397,7 @@ function escapeCsvValue(value: any): string {
     }
     
     // Se o valor contém vírgula, aspas ou quebra de linha, envolve com aspas
-    if (/[";\r\n]/.test(stringValue)) {
+    if (/[",\r\n]/.test(stringValue)) {
         return `"${stringValue.replace(/"/g, '""')}"`;
     }
     return stringValue;
@@ -415,7 +415,6 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
 
     sortedWorkDays.forEach(day => {
         const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
-        const timeEntriesStr = day.timeEntries.map(t => `${t.start}-${t.end}`).join('; '); // Usa ; aqui também
         
         const maxEntries = Math.max(
             day.earnings.length,
@@ -435,7 +434,6 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
                 isFirstRowOfDay ? dateStr : '',
                 isFirstRowOfDay ? escapeCsvValue(day.km) : '',
                 isFirstRowOfDay ? escapeCsvValue(day.hours) : '',
-                isFirstRowOfDay ? escapeCsvValue(timeEntriesStr) : '',
                 earning ? escapeCsvValue(earning.category) : '',
                 earning ? escapeCsvValue(earning.trips) : '',
                 earning ? escapeCsvValue(earning.amount) : '',
@@ -449,8 +447,8 @@ export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
     });
 
     const csvContent = [
-        CSV_HEADERS.join(';'),
-        ...rows.map(row => row.join(';'))
+        CSV_HEADERS.join(','),
+        ...rows.map(row => row.join(','))
     ].join('\n');
 
     // Retornamos o conteúdo em vez de acionar o download no servidor
