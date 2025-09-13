@@ -1,7 +1,8 @@
 
+
 "use client";
 
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -26,7 +27,7 @@ const months = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 export function HistoryFilters({ isPending, onFiltersChange }: HistoryFiltersProps) {
-  const [filterType, setFilterType] = useState<ReportFilterValues['type'] | null>(null);
+  const [filterType, setFilterType] = useState<ReportFilterValues['type']>('thisMonth');
   const [year, setYear] = useState<number>(getYear(new Date()));
   const [month, setMonth] = useState<number>(new Date().getMonth());
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -49,6 +50,12 @@ export function HistoryFilters({ isPending, onFiltersChange }: HistoryFiltersPro
 
     onFiltersChange(filters);
   };
+  
+  // Efetua a busca inicial ao carregar o componente
+  React.useEffect(() => {
+    handleApplyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex flex-wrap gap-2 items-center">

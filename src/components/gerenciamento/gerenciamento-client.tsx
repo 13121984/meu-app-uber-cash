@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useTransition, useEffect, useCallback } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { useWorkDayColumns } from "./columns";
 import { DataTable } from "./data-table";
 import { HistoryFilters } from "./history-filters";
@@ -17,8 +17,6 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter, useSearchParams } from "next/navigation";
-import { parseISO, isValid, getYear } from 'date-fns';
 
 
 export interface GroupedWorkDay {
@@ -31,8 +29,6 @@ export interface GroupedWorkDay {
 
 export function GerenciamentoClient() {
   const { user } = useAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { columns, Dialogs, setEditingDay } = useWorkDayColumns();
 
   const [isDeletingFiltered, startDeleteTransition] = useTransition();
@@ -40,68 +36,35 @@ export function GerenciamentoClient() {
   const [isPending, startTransition] = useTransition();
   
   const [groupedWorkDays, setGroupedWorkDays] = useState<GroupedWorkDay[]>([]);
-  const [currentFilters, setCurrentFilters] = useState<ReportFilterValues | null>(null);
+  // Este estado agora armazena os filtros aplicados para uso na exclusão
+  const [activeFilters, setActiveFilters] = useState<ReportFilterValues | null>(null);
 
   const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
     if (!user) return;
     
-    setCurrentFilters(filters);
+    setActiveFilters(filters); // Guarda os filtros que estão sendo aplicados
     startTransition(async () => {
       try {
         const groupedData = await getFilteredWorkDaysAction(user.id, filters);
         setGroupedWorkDays(groupedData);
-        
-        // Update URL once after fetching
-        const newQuery = new URLSearchParams();
-        newQuery.set('period', filters.type);
-        if (filters.year) newQuery.set('year', filters.year.toString());
-        if (filters.month !== undefined) newQuery.set('month', filters.month.toString());
-        if (filters.dateRange?.from) newQuery.set('from', filters.dateRange.from.toISOString());
-        if (filters.dateRange?.to) newQuery.set('to', filters.dateRange.to.toISOString());
-        router.replace(`/gerenciamento?${newQuery.toString()}`);
-
       } catch (e) {
         console.error("Failed to fetch work days", e);
         toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
       }
     });
-  }, [user, router]);
-
-  // Effect to load initial data based on URL on first mount
-  useEffect(() => {
-      if (user && !currentFilters) {
-        let initialFilters: ReportFilterValues = { type: 'thisMonth' };
-        const periodParam = searchParams.get('period') as ReportFilterValues['type'] | null;
-        if (periodParam) {
-            const yearParam = searchParams.get('year');
-            const monthParam = searchParams.get('month');
-            const fromParam = searchParams.get('from');
-            const toParam = searchParams.get('to');
-            
-            initialFilters = { type: periodParam };
-            if (yearParam) initialFilters.year = parseInt(yearParam);
-            if (monthParam !== null) initialFilters.month = parseInt(monthParam);
-            if (fromParam && isValid(parseISO(fromParam))) {
-                 initialFilters.dateRange = { from: parseISO(fromParam), to: toParam && isValid(parseISO(toParam)) ? parseISO(toParam) : undefined };
-            }
-        }
-        handleApplyFilters(initialFilters);
-      }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
 
   const filteredCount = groupedWorkDays.reduce((acc, day) => acc + day.entries.length, 0);
 
   const handleDeleteFiltered = async () => {
-    if (!currentFilters || !user) return;
+    if (!activeFilters || !user) return;
 
     startDeleteTransition(async () => {
       try {
-          const result = await deleteFilteredWorkDaysAction(user.id, currentFilters);
+          const result = await deleteFilteredWorkDaysAction(user.id, activeFilters);
           if (result.success) {
               toast({ title: "Sucesso!", description: `${result.count || 0} registros apagados.` });
-              handleApplyFilters(currentFilters);
+              handleApplyFilters(activeFilters);
           } else {
               toast({ title: "Erro!", description: result.error, variant: "destructive" });
           }
@@ -122,7 +85,7 @@ export function GerenciamentoClient() {
         );
      }
      
-     if (!currentFilters) {
+     if (!activeFilters) {
          return (
              <div className="text-center py-20 text-muted-foreground border-dashed border-2 rounded-lg mt-4">
                 <History className="mx-auto h-12 w-12" />
@@ -173,7 +136,7 @@ export function GerenciamentoClient() {
             <CardDescription>
                 Use os filtros para encontrar e gerenciar seus dias de trabalho.
             </CardDescription>
-             <Link href={`/relatorios?${searchParams.toString()}`}>
+             <Link href={`/relatorios`}>
                 <Button variant="outline">
                     <BarChart3 className="mr-2 h-4 w-4" />
                     Ver Relatórios
