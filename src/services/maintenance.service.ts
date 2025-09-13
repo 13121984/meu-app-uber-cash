@@ -1,7 +1,6 @@
 
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { isWithinInterval, startOfDay, endOfDay, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO } from "date-fns";
 import type { ReportFilterValues } from "@/app/relatorios/actions";
 import { getFile, saveFile } from './storage.service';
@@ -56,9 +55,6 @@ export async function addMaintenance(userId: string, data: Omit<Maintenance, 'id
     allRecords.unshift(newRecord);
     await writeMaintenanceData(userId, allRecords);
 
-    revalidatePath('/manutencao');
-    revalidatePath('/dashboard');
-    revalidatePath('/'); // For the new reminder card
     return { success: true, id: newRecord.id };
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Falha ao adicionar registro de manutenção.";
@@ -136,9 +132,6 @@ export async function updateMaintenance(userId: string, id: string, data: Omit<M
     };
     await writeMaintenanceData(userId, allRecords);
     
-    revalidatePath('/manutencao');
-    revalidatePath('/dashboard');
-    revalidatePath('/'); // For the new reminder card
     return { success: true };
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Falha ao atualizar registro.";
@@ -158,9 +151,6 @@ export async function deleteMaintenance(userId: string, id: string): Promise<{ s
     }
     await writeMaintenanceData(userId, allRecords);
     
-    revalidatePath('/manutencao');
-    revalidatePath('/dashboard');
-    revalidatePath('/'); // For the new reminder card
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registro.";
@@ -173,9 +163,6 @@ export async function deleteAllMaintenance(userId: string): Promise<{ success: b
   if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     await writeMaintenanceData(userId, []);
-    revalidatePath('/manutencao');
-    revalidatePath('/dashboard');
-    revalidatePath('/'); // For the new reminder card
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar todos os registros.";

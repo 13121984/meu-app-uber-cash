@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DollarSign, CheckCircle, AlertTriangle, Loader2, Calendar, Info, BarChart3, LineChart, Clock } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
-import { Goals, saveGoals, getGoals } from '@/services/goal.service';
+import { Goals, getGoals } from '@/services/goal.service';
+import { saveGoalsAction } from '@/app/gerenciamento/actions'; // Importar a nova action centralizada
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '../ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -85,7 +86,7 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
           daily: calculatedGoals.daily,
           workDaysPerWeek: data.workDaysPerWeek,
       }
-      await saveGoals(user.id, finalGoals);
+      await saveGoalsAction(user.id, finalGoals); // Usar a nova action centralizada
       toast({
         title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Metas Salvas!</span></div>,
         description: "Seu novo plano de metas foi salvo e será usado no dashboard.",

@@ -1,9 +1,7 @@
 
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getFile, saveFile } from './storage.service';
-import { updateAllSummaries } from "./summary.service";
 
 export interface Goals {
   daily: number;
@@ -41,13 +39,6 @@ export async function getGoals(userId: string): Promise<Goals> {
 export async function saveGoals(userId: string, goals: Goals): Promise<{ success: boolean, error?: string }> {
   try {
     await saveFile(userId, FILE_NAME, goals);
-    
-    // Dispara a atualização de todos os resumos para refletir a nova meta
-    await updateAllSummaries(userId);
-
-    // Revalida as páginas que dependem desses dados
-    revalidatePath('/', 'layout');
-
     return { success: true };
   } catch (error) {
      const errorMessage = error instanceof Error ? error.message : "Falha ao salvar metas.";

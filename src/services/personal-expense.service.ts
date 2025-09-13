@@ -1,7 +1,6 @@
 
 "use server";
 
-import { revalidatePath } from 'next/cache';
 import { startOfDay, parseISO, isSameMonth, isSameYear } from 'date-fns';
 import { getFile, saveFile } from './storage.service';
 
@@ -42,7 +41,6 @@ export async function addPersonalExpense(userId: string, data: Omit<PersonalExpe
     allRecords.unshift(newRecord);
     await writePersonalExpenses(userId, allRecords);
 
-    revalidatePath('/metas');
     return { success: true, id: newRecord.id };
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Falha ao adicionar despesa.";
@@ -85,7 +83,6 @@ export async function updatePersonalExpense(userId: string, id: string, data: Om
     allRecords[index] = { ...data, id, date: startOfDay(new Date(data.date)) };
     await writePersonalExpenses(userId, allRecords);
     
-    revalidatePath('/metas');
     return { success: true, id };
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Falha ao atualizar despesa.";
@@ -102,7 +99,6 @@ export async function deletePersonalExpense(userId: string, id: string): Promise
     allRecords = allRecords.filter(r => r.id !== id);
     await writePersonalExpenses(userId, allRecords);
     
-    revalidatePath('/metas');
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar despesa.";
@@ -116,7 +112,6 @@ export async function deletePersonalExpense(userId: string, id: string): Promise
 export async function deleteAllPersonalExpenses(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
     await writePersonalExpenses(userId, []);
-    revalidatePath('/metas');
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Falha ao apagar todas as despesas.";

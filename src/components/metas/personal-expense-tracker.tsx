@@ -14,7 +14,7 @@ import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from '@/contexts/auth-context';
-
+import { updateAllSummariesAction } from '@/app/gerenciamento/actions';
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -47,12 +47,16 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
   const [selectedRecord, setSelectedRecord] = useState<PersonalExpense | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
+  const fetchRecords = async () => {
     if (!user) return;
     startTransition(async () => {
         const data = await getPersonalExpenses(user.id);
         setRecords(data);
     });
+  }
+
+  useEffect(() => {
+    fetchRecords();
   }, [user]);
 
   const monthlyTotal = useMemo(() => {
@@ -63,15 +67,14 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
       .reduce((sum, record) => sum + record.amount, 0);
   }, [records]);
 
-  const handleSuccess = (record: PersonalExpense, operation: 'created' | 'updated') => {
-    if (operation === 'updated') {
-        setRecords(prev => prev.map(r => r.id === record.id ? record : r));
-        setIsFormOpen(false); // Close dialog only on update
-    } else {
-        setRecords(prev => [record, ...prev]);
-    }
+  const handleSuccess = async (record: PersonalExpense, operation: 'created' | 'updated') => {
+    setIsFormOpen(false);
     setSelectedRecord(null);
-    onExpensesChange();
+    onExpensesChange(); // Notifica o pai que algo mudou
+    fetchRecords(); // Re-busca os dados
+    if (user) {
+        await updateAllSummariesAction(user.id); // Revalida o cache
+    }
   }
 
   const handleEdit = (record: PersonalExpense) => {
@@ -85,8 +88,9 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
     const result = await deletePersonalExpense(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Despesa apagada." });
-      setRecords(prev => prev.filter(r => r.id !== id));
       onExpensesChange();
+      fetchRecords();
+      await updateAllSummariesAction(user.id);
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }
@@ -99,8 +103,9 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
     const result = await deleteAllPersonalExpenses(user.id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Todas as despesas foram apagadas." });
-      setRecords([]);
-      onExpensesChange(); // Notifica o pai
+      onExpensesChange();
+      fetchRecords();
+      await updateAllSummariesAction(user.id);
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }

@@ -4,14 +4,15 @@
 import { revalidatePath } from "next/cache";
 import { deleteWorkDaysByFilter, addOrUpdateWorkDay, deleteWorkDayEntry, getWorkDays, WorkDay } from "@/services/work-day.service";
 import type { ReportFilterValues } from "@/app/relatorios/actions";
-import { getGoals, Goals } from "@/services/goal.service";
+import { getGoals, Goals, saveGoals } from "@/services/goal.service";
 import { getMaintenanceRecords, Maintenance } from "@/services/maintenance.service";
 import { SummaryData, saveSummaryData, PeriodData } from "@/services/summary.service";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 
 // --- Funções de Cálculo Internas ---
 
-function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
+// Esta função agora vive aqui para evitar dependências cíclicas.
+async function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): Promise<PeriodData> {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
     const shiftPerformanceMap = new Map<PeriodData['performanceByShift'][0]['shift'], { profit: number; hours: number, rawEarnings: number }>();
@@ -178,4 +179,13 @@ export async function deleteFilteredWorkDaysAction(userId: string, filters: Repo
 export async function updateAllSummariesAction(userId: string) {
     await updateAllSummaries(userId);
     revalidatePath('/', 'layout');
+}
+
+export async function saveGoalsAction(userId: string, goals: Goals): Promise<{ success: boolean; error?: string }> {
+    const result = await saveGoals(userId, goals);
+    if (result.success) {
+        await updateAllSummaries(userId);
+        revalidatePath('/', 'layout');
+    }
+    return result;
 }
