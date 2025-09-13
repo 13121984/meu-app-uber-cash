@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useTransition, useEffect, useCallback } from 'react';
@@ -27,7 +28,7 @@ import { MaintenanceForm } from "./maintenance-form";
 import { ReportsFilter } from '@/components/relatorios/reports-filter';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Wrench, Trash2, Edit, DollarSign, Filter, Loader2 } from 'lucide-react';
+import { PlusCircle, Wrench, Trash2, Edit, DollarSign, Filter, Loader2, Package } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { Skeleton } from '../ui/skeleton';
@@ -82,7 +83,7 @@ export function MaintenanceClient() {
   }, [user]);
 
   const filteredTotal = useMemo(() => {
-    return records.reduce((sum, record) => sum + record.amount, 0);
+    return records.reduce((sum, record) => sum + record.items.reduce((itemSum, item) => itemSum + item.amount, 0), 0);
   }, [records]);
 
 
@@ -181,6 +182,7 @@ export function MaintenanceClient() {
           </div>
           {records.map(record => {
              const typeInfo = maintenanceTypeLabels[record.type] || { label: 'N/A', className: '' };
+             const totalAmount = record.items.reduce((sum, item) => sum + item.amount, 0);
              return (
               <Card key={record.id}>
                   <CardContent className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -188,13 +190,14 @@ export function MaintenanceClient() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-bold">{record.description}</p>
                             <Badge variant="outline" className={cn(typeInfo.className)}>{typeInfo.label}</Badge>
+                             <Badge variant="secondary" className="flex items-center gap-1"><Package className="h-3 w-3"/> {record.items.length} {record.items.length === 1 ? 'item' : 'itens'}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
                               {format(new Date(record.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
                           </p>
                       </div>
                       <div className="flex items-center gap-4">
-                          <p className="font-semibold text-red-500">{formatCurrency(record.amount)}</p>
+                          <p className="font-semibold text-red-500">{formatCurrency(totalAmount)}</p>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(record)} disabled={isDeleting}>
                               <Edit className="h-4 w-4" />
                           </Button>
@@ -237,7 +240,7 @@ export function MaintenanceClient() {
                  </CardDescription>
               </div>
                 <DialogTrigger asChild>
-                    <Button>
+                    <Button onClick={() => setSelectedRecord(null)}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Adicionar Registro
                     </Button>
@@ -253,7 +256,7 @@ export function MaintenanceClient() {
             </CardContent>
         </Card>
         </div>
-        <DialogContent>
+        <DialogContent className="max-w-3xl">
             <DialogHeader>
                 <DialogTitle>{selectedRecord ? 'Editar' : 'Adicionar'} Registro de Manutenção</DialogTitle>
                 <DialogDescription>

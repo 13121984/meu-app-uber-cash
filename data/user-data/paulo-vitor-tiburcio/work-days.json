@@ -1,49 +1,25 @@
 [
   {
     "date": "2025-09-13T00:00:00.000Z",
-    "km": 30,
-    "hours": 2,
+    "km": 100,
+    "hours": 8,
     "timeEntries": [],
     "earnings": [
       {
-        "id": 1757774918877.653,
+        "id": 1757775237637.2854,
         "category": "99 Pop",
-        "trips": 2,
-        "amount": 60
+        "trips": 15,
+        "amount": 250
       }
     ],
     "fuelEntries": [
       {
-        "id": 1757774927848,
+        "id": 1757775253824,
         "type": "GNV",
-        "paid": 10,
+        "paid": 40,
         "price": 4.77
       }
     ],
-    "id": "1757775005731"
-  },
-  {
-    "date": "2025-09-13T00:00:00.000Z",
-    "km": 30,
-    "hours": 2,
-    "timeEntries": [],
-    "earnings": [
-      {
-        "id": 1757774918877.653,
-        "category": "99 Pop",
-        "trips": 2,
-        "amount": 60
-      }
-    ],
-    "fuelEntries": [
-      {
-        "id": 1757774927848,
-        "type": "GNV",
-        "paid": 10,
-        "price": 4.77
-      }
-    ],
-    "id": "1757774943714",
-    "maintenanceEntries": []
+    "id": "1757775263641"
   }
 ]

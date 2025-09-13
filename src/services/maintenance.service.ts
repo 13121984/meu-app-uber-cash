@@ -4,15 +4,21 @@ import type { ReportFilterValues } from "@/app/relatorios/actions";
 import { getFile, saveFile } from './storage.service';
 
 
+export interface MaintenanceItem {
+  id: string;
+  description: string;
+  amount: number;
+  reminderKm: number | null;
+  reminderDate: Date | null;
+}
+
 export interface Maintenance {
   id: string;
   date: Date;
   description: string;
-  amount: number;
   type: 'preventive' | 'corrective' | 'both'; 
   kmAtService: number | null;
-  reminderKm: number | null;
-  reminderDate: Date | null;
+  items: MaintenanceItem[];
 }
 
 const FILE_NAME = 'maintenance.json';
@@ -21,14 +27,37 @@ const FILE_NAME = 'maintenance.json';
 async function readMaintenanceData(userId: string): Promise<Maintenance[]> {
   if (!userId) return [];
   const data = await getFile<Maintenance[]>(userId, FILE_NAME, []);
-  return (data || []).map(record => ({
-    ...record,
-    type: record.type || 'corrective', // Garante um valor padrão para registros antigos
-    date: parseISO(record.date as any),
-    reminderDate: record.reminderDate ? parseISO(record.reminderDate as any) : null,
-    kmAtService: record.kmAtService ?? null,
-    reminderKm: record.reminderKm ?? null,
-  }));
+  
+  // Migration logic for old data structure
+  return (data || []).map(record => {
+    // If record has 'amount' property, it's the old format
+    if (record.hasOwnProperty('amount')) {
+      const oldRecord = record as any;
+      return {
+        id: oldRecord.id,
+        date: parseISO(oldRecord.date as any),
+        description: oldRecord.description,
+        type: oldRecord.type || 'corrective',
+        kmAtService: oldRecord.kmAtService ?? null,
+        items: [{
+            id: `item-${oldRecord.id}`,
+            description: oldRecord.description,
+            amount: oldRecord.amount,
+            reminderDate: oldRecord.reminderDate ? parseISO(oldRecord.reminderDate as any) : null,
+            reminderKm: oldRecord.reminderKm ?? null,
+        }]
+      };
+    }
+    // New format
+    return {
+        ...record,
+        date: parseISO(record.date as any),
+        items: (record.items || []).map(item => ({
+            ...item,
+            reminderDate: item.reminderDate ? parseISO(item.reminderDate as any) : null,
+        }))
+    };
+  });
 }
 
 async function writeMaintenanceData(userId: string, data: Maintenance[]): Promise<void> {
@@ -48,7 +77,10 @@ export async function addMaintenance(userId: string, data: Omit<Maintenance, 'id
         ...data,
         id: Date.now().toString(),
         date: new Date(data.date),
-        reminderDate: data.reminderDate ? new Date(data.reminderDate) : null,
+        items: data.items.map(item => ({
+            ...item,
+            id: `item-${Date.now()}-${Math.random()}`
+        }))
     };
     allRecords.unshift(newRecord);
     await writeMaintenanceData(userId, allRecords);
@@ -120,7 +152,10 @@ export async function updateMaintenance(userId: string, id: string, data: Omit<M
         ...data, 
         id, 
         date: new Date(data.date),
-        reminderDate: data.reminderDate ? new Date(data.reminderDate) : null,
+        items: data.items.map(item => ({
+            ...item,
+            id: item.id.startsWith('item-') ? item.id : `item-${Date.now()}-${Math.random()}`
+        }))
     };
     await writeMaintenanceData(userId, allRecords);
     

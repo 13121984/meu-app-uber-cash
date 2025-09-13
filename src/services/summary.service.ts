@@ -4,7 +4,7 @@
 import { getFile, saveFile } from './storage.service';
 import { getWorkDays, getFilteredWorkDays, WorkDay } from './work-day.service';
 import { getGoals } from './goal.service';
-import { getMaintenanceRecords, getFilteredMaintenanceRecords, Maintenance } from './maintenance.service';
+import { getFilteredMaintenanceRecords, Maintenance } from './maintenance.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { format, startOfDay } from 'date-fns';
 
@@ -155,7 +155,7 @@ function calculatePeriodData(workDays: WorkDay[], maintenanceRecords: Maintenanc
     });
 
     const maintenanceTotal = Array.isArray(maintenanceRecords) 
-        ? maintenanceRecords.reduce((sum, r) => sum + r.amount, 0)
+        ? maintenanceRecords.reduce((sum, record) => sum + record.items.reduce((itemSum, item) => itemSum + item.amount, 0), 0)
         : 0;
 
     totalExtras += maintenanceTotal;
