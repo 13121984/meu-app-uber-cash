@@ -88,13 +88,14 @@ function PlannerInternal({ initialData }: { initialData: Goals }) {
       }
       await saveGoalsAction(user.id, finalGoals); // Usar a nova action centralizada
       toast({
-        title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Metas Salvas!</span></div>,
+        title: "Metas Salvas!",
         description: "Seu novo plano de metas foi salvo e será usado no dashboard.",
+        variant: "success",
       });
       router.refresh(); 
     } catch (error) {
       toast({
-        title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,
+        title: "Erro ao Salvar",
         description: "Não foi possível salvar suas metas.",
         variant: "destructive",
       });
