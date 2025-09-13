@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { Maintenance, getFilteredMaintenanceRecords } from "@/services/maintenance.service";
+import { Maintenance } from "@/services/maintenance.service";
 import { MaintenanceForm } from "./maintenance-form";
 import { ReportsFilter } from '@/components/relatorios/reports-filter';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -35,7 +35,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
-import { deleteMaintenanceAction, deleteAllMaintenanceAction } from '@/app/gerenciamento/actions';
+import { deleteMaintenanceAction, deleteAllMaintenanceAction, getFilteredMaintenanceRecordsAction } from '@/app/gerenciamento/actions';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -74,7 +74,7 @@ export function MaintenanceClient() {
     setCurrentFilters(filters);
     startTransition(async () => {
       try {
-        const data = await getFilteredMaintenanceRecords(user.id, filters);
+        const data = await getFilteredMaintenanceRecordsAction(user.id, filters);
         setRecords(data);
       } catch (e) {
         toast({ title: "Erro ao buscar dados", variant: "destructive" });

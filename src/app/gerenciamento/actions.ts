@@ -16,7 +16,7 @@ import {
   WorkDay,
 } from '@/services/work-day.service';
 import { getGoals, Goals, saveGoals as serviceSaveGoals } from '@/services/goal.service';
-import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUpdateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance as serviceDeleteAllMaintenance } from '@/services/maintenance.service';
+import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUpdateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance as serviceDeleteAllMaintenance, getFilteredMaintenanceRecords as serviceGetFilteredMaintenanceRecords, Maintenance } from '@/services/maintenance.service';
 import { addPersonalExpense as serviceAddPersonalExpense, updatePersonalExpense as serviceUpdatePersonalExpense, deletePersonalExpense as serviceDeletePersonalExpense, deleteAllPersonalExpenses as serviceDeleteAllPersonalExpenses, getCurrentMonthPersonalExpensesTotal as serviceGetCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
 import { saveCatalogData, getCatalogData as serviceGetCatalogData, Catalog } from '@/services/catalog.service';
 import { updateAllSummaries as serviceUpdateAllSummaries, getSummaryForPeriod as serviceGetSummaryForPeriod } from '@/services/summary.service';
@@ -24,7 +24,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getSettings as serviceGetSettings } from '@/services/settings.service';
 import type { Settings } from '@/types/settings';
 import { getMaintenanceRemindersAction as serviceGetMaintenanceReminders } from '@/app/inicio/actions';
-import type { BackupInput, BackupOutput } from '@/ai/flows/backup-flow';
+import { runBackupAction as serviceRunBackupAction } from "@/app/configuracoes/backup/actions";
 
 
 export async function addOrUpdateWorkDayAction(userId: string, workDay: any) {
@@ -196,5 +196,8 @@ export async function getCurrentMonthPersonalExpensesTotalAction(userId: string)
     return await serviceGetCurrentMonthPersonalExpensesTotal(userId);
 }
 
+export async function getFilteredMaintenanceRecordsAction(userId: string, filters?: ReportFilterValues): Promise<Maintenance[]> {
+    return await serviceGetFilteredMaintenanceRecords(userId, filters);
+}
 
 export { serviceGetMaintenanceReminders as getMaintenanceRemindersAction };
