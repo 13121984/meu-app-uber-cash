@@ -22,6 +22,7 @@ import Link from 'next/link';
 import { Separator } from '../ui/separator';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { addMaintenanceAction, updateMaintenanceAction } from '@/app/gerenciamento/actions';
+import { Card } from '@/components/ui/card';
 
 export const maintenanceItemSchema = z.object({
     id: z.string().optional(),
