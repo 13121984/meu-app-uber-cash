@@ -32,7 +32,7 @@ interface ReportsFilterProps {
 const years = Array.from({ length: 10 }, (_, i) => getYear(new Date()) - i);
 const months = Array.from({ length: 12 }, (_, i) => ({
   value: i,
-  label: format(new Date(0, i), 'MMMM', { locale: ptBR }),
+  label: format(new Date(0, i), 'MMMM', { locale: ptBR })!,
 }));
 
 export function ReportsFilter({ onApplyFilters, isPending, reportData, activeFilters, chartRefs, plan }: ReportsFilterProps) {
