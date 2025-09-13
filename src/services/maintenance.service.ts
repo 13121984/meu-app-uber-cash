@@ -132,7 +132,7 @@ export async function getFilteredMaintenanceRecords(userId: string, filters?: Re
     }
     
     if (interval) {
-        const filtered = allRecords.filter(record => isWithinInterval(record.date, interval!));
+        const filtered = allRecords.filter(record => isWithinInterval(new Date(record.date), interval!));
         return filtered || [];
     }
 

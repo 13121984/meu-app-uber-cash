@@ -37,6 +37,7 @@ export async function getGoals(userId: string): Promise<Goals> {
  * Salva ou atualiza as metas no arquivo local do usuário.
  */
 export async function saveGoals(userId: string, goals: Goals): Promise<{ success: boolean, error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     await saveFile(userId, FILE_NAME, goals);
     return { success: true };

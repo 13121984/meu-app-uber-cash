@@ -70,6 +70,7 @@ async function writeWorkDays(userId: string, data: WorkDay[]): Promise<void> {
 // --- Funções CRUD ---
 
 export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado.", operation: 'created' };
   try {
     const allWorkDays = await readWorkDays(userId);
     const finalDate = startOfDay(new Date(data.date));
@@ -95,6 +96,7 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
 }
 
 export async function deleteWorkDay(userId: string, id: string): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     let allWorkDays = await readWorkDays(userId);
     allWorkDays = allWorkDays.filter(r => r.id !== id);
@@ -107,6 +109,7 @@ export async function deleteWorkDay(userId: string, id: string): Promise<{ succe
 }
 
 export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilterValues): Promise<{ success: boolean; error?: string, count?: number }> {
+    if (!userId) return { success: false, error: "Usuário não autenticado." };
     try {
         let allWorkDays = await readWorkDays(userId);
         const initialLength = allWorkDays.length;
@@ -164,7 +167,7 @@ export function getFilteredWorkDays(allWorkDays: WorkDay[], filters: ReportFilte
       }
       break;
   }
-  if (interval) return allWorkDays.filter(d => isWithinInterval(d.date, interval!));
+  if (interval) return allWorkDays.filter(d => isWithinInterval(new Date(d.date), interval!));
   return [];
 }
 
@@ -212,11 +215,11 @@ export function generateCsvContent(workDays: WorkDay[]): string {
 
     sortedWorkDays.forEach(day => {
         const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
-        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, day.maintenanceEntries.length, 1);
+        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, (day.maintenanceEntries || []).length, 1);
         for (let i = 0; i < maxEntries; i++) {
             const earning = day.earnings[i];
             const fuel = day.fuelEntries[i];
-            const maintenance = day.maintenanceEntries[i];
+            const maintenance = day.maintenanceEntries ? day.maintenanceEntries[i] : undefined;
             const isFirstRowOfDay = i === 0;
             rows.push([
                 isFirstRowOfDay ? dateStr : '', isFirstRowOfDay ? escapeCsvValue(day.km) : '', isFirstRowOfDay ? escapeCsvValue(day.hours) : '',

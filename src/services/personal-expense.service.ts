@@ -49,6 +49,7 @@ export async function getPersonalExpenses(userId: string): Promise<PersonalExpen
 }
 
 export async function getCurrentMonthPersonalExpensesTotal(userId: string): Promise<number> {
+    if (!userId) return 0;
     const allExpenses = await getPersonalExpenses(userId);
     const now = new Date();
     
