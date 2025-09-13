@@ -184,12 +184,6 @@ export function TaximeterClient() {
     setTotal(rates.startingFare + distance * rates.ratePerKm + (time / 60) * rates.ratePerMinute);
   }, [distance, time, rates]);
 
-  useEffect(() => {
-    if (user?.preferences.taximeterRates) {
-        setRates(user.preferences.taximeterRates);
-    }
-  }, [user]);
-
   const handleSaveRates = async (newRates: TaximeterRates) => {
     if (!user) return;
     setIsLoading(true);
