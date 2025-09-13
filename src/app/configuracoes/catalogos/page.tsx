@@ -13,10 +13,12 @@ export default function GerenciarCatalogosPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getCatalogAction().then(data => {
+    async function loadCatalog() {
+      const data = await getCatalogAction();
       setInitialCatalog(data);
       setIsLoading(false);
-    });
+    }
+    loadCatalog();
   }, []);
 
   if (isLoading || !initialCatalog) {

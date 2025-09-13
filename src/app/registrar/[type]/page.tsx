@@ -1,50 +1,25 @@
 
-"use client";
-
 import { RegistrationWizard } from '@/components/registrar/registration-wizard';
 import { getWorkDaysForDate, type WorkDay } from '@/services/work-day.service';
 import { startOfDay } from 'date-fns';
 import { notFound } from 'next/navigation';
-import { useAuth } from '@/contexts/auth-context';
-import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { getCatalogAction } from '@/app/gerenciamento/actions';
 
-export default function RegistrarPage({ params }: { params: { type: 'today' | 'other-day' }}) {
+export default async function RegistrarPage({ params }: { params: { type: 'today' | 'other-day' }}) {
   const registrationType = params.type;
-  const { user, loading } = useAuth();
-  const [existingDayEntries, setExistingDayEntries] = useState<WorkDay[]>([]);
-  const [isDataLoading, setIsDataLoading] = useState(true);
-
+  
   if (registrationType !== 'today' && registrationType !== 'other-day') {
     notFound();
   }
 
-  useEffect(() => {
-    async function loadInitialData() {
-      if (user && registrationType === 'today') {
-        try {
-          const entries = await getWorkDaysForDate(user.id, startOfDay(new Date()));
-          setExistingDayEntries(entries);
-        } catch (err) {
-          console.error("Failed to load today's entries:", err);
-          setExistingDayEntries([]);
-        }
-      }
-      setIsDataLoading(false);
-    }
-    
-    if (!loading) {
-        loadInitialData();
-    }
-  }, [user, loading, registrationType]);
-
-  if (loading || isDataLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
+  // Fetching data on the server
+  const catalog = await getCatalogAction();
+  
+  // NOTE: We are fetching existingDayEntries on the server, but since RegistrationWizard
+  // is a client component, it will re-fetch or manage its own state on the client.
+  // This server-side fetch is for potential future use or if we refactor to pass it down.
+  // For 'other-day', we don't have a user ID or date here, so we pass an empty array.
+  const existingDayEntries: WorkDay[] = [];
 
   return (
     <div className="space-y-6">
@@ -57,6 +32,7 @@ export default function RegistrarPage({ params }: { params: { type: 'today' | 'o
       <RegistrationWizard 
         registrationType={registrationType} 
         existingDayEntries={existingDayEntries}
+        catalog={catalog}
       />
     </div>
   );

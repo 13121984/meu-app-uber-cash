@@ -11,8 +11,8 @@ import { LivePreview } from './live-preview';
 import { toast } from "@/hooks/use-toast"
 import { useRouter } from 'next/navigation';
 import { parseISO, startOfDay } from 'date-fns';
-import type { WorkDay } from '@/services/work-day.service';
-import { addOrUpdateWorkDayAction, deleteWorkDayAction, getCatalogAction } from '@/app/gerenciamento/actions';
+import { getWorkDaysForDate, WorkDay } from '@/services/work-day.service';
+import { addOrUpdateWorkDayAction, deleteWorkDayAction } from '@/app/gerenciamento/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -105,8 +105,9 @@ interface RegistrationWizardProps {
     initialData?: Partial<WorkDay> | null;
     isEditing?: boolean;
     onSuccess?: () => void;
-    registrationType?: 'today' | 'other-day';
+    registrationType: 'today' | 'other-day';
     existingDayEntries?: WorkDay[];
+    catalog: Catalog | null;
 }
 
 
@@ -120,9 +121,9 @@ function WizardSkeleton() {
     )
 }
 
-export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType = 'today', existingDayEntries: propsExistingEntries }: RegistrationWizardProps) {
+export function RegistrationWizard({ initialData: propsInitialData, isEditing = false, onSuccess, registrationType = 'today', existingDayEntries: propsExistingEntries, catalog }: RegistrationWizardProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,12 +133,28 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const [entryBeingEdited, setEntryBeingEdited] = useState<WorkDay | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [catalog, setCatalog] = useState<Catalog | null>(null);
-
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
    useEffect(() => {
-    setExistingEntries(propsExistingEntries || []);
-   }, [propsExistingEntries]);
+    async function loadInitialData() {
+      if (user && registrationType === 'today' && !propsInitialData) {
+        try {
+          const entries = await getWorkDaysForDate(user.id, startOfDay(new Date()));
+          setExistingEntries(entries);
+        } catch (err) {
+          console.error("Failed to load today's entries:", err);
+          setExistingEntries([]);
+        }
+      } else if (propsExistingEntries) {
+         setExistingEntries(propsExistingEntries);
+      }
+      setIsDataLoading(false);
+    }
+    
+    if (!loading) {
+        loadInitialData();
+    }
+  }, [user, loading, registrationType, propsExistingEntries, propsInitialData]);
    
    useEffect(() => {
     if (entryBeingEdited) {
@@ -148,14 +165,6 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
         dispatch({ type: 'RESET_STATE', payload: { registrationType }});
     }
    }, [entryBeingEdited, registrationType, propsInitialData]);
-   
-   useEffect(() => {
-       const fetchCatalog = async () => {
-           const catalogData = await getCatalogAction();
-           setCatalog(catalogData);
-       }
-       fetchCatalog();
-   }, []);
 
 
   const handleNext = () => {
@@ -230,7 +239,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       setIsAlertOpen(false);
   };
 
-  if (!catalog) {
+  if (loading || isDataLoading || !catalog) {
       return <WizardSkeleton />;
   }
 
