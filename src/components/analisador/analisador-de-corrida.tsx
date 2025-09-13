@@ -8,13 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Sparkles, Upload } from 'lucide-react';
-import { runAnalysisAction, AnalysisOutput } from './actions';
+import { analyzeRace, AnalyzeRaceOutput } from '@/ai/flows/analise-corrida-flow';
 
 export function AnalisadorDeCorrida() {
   const [image, setImage] = useState<File | null>(null);
   const [rates, setRates] = useState({ ratePerKm: 2, ratePerHour: 30 });
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<AnalysisOutput | null>(null);
+  const [result, setResult] = useState<AnalyzeRaceOutput | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -38,17 +38,14 @@ export function AnalisadorDeCorrida() {
       const reader = new FileReader();
       reader.readAsDataURL(image);
       reader.onload = async (event) => {
-        const dataUri = event.target?.result as string;
-        const response = await runAnalysisAction({ image: dataUri, rates });
-        if (response.success && response.output) {
-          setResult(response.output);
-        } else {
-          toast({ title: 'Erro na análise', description: response.error, variant: 'destructive' });
-        }
+        const raceImage = event.target?.result as string;
+        const response = await analyzeRace({ raceImage, userRates: rates });
+        setResult(response);
         setIsLoading(false);
       };
     } catch (error) {
-      toast({ title: 'Erro', description: 'Falha ao analisar a imagem.', variant: 'destructive' });
+        const err = error as Error;
+      toast({ title: 'Erro', description: err.message || 'Falha ao analisar a imagem.', variant: 'destructive' });
       setIsLoading(false);
     }
   };
