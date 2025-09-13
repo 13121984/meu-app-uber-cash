@@ -18,6 +18,7 @@ import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUp
 import { addPersonalExpense as serviceAddPersonalExpense, updatePersonalExpense as serviceUpdatePersonalExpense, deletePersonalExpense as serviceDeletePersonalExpense, deleteAllPersonalExpenses as serviceDeleteAllPersonalExpenses } from '@/services/personal-expense.service';
 import { saveCatalogData, getCatalogData as serviceGetCatalogData, Catalog } from '@/services/catalog.service';
 import { runBackupAction as serviceRunBackupAction, BackupInput, BackupOutput } from "@/ai/flows/backup-flow";
+import { updateAllSummaries as serviceUpdateAllSummaries } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 
 export async function addOrUpdateWorkDayAction(userId: string, workDay: any) {
@@ -170,4 +171,9 @@ export async function getFilteredWorkDaysAction(userId: string, filters: ReportF
 
 export async function getWorkDaysForDateAction(userId: string, date: Date): Promise<WorkDay[]> {
     return await serviceGetWorkDaysForDate(userId, date);
+}
+
+export async function updateAllSummariesAction(userId: string) {
+    await serviceUpdateAllSummaries(userId);
+    revalidatePath('/', 'layout');
 }

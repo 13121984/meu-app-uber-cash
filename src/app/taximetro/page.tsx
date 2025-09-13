@@ -28,10 +28,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from '@/components/ui/label';
-import { addOrUpdateWorkDay } from '@/services/work-day.service';
+import { addOrUpdateWorkDayAction, updateAllSummariesAction } from '@/app/gerenciamento/actions';
 import { isAfter, add, formatDistanceToNowStrict } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { updateAllSummaries } from '@/services/summary.service';
 
 // Helper para calcular a distância (fórmula de Haversine)
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -208,7 +207,7 @@ export default function TaximetroPage() {
 
         setStatus('idle');
         
-        const result = await addOrUpdateWorkDay(user.id, {
+        const result = await addOrUpdateWorkDayAction(user.id, {
             id: '',
             date: new Date(),
             km: finalRideData.distance,
@@ -225,7 +224,7 @@ export default function TaximetroPage() {
         });
         
         if (result.success) {
-            await updateAllSummaries(user.id);
+            await updateAllSummariesAction(user.id);
             toast({
                 title: "Corrida Salva!",
                 description: `A corrida de ${formatCurrency(finalRideData.cost)} foi salva no seu histórico.`
