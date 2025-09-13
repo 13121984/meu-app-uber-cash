@@ -204,15 +204,15 @@ export async function updateAllSummaries(userId: string): Promise<void> {
     const goals = await getGoals(userId);
 
     const hojeWorkDays = getFilteredWorkDays(allWorkDays, { type: 'today' });
-    const hojeMaintenance = getFilteredMaintenanceRecords(allMaintenance, { type: 'today' });
+    const hojeMaintenance = await getFilteredMaintenanceRecords(userId, { type: 'today' });
     const hojeData = calculatePeriodData(hojeWorkDays, hojeMaintenance, { today: goals.daily }, 'today');
     
     const semanaWorkDays = getFilteredWorkDays(allWorkDays, { type: 'thisWeek' });
-    const semanaMaintenance = getFilteredMaintenanceRecords(allMaintenance, { type: 'thisWeek' });
+    const semanaMaintenance = await getFilteredMaintenanceRecords(userId, { type: 'thisWeek' });
     const semanaData = calculatePeriodData(semanaWorkDays, semanaMaintenance, { thisWeek: goals.weekly }, 'thisWeek');
 
     const mesWorkDays = getFilteredWorkDays(allWorkDays, { type: 'thisMonth' });
-    const mesMaintenance = getFilteredMaintenanceRecords(allMaintenance, { type: 'thisMonth' });
+    const mesMaintenance = await getFilteredMaintenanceRecords(userId, { type: 'thisMonth' });
     const mesData = calculatePeriodData(mesWorkDays, mesMaintenance, { thisMonth: goals.monthly }, 'thisMonth');
     
     const newSummaryData: SummaryData = {
@@ -231,7 +231,7 @@ export async function generateReportData(userId: string, filters: ReportFilterVa
     const allMaintenance = await getFilteredMaintenanceRecords(userId);
 
     const filteredWorkDays = getFilteredWorkDays(allWorkDays, filters);
-    const filteredMaintenance = getFilteredMaintenanceRecords(allMaintenance, filters);
+    const filteredMaintenance = await getFilteredMaintenanceRecords(userId, filters);
     
     const periodData = calculatePeriodData(filteredWorkDays, filteredMaintenance, {}, 'custom');
 
