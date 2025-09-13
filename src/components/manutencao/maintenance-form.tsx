@@ -116,12 +116,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
       const errorMessage = error instanceof Error ? error.message : "Não foi possível salvar o registro.";
       toast({
         title: "Erro!",
-        description: (
-            <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <span>{errorMessage}</span>
-            </div>
-        ),
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -275,7 +270,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
                                         </Button>
                                     </FormControl>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR}/></PopoverContent>
+                                    <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value || undefined} onSelect={field.onChange} initialFocus locale={ptBR}/></PopoverContent>
                                 </Popover>
                                 <FormMessage />
                                 </FormItem>
