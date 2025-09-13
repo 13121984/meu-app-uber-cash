@@ -76,7 +76,7 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
             link.click();
             document.body.removeChild(link);
           } else {
-              toast({ title: "Erro ao baixar", description: result.error || "Não foi possível obter o arquivo de backup.", variant: 'destructive'});
+              toast({ title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao baixar</span></div>, description: result.error || "Não foi possível obter o arquivo de backup.", variant: 'destructive'});
           }
       });
   }
