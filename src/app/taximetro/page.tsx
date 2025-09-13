@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Play, Pause, Square, Timer, Map, DollarSign, Loader2, Settings, Lock, CalculatorIcon, Check, ArrowRight } from 'lucide-react';
 import { Geolocation, Position } from '@capacitor/geolocation';
 import { toast } from '@/hooks/use-toast';
-import { updateUserPreferences, TaximeterRates, UserPreferences } from '@/services/auth.service';
+import { TaximeterRates, UserPreferences } from '@/services/auth.service';
 import Link from 'next/link';
 import {
   Accordion,
@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from '@/components/ui/label';
-import { addOrUpdateWorkDayAction, updateAllSummariesAction } from '@/app/gerenciamento/actions';
+import { addOrUpdateWorkDayAction, updateAllSummariesAction, updateUserPreferencesAction } from '@/app/gerenciamento/actions';
 import { isAfter, add, formatDistanceToNowStrict } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -232,7 +232,7 @@ export default function TaximetroPage() {
         }
         
         if (user.plan === 'basic') {
-            await updateUserPreferences(user.id, { lastTaximeterUse: new Date().toISOString() });
+            await updateUserPreferencesAction(user.id, { lastTaximeterUse: new Date().toISOString() });
             await refreshUser();
         }
 
@@ -263,7 +263,7 @@ export default function TaximetroPage() {
         };
         setRates(finalRates);
 
-        const result = await updateUserPreferences(user.id, { taximeterRates: finalRates });
+        const result = await updateUserPreferencesAction(user.id, { taximeterRates: finalRates });
         if(result.success) {
             toast({ title: "Tarifas Salvas!", description: "Suas novas tarifas foram salvas com sucesso."});
             await refreshUser();

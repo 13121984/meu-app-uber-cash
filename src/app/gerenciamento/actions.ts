@@ -24,7 +24,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getSettings as serviceGetSettings } from '@/services/settings.service';
 import type { Settings } from '@/types/settings';
 import { getMaintenanceRemindersAction as serviceGetMaintenanceReminders } from '@/app/inicio/actions';
-import { runBackupAction as serviceRunBackupAction } from "@/app/configuracoes/backup/actions";
+import { updateUserPreferences as serviceUpdateUserPreferences, UserPreferences } from '@/services/auth.service';
 
 
 export async function addOrUpdateWorkDayAction(userId: string, workDay: any) {
@@ -198,6 +198,10 @@ export async function getCurrentMonthPersonalExpensesTotalAction(userId: string)
 
 export async function getFilteredMaintenanceRecordsAction(userId: string, filters?: ReportFilterValues): Promise<Maintenance[]> {
     return await serviceGetFilteredMaintenanceRecords(userId, filters);
+}
+
+export async function updateUserPreferencesAction(userId: string, preferences: Partial<UserPreferences>) {
+    return await serviceUpdateUserPreferences(userId, preferences);
 }
 
 export { serviceGetMaintenanceReminders as getMaintenanceRemindersAction };

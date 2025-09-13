@@ -2,8 +2,8 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
-import { login as loginService, signup as signupService, User, SecurityAnswer, getUserById, Plan, updateUserPreferences } from '@/services/auth.service';
-import { clearAllDataForUserAction, getSettingsForUserAction } from '@/app/gerenciamento/actions';
+import { login as loginService, signup as signupService, User, SecurityAnswer, getUserById, Plan } from '@/services/auth.service';
+import { clearAllDataForUserAction, getSettingsForUserAction, updateUserPreferencesAction } from '@/app/gerenciamento/actions';
 import type { AppTheme } from '@/types/settings';
 
 interface AuthContextType {
@@ -103,14 +103,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   const setColorTheme = async (colorTheme: string) => {
     if (user) {
-      await updateUserPreferences(user.id, { colorTheme });
+      await updateUserPreferencesAction(user.id, { colorTheme });
       await refreshUser();
     }
   };
 
   const setTheme = async (theme: AppTheme) => {
       if(user) {
-        await updateUserPreferences(user.id, { theme });
+        await updateUserPreferencesAction(user.id, { theme });
         await refreshUser();
       }
   }
