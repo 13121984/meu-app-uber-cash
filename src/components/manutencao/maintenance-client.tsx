@@ -250,7 +250,10 @@ export function MaintenanceClient() {
                 <ReportsFilter 
                     onApplyFilters={handleApplyFilters}
                     isPending={isPending}
-                    reportContentRef={React.createRef()}
+                    reportData={null}
+                    activeFilters={currentFilters}
+                    chartRefs={{}}
+                    plan={user?.plan || 'basic'}
                 />
                 {renderContent()}
             </CardContent>
