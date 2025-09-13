@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from "@/hooks/use-toast";
-import { getSettingsForUserAction, getCatalogAction } from '@/app/gerenciamento/actions';
+import { getSettingsForUserAction, getCatalogAction, saveSettingsAction } from '@/app/gerenciamento/actions';
 import type { Catalog } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
 import { Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun, Lock } from 'lucide-react';
@@ -88,31 +88,17 @@ export function SettingsForm() {
 
     const handleThemeChange = async (theme: AppTheme) => {
       if (!user) return;
-      setIsSubmitting(true);
+      
       try {
         await setTheme(theme);
-        toast({
-            title: "Tema Salvo!",
-            description: (
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <span>A nova aparência foi aplicada.</span>
-              </div>
-            ),
-        });
+        
       } catch (error) {
         toast({
-          title: "Erro ao Salvar",
-          description: (
-             <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <span>Não foi possível salvar o tema.</span>
-             </div>
-          ),
+          title: "Erro ao Salvar Tema",
+          description: "Não foi possível salvar o tema.",
           variant: "destructive",
         });
-      } finally {
-        setIsSubmitting(false);
+        throw error; // Propagate error to stop onSubmit
       }
     };
 
@@ -120,13 +106,32 @@ export function SettingsForm() {
         if (!user) return;
         setIsSubmitting(true);
         try {
-            await updateUserPreferences(user.id, { 
+            // Save general settings
+            await saveSettingsAction(user.id, {
+                theme: data.theme,
                 maintenanceNotifications: data.maintenanceNotifications,
                 defaultFuelType: data.defaultFuelType,
+                weeklyBackup: initialSettings?.weeklyBackup || false,
+                backupEmail: initialSettings?.backupEmail || ''
             });
-            await handleThemeChange(data.theme); // Também atualiza o tema
+
+            // Save theme preference separately (already handled by setTheme in context)
+            await handleThemeChange(data.theme);
+
+            toast({
+                title: "Preferências Salvas!",
+                description: "Suas configurações foram atualizadas com sucesso."
+            });
+            router.refresh();
+
         } catch(e) {
-            // Error is handled in handleThemeChange
+            // Error is handled in the specific functions
+            console.error("Failed to save settings", e);
+             toast({
+                title: "Erro Geral",
+                description: "Não foi possível salvar todas as configurações.",
+                variant: "destructive"
+             });
         } finally {
             setIsSubmitting(false);
         }

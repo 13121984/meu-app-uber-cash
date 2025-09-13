@@ -21,7 +21,7 @@ import { addPersonalExpense as serviceAddPersonalExpense, updatePersonalExpense 
 import { saveCatalogData, getCatalogData as serviceGetCatalogData, Catalog } from '@/services/catalog.service';
 import { updateAllSummaries as serviceUpdateAllSummaries, getSummaryForPeriod as serviceGetSummaryForPeriod } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import { getSettings as serviceGetSettings } from '@/services/settings.service';
+import { getSettings as serviceGetSettings, saveSettings as serviceSaveSettings } from '@/services/settings.service';
 import type { Settings } from '@/types/settings';
 import { getMaintenanceRemindersAction as serviceGetMaintenanceReminders } from '@/app/inicio/actions';
 import { updateUserPreferences as serviceUpdateUserPreferences, UserPreferences } from '@/services/auth.service';
@@ -178,6 +178,14 @@ export async function updateAllSummariesAction(userId: string) {
 
 export async function getSettingsForUserAction(userId: string): Promise<Settings> {
     return await serviceGetSettings(userId);
+}
+
+export async function saveSettingsAction(userId: string, settings: Settings) {
+    const result = await serviceSaveSettings(userId, settings);
+    if(result.success) {
+        revalidatePath('/configuracoes');
+    }
+    return result;
 }
 
 export async function importWorkDaysAction(userId: string, csvContent: string): Promise<{ success: boolean; count?: number; error?: string }> {
