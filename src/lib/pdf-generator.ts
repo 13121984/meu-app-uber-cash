@@ -11,10 +11,7 @@ import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { mandatoryCards, allStats } from './dashboard-items';
 import type { Plan } from '@/services/auth.service';
 
-// Adiciona a interface para a API do autoTable no jsPDF
-interface jsPDFWithAutoTable extends jsPDF {
-  autoTable: (options: any) => jsPDF;
-}
+// A interface foi movida para o arquivo .d.ts global para evitar conflitos.
 
 const formatCurrency = (value: number) => {
     if (typeof value !== 'number' || isNaN(value)) return 'R$ 0,00';
@@ -64,7 +61,7 @@ export const generatePdf = async (
     plan: Plan,
     chartElements: { [key: string]: HTMLElement | null }
 ) => {
-    const doc = new jsPDF() as jsPDFWithAutoTable;
+    const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
     const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
     let y = 15; // Posição vertical inicial
