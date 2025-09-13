@@ -9,8 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { getWorkDays } from '@/services/work-day.service';
-import { exportToCsvFlow } from './export-flow';
+import { getWorkDays, generateCsvContent } from '@/services/work-day.service';
 import { format } from 'date-fns';
 import { saveBackupData } from '@/services/backup.service';
 
@@ -47,17 +46,8 @@ const runBackupFlow = ai.defineFlow(
       return { success: false, message: "Nenhum dado para fazer backup." };
     }
 
-     const serializableWorkDays = allWorkDays.map(day => ({
-      ...day,
-      date: day.date.toISOString(),
-      maintenance: {
-        description: day.maintenanceEntries.map(m => m.description).join('; '),
-        amount: day.maintenanceEntries.reduce((sum, m) => sum + m.amount, 0),
-      }
-    }));
-
-    // Re-use the existing export flow to generate the CSV content
-    const { csvContent } = await exportToCsvFlow(serializableWorkDays as any);
+    // A função generateCsvContent já está no formato correto
+    const csvContent = await generateCsvContent(allWorkDays);
 
     const now = new Date();
     const backupFileName = `Backup_UberCash_${format(now, 'yyyy-MM-dd_HH-mm')}.csv`;
