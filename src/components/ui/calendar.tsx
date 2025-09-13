@@ -99,8 +99,8 @@ function Calendar({
           )
         },
       }}
-      captionLayout="dropdown-nav" 
-      fromYear={2015} 
+      captionLayout="dropdown"
+      fromYear={2015}
       toYear={new Date().getFullYear() + 5}
       {...props}
     />
