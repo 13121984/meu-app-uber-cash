@@ -3,7 +3,7 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 import { login as loginService, signup as signupService, User, SecurityAnswer, getUserById, Plan, updateUserPreferences } from '@/services/auth.service';
-import { clearAllDataForUserAction } from '@/app/gerenciamento/actions';
+import { clearAllDataForUserAction, getSettingsForUserAction } from '@/app/gerenciamento/actions';
 import type { AppTheme } from '@/types/settings';
 
 interface AuthContextType {
