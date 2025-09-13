@@ -3,6 +3,21 @@
 
 import fs from 'fs/promises';
 import { getFile, saveFile } from './storage.service';
+import { getWorkDays, generateCsvContent } from '@/services/work-day.service';
+import { format } from 'date-fns';
+
+
+export interface BackupInput {
+    userId: string;
+}
+
+export interface BackupOutput {
+  success: boolean;
+  message: string;
+  backupDate?: string;
+  fileName?: string;
+  csvContent?: string;
+}
 
 export interface BackupData {
   lastBackupDate: string | null;
@@ -17,6 +32,36 @@ const defaultData: BackupData = {
     fileName: null,
     csvContent: null
 };
+
+
+export async function runBackupFlow({ userId }: BackupInput): Promise<BackupOutput> {
+    const allWorkDays = await getWorkDays(userId);
+    if (allWorkDays.length === 0) {
+      return { success: false, message: "Nenhum dado para fazer backup." };
+    }
+
+    const csvContent = await generateCsvContent(allWorkDays);
+    const now = new Date();
+    const backupFileName = `Backup_UberCash_${format(now, 'yyyy-MM-dd_HH-mm')}.csv`;
+
+    const saveResult = await saveBackupData(userId, {
+      fileName: backupFileName,
+      csvContent: csvContent,
+    });
+
+    if (!saveResult.success) {
+      return { success: false, message: saveResult.error || "Falha ao salvar o arquivo de backup." };
+    }
+    
+    return {
+      success: true,
+      message: `Backup criado com sucesso!`,
+      backupDate: now.toISOString(),
+      fileName: backupFileName,
+      csvContent: csvContent,
+    };
+}
+
 
 /**
  * Busca os metadados do último backup (sem o conteúdo CSV).

@@ -6,7 +6,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { ReportsFilter } from './reports-filter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Loader2, Info, PlusCircle, Wrench, LineChart, PieChart, BarChart3, CandlestickChart, Fuel, Lock, ArrowLeft } from 'lucide-react';
-import { ReportData, generateReportData } from '@/services/summary.service';
+import { ReportData } from '@/services/summary.service';
+import { generateReportData } from '@/app/gerenciamento/actions';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -180,5 +181,3 @@ export function ReportsClient() {
     </div>
   );
 }
-
-    

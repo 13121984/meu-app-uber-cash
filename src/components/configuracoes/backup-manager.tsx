@@ -6,9 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Download, Loader2, CheckCircle, AlertTriangle, HardDriveUpload } from 'lucide-react';
-import { runBackupFlow } from '@/app/configuracoes/backup/actions';
-import type { BackupData } from '@/services/backup.service';
-import { getBackupForDownload } from '@/services/backup.service';
+import { runBackupFlowAction } from '@/app/configuracoes/backup/actions';
+import { getBackupForDownload, getBackupData, type BackupData } from '@/services/backup.service';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/auth-context';
@@ -41,7 +40,7 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
   const handleGenerateBackup = () => {
     if(!user) return;
     startTransition(async () => {
-        const result = await runBackupFlow({ userId: user.id });
+        const result = await runBackupFlowAction({ userId: user.id });
         if (result.success && result.backupDate) {
             toast({
                 title: "Backup Criado!",

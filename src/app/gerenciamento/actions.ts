@@ -19,7 +19,7 @@ import { getGoals, Goals, saveGoals as serviceSaveGoals } from '@/services/goal.
 import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUpdateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance as serviceDeleteAllMaintenance, getFilteredMaintenanceRecords as serviceGetFilteredMaintenanceRecords, Maintenance } from '@/services/maintenance.service';
 import { addPersonalExpense as serviceAddPersonalExpense, updatePersonalExpense as serviceUpdatePersonalExpense, deletePersonalExpense as serviceDeletePersonalExpense, deleteAllPersonalExpenses as serviceDeleteAllPersonalExpenses, getCurrentMonthPersonalExpensesTotal as serviceGetCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
 import { saveCatalogData, getCatalogData as serviceGetCatalogData, Catalog } from '@/services/catalog.service';
-import { updateAllSummaries as serviceUpdateAllSummaries, getSummaryForPeriod as serviceGetSummaryForPeriod } from '@/services/summary.service';
+import { updateAllSummaries as serviceUpdateAllSummaries, getSummaryForPeriod as serviceGetSummaryForPeriod, generateReportData } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getSettings as serviceGetSettings, saveSettings as serviceSaveSettings } from '@/services/settings.service';
 import type { Settings } from '@/types/settings';
@@ -213,3 +213,5 @@ export async function updateUserPreferencesAction(userId: string, preferences: P
 }
 
 export { serviceGetMaintenanceReminders as getMaintenanceRemindersAction };
+
+export { generateReportData };

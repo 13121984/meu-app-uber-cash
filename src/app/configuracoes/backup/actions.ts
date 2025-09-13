@@ -1,12 +1,12 @@
 
 'use server';
 
-import { runBackupAction as serviceRunBackupAction } from "@/ai/flows/backup-flow";
-import type { BackupInput, BackupOutput } from "@/ai/flows/backup-flow";
 import { revalidatePath } from 'next/cache';
+import { runBackupFlow as serviceRunBackupFlow } from '@/services/backup.service';
+import type { BackupInput, BackupOutput } from '@/services/backup.service';
 
-export async function runBackupFlow(input: BackupInput): Promise<BackupOutput> {
-    const result = await serviceRunBackupAction(input);
+export async function runBackupFlowAction(input: BackupInput): Promise<BackupOutput> {
+    const result = await serviceRunBackupFlow(input);
     if (result.success) {
         revalidatePath('/configuracoes/backup');
     }
