@@ -3,7 +3,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import type { TripsByCategory } from "./dashboard-client"
+import type { TripsByCategory } from "@/services/summary.service"
 
 interface TripsBarChartProps {
   data: TripsByCategory[];

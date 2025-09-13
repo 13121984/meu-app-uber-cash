@@ -3,7 +3,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import type { EarningsByCategory } from "./dashboard-client"
+import type { EarningsByCategory } from "@/services/summary.service"
 
 interface EarningsBarChartProps {
   data: EarningsByCategory[];
