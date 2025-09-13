@@ -20,8 +20,9 @@ import type { Settings, AppTheme } from '@/types/settings';
 import { Skeleton } from '../ui/skeleton';
 import { useAuth } from '@/contexts/auth-context';
 import Link from 'next/link';
+import { updateUserPreferences } from '@/services/auth.service';
 
-// Schema agora inclui apenas os campos gerenciados neste formulário
+
 const settingsSchema = z.object({
     theme: z.enum(['light', 'dark']),
     maintenanceNotifications: z.boolean(),
@@ -35,135 +36,43 @@ const themes: { value: AppTheme; label: string, icon: React.ElementType }[] = [
     { value: 'light', label: 'Claro', icon: Sun },
 ];
 
-function SettingsFormInternal({ initialSettings, fuelTypes }: { initialSettings: Settings, fuelTypes: string[] }) {
-  const router = useRouter();
-  const { user, isAutopilot, setTheme } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { control, handleSubmit, watch, formState: { errors } } = useForm<SettingsFormData>({
-    resolver: zodResolver(settingsSchema),
-    defaultValues: {
-        theme: initialSettings.theme,
-        maintenanceNotifications: initialSettings.maintenanceNotifications,
-        defaultFuelType: initialSettings.defaultFuelType,
-    },
-  });
-
-  const onSubmit = async (data: SettingsFormData) => {
-    if (!user) return;
-    setIsSubmitting(true);
-    try {
-      // Usamos a função `setTheme` do contexto para atualizar
-      await setTheme(data.theme);
-      
-      toast({
-        title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Configurações Salvas!</span></div>,
-        description: "Suas preferências foram atualizadas.",
-      });
-      // A página já irá recarregar devido à mudança no contexto, não precisa de reload manual.
-    } catch (error) {
-      toast({
-        title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,
-        description: "Não foi possível salvar suas configurações.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        
-        <Card>
-            <CardHeader className="flex-row justify-between items-center">
-                <div>
-                    <CardTitle className="flex items-center gap-2 font-headline">Tema Claro/Escuro</CardTitle>
-                    <CardDescription>Personalize a aparência do aplicativo.</CardDescription>
-                </div>
-                <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                    {isSubmitting ? 'Salvando...' : 'Salvar Tema'}
-                </Button>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Tema */}
-                    <div className="space-y-2">
-                        <Label>Tema do Aplicativo</Label>
-                        <Controller
-                            name="theme"
-                            control={control}
-                            render={({ field }) => (
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione um tema..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {themes.map(theme => (
-                                            <SelectItem key={theme.value} value={theme.value}>
-                                                <div className="flex items-center gap-2">
-                                                    <theme.icon className="h-4 w-4" />
-                                                    {theme.label}
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            )}
-                        />
-                    </div>
-                </div>
-
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                     {/* Notificações */}
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                            <Label className="flex items-center gap-2">
-                                Habilitar Notificações de Manutenção
-                                {!isAutopilot && <Lock className="h-4 w-4 text-primary" />}
-                            </Label>
-                             <div className="text-xs text-muted-foreground">
-                                {isAutopilot 
-                                    ? 'Você será notificado sobre as próximas manutenções.' 
-                                    : (
-                                        <Link href="/premium" className="underline hover:text-primary">
-                                            Exclusivo para assinantes Autopilot.
-                                        </Link>
-                                    )
-                                }
-                            </div>
-                        </div>
-                        <Controller 
-                            name="maintenanceNotifications" 
-                            control={control} 
-                            render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!isAutopilot}/>} 
-                        />
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    </form>
-  );
-}
-
 export function SettingsForm() {
-    const { user, loading } = useAuth();
-    const [settings, setSettings] = useState<Settings | null>(null);
-    const [catalog, setCatalog] = useState<Catalog | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { user, loading: authLoading, isAutopilot, setTheme } = useAuth();
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [initialSettings, setInitialSettings] = useState<Settings | null>(null);
+    const [fuelTypes, setFuelTypes] = useState<string[]>([]);
+    const [isDataLoading, setIsDataLoading] = useState(true);
+    
+    const { control, handleSubmit, watch, reset, formState: { errors } } = useForm<SettingsFormData>({
+        resolver: zodResolver(settingsSchema),
+        defaultValues: {
+            theme: 'dark',
+            maintenanceNotifications: true,
+            defaultFuelType: '',
+        },
+    });
 
     useEffect(() => {
         if (!user) return;
         async function loadInitialData() {
-            setIsLoading(true);
+            setIsDataLoading(true);
             try {
                 const [settingsData, catalogData] = await Promise.all([
                     getSettingsForUserAction(user!.id),
                     getCatalogAction(),
                 ]);
-                setSettings(settingsData);
-                setCatalog(catalogData);
+                setInitialSettings(settingsData);
+                const activeFuelTypes = catalogData.fuel.filter(f => f.active).map(f => f.name);
+                setFuelTypes(activeFuelTypes);
+                
+                // Reset form with fetched data
+                reset({
+                    theme: settingsData.theme,
+                    maintenanceNotifications: settingsData.maintenanceNotifications,
+                    defaultFuelType: settingsData.defaultFuelType,
+                });
+
             } catch (error) {
                 toast({
                     title: "Erro ao carregar configurações",
@@ -171,14 +80,50 @@ export function SettingsForm() {
                     variant: "destructive"
                 });
             } finally {
-                setIsLoading(false);
+                setIsDataLoading(false);
             }
         }
         loadInitialData();
-    }, [user]);
+    }, [user, reset]);
 
-    if (loading || isLoading || !settings || !catalog || !user) {
-        return (
+    const handleThemeChange = async (theme: AppTheme) => {
+      if (!user) return;
+      setIsSubmitting(true);
+      try {
+        await setTheme(theme);
+        toast({
+          title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Tema Salvo!</span></div>,
+          description: "A nova aparência foi aplicada.",
+        });
+      } catch (error) {
+        toast({
+          title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,
+          description: "Não foi possível salvar o tema.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    const onSubmit = async (data: SettingsFormData) => {
+        if (!user) return;
+        setIsSubmitting(true);
+        try {
+            await updateUserPreferences(user.id, { 
+                maintenanceNotifications: data.maintenanceNotifications,
+                defaultFuelType: data.defaultFuelType,
+            });
+            await handleThemeChange(data.theme); // Também atualiza o tema
+        } catch(e) {
+            // Error is handled in handleThemeChange
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+    
+    if (authLoading || isDataLoading) {
+       return (
             <Card>
                 <CardHeader className="flex-row justify-between items-center">
                   <div>
@@ -198,7 +143,94 @@ export function SettingsForm() {
             </Card>
         );
     }
-    
-    const activeFuelTypes = catalog.fuel.filter(f => f.active).map(f => f.name);
-    return <SettingsFormInternal initialSettings={settings} fuelTypes={activeFuelTypes} />;
+  
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <Card>
+                <CardHeader className="flex-row justify-between items-center">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 font-headline">Tema Claro/Escuro</CardTitle>
+                        <CardDescription>Personalize a aparência do aplicativo.</CardDescription>
+                    </div>
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        {isSubmitting ? 'Salvando...' : 'Salvar Preferências'}
+                    </Button>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                            <Label>Tema do Aplicativo</Label>
+                            <Controller
+                                name="theme"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecione um tema..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {themes.map(theme => (
+                                                <SelectItem key={theme.value} value={theme.value}>
+                                                    <div className="flex items-center gap-2">
+                                                        <theme.icon className="h-4 w-4" />
+                                                        {theme.label}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Combustível Padrão</Label>
+                             <Controller
+                                name="defaultFuelType"
+                                control={control}
+                                render={({ field }) => (
+                                     <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecione um combustível..."/>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {fuelTypes.map(fuel => (
+                                                <SelectItem key={fuel} value={fuel}>{fuel}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                             />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <Label className="flex items-center gap-2">
+                                    Habilitar Notificações de Manutenção
+                                    {!isAutopilot && <Lock className="h-4 w-4 text-primary" />}
+                                </Label>
+                                <div className="text-xs text-muted-foreground">
+                                    {isAutopilot 
+                                        ? 'Você será notificado sobre as próximas manutenções.' 
+                                        : (
+                                            <Link href="/premium" className="underline hover:text-primary">
+                                                Exclusivo para assinantes Autopilot.
+                                            </Link>
+                                        )
+                                    }
+                                </div>
+                            </div>
+                            <Controller 
+                                name="maintenanceNotifications" 
+                                control={control} 
+                                render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!isAutopilot}/>} 
+                            />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </form>
+    );
 }
