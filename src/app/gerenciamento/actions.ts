@@ -7,35 +7,12 @@ import { deleteWorkDaysByFilter, addOrUpdateWorkDay, deleteWorkDayEntry, getWork
 import type { ReportFilterValues } from "@/app/relatorios/actions";
 import { getGoals, Goals } from "@/services/goal.service";
 import { getMaintenanceRecords, Maintenance } from "@/services/maintenance.service";
-import { SummaryData, defaultSummaryData, saveSummaryData } from "@/services/summary.service";
-import { startOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { SummaryData, defaultSummaryData, saveSummaryData, PeriodData } from "@/services/summary.service";
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 
 // --- Internal Calculation Logic (Moved from summary.service) ---
 
-interface PeriodData {
-  totalGanho: number;
-  totalLucro: number;
-  totalCombustivel: number;
-  totalExtras: number;
-  diasTrabalhados: number;
-  totalKm: number;
-  totalHoras: number;
-  mediaHorasPorDia: number;
-  mediaKmPorDia: number;
-  ganhoPorHora: number;
-  ganhoPorKm: number;
-  totalViagens: number;
-  eficiencia: number;
-  earningsByCategory: { name: string; total: number; }[];
-  tripsByCategory: { name: string; total: number; }[];
-  maintenance: { totalSpent: number; servicesPerformed: number; };
-  meta: { target: number; period: string };
-  profitComposition: { name: string; value: number; fill: string; totalGanho: number; }[];
-  performanceByShift?: { shift: 'Madrugada' | 'Manhã' | 'Tarde' | 'Noite'; profit: number; hours: number; profitPerHour: number; }[];
-}
-
-
-async function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): Promise<PeriodData> {
+function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
     const shiftPerformanceMap = new Map<PeriodData['performanceByShift'][0]['shift'], { profit: number; hours: number, rawEarnings: number }>();
@@ -146,7 +123,7 @@ async function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'sem
 }
 
 
-async function updateAllSummariesAction(userId: string) {
+export async function updateAllSummariesAction(userId: string) {
     const allWorkDays = await getWorkDays(userId);
     const allMaintenance = await getMaintenanceRecords(userId);
     const goals = await getGoals(userId);

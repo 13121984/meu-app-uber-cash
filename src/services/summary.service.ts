@@ -3,9 +3,9 @@
 
 import { getFile, saveFile } from './storage.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import { getWorkDays, WorkDay } from './work-day.service';
-import { getGoals, Goals } from './goal.service';
-import { getMaintenanceRecords, Maintenance } from './maintenance.service';
+import { WorkDay } from './work-day.service';
+import { Goals } from './goal.service';
+import { Maintenance } from './maintenance.service';
 import { startOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format } from 'date-fns';
 
 // --- Interfaces ---
@@ -58,7 +58,7 @@ export interface ReportData extends Omit<PeriodData, 'performanceByShift'> {
 
 const FILE_NAME = 'summary.json';
 
-const defaultPeriodData: PeriodData = {
+export const defaultPeriodData: PeriodData = {
     totalGanho: 0, totalLucro: 0, totalCombustivel: 0, totalExtras: 0,
     diasTrabalhados: 0, totalKm: 0, totalHoras: 0, mediaHorasPorDia: 0, mediaKmPorDia: 0,
     ganhoPorHora: 0, ganhoPorKm: 0, totalViagens: 0, eficiencia: 0,
@@ -69,16 +69,22 @@ const defaultPeriodData: PeriodData = {
 };
 
 export const defaultSummaryData: SummaryData = {
-    hoje: defaultPeriodData,
-    semana: defaultPeriodData,
-    mes: defaultPeriodData,
+    hoje: { ...defaultPeriodData, meta: { target: 0, period: 'diária' } },
+    semana: { ...defaultPeriodData, meta: { target: 0, period: 'semanal' } },
+    mes: { ...defaultPeriodData, meta: { target: 0, period: 'mensal' } },
 };
+
 
 // --- Funções do Serviço ---
 
 export async function getSummaryData(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
-    return await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
+    const data = await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
+    // Ensure the meta period is set correctly if files are old
+    data.hoje.meta.period = 'diária';
+    data.semana.meta.period = 'semanal';
+    data.mes.meta.period = 'mensal';
+    return data;
 }
 
 export async function saveSummaryData(userId: string, data: SummaryData): Promise<void> {
@@ -94,217 +100,5 @@ export async function getTodayData(userId: string): Promise<PeriodData> {
 
 export async function getSummaryForPeriod(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
-    return await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
-}
-
-
-async function getFilteredDaysAndMaintenance(userId: string, filters: ReportFilterValues) {
-    const allWorkDays = await getWorkDays(userId);
-    const allMaintenance = await getMaintenanceRecords(userId);
-
-    let interval: { start: Date; end: Date } | null = null;
-    const now = new Date();
-
-    switch (filters.type) {
-        case 'all': break;
-        case 'today': interval = { start: startOfDay(now), end: endOfDay(now) }; break;
-        case 'thisWeek': interval = { start: startOfWeek(now), end: endOfWeek(now) }; break;
-        case 'thisMonth': interval = { start: startOfMonth(now), end: endOfMonth(now) }; break;
-        case 'specificMonth':
-            if (filters.year !== undefined && filters.month !== undefined) {
-                const specificDate = new Date(filters.year, filters.month);
-                interval = { start: startOfMonth(specificDate), end: endOfMonth(specificDate) };
-            }
-            break;
-        case 'specificYear':
-            if (filters.year !== undefined) {
-                interval = { start: new Date(filters.year, 0, 1), end: new Date(filters.year, 11, 31, 23, 59, 59) };
-            }
-            break;
-        case 'custom':
-            if (filters.dateRange?.from) {
-                interval = { start: startOfDay(filters.dateRange.from), end: filters.dateRange.to ? endOfDay(filters.dateRange.to) : endOfDay(filters.dateRange.from) };
-            }
-            break;
-    }
-
-    const filteredWorkDays = interval ? allWorkDays.filter(d => isWithinInterval(d.date, interval!)) : allWorkDays;
-    const filteredMaintenance = interval ? allMaintenance.filter(m => isWithinInterval(m.date, interval!)) : allMaintenance;
-    
-    return { filteredWorkDays, filteredMaintenance };
-}
-
-
-export async function getReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
-  const { filteredWorkDays, filteredMaintenance } = await getFilteredDaysAndMaintenance(userId, filters);
-  const goals = await getGoals(userId);
-
-  const periodData = calculatePeriodData(filteredWorkDays, 'mensal', goals, filteredMaintenance); // 'mensal' is a placeholder
-
-  const earningsByCategoryMap = new Map<string, number>();
-  const tripsByCategoryMap = new Map<string, number>();
-  const hoursByCategoryMap = new Map<string, number>();
-  const fuelExpensesMap = new Map<string, number>();
-  const dailyDataMap = new Map<string, { lucro: number, viagens: number }>();
-
-  filteredWorkDays.forEach(day => {
-    const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
-    const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-    const dailyTrips = day.earnings.reduce((sum, e) => sum + e.trips, 0);
-    const dailyProfit = dailyEarnings - dailyFuel;
-
-    day.fuelEntries.forEach(fuel => {
-        fuelExpensesMap.set(fuel.type || 'Não especificado', (fuelExpensesMap.get(fuel.type) || 0) + fuel.paid);
-    });
-
-    day.earnings.forEach(earning => {
-        earningsByCategoryMap.set(earning.category, (earningsByCategoryMap.get(earning.category) || 0) + earning.amount);
-        tripsByCategoryMap.set(earning.category, (tripsByCategoryMap.get(earning.category) || 0) + earning.trips);
-        if (dailyEarnings > 0 && day.hours > 0) {
-            hoursByCategoryMap.set(earning.category, (hoursByCategoryMap.get(earning.category) || 0) + (earning.amount / dailyEarnings) * day.hours);
-        }
-    });
-
-    const dateKey = format(day.date, 'yyyy-MM-dd');
-    const currentDaily = dailyDataMap.get(dateKey) || { lucro: 0, viagens: 0 };
-    dailyDataMap.set(dateKey, { lucro: currentDaily.lucro + dailyProfit, viagens: currentDaily.viagens + dailyTrips });
-  });
-
-  const sortedDailyEntries = Array.from(dailyDataMap.entries()).sort((a, b) => parseISO(a[0]).getTime() - parseISO(b[0]).getTime());
-
-  const getTargetGoal = () => {
-    const periodType = filters.type;
-    if (periodType === 'today') return goals.daily;
-    if (periodType === 'thisWeek') return goals.weekly;
-    if (periodType === 'thisMonth' || periodType === 'specificMonth') return goals.monthly;
-    return 0;
-  };
-  
-  const report: ReportData = {
-    ...periodData,
-    totalGastos: periodData.totalCombustivel + periodData.maintenance.totalSpent,
-    fuelExpenses: Array.from(fuelExpensesMap, ([type, total]) => ({ type, total })),
-    profitEvolution: sortedDailyEntries.map(([dateKey, data]) => ({ date: format(parseISO(dateKey), 'dd/MM'), lucro: data.lucro })),
-    dailyTrips: sortedDailyEntries.map(([dateKey, data]) => ({ date: format(parseISO(dateKey), 'dd/MM'), viagens: data.viagens })),
-    averageEarningPerTrip: Array.from(earningsByCategoryMap, ([name, total]) => ({ name, average: (tripsByCategoryMap.get(name) || 0) > 0 ? total / (tripsByCategoryMap.get(name) || 1) : 0 })).filter(item => item.average > 0),
-    averageEarningPerHour: Array.from(earningsByCategoryMap, ([name, total]) => ({ name, average: (hoursByCategoryMap.get(name) || 0) > 0 ? total / (hoursByCategoryMap.get(name) || 1) : 0 })).filter(item => item.average > 0),
-    rawWorkDays: filteredWorkDays,
-    meta: {
-      target: getTargetGoal(),
-      period: filters.type || 'all',
-    }
-  };
-
-  return report;
-}
-
-// Esta função é uma cópia da lógica de cálculo, agora sem ser exportada para evitar ciclos.
-function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
-    const earningsByCategoryMap = new Map<string, number>();
-    const tripsByCategoryMap = new Map<string, number>();
-    const shiftPerformanceMap = new Map<PerformanceByShift['shift'], { profit: number; hours: number, rawEarnings: number }>();
-
-    const data = {
-        totalGanho: 0, totalLucro: 0, totalCombustivel: 0, totalExtras: 0,
-        diasTrabalhados: new Set(workDays.map(d => d.date.toDateString())).size,
-        totalKm: 0, totalHoras: 0, totalViagens: 0, totalLitros: 0,
-    };
-
-    const maintenanceData = {
-        totalSpent: maintenanceRecords.reduce((sum, record) => sum + record.amount, 0),
-        servicesPerformed: maintenanceRecords.length,
-    };
-
-    workDays.forEach(day => {
-        const dailyEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
-        const dailyFuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
-        const dailyProfit = dailyEarnings - dailyFuel;
-
-        data.totalGanho += dailyEarnings;
-        data.totalCombustivel += dailyFuel;
-        data.totalLucro += dailyProfit;
-        data.totalKm += day.km;
-        data.totalHoras += day.hours;
-        
-        day.fuelEntries.forEach(fuel => { if (fuel.price > 0) { data.totalLitros += fuel.paid / fuel.price; } });
-        
-        day.earnings.forEach(earning => {
-            earningsByCategoryMap.set(earning.category, (earningsByCategoryMap.get(earning.category) || 0) + earning.amount);
-            tripsByCategoryMap.set(earning.category, (tripsByCategoryMap.get(earning.category) || 0) + earning.trips);
-            data.totalViagens += earning.trips;
-        });
-
-        const timeToMinutes = (time: string): number => {
-            if (!time || !time.includes(':')) return 0;
-            const [hours, minutes] = time.split(':').map(Number);
-            return hours * 60 + minutes;
-        };
-
-        const getShift = (startTime: string): PerformanceByShift['shift'] => {
-            if (typeof startTime !== 'string' || !startTime.includes(':')) {
-                return 'Manhã'; 
-            }
-            const startMinutes = timeToMinutes(startTime);
-            if (startMinutes >= timeToMinutes("06:01") && startMinutes <= timeToMinutes("12:00")) return 'Manhã';
-            if (startMinutes > timeToMinutes("12:00") && startMinutes <= timeToMinutes("18:00")) return 'Tarde';
-            if (startMinutes > timeToMinutes("18:00") && startMinutes <= timeToMinutes("23:59")) return 'Noite';
-            return 'Madrugada';
-        };
-
-        if (day.timeEntries && day.timeEntries.length > 0 && day.timeEntries.every(t => t.start && t.end)) {
-             const totalDayHoursFromEntries = day.timeEntries.reduce((sum, entry) => {
-                const startMinutes = timeToMinutes(entry.start);
-                const endMinutes = timeToMinutes(entry.end);
-                return sum + (endMinutes > startMinutes ? (endMinutes - startMinutes) / 60 : 0);
-            }, 0);
-
-            if (totalDayHoursFromEntries > 0) {
-                 day.timeEntries.forEach(entry => {
-                    const entryHours = (timeToMinutes(entry.end) - timeToMinutes(entry.start)) / 60;
-                    if (entryHours > 0) {
-                        const shift = getShift(entry.start);
-                        const shiftData = shiftPerformanceMap.get(shift) || { profit: 0, hours: 0, rawEarnings: 0 };
-                        shiftData.profit += dailyProfit * (entryHours / totalDayHoursFromEntries);
-                        shiftData.rawEarnings += dailyEarnings * (entryHours / totalDayHoursFromEntries);
-                        shiftData.hours += entryHours;
-                        shiftPerformanceMap.set(shift, shiftData);
-                    }
-                });
-            }
-        }
-    });
-    
-    data.totalLucro -= maintenanceData.totalSpent;
-
-    const earningsByCategory: EarningsByCategory[] = Array.from(earningsByCategoryMap, ([name, total]) => ({ name, total }));
-    const tripsByCategory: TripsByCategory[] = Array.from(tripsByCategoryMap, ([name, total]) => ({ name, total }));
-    const performanceByShift: PerformanceByShift[] = Array.from(shiftPerformanceMap, ([shift, data]) => ({
-        shift, 
-        profit: data.profit, 
-        hours: data.hours,
-        profitPerHour: data.hours > 0 ? data.rawEarnings / data.hours : 0
-    })).sort((a,b) => a.shift.localeCompare(b.shift));
-
-    const profitComposition = [
-        { name: 'Lucro Líquido', value: data.totalLucro, fill: 'hsl(var(--chart-1))', totalGanho: data.totalGanho },
-        { name: 'Combustível', value: data.totalCombustivel, fill: 'hsl(var(--chart-2))', totalGanho: data.totalGanho },
-        { name: 'Manutenção', value: maintenanceData.totalSpent, fill: 'hsl(var(--chart-3))', totalGanho: data.totalGanho },
-      ].filter(item => item.value !== 0);
-
-    let targetGoal = 0;
-    if (period === 'diária') targetGoal = goals.daily;
-    else if (period === 'semanal') targetGoal = goals.weekly;
-    else if (period === 'mensal') targetGoal = goals.monthly;
-
-    return {
-        ...data,
-        mediaHorasPorDia: data.diasTrabalhados > 0 ? data.totalHoras / data.diasTrabalhados : 0,
-        mediaKmPorDia: data.diasTrabalhados > 0 ? data.totalKm / data.diasTrabalhados : 0,
-        ganhoPorHora: data.totalHoras > 0 ? data.totalGanho / data.totalHoras : 0,
-        ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.km : 0,
-        eficiencia: data.totalKm > 0 && data.totalLitros > 0 ? data.totalKm / data.totalLitros : 0,
-        earningsByCategory, tripsByCategory, maintenance: maintenanceData,
-        meta: { target: targetGoal, period },
-        profitComposition, performanceByShift,
-    };
+    return await getSummaryData(userId);
 }
