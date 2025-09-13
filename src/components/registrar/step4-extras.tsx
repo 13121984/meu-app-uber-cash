@@ -21,13 +21,13 @@ interface Step4ExtrasProps {
 
 export function Step4Extras({ data, dispatch, isDisabled = false }: Step4ExtrasProps) {
   
-  const handleMaintenanceChange = useCallback((newMaintenance: State['maintenance']) => {
-      dispatch({ type: 'UPDATE_FIELD', payload: { field: 'maintenance', value: newMaintenance } });
+  const handleMaintenanceChange = useCallback((newMaintenance: State['maintenanceEntries']) => {
+      dispatch({ type: 'UPDATE_FIELD', payload: { field: 'maintenanceEntries', value: newMaintenance } });
   }, [dispatch]);
   
   const handleChange = (field: 'description' | 'amount', value: string | number) => {
     const newValue = field === 'amount' ? (parseFloat(value.toString()) || 0) : value;
-    handleMaintenanceChange({ ...data.maintenance, [field]: newValue });
+    handleMaintenanceChange([{ id: Date.now(), description: field === 'description' ? String(newValue) : data.maintenanceEntries[0]?.description || '', amount: field === 'amount' ? Number(newValue) : data.maintenanceEntries[0]?.amount || 0 }]);
   };
 
   if (isDisabled) {
@@ -56,7 +56,7 @@ export function Step4Extras({ data, dispatch, isDisabled = false }: Step4ExtrasP
             <Textarea
               id="description"
               placeholder="Ex: Troca de óleo"
-              value={data.maintenance.description}
+              value={data.maintenanceEntries[0]?.description || ''}
               onChange={(e) => handleChange('description', e.target.value)}
               className="pl-10"
               disabled={isDisabled}
@@ -71,7 +71,7 @@ export function Step4Extras({ data, dispatch, isDisabled = false }: Step4ExtrasP
               id="amount"
               type="number"
               placeholder="Ex: 120.00"
-              value={data.maintenance.amount || ''}
+              value={data.maintenanceEntries[0]?.amount || ''}
               onChange={(e) => handleChange('amount', e.target.value)}
               className="pl-10"
               disabled={isDisabled}
