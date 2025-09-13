@@ -15,6 +15,8 @@ import { allCharts, mandatoryCharts, allStats, mandatoryCards } from '@/lib/dash
 import { motion } from 'framer-motion';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Plan } from '@/services/auth.service';
+import { parseISO, isValid } from 'date-fns';
+
 
 const StatsCard = dynamic(() => import('../dashboard/stats-card').then(mod => mod.StatsCard), { ssr: false });
 const EarningsPieChart = dynamic(() => import('../dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -50,7 +52,6 @@ export function ReportsClient() {
   const handleApplyFilters = useCallback((newFilters: ReportFilterValues) => {
     if (!user) return;
     
-    const currentQuery = new URLSearchParams(searchParams.toString());
     const newQuery = new URLSearchParams();
     newQuery.set('period', newFilters.type);
     if(newFilters.year) newQuery.set('year', newFilters.year.toString());
@@ -58,18 +59,16 @@ export function ReportsClient() {
     if(newFilters.dateRange?.from) newQuery.set('from', newFilters.dateRange.from.toISOString());
     if(newFilters.dateRange?.to) newQuery.set('to', newFilters.dateRange.to.toISOString());
 
-    if (currentQuery.toString() !== newQuery.toString()) {
-        router.replace(`/relatorios?${newQuery.toString()}`);
-    }
+    router.replace(`/relatorios?${newQuery.toString()}`);
 
     setFilters(newFilters);
     startTransition(async () => {
       const reportData = await generateReportData(user.id, newFilters);
       setData(reportData);
     });
-  }, [user, router, searchParams]);
+  }, [user, router]);
   
-  useEffect(() => {
+ useEffect(() => {
     if (user && !filters) {
         const period = searchParams.get('period');
         if (period) {
@@ -80,14 +79,14 @@ export function ReportsClient() {
             const to = searchParams.get('to');
             
             if (year) initialFilters.year = parseInt(year);
-            if (month !== null) initialFilters.month = parseInt(month);
-            if (from) {
-                initialFilters.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
+            if (month !== null && !isNaN(parseInt(month))) initialFilters.month = parseInt(month);
+            if (from && isValid(parseISO(from))) {
+                initialFilters.dateRange = { from: parseISO(from), to: to && isValid(parseISO(to)) ? parseISO(to) : undefined };
             }
             handleApplyFilters(initialFilters);
         }
     }
-  }, [user, filters, searchParams, handleApplyFilters]);
+  }, [user, searchParams, filters, handleApplyFilters]);
   
 
   const getChartData = (reportData: ReportData, chartId: string) => {
@@ -181,3 +180,5 @@ export function ReportsClient() {
     </div>
   );
 }
+
+    

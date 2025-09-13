@@ -17,6 +17,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
+import { parseISO, isValid } from 'date-fns';
 
 
 export interface GroupedWorkDay {
@@ -43,7 +44,6 @@ export function GerenciamentoClient() {
   const handleApplyFilters = useCallback((filters: ReportFilterValues) => {
     if (!user) return;
     
-    // Constrói a nova query string
     const newQuery = new URLSearchParams();
     newQuery.set('period', filters.type);
     if (filters.year) newQuery.set('year', filters.year.toString());
@@ -51,10 +51,7 @@ export function GerenciamentoClient() {
     if (filters.dateRange?.from) newQuery.set('from', filters.dateRange.from.toISOString());
     if (filters.dateRange?.to) newQuery.set('to', filters.dateRange.to.toISOString());
 
-    // Compara a nova query com a atual para evitar loops
-    if (newQuery.toString() !== searchParams.toString()) {
-        router.replace(`/gerenciamento?${newQuery.toString()}`);
-    }
+    router.replace(`/gerenciamento?${newQuery.toString()}`);
     
     setCurrentFilters(filters);
     startTransition(async () => {
@@ -66,29 +63,33 @@ export function GerenciamentoClient() {
         toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
       }
     });
-  }, [user, router, searchParams]);
+  }, [user, router]);
   
   useEffect(() => {
-    const period = searchParams.get('period');
-    
-    if (user && period) {
-        const year = searchParams.get('year');
-        const month = searchParams.get('month');
-        const from = searchParams.get('from');
-        const to = searchParams.get('to');
-        const filtersFromUrl: ReportFilterValues = { type: period as any };
-        if (year) filtersFromUrl.year = parseInt(year);
-        if (month !== null) filtersFromUrl.month = parseInt(month);
-        if (from) {
-            filtersFromUrl.dateRange = { from: new Date(from), to: to ? new Date(to) : undefined };
+    if (user && !currentFilters) {
+        const period = searchParams.get('period');
+        
+        let filtersToApply: ReportFilterValues | null = null;
+        
+        if (period) {
+            const year = searchParams.get('year');
+            const month = searchParams.get('month');
+            const from = searchParams.get('from');
+            const to = searchParams.get('to');
+            const filtersFromUrl: ReportFilterValues = { type: period as any };
+            if (year) filtersFromUrl.year = parseInt(year);
+            if (month !== null && !isNaN(parseInt(month))) filtersFromUrl.month = parseInt(month);
+            if (from && isValid(parseISO(from))) {
+                filtersFromUrl.dateRange = { from: parseISO(from), to: to && isValid(parseISO(to)) ? parseISO(to) : undefined };
+            }
+            filtersToApply = filtersFromUrl;
+        } else {
+            filtersToApply = { type: 'thisMonth' };
         }
         
-        if (JSON.stringify(filtersFromUrl) !== JSON.stringify(currentFilters)) {
-            handleApplyFilters(filtersFromUrl);
+        if (filtersToApply) {
+            handleApplyFilters(filtersToApply);
         }
-    } else if (user && !period) {
-        const defaultFilters: ReportFilterValues = { type: 'thisMonth' };
-        handleApplyFilters(defaultFilters);
     }
   }, [user, searchParams, currentFilters, handleApplyFilters]);
 
@@ -151,7 +152,7 @@ export function GerenciamentoClient() {
               )}
             <DataTable 
               columns={columns} 
-              data={groupedWorkDays.map(g => ({...g, date: new Date(g.date)}))} // Ensure date is a Date object for the table
+              data={groupedWorkDays.map(g => ({...g, date: new Date(g.date)}))}
               onRowClick={(row) => setEditingDay(row.original)} 
             />
          </div>
@@ -233,3 +234,5 @@ export function GerenciamentoClient() {
     </div>
   );
 }
+
+    
