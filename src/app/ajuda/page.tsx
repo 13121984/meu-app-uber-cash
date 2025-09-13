@@ -22,7 +22,7 @@ const helpTopics = [
     value: "planos",
     icon: Gem,
     title: "Qual a diferença entre os planos?",
-    content: "O plano Básico (Gratuito) oferece as ferramentas essenciais para começar. O plano Pro eleva sua gestão com o 'TX IA' para analisar corridas, acesso a todos os cards e gráficos, personalização e a nova Auditoria de Rentabilidade. O plano Autopilot (Premium) é a experiência definitiva, com registro simplificado de corridas e todos os outros benefícios.",
+    content: "O plano Básico (Gratuito) oferece as ferramentas essenciais para começar. O plano Pro eleva sua gestão com o 'TX IA' para analisar corridas, acesso a todos os cards e gráficos, personalização e a futura Auditoria de Rentabilidade. O plano Autopilot (Premium) é a experiência definitiva, com registro simplificado de corridas e todos os outros benefícios.",
     isPremiumFeature: true,
   },
   {
@@ -53,7 +53,7 @@ const helpTopics = [
     value: "auditoria_rentabilidade",
     icon: BarChart3,
     title: "O que é a Auditoria de Rentabilidade?",
-    content: "Disponível nos planos Pro e Autopilot, esta ferramenta em 'Planejamento Financeiro' é seu consultor pessoal. Ela analisa seus dados e mostra qual foi o dia mais lucrativo do mês, qual plataforma (Uber, 99, etc.) te pagou melhor por hora, e te dá insights para você focar onde ganha mais.",
+    content: "Esta funcionalidade, que chegará em breve para os planos Pro e Autopilot, será seu consultor pessoal. Ela analisará seus dados e mostrará qual foi o dia mais lucrativo do mês, qual plataforma (Uber, 99, etc.) te pagou melhor por hora, e te dará insights para você focar onde ganha mais.",
     isPremiumFeature: true,
   },
   {

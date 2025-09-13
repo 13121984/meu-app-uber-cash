@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { Loader2, Calculator, Wallet, Gem, BarChart3 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { GoalPlanner } from '@/components/metas/goal-planner';
 import { FinancialGoalCalculator } from '@/components/metas/financial-goal-calculator';
 import { PersonalExpenseTracker } from '@/components/metas/personal-expense-tracker';
@@ -14,6 +14,7 @@ import { ProfitabilityAudit } from '@/components/metas/profitability-audit';
 import { getSummaryForPeriod } from '@/services/summary.service';
 import { getCurrentMonthPersonalExpensesTotal } from '@/services/personal-expense.service';
 import { IconTargetArrow } from '@/components/ui/icons/target-arrow';
+import { Badge } from '@/components/ui/badge';
 
 export default function MetasPage() {
     const { user, loading, isPro } = useAuth();
@@ -91,19 +92,22 @@ export default function MetasPage() {
             </Card>
             
             {isPro && (
-                <Card>
+                <Card className="opacity-50 cursor-not-allowed">
                     <AccordionItem value="item-4" className="border-b-0">
-                        <AccordionTrigger className="p-6">
+                        <AccordionTrigger className="p-6 hover:no-underline">
                              <div className="flex items-center gap-3">
                                 <Gem className="w-6 h-6 text-primary" />
                                 <div>
-                                    <h2 className="font-semibold text-lg text-left">Auditoria de Rentabilidade</h2>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="font-semibold text-lg text-left">Auditoria de Rentabilidade</h2>
+                                        <Badge variant="outline" className="border-amber-500 text-amber-500">Em Breve</Badge>
+                                    </div>
                                     <p className="text-sm text-muted-foreground text-left font-normal">Descubra seus dias e apps mais lucrativos.</p>
                                 </div>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="p-6 pt-0">
-                            <ProfitabilityAudit />
+                            {/* O componente não é mais renderizado, mostrando apenas o cabeçalho desativado */}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>

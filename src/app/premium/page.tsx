@@ -28,7 +28,7 @@ const basicFeatures = [
 const proFeatures = [
   { id: 'registros', name: 'Controle de Ganhos', basic: true, pro: true, autopilot: true },
   { id: 'relatorios_completos', name: 'Todos os Cards e Gráficos', description: "Ganho/h, Ganho/km, Eficiência, e muito mais", basic: false, pro: true, autopilot: true },
-  { id: 'auditoria_rentabilidade', name: 'Auditoria de Rentabilidade', description: "Descubra seus dias e apps mais lucrativos.", basic: false, pro: true, autopilot: true },
+  { id: 'auditoria_rentabilidade', name: 'Auditoria de Rentabilidade', description: "Descubra seus dias e apps mais lucrativos.", basic: false, pro: true, autopilot: true, comingSoon: true },
   { id: 'personalizacao_completa', name: 'Adicionar e Ocultar Itens do Layout', basic: false, pro: true, autopilot: true },
   { id: 'taximetro', name: 'Taxímetro Inteligente', basic: '1 uso/dia', pro: 'Ilimitado', autopilot: 'Ilimitado' },
   { id: 'tx_ia', name: 'TX IA: Análise de Corridas', description: "Use a IA para decidir se uma corrida vale a pena", basic: false, pro: true, autopilot: true },
@@ -108,7 +108,10 @@ export default function PremiumPage() {
                 <li key={feature.id} className="flex items-start gap-3 text-sm">
                 <FeatureIcon isIncluded={finalInclusion} />
                 <div>
-                    <span className={cn(!finalInclusion && "text-muted-foreground/70 line-through")}>{feature.name}</span>
+                    <div className="flex items-center gap-2">
+                        <span className={cn(!finalInclusion && "text-muted-foreground/70 line-through")}>{feature.name}</span>
+                        {feature.comingSoon && <Badge variant="outline" className="border-amber-500 text-amber-500">Em Breve</Badge>}
+                    </div>
                     {feature.description && (
                         <p className="text-xs text-muted-foreground">{feature.description}</p>
                     )}
