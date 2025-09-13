@@ -66,8 +66,13 @@ export function ImportCard() {
                 
                 if (result.success) {
                     toast({
-                        title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Importação Concluída!</span></div>,
-                        description: `${result.count} dias de registros foram importados/atualizados com sucesso.`,
+                        title: "Importação Concluída!",
+                        description: (
+                            <div className="flex items-center gap-2">
+                                <CheckCircle className="h-5 w-5 text-green-500" />
+                                <span>{`${result.count} dias de registros foram importados/atualizados com sucesso.`}</span>
+                            </div>
+                        ),
                     });
                     router.refresh();
                 } else {
@@ -77,8 +82,13 @@ export function ImportCard() {
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : "Erro desconhecido ao processar o arquivo.";
                 toast({
-                    title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro na Importação</span></div>,
-                    description: errorMessage,
+                    title: "Erro na Importação",
+                    description: (
+                        <div className="flex items-center gap-2">
+                             <AlertTriangle className="h-5 w-5 text-destructive" />
+                             <span>{errorMessage}</span>
+                        </div>
+                    ),
                     variant: "destructive",
                 });
             } finally {
