@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useReducer, useEffect } from 'react';
@@ -237,7 +238,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   }
 
   const activeEarningCategories = catalog.earnings.filter(c => c.active);
-  const activeFuelCategories = catalog.fuel.filter(c => c.active);
+  const activeFuelCategories = catalog.fuel.filter(f => f.active);
 
   const renderStepContent = () => {
     switch (currentStep) {

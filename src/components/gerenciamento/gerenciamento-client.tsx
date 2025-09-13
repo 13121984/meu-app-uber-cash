@@ -8,7 +8,7 @@ import { DataTable } from "./data-table";
 import { HistoryFilters } from "./history-filters";
 import { Button } from "../ui/button";
 import { Loader2, Trash2, History, BarChart3, Smartphone } from "lucide-react";
-import { deleteFilteredWorkDaysAction } from "./actions";
+import { deleteFilteredWorkDaysAction } from "@/app/gerenciamento/actions";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";

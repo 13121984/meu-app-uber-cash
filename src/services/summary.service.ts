@@ -2,10 +2,6 @@
 'use server';
 
 import { getFile, saveFile } from './storage.service';
-import type { WorkDay } from './work-day.service';
-import type { Goals } from './goal.service';
-import type { ReportFilterValues } from '@/app/relatorios/actions';
-import type { Maintenance } from './maintenance.service';
 
 // --- Interfaces ---
 
@@ -44,16 +40,6 @@ export interface SummaryData {
     hoje: PeriodData;
     semana: PeriodData;
     mes: PeriodData;
-}
-
-export interface ReportData extends Omit<PeriodData, 'performanceByShift'> {
-  totalGastos: number;
-  fuelExpenses: FuelExpense[];
-  profitEvolution: ProfitEvolutionData[];
-  dailyTrips: DailyTripsData[];
-  averageEarningPerTrip: AverageEarningByCategory[];
-  averageEarningPerHour: AverageEarningByCategory[];
-  rawWorkDays: WorkDay[];
 }
 
 const FILE_NAME = 'summary.json';
@@ -101,36 +87,4 @@ export async function getTodayData(userId: string): Promise<PeriodData> {
 export async function getSummaryForPeriod(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
     return await getSummaryData(userId);
-}
-
-
-export async function getReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
-    const summary = await getSummaryData(userId);
-    let periodData: PeriodData;
-
-    switch (filters.type) {
-        case 'today':
-            periodData = summary.hoje;
-            break;
-        case 'thisWeek':
-            periodData = summary.semana;
-            break;
-        case 'thisMonth':
-        default:
-            periodData = summary.mes;
-            break;
-    }
-
-    const { performanceByShift, ...restOfPeriodData } = periodData;
-
-    return {
-        ...restOfPeriodData,
-        totalGastos: periodData.totalCombustivel + periodData.maintenance.totalSpent,
-        fuelExpenses: [],
-        profitEvolution: [],
-        dailyTrips: [],
-        averageEarningPerTrip: [],
-        averageEarningPerHour: [],
-        rawWorkDays: [],
-    };
 }
