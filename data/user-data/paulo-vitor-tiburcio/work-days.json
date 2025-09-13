@@ -2,8 +2,8 @@
   {
     "id": "1757775263641",
     "date": "2025-09-13T00:00:00.000Z",
-    "km": 100,
-    "hours": 8,
+    "km": 200,
+    "hours": 12,
     "timeEntries": [],
     "earnings": [
       {
@@ -23,9 +23,69 @@
       {
         "id": 1757775253824,
         "type": "GNV",
+        "paid": 80,
+        "price": 4.77
+      }
+    ],
+    "maintenanceEntries": []
+  },
+  {
+    "date": "2025-09-12T00:00:00.000Z",
+    "km": 150,
+    "hours": 10,
+    "timeEntries": [],
+    "earnings": [
+      {
+        "id": 1757779421189.5605,
+        "category": "99 Pop",
+        "trips": 10,
+        "amount": 125
+      },
+      {
+        "id": 1757779422293.1538,
+        "category": "Uber Cash",
+        "trips": 8,
+        "amount": 150
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757779452001,
+        "type": "GNV",
         "paid": 60,
         "price": 4.77
       }
-    ]
+    ],
+    "id": "1757779477844",
+    "maintenanceEntries": []
+  },
+  {
+    "date": "2025-09-10T00:00:00.000Z",
+    "km": 200,
+    "hours": 11,
+    "timeEntries": [],
+    "earnings": [
+      {
+        "id": 1757779516773.0193,
+        "category": "99 Pop",
+        "trips": 12,
+        "amount": 160
+      },
+      {
+        "id": 1757779518861.227,
+        "category": "Uber Cash",
+        "trips": 15,
+        "amount": 250
+      }
+    ],
+    "fuelEntries": [
+      {
+        "id": 1757779541841,
+        "type": "GNV",
+        "paid": 75,
+        "price": 4.77
+      }
+    ],
+    "id": "1757779551418"
   }
 ]

@@ -61,17 +61,20 @@ export function ProfitabilityAudit() {
                 let bestDay: Insight['bestDay'] = null;
                 let worstDay: Insight['worstDay'] = null;
 
-                if(report.profitEvolution.length > 0) {
-                    const dailyPerformance = report.rawWorkDays.reduce((acc, day) => {
+                if(report.rawWorkDays.length > 0) {
+                    const dailyPerformance = new Map<string, { earnings: number; hours: number }>();
+                    
+                    report.rawWorkDays.forEach(day => {
                         const dateKey = format(day.date, 'yyyy-MM-dd');
-                        const dayData = acc.get(dateKey) || { earnings: 0, hours: 0 };
+                        const dayData = dailyPerformance.get(dateKey) || { earnings: 0, hours: 0 };
                         
-                        dayData.earnings += day.earnings.reduce((sum, e) => sum + e.amount, 0);
+                        const dayEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
+                        
+                        dayData.earnings += dayEarnings;
                         dayData.hours += day.hours;
                         
-                        acc.set(dateKey, dayData);
-                        return acc;
-                    }, new Map<string, { earnings: number; hours: number }>());
+                        dailyPerformance.set(dateKey, dayData);
+                    });
 
                     let maxProfit = -Infinity;
                     let minProfit = Infinity;
@@ -80,13 +83,19 @@ export function ProfitabilityAudit() {
                         const profitPerHour = data.hours > 0 ? data.earnings / data.hours : 0;
                         if (profitPerHour > maxProfit) {
                             maxProfit = profitPerHour;
-                            bestDay = { date: format(new Date(date), 'dd/MM/yyyy'), profitPerHour };
+                            // Adiciona um dia para corrigir o fuso horário que o new Date() pode introduzir
+                            bestDay = { date: format(new Date(date.replace(/-/g, '/')), 'dd/MM/yyyy'), profitPerHour };
                         }
-                        if (profitPerHour < minProfit) {
+                        if (profitPerHour < minProfit && data.hours > 0) { // Garante que não pegue dias com 0 horas
                             minProfit = profitPerHour;
-                            worstDay = { date: format(new Date(date), 'dd/MM/yyyy'), profitPerHour };
+                            worstDay = { date: format(new Date(date.replace(/-/g, '/')), 'dd/MM/yyyy'), profitPerHour };
                         }
                     });
+
+                    // If there's only one day, it can't be the worst day.
+                    if (dailyPerformance.size <= 1) {
+                        worstDay = null;
+                    }
                 }
                 
                 const bestApp = report.averageEarningPerHour.length > 0
@@ -129,7 +138,7 @@ export function ProfitabilityAudit() {
                     color="text-green-500"
                 />
             )}
-            {insights.worstDay && insights.worstDay.date !== insights.bestDay?.date && (
+            {insights.worstDay && (
                  <InsightCard 
                     icon={TrendingDown}
                     title="Seu Pior Dia do Mês"
