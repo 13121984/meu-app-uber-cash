@@ -219,7 +219,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold font-headline flex items-center gap-2"><Package className="h-5 w-5 text-primary"/> Itens do Serviço</h3>
-            <Button type="button" size="sm" variant="destructive" onClick={() => append({ id: `item-${Date.now()}`, description: '', amount: 0, reminderKm: null, reminderDate: null })}>
+            <Button type="button" size="sm" variant="destructive" onClick={() => append({ id: `item-${Date.now()}-${Math.random()}`, description: '', amount: 0, reminderKm: null, reminderDate: null })}>
               <PlusCircle className="mr-2 h-4 w-4"/> Adicionar Item
             </Button>
           </div>

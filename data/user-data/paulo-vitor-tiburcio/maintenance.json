@@ -9,47 +9,47 @@
       {
         "id": "item-1757775528134",
         "description": "troca de oleo",
-        "amount": 150,
-        "reminderDate": "2025-10-31T03:00:00.000Z",
-        "reminderKm": 4900
+        "amount": 0,
+        "reminderKm": 5000,
+        "reminderDate": "2025-10-31T03:00:00.000Z"
       }
     ]
   },
   {
-    "id": "1757777592321",
     "date": "2025-09-12T03:00:00.000Z",
     "description": "Manutenção do Cabeçote",
     "type": "corrective",
     "kmAtService": 1464641,
     "items": [
       {
-        "id": "item-1757777592322-0.5132026740994204",
+        "id": "item-1757778064208-0.4199415343229125",
         "description": "Mão de obra",
         "amount": 1520,
         "reminderKm": null,
         "reminderDate": null
       },
       {
-        "id": "item-1757777592322-0.3640494178009108",
+        "id": "item-1757778064208-0.45211408849111834",
         "description": "Peças ",
         "amount": 750,
         "reminderKm": null,
         "reminderDate": null
       },
       {
-        "id": "item-1757777592322-0.5571636338449806",
+        "id": "item-1757778064208-0.9737080193446535",
         "description": "Troca de óleo",
         "amount": 0,
         "reminderKm": 5000,
         "reminderDate": null
       },
       {
-        "id": "item-1757777632540",
+        "id": "item-1757778064208-0.36311302616001173",
         "description": "Retifica",
-        "amount": 2246,
+        "amount": 2246.39,
         "reminderKm": null,
         "reminderDate": null
       }
-    ]
+    ],
+    "id": "1757778064207"
   }
 ]

@@ -79,7 +79,7 @@ export async function addMaintenance(userId: string, data: Omit<Maintenance, 'id
         date: new Date(data.date),
         items: data.items.map(item => ({
             ...item,
-            id: `item-${Date.now()}-${Math.random()}`
+            id: item.id || `item-${Date.now()}-${Math.random()}`
         }))
     };
     allRecords.unshift(newRecord);
@@ -140,7 +140,7 @@ export async function getFilteredMaintenanceRecords(userId: string, filters?: Re
 }
 
 
-export async function updateMaintenance(userId: string, id: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; error?: string }> {
+export async function updateMaintenance(userId: string, id: string, data: Omit<Maintenance, 'id'>): Promise<{ success: boolean; id?: string, error?: string }> {
   if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     const allRecords = await readMaintenanceData(userId);
@@ -155,12 +155,12 @@ export async function updateMaintenance(userId: string, id: string, data: Omit<M
         items: data.items.map(item => ({
             ...item,
             reminderDate: item.reminderDate ? new Date(item.reminderDate) : null,
-            id: item.id && item.id.startsWith('item-') ? item.id : `item-${Date.now()}-${Math.random()}`
+            id: item.id || `item-${Date.now()}-${Math.random()}`
         }))
     };
     await writeMaintenanceData(userId, allRecords);
     
-    return { success: true };
+    return { success: true, id };
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Falha ao atualizar registro.";
     return { success: false, error: errorMessage };
