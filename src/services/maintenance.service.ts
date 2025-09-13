@@ -1,5 +1,5 @@
 
-import { isWithinInterval, startOfDay, endOfDay, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO } from "date-fns";
+import { isWithinInterval, startOfDay, endOfDay, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO, isValid } from "date-fns";
 import type { ReportFilterValues } from "@/app/relatorios/actions";
 import { getFile, saveFile } from './storage.service';
 
@@ -154,7 +154,8 @@ export async function updateMaintenance(userId: string, id: string, data: Omit<M
         date: new Date(data.date),
         items: data.items.map(item => ({
             ...item,
-            id: item.id.startsWith('item-') ? item.id : `item-${Date.now()}-${Math.random()}`
+            reminderDate: item.reminderDate ? new Date(item.reminderDate) : null,
+            id: item.id && item.id.startsWith('item-') ? item.id : `item-${Date.now()}-${Math.random()}`
         }))
     };
     await writeMaintenanceData(userId, allRecords);

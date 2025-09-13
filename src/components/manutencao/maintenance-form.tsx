@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from 'react';
@@ -84,7 +85,14 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
     setIsSubmitting(true);
     try {
       let result;
-      const dataToSend = { ...data };
+      // Garante que as datas de lembrete sejam nulas se não estiverem definidas
+      const dataToSend = {
+          ...data,
+          items: data.items.map(item => ({
+              ...item,
+              reminderDate: item.reminderDate || null,
+          })),
+      };
 
       if (initialData?.id) {
         result = await updateMaintenanceAction(user.id, initialData.id, dataToSend);
