@@ -44,8 +44,13 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
         const result = await runBackupFlow({ userId: user.id });
         if (result.success && result.backupDate) {
             toast({
-                title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Backup Criado!</span></div>,
-                description: result.message,
+                title: "Backup Criado!",
+                description: (
+                    <div className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-500"/>
+                        <span>{result.message}</span>
+                    </div>
+                ),
             });
             // Update the state to reflect the new backup without a full page reload
             setBackupData({
@@ -54,8 +59,13 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
             });
         } else {
              toast({
-                title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro no Backup</span></div>,
-                description: result.message,
+                title: "Erro no Backup",
+                description: (
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
+                        <span>{result.message}</span>
+                    </div>
+                ),
                 variant: 'destructive'
             });
         }
@@ -76,7 +86,16 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
             link.click();
             document.body.removeChild(link);
           } else {
-              toast({ title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao baixar</span></div>, description: result.error || "Não foi possível obter o arquivo de backup.", variant: 'destructive'});
+              toast({ 
+                title: "Erro ao baixar", 
+                description: (
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
+                        <span>{result.error || "Não foi possível obter o arquivo de backup."}</span>
+                    </div>
+                ), 
+                variant: 'destructive'
+              });
           }
       });
   }
