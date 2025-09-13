@@ -11,7 +11,8 @@
         "startingFare": 3,
         "ratePerKm": 2.5,
         "ratePerMinute": 0
-      }
+      },
+      "theme": "light"
     }
   },
   {
