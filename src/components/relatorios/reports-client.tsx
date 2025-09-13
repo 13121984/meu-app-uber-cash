@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useTransition, useMemo, useCallback, useRef, useEffect } from 'react';
@@ -5,7 +6,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { ReportsFilter } from './reports-filter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Loader2, Info, PlusCircle, Wrench, LineChart, PieChart, BarChart3, CandlestickChart, Fuel, Lock, ArrowLeft } from 'lucide-react';
-import { ReportData } from '@/services/summary.service';
+import { ReportData, generateReportData } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -14,10 +15,6 @@ import { allCharts, mandatoryCharts, allStats, mandatoryCards } from '@/lib/dash
 import { motion } from 'framer-motion';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Plan } from '@/services/auth.service';
-import { getFilteredWorkDays, WorkDay, getWorkDays } from '@/services/work-day.service';
-import { getMaintenanceRecords, Maintenance } from '@/services/maintenance.service';
-import { getGoals, Goals } from '@/services/goal.service';
-import { format } from 'date-fns';
 
 const StatsCard = dynamic(() => import('../dashboard/stats-card').then(mod => mod.StatsCard), { ssr: false });
 const EarningsPieChart = dynamic(() => import('../dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -29,61 +26,6 @@ const FuelBarChart = dynamic(() => import('./fuel-bar-chart').then(mod => mod.Fu
 const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => mod.DailyTripsChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerHourChart = dynamic(() => import('./average-earning-per-hour-chart').then(mod => mod.AverageEarningPerHourChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
-
-async function generateReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
-    const allWorkDays = await getWorkDays(userId);
-    const filteredWorkDays = getFilteredWorkDays(allWorkDays, filters);
-    
-    const allMaintenance = await getMaintenanceRecords(userId);
-    const maintenanceInPeriod = allMaintenance.filter(m => filteredWorkDays.some(wd => wd.date.getTime() === m.date.getTime()));
-
-    const goals = await getGoals(userId);
-
-    const totalGanho = filteredWorkDays.reduce((acc, day) => acc + day.earnings.reduce((sum, e) => sum + e.amount, 0), 0);
-    const totalCombustivel = filteredWorkDays.reduce((acc, day) => acc + day.fuelEntries.reduce((sum, f) => sum + f.paid, 0), 0);
-    const totalManutencao = maintenanceInPeriod.reduce((sum, m) => sum + m.amount, 0);
-    const totalLucro = totalGanho - totalCombustivel - totalManutencao;
-    const totalKm = filteredWorkDays.reduce((acc, day) => acc + day.km, 0);
-    const totalHoras = filteredWorkDays.reduce((acc, day) => acc + day.hours, 0);
-    const totalViagens = filteredWorkDays.reduce((acc, day) => acc + day.earnings.reduce((sum, e) => sum + e.trips, 0), 0);
-    const diasTrabalhados = new Set(filteredWorkDays.map(d => d.date.toDateString())).size;
-    const totalLitros = filteredWorkDays.reduce((acc, day) => acc + day.fuelEntries.reduce((sum, f) => sum + (f.price > 0 ? f.paid / f.price : 0), 0), 0);
-
-    const earningsByCategory = filteredWorkDays.flatMap(d => d.earnings).reduce((acc, e) => {
-        acc[e.category] = (acc[e.category] || 0) + e.amount;
-        return acc;
-    }, {} as Record<string, number>);
-
-    // Complex aggregations for charts
-    const profitEvolution = filteredWorkDays.reduce((acc, day) => {
-        const dateKey = format(day.date, "dd/MM");
-        const profit = day.earnings.reduce((s, e) => s + e.amount, 0) - day.fuelEntries.reduce((s, f) => s + f.paid, 0);
-        acc[dateKey] = (acc[dateKey] || 0) + profit;
-        return acc;
-    }, {} as Record<string, number>);
-
-    return {
-        totalGanho, totalLucro, totalCombustivel, totalExtras: 0, diasTrabalhados, totalKm, totalHoras,
-        mediaHorasPorDia: diasTrabalhados > 0 ? totalHoras / diasTrabalhados : 0,
-        mediaKmPorDia: diasTrabalhados > 0 ? totalKm / diasTrabalhados : 0,
-        ganhoPorHora: totalHoras > 0 ? totalGanho / totalHoras : 0,
-        ganhoPorKm: totalKm > 0 ? totalGanho / totalKm : 0,
-        totalViagens, totalLitros,
-        eficiencia: totalKm > 0 && totalLitros > 0 ? totalKm / totalLitros : 0,
-        earningsByCategory: Object.entries(earningsByCategory).map(([name, total]) => ({ name, total })),
-        tripsByCategory: [], // Simplified, logic can be added if needed
-        maintenance: { totalSpent: totalManutencao, servicesPerformed: maintenanceInPeriod.length },
-        meta: { target: 0, period: filters.type }, // Simplified
-        profitComposition: [], // Simplified
-        performanceByShift: [], // Simplified
-        profitEvolution: Object.entries(profitEvolution).map(([date, lucro]) => ({ date, lucro })),
-        fuelExpenses: [], // Simplified
-        dailyTrips: [], // Simplified
-        averageEarningPerHour: [], // Simplified
-        averageEarningPerTrip: [], // Simplified
-        rawWorkDays: filteredWorkDays,
-    };
-}
 
 
 const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
