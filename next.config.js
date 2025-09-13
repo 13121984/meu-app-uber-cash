@@ -3,7 +3,6 @@
 require('dotenv').config({ path: './.env' });
 
 const nextConfig = {
-  output: 'export', // Adiciona a configuração de export estático
   images: {
     unoptimized: true, 
     remotePatterns: [
