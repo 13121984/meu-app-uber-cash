@@ -26,45 +26,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const getActiveUserId = useCallback(() => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const storedUserJSON = localStorage.getItem('rota-certa-user');
-      if (storedUserJSON) {
+    // This function will only run on the client
+    const storedUserJSON = localStorage.getItem('rota-certa-user');
+    if (storedUserJSON) {
+      try {
         const storedUser = JSON.parse(storedUserJSON);
         return storedUser.id;
+      } catch {
+        return null;
       }
-    } catch {
-      return null;
     }
     return null;
   }, []);
 
   const loadUserFromStorage = useCallback(async () => {
-    setLoading(true);
     const userId = getActiveUserId();
     if (userId) {
       try {
         const freshUser = await getUserById(userId);
         if (freshUser) {
             setUser(freshUser);
-             if (typeof window !== 'undefined') {
-                localStorage.setItem('rota-certa-user', JSON.stringify(freshUser));
-             }
+            localStorage.setItem('rota-certa-user', JSON.stringify(freshUser));
         } else {
             // User might have been deleted, clear storage
             setUser(null);
-             if (typeof window !== 'undefined') {
-                localStorage.removeItem('rota-certa-user');
-             }
+            localStorage.removeItem('rota-certa-user');
         }
       } catch (error) {
         console.error("Failed to fetch user from server, using stale local data.", error);
         // Fallback to local data if server is unreachable
-        if (typeof window !== 'undefined') {
-            const storedUserJSON = localStorage.getItem('rota-certa-user');
-            if (storedUserJSON) {
-                setUser(JSON.parse(storedUserJSON));
-            }
+        const storedUserJSON = localStorage.getItem('rota-certa-user');
+        if (storedUserJSON) {
+            setUser(JSON.parse(storedUserJSON));
         }
       }
     }
@@ -72,6 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [getActiveUserId]);
 
   useEffect(() => {
+    // This effect runs only on the client side
     loadUserFromStorage();
   }, [loadUserFromStorage]);
 
@@ -82,9 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const updatedUser = await getUserById(user.id);
         if(updatedUser) {
             setUser(updatedUser);
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('rota-certa-user', JSON.stringify(updatedUser));
-            }
+            localStorage.setItem('rota-certa-user', JSON.stringify(updatedUser));
         }
     } catch (e) {
         console.error("Failed to refresh user:", e);
@@ -98,14 +90,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const result = await loginService(userId, password);
     if (result.success && result.user) {
       setUser(result.user);
-       if (typeof window !== 'undefined') {
-        localStorage.setItem('rota-certa-user', JSON.stringify(result.user));
-       }
+      localStorage.setItem('rota-certa-user', JSON.stringify(result.user));
     } else {
         setUser(null);
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem('rota-certa-user');
-        }
+        localStorage.removeItem('rota-certa-user');
     }
     setLoading(false);
     return { success: result.success, user: result.user, error: result.error };
@@ -124,9 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setUser(null);
-    if (typeof window !== 'undefined') {
-        localStorage.removeItem('rota-certa-user');
-    }
+    localStorage.removeItem('rota-certa-user');
   };
   
   const setColorTheme = async (colorTheme: string) => {

@@ -18,24 +18,28 @@ export function AppContent({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+
   const [theme, setTheme] = useState('dark');
   const [colorTheme, setColorTheme] = useState('orange');
   const [isInitialSetup, setIsInitialSetup] = useState(false);
 
+  // This effect runs only on the client, after hydration.
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
+      // Apply themes based on user preferences
       setTheme(user.preferences.theme || 'dark');
       setColorTheme(user.preferences.colorTheme || 'orange');
+      
+      // Check if the user needs to go through the initial vehicle setup
       const setupParam = searchParams.get('setup');
-      if (setupParam === 'true' && user.vehicles.length === 0) {
+      if (setupParam === 'true' && (!user.vehicles || user.vehicles.length === 0)) {
         setIsInitialSetup(true);
       } else {
         setIsInitialSetup(false);
       }
-    } else {
-      setIsInitialSetup(false);
     }
-  }, [user, searchParams, pathname]);
+  }, [user, loading, searchParams, pathname]);
+
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -44,38 +48,33 @@ export function AppContent({
     root.setAttribute('data-color-theme', colorTheme);
   }, [theme, colorTheme]);
   
-  const isAuthPage = pathname === '/login' || pathname === '/cadastro' || pathname === '/recuperar';
+  const isAuthPage = pathname === '/login' || pathname === '/cadastro' || pathname === '/recuperar' || pathname === '/landing';
 
+  // Redirect to login if not authenticated and not on an auth page.
+  // This also runs only on the client.
   useEffect(() => {
     if (!loading && !user && !isAuthPage) {
       router.replace('/login');
     }
   }, [user, loading, isAuthPage, router]);
   
-  if (loading) {
+  if (loading || (!user && !isAuthPage)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
       </div>
     );
   }
+  
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
 
   if (isInitialSetup) {
       return <VehicleSetup />;
   }
-
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
   
-  if (!user) {
-    return (
-        <div className="flex min-h-screen items-center justify-center bg-background">
-            <Loader2 className="h-16 w-16 animate-spin text-primary" />
-        </div>
-    );
-  }
-  
+  // This should only be reached if the user is loaded and authenticated
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background">
       <TopBar />
