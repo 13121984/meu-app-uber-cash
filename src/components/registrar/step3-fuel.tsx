@@ -62,7 +62,6 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
             const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
             return { ...f, [field]: isNaN(numValue) ? 0 : numValue };
         }
-        // Garante que o tipo seja sempre uma string
         return { ...f, [field]: String(value) };
       }
       return f;
@@ -73,11 +72,12 @@ export function Step3Fuel({ data, dispatch, fuelTypes }: Step3FuelProps) {
   const handleMaintenanceChange = (id: number, field: keyof Omit<MaintenanceEntry, 'id'>, value: string | number) => {
       const updatedEntries = data.maintenanceEntries.map((m) => {
           if (m.id === id) {
-              if(field === 'amount') {
+              if (field === 'amount') {
                    const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
                    return { ...m, [field]: isNaN(numValue) ? 0 : numValue };
               }
-              return { ...m, [field]: value };
+              // Garante que a descrição seja sempre uma string
+              return { ...m, [field]: String(value) };
           }
           return m;
       });
