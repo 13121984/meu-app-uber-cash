@@ -283,7 +283,7 @@ export default function AjudaPage() {
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent>
-                                            <div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: topic.content }} />
+                                            <div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: topic.content || '' }} />
                                         </AccordionContent>
                                      </AccordionItem>
                                  )
