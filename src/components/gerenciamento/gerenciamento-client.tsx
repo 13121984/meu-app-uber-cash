@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useTransition, useEffect, useCallback } from "react";
@@ -11,13 +10,13 @@ import { deleteFilteredWorkDaysAction } from "@/app/gerenciamento/actions";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { getFilteredAndGroupedWorkDays, type WorkDay } from '@/services/work-day.service';
+import { getFilteredWorkDays, groupWorkDays, type WorkDay } from '@/services/work-day.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { getWorkDays } from "@/services/work-day.service";
 
 export interface GroupedWorkDay {
   date: Date;
@@ -55,8 +54,10 @@ export function GerenciamentoClient() {
     setCurrentFilters(filters);
     startTransition(async () => {
       try {
-        const filtered = await getFilteredAndGroupedWorkDays(user.id, filters);
-        setGroupedWorkDays(filtered);
+        const allWorkDays = await getWorkDays(user.id);
+        const filtered = getFilteredWorkDays(allWorkDays, filters);
+        const grouped = groupWorkDays(filtered);
+        setGroupedWorkDays(grouped);
       } catch (e) {
         console.error("Failed to fetch work days", e);
         toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
@@ -83,7 +84,6 @@ export function GerenciamentoClient() {
             handleApplyFilters(filtersFromUrl);
         }
     } else if (user && !period) {
-        // Aplica um filtro padrão (Este Mês) se nenhum filtro estiver na URL
         const defaultFilters: ReportFilterValues = { type: 'thisMonth' };
         handleApplyFilters(defaultFilters);
     }

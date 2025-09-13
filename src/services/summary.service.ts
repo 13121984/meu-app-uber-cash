@@ -1,4 +1,3 @@
-
 import { getFile, saveFile } from './storage.service';
 
 // --- Interfaces ---
@@ -40,6 +39,16 @@ export interface SummaryData {
     mes: PeriodData;
 }
 
+export interface ReportData extends PeriodData {
+    profitEvolution: ProfitEvolutionData[];
+    fuelExpenses: FuelExpense[];
+    dailyTrips: DailyTripsData[];
+    averageEarningPerHour: AverageEarningByCategory[];
+    averageEarningPerTrip: AverageEarningByCategory[];
+    rawWorkDays: any[];
+}
+
+
 const FILE_NAME = 'summary.json';
 
 export const defaultPeriodData: PeriodData = {
@@ -58,26 +67,14 @@ export const defaultSummaryData: SummaryData = {
     mes: { ...defaultPeriodData, meta: { target: 0, period: 'mensal' } },
 };
 
-
-// --- Funções do Serviço (Puras) ---
+// --- Funções do Serviço Puras ---
 
 export async function getSummaryData(userId: string): Promise<SummaryData> {
     if (!userId) return defaultSummaryData;
-    const data = await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
-    // Garantir que os períodos estejam corretos, caso o arquivo salvo esteja desatualizado
-    if (data.hoje) data.hoje.meta.period = 'diária';
-    if (data.semana) data.semana.meta.period = 'semanal';
-    if (data.mes) data.mes.meta.period = 'mensal';
-    return data;
+    return await getFile<SummaryData>(userId, FILE_NAME, defaultSummaryData);
 }
 
 export async function saveSummaryData(userId: string, data: SummaryData): Promise<void> {
     if (!userId) return;
     await saveFile(userId, FILE_NAME, data);
-}
-
-export async function getTodayData(userId: string): Promise<PeriodData> {
-    if (!userId) return defaultPeriodData;
-    const summary = await getSummaryData(userId);
-    return summary.hoje;
 }

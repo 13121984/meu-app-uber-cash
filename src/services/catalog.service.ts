@@ -1,11 +1,10 @@
-
 import fs from 'fs/promises';
 import path from 'path';
 
 export interface CatalogItem {
   name: string;
   active: boolean;
-  isDefault: boolean; // Cannot be deleted by any user if true
+  isDefault: boolean;
 }
 
 export interface Catalog {
@@ -35,72 +34,29 @@ const defaultCatalog: Catalog = {
   ]
 };
 
-async function readCatalogFile(): Promise<Partial<Catalog>> {
-    try {
-        await fs.access(dataFilePath);
-        const fileContent = await fs.readFile(dataFilePath, 'utf8');
-        return fileContent ? JSON.parse(fileContent) : {};
-    } catch (error) {
-        if (error instanceof SyntaxError) {
-             console.error("Error parsing catalog.json, returning empty object:", error);
-             return {};
-        }
-        // If file doesn't exist or other read error
-        return {};
-    }
-}
-
 export async function getCatalog(): Promise<Catalog> {
-  const data = await readCatalogFile();
-  
-  const mergeCatalogs = (defaults: CatalogItem[], saved: CatalogItem[] = []): CatalogItem[] => {
-      const savedMap = new Map(saved.map(item => [item.name, item]));
-      const finalItems: CatalogItem[] = [];
-      const usedNames = new Set<string>();
-
-      defaults.forEach(defaultItem => {
-          const savedItem = savedMap.get(defaultItem.name);
-          finalItems.push({
-              name: defaultItem.name,
-              isDefault: defaultItem.isDefault, 
-              active: savedItem?.active ?? defaultItem.active, 
-          });
-          usedNames.add(defaultItem.name);
-      });
-
-      saved.forEach(savedItem => {
-          if (!usedNames.has(savedItem.name)) {
-              finalItems.push({
-                  ...savedItem,
-                  isDefault: false,
-              });
-          }
-      });
-      
-      return finalItems;
-  };
-  
-  const finalCatalog = {
-      earnings: mergeCatalogs(defaultCatalog.earnings, data.earnings),
-      fuel: mergeCatalogs(defaultCatalog.fuel, data.fuel)
-  };
-  
-  // Ensure the file is created with default data if it was missing or corrupt
   try {
-    await fs.access(dataFilePath);
-    // If access is fine, we do nothing.
-  } catch {
-    await saveCatalog(finalCatalog);
+    const fileContent = await fs.readFile(dataFilePath, 'utf8');
+    if (!fileContent) {
+        await fs.writeFile(dataFilePath, JSON.stringify(defaultCatalog, null, 2), 'utf8');
+        return defaultCatalog;
+    }
+    const data = JSON.parse(fileContent);
+    return {
+        earnings: data.earnings || defaultCatalog.earnings,
+        fuel: data.fuel || defaultCatalog.fuel
+    };
+  } catch (error) {
+    // If file doesn't exist or is corrupt, create it with default data
+    await fs.writeFile(dataFilePath, JSON.stringify(defaultCatalog, null, 2), 'utf8');
+    return defaultCatalog;
   }
-
-  return finalCatalog;
 }
 
 export async function saveCatalog(catalog: Catalog): Promise<{ success: boolean, error?: string }> {
   try {
     await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
     await fs.writeFile(dataFilePath, JSON.stringify(catalog, null, 2), 'utf8');
-    
     return { success: true };
   } catch (error) {
      const errorMessage = error instanceof Error ? error.message : "Falha ao salvar catálogo.";

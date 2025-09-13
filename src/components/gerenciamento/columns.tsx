@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -28,28 +27,10 @@ const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style:
 export const useWorkDayColumns = () => {
   const { user } = useAuth();
   const [editingDay, setEditingDay] = useState<GroupedWorkDay | null>(null);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [dayToDelete, setDayToDelete] = useState<GroupedWorkDay | null>(null);
   
   const handleEditClick = (e: React.MouseEvent, day: GroupedWorkDay) => {
     e.stopPropagation();
     setEditingDay(day);
-  }
-
-  const handleConfirmDelete = async () => {
-    if (!dayToDelete || !user) return;
-    setIsDeleting(true);
-    try {
-      await deleteFilteredWorkDaysAction(user.id, { type: 'custom', dateRange: { from: dayToDelete.date, to: dayToDelete.date } });
-      toast({ title: "Sucesso!", description: `Registros de ${format(dayToDelete.date, 'dd/MM/yyyy')} apagados.` });
-    } catch (error) {
-      toast({ title: "Erro!", description: "Não foi possível apagar os registros.", variant: "destructive" });
-    } finally {
-      setIsDeleting(false);
-      setIsAlertOpen(false);
-      setDayToDelete(null);
-    }
   }
 
   const columns: ColumnDef<GroupedWorkDay>[] = [
@@ -121,33 +102,11 @@ export const useWorkDayColumns = () => {
   ]
 
   const Dialogs = (
-    <>
-      <EditWorkDayDialog
-        isOpen={!!editingDay}
-        onOpenChange={(isOpen) => !isOpen && setEditingDay(null)}
-        groupedWorkDay={editingDay}
-      />
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso irá apagar permanentemente TODOS os registros de trabalho para o dia {dayToDelete && format(dayToDelete.date, 'dd/MM/yyyy')}.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmDelete} 
-              disabled={isDeleting} 
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              {isDeleting ? "Apagando..." : "Apagar Tudo"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <EditWorkDayDialog
+      isOpen={!!editingDay}
+      onOpenChange={(isOpen) => !isOpen && setEditingDay(null)}
+      groupedWorkDay={editingDay}
+    />
   )
 
   return { columns, Dialogs, setEditingDay };

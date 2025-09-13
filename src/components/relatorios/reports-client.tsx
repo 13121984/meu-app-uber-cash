@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useState, useTransition, useMemo, useCallback, useRef, useEffect } from 'react';
@@ -7,7 +5,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { ReportsFilter } from './reports-filter';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Loader2, Info, PlusCircle, Wrench, LineChart, PieChart, BarChart3, CandlestickChart, Fuel, Lock, ArrowLeft } from 'lucide-react';
-import { ReportData, getReportData } from '@/services/summary.service';
+import { ReportData } from '@/services/summary.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -16,6 +14,10 @@ import { allCharts, mandatoryCharts, allStats, mandatoryCards } from '@/lib/dash
 import { motion } from 'framer-motion';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Plan } from '@/services/auth.service';
+import { getFilteredWorkDays, WorkDay, getWorkDays } from '@/services/work-day.service';
+import { getMaintenanceRecords, Maintenance } from '@/services/maintenance.service';
+import { getGoals, Goals } from '@/services/goal.service';
+import { format } from 'date-fns';
 
 const StatsCard = dynamic(() => import('../dashboard/stats-card').then(mod => mod.StatsCard), { ssr: false });
 const EarningsPieChart = dynamic(() => import('../dashboard/earnings-chart').then(mod => mod.EarningsPieChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
@@ -28,16 +30,67 @@ const DailyTripsChart = dynamic(() => import('./daily-trips-chart').then(mod => 
 const AverageEarningPerHourChart = dynamic(() => import('./average-earning-per-hour-chart').then(mod => mod.AverageEarningPerHourChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 const AverageEarningPerTripChart = dynamic(() => import('./average-earning-per-trip-chart').then(mod => mod.AverageEarningPerTripChart), { ssr: false, loading: () => <div className="h-[350px] w-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> });
 
+async function generateReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
+    const allWorkDays = await getWorkDays(userId);
+    const filteredWorkDays = getFilteredWorkDays(allWorkDays, filters);
+    
+    const allMaintenance = await getMaintenanceRecords(userId);
+    const maintenanceInPeriod = allMaintenance.filter(m => filteredWorkDays.some(wd => wd.date.getTime() === m.date.getTime()));
+
+    const goals = await getGoals(userId);
+
+    const totalGanho = filteredWorkDays.reduce((acc, day) => acc + day.earnings.reduce((sum, e) => sum + e.amount, 0), 0);
+    const totalCombustivel = filteredWorkDays.reduce((acc, day) => acc + day.fuelEntries.reduce((sum, f) => sum + f.paid, 0), 0);
+    const totalManutencao = maintenanceInPeriod.reduce((sum, m) => sum + m.amount, 0);
+    const totalLucro = totalGanho - totalCombustivel - totalManutencao;
+    const totalKm = filteredWorkDays.reduce((acc, day) => acc + day.km, 0);
+    const totalHoras = filteredWorkDays.reduce((acc, day) => acc + day.hours, 0);
+    const totalViagens = filteredWorkDays.reduce((acc, day) => acc + day.earnings.reduce((sum, e) => sum + e.trips, 0), 0);
+    const diasTrabalhados = new Set(filteredWorkDays.map(d => d.date.toDateString())).size;
+    const totalLitros = filteredWorkDays.reduce((acc, day) => acc + day.fuelEntries.reduce((sum, f) => sum + (f.price > 0 ? f.paid / f.price : 0), 0), 0);
+
+    const earningsByCategory = filteredWorkDays.flatMap(d => d.earnings).reduce((acc, e) => {
+        acc[e.category] = (acc[e.category] || 0) + e.amount;
+        return acc;
+    }, {} as Record<string, number>);
+
+    // Complex aggregations for charts
+    const profitEvolution = filteredWorkDays.reduce((acc, day) => {
+        const dateKey = format(day.date, "dd/MM");
+        const profit = day.earnings.reduce((s, e) => s + e.amount, 0) - day.fuelEntries.reduce((s, f) => s + f.paid, 0);
+        acc[dateKey] = (acc[dateKey] || 0) + profit;
+        return acc;
+    }, {} as Record<string, number>);
+
+    return {
+        totalGanho, totalLucro, totalCombustivel, totalExtras: 0, diasTrabalhados, totalKm, totalHoras,
+        mediaHorasPorDia: diasTrabalhados > 0 ? totalHoras / diasTrabalhados : 0,
+        mediaKmPorDia: diasTrabalhados > 0 ? totalKm / diasTrabalhados : 0,
+        ganhoPorHora: totalHoras > 0 ? totalGanho / totalHoras : 0,
+        ganhoPorKm: totalKm > 0 ? totalGanho / totalKm : 0,
+        totalViagens, totalLitros,
+        eficiencia: totalKm > 0 && totalLitros > 0 ? totalKm / totalLitros : 0,
+        earningsByCategory: Object.entries(earningsByCategory).map(([name, total]) => ({ name, total })),
+        tripsByCategory: [], // Simplified, logic can be added if needed
+        maintenance: { totalSpent: totalManutencao, servicesPerformed: maintenanceInPeriod.length },
+        meta: { target: 0, period: filters.type }, // Simplified
+        profitComposition: [], // Simplified
+        performanceByShift: [], // Simplified
+        profitEvolution: Object.entries(profitEvolution).map(([date, lucro]) => ({ date, lucro })),
+        fuelExpenses: [], // Simplified
+        dailyTrips: [], // Simplified
+        averageEarningPerHour: [], // Simplified
+        averageEarningPerTrip: [], // Simplified
+        rawWorkDays: filteredWorkDays,
+    };
+}
+
 
 const chartComponentMap: { [key: string]: React.ComponentType<any> } = {
-  earningsComposition: EarningsPieChart,
-  profitEvolution: ProfitEvolutionChart,
-  earningsByCategory: EarningsBarChart,
-  tripsByCategory: TripsBarChart,
-  maintenance: MaintenanceSummary,
-  fuelExpenses: FuelBarChart,
-  dailyTrips: DailyTripsChart,
-  averageEarningPerHour: AverageEarningPerHourChart,
+  earningsComposition: EarningsPieChart, profitEvolution: ProfitEvolutionChart,
+  earningsByCategory: EarningsBarChart, tripsByCategory: TripsBarChart,
+  maintenance: MaintenanceSummary, fuelExpenses: FuelBarChart,
+  dailyTrips: DailyTripsChart, averageEarningPerHour: AverageEarningPerHourChart,
   averageEarningPerTrip: AverageEarningPerTripChart,
 };
 
@@ -69,7 +122,7 @@ export function ReportsClient() {
 
     setFilters(newFilters);
     startTransition(async () => {
-      const reportData = await getReportData(user.id, newFilters);
+      const reportData = await generateReportData(user.id, newFilters);
       setData(reportData);
     });
   }, [user, router, searchParams]);
@@ -111,48 +164,17 @@ export function ReportsClient() {
   }
 
   const renderContent = () => {
-    if (isPending) {
-        return (
-            <div className="flex justify-center items-center h-96">
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            </div>
-        );
-    }
-    
-    if (!data) {
-        return (
-            <Card className="mt-6 flex flex-col items-center justify-center p-12 text-center border-dashed">
-                <Info className="w-12 h-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold">Gere um Relatório</h3>
-                <p className="text-muted-foreground">Selecione um período acima para visualizar suas análises.</p>
-            </Card>
-        );
-    }
-
-    if (data.diasTrabalhados === 0) {
-        return (
-            <Card className="mt-6 flex flex-col items-center justify-center p-12 text-center border-dashed">
-                <Info className="w-12 h-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold">Nenhum dado encontrado</h3>
-                <p className="text-muted-foreground">Não há registros para o período selecionado. Tente ajustar os filtros.</p>
-            </Card>
-        );
-    }
+    if (isPending) return <div className="flex justify-center items-center h-96"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
+    if (!data) return <Card className="mt-6 flex flex-col items-center justify-center p-12 text-center border-dashed"><Info className="w-12 h-12 text-muted-foreground mb-4" /><h3 className="text-xl font-semibold">Gere um Relatório</h3><p className="text-muted-foreground">Selecione um período acima para visualizar suas análises.</p></Card>;
+    if (data.diasTrabalhados === 0) return <Card className="mt-6 flex flex-col items-center justify-center p-12 text-center border-dashed"><Info className="w-12 h-12 text-muted-foreground mb-4" /><h3 className="text-xl font-semibold">Nenhum dado encontrado</h3><p className="text-muted-foreground">Não há registros para o período selecionado. Tente ajustar os filtros.</p></Card>;
     
     const savedCardOrder = user?.preferences?.dashboardCardOrder || [];
-    const orderedCardIds = isPro 
-      ? [...new Set([...savedCardOrder, ...allStats.map(s => s.id)])] 
-      : savedCardOrder.length > 0 && savedCardOrder.some(id => mandatoryCards.includes(id))
-        ? [...new Set([...savedCardOrder.filter(id => mandatoryCards.includes(id)), ...mandatoryCards])]
-        : mandatoryCards;
-
+    const orderedCardIds = isPro ? [...new Set([...savedCardOrder, ...allStats.map(s => s.id)])] : savedCardOrder.length > 0 && savedCardOrder.some(id => mandatoryCards.includes(id)) ? [...new Set([...savedCardOrder.filter(id => mandatoryCards.includes(id)), ...mandatoryCards])] : mandatoryCards;
     const cardsToShow = orderedCardIds.map(id => {
         if (!isPro && !mandatoryCards.includes(id)) return null;
-
         const cardInfo = allStats.find(s => s.id === id);
         if (!cardInfo) return null;
-        
-        let value: any = 0;
+        let value: any = (data as any)[id] ?? data.maintenance[id as keyof typeof data.maintenance] ?? 0;
         if (id === 'lucro') value = data.totalLucro;
         else if (id === 'ganho') value = data.totalGanho;
         else if (id === 'combustivel') value = data.totalCombustivel;
@@ -165,83 +187,31 @@ export function ReportsClient() {
         else if (id === 'eficiencia') value = data.eficiencia;
         else if (id === 'kmRodados') value = data.totalKm;
         else if (id === 'horasTrabalhadas') value = data.totalHoras;
-        else value = (data as any)[id] ?? data.maintenance[id as keyof typeof data.maintenance] ?? 0;
-
         return { ...cardInfo, value };
     }).filter(Boolean) as (typeof allStats[0] & { value: number })[];
     
     const savedChartOrder = user?.preferences?.reportChartOrder || [];
-    const chartsToShowIds = isPro 
-      ? [...new Set([...savedChartOrder, ...allCharts.map(c => c.id)])]
-      : savedChartOrder.length > 0 && savedChartOrder.some(id => mandatoryCharts.includes(id))
-        ? [...new Set([...savedChartOrder.filter(id => mandatoryCharts.includes(id)), ...mandatoryCharts])]
-        : mandatoryCharts;
-
+    const chartsToShowIds = isPro ? [...new Set([...savedChartOrder, ...allCharts.map(c => c.id)])] : savedChartOrder.length > 0 && savedChartOrder.some(id => mandatoryCharts.includes(id)) ? [...new Set([...savedChartOrder.filter(id => mandatoryCharts.includes(id)), ...mandatoryCharts])] : mandatoryCharts;
     const chartsToShow = chartsToShowIds.map(id => {
       if (!isPro && !mandatoryCharts.includes(id)) return null;
       return allCharts.find(c => c.id === id);
     }).filter(Boolean);
 
-
     return (
-        <motion.div 
-            ref={reportContentRef} 
-            className="space-y-6 mt-6 bg-background p-4 rounded-lg"
-            key={filters ? JSON.stringify(filters) : 'initial'}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-        >
+        <motion.div ref={reportContentRef} className="space-y-6 mt-6 bg-background p-4 rounded-lg" key={filters ? JSON.stringify(filters) : 'initial'} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {cardsToShow.map(stat => <StatsCard key={stat.id} {...stat} isPreview={false} />)}
-                 {!isPro && (
-                   <Link href="/configuracoes/layout-personalizado" passHref>
-                      <Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors">
-                        <CardContent className="p-0 text-center">
-                            <Lock className="h-8 w-8 mx-auto text-primary mb-2"/>
-                            <p className="text-sm font-semibold">Adicionar Card</p>
-                             <p className="text-xs text-muted-foreground">Desbloquear com Pro</p>
-                        </CardContent>
-                      </Card>
-                  </Link>
-              )}
+                 {!isPro && <Link href="/configuracoes/layout-personalizado" passHref><Card className="p-4 h-full flex flex-col items-center justify-center border-dashed hover:bg-muted/50 transition-colors"><CardContent className="p-0 text-center"><Lock className="h-8 w-8 mx-auto text-primary mb-2"/><p className="text-sm font-semibold">Adicionar Card</p><p className="text-xs text-muted-foreground">Desbloquear com Pro</p></CardContent></Card></Link>}
             </div>
             {chartsToShow.map(chart => {
               if (!chart) return null;
               const ChartComponent = chartComponentMap[chart.id];
               if (!ChartComponent) return null;
-              
               const chartData = getChartData(data, chart.id);
               if(!chartData || (Array.isArray(chartData) && chartData.length === 0)) return null;
-
-              return (
-                  <motion.div
-                    key={chart.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                    ref={(el) => (chartRefs.current[chart.id] = el)}
-                  >
-                    <Card>
-                        <CardHeader>
-                        <CardTitle className="font-headline text-lg">{chart.title}</CardTitle>
-                        <CardDescription>{chart.description}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <ChartComponent key={`${chart.id}-${filters?.type}`} data={chartData} />
-                        </CardContent>
-                    </Card>
-                  </motion.div>
-              );
+              return <motion.div key={chart.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, delay: 0.2 }} ref={(el) => (chartRefs.current[chart.id] = el)}><Card><CardHeader><CardTitle className="font-headline text-lg">{chart.title}</CardTitle><CardDescription>{chart.description}</CardDescription></CardHeader><CardContent><ChartComponent key={`${chart.id}-${filters?.type}`} data={chartData} /></CardContent></Card></motion.div>;
             })}
-             {!isPro && (
-              <Link href="/configuracoes/layout-personalizado" passHref>
-                <Button variant="outline" className="w-full">
-                    <Lock className="mr-2 h-4 w-4 text-primary"/>
-                    Adicionar outro Gráfico (Desbloquear com Pro)
-                </Button>
-            </Link>
-          )}
+             {!isPro && <Link href="/configuracoes/layout-personalizado" passHref><Button variant="outline" className="w-full"><Lock className="mr-2 h-4 w-4 text-primary"/>Adicionar outro Gráfico (Desbloquear com Pro)</Button></Link>}
         </motion.div>
     );
   };
@@ -259,12 +229,9 @@ export function ReportsClient() {
             </Link>
           </div>
           <ReportsFilter 
-            onApplyFilters={handleApplyFilters} 
-            isPending={isPending}
-            reportData={data}
-            activeFilters={filters}
-            chartRefs={chartRefs.current}
-            plan={user?.plan || 'basic'}
+            onApplyFilters={handleApplyFilters} isPending={isPending}
+            reportData={data} activeFilters={filters}
+            chartRefs={chartRefs.current} plan={user?.plan || 'basic'}
           />
         </CardContent>
       </Card>

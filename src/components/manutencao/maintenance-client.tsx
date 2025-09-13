@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useTransition, useEffect, useCallback } from 'react';
@@ -23,19 +22,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-import { Maintenance, deleteMaintenance, deleteAllMaintenance, getFilteredMaintenanceRecords } from "@/services/maintenance.service";
+import { Maintenance, getFilteredMaintenanceRecords } from "@/services/maintenance.service";
 import { MaintenanceForm } from "./maintenance-form";
 import { ReportsFilter } from '@/components/relatorios/reports-filter';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Wrench, Trash2, Edit, DollarSign, Filter, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { Skeleton } from '../ui/skeleton';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
+import { deleteMaintenanceAction, deleteAllMaintenanceAction } from '@/app/gerenciamento/actions';
 
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -60,7 +59,6 @@ const maintenanceTypeLabels = {
 };
 
 export function MaintenanceClient() {
-  const router = useRouter();
   const { user } = useAuth();
   const [records, setRecords] = useState<Maintenance[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -104,7 +102,7 @@ export function MaintenanceClient() {
   const handleDelete = async (id: string) => {
     if (!user) return;
     setIsDeleting(true);
-    const result = await deleteMaintenance(user.id, id);
+    const result = await deleteMaintenanceAction(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Registro apagado." });
       if (currentFilters) {
@@ -119,7 +117,7 @@ export function MaintenanceClient() {
   const handleDeleteAll = async () => {
     if (!user) return;
     setIsDeleting(true);
-    const result = await deleteAllMaintenance(user.id);
+    const result = await deleteAllMaintenanceAction(user.id);
      if(result.success) {
       toast({ title: "Sucesso!", description: "Todos os registros foram apagados." });
       if (currentFilters) {

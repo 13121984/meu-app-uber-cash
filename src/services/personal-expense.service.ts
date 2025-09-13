@@ -1,6 +1,3 @@
-
-"use server";
-
 import { startOfDay, parseISO, isSameMonth, isSameYear } from 'date-fns';
 import { getFile, saveFile } from './storage.service';
 
@@ -15,6 +12,7 @@ export interface PersonalExpense {
 const FILE_NAME = 'personal-expenses.json';
 
 async function readPersonalExpenses(userId: string): Promise<PersonalExpense[]> {
+  if (!userId) return [];
   const data = await getFile<PersonalExpense[]>(userId, FILE_NAME, []);
   return (data || []).map(record => ({
     ...record,
@@ -23,14 +21,13 @@ async function readPersonalExpenses(userId: string): Promise<PersonalExpense[]> 
 }
 
 async function writePersonalExpenses(userId: string, data: PersonalExpense[]): Promise<void> {
+    if (!userId) return;
     const sortedData = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     await saveFile(userId, FILE_NAME, sortedData);
 }
 
-/**
- * Adiciona um novo registro de despesa pessoal.
- */
 export async function addPersonalExpense(userId: string, data: Omit<PersonalExpense, 'id'>): Promise<{ success: boolean; id?: string; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     const allRecords = await readPersonalExpenses(userId);
     const newRecord: PersonalExpense = {
@@ -40,26 +37,17 @@ export async function addPersonalExpense(userId: string, data: Omit<PersonalExpe
     };
     allRecords.unshift(newRecord);
     await writePersonalExpenses(userId, allRecords);
-
     return { success: true, id: newRecord.id };
   } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : "Falha ao adicionar despesa.";
-    return { success: false, error: errorMessage };
+    return { success: false, error: e instanceof Error ? e.message : "Falha ao adicionar despesa." };
   }
 }
 
-/**
- * Busca todos os registros de despesas pessoais.
- */
 export async function getPersonalExpenses(userId: string): Promise<PersonalExpense[]> {
-    let records = await readPersonalExpenses(userId);
-    return records;
+    if (!userId) return [];
+    return await readPersonalExpenses(userId);
 }
 
-
-/**
- * Calcula o total de despesas pessoais para o mês atual.
- */
 export async function getCurrentMonthPersonalExpensesTotal(userId: string): Promise<number> {
     const allExpenses = await getPersonalExpenses(userId);
     const now = new Date();
@@ -69,11 +57,8 @@ export async function getCurrentMonthPersonalExpensesTotal(userId: string): Prom
         .reduce((sum, expense) => sum + expense.amount, 0);
 }
 
-
-/**
- * Atualiza um registro de despesa pessoal existente.
- */
 export async function updatePersonalExpense(userId: string, id: string, data: Omit<PersonalExpense, 'id'>): Promise<{ success: boolean; id?: string, error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     const allRecords = await readPersonalExpenses(userId);
     const index = allRecords.findIndex(r => r.id === id);
@@ -82,39 +67,30 @@ export async function updatePersonalExpense(userId: string, id: string, data: Om
     }
     allRecords[index] = { ...data, id, date: startOfDay(new Date(data.date)) };
     await writePersonalExpenses(userId, allRecords);
-    
     return { success: true, id };
   } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : "Falha ao atualizar despesa.";
-    return { success: false, error: errorMessage };
+    return { success: false, error: e instanceof Error ? e.message : "Falha ao atualizar despesa." };
   }
 }
 
-/**
- * Apaga um registro de despesa pessoal.
- */
 export async function deletePersonalExpense(userId: string, id: string): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     let allRecords = await readPersonalExpenses(userId);
     allRecords = allRecords.filter(r => r.id !== id);
     await writePersonalExpenses(userId, allRecords);
-    
     return { success: true };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Falha ao apagar despesa.";
-    return { success: false, error: errorMessage };
+    return { success: false, error: error instanceof Error ? error.message : "Falha ao apagar despesa." };
   }
 }
 
-/**
- * Apaga todos os registros de despesas pessoais.
- */
 export async function deleteAllPersonalExpenses(userId: string): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: "Usuário não autenticado." };
   try {
     await writePersonalExpenses(userId, []);
     return { success: true };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Falha ao apagar todas as despesas.";
-    return { success: false, error: errorMessage };
+    return { success: false, error: error instanceof Error ? error.message : "Falha ao apagar todas as despesas." };
   }
 }

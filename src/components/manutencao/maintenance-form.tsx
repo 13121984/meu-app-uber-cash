@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -16,12 +15,12 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { addMaintenance, updateMaintenance } from '@/services/maintenance.service';
 import type { Maintenance as MaintenanceType } from '@/services/maintenance.service';
 import { useAuth } from '@/contexts/auth-context';
 import Link from 'next/link';
 import { Separator } from '../ui/separator';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { addMaintenanceAction, updateMaintenanceAction } from '@/app/gerenciamento/actions';
 
 export const maintenanceSchema = z.object({
   id: z.string().optional(),
@@ -71,9 +70,9 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
       const dataToSend = { ...data };
 
       if (initialData?.id) {
-        result = await updateMaintenance(user.id, initialData.id, dataToSend);
+        result = await updateMaintenanceAction(user.id, initialData.id, dataToSend);
       } else {
-        result = await addMaintenance(user.id, dataToSend);
+        result = await addMaintenanceAction(user.id, dataToSend);
       }
 
       if (result.success && result.id) {
@@ -227,7 +226,6 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
 
         <Separator />
         
-        {/* Reminder section */}
         <div className="space-y-4 rounded-lg border p-4">
             <div className="flex justify-between items-center">
                  <h3 className="font-semibold flex items-center gap-2">

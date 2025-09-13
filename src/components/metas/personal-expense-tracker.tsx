@@ -1,20 +1,18 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo, useTransition } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { PersonalExpense, getPersonalExpenses, deletePersonalExpense, deleteAllPersonalExpenses } from '@/services/personal-expense.service';
+import { PersonalExpense, getPersonalExpenses } from '@/services/personal-expense.service';
 import { PersonalExpenseForm } from "./personal-expense-form";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2, Edit, DollarSign, List, Loader2, CalendarIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from '@/contexts/auth-context';
-import { updateAllSummariesAction } from '@/app/gerenciamento/actions';
+import { deletePersonalExpenseAction, deleteAllPersonalExpensesAction } from '@/app/gerenciamento/actions';
 
 const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -67,14 +65,11 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
       .reduce((sum, record) => sum + record.amount, 0);
   }, [records]);
 
-  const handleSuccess = async (record: PersonalExpense, operation: 'created' | 'updated') => {
+  const handleSuccess = (record: PersonalExpense, operation: 'created' | 'updated') => {
     setIsFormOpen(false);
     setSelectedRecord(null);
-    onExpensesChange(); // Notifica o pai que algo mudou
-    fetchRecords(); // Re-busca os dados
-    if (user) {
-        await updateAllSummariesAction(user.id); // Revalida o cache
-    }
+    onExpensesChange(); 
+    fetchRecords(); 
   }
 
   const handleEdit = (record: PersonalExpense) => {
@@ -85,12 +80,11 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
   const handleDelete = async (id: string) => {
     if (!user) return;
     setIsDeleting(true);
-    const result = await deletePersonalExpense(user.id, id);
+    const result = await deletePersonalExpenseAction(user.id, id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Despesa apagada." });
       onExpensesChange();
       fetchRecords();
-      await updateAllSummariesAction(user.id);
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }
@@ -100,12 +94,11 @@ export function PersonalExpenseTracker({ onExpensesChange }: PersonalExpenseTrac
   const handleDeleteAll = async () => {
     if (!user) return;
     setIsDeleting(true);
-    const result = await deleteAllPersonalExpenses(user.id);
+    const result = await deleteAllPersonalExpensesAction(user.id);
     if(result.success) {
       toast({ title: "Sucesso!", description: "Todas as despesas foram apagadas." });
       onExpensesChange();
       fetchRecords();
-      await updateAllSummariesAction(user.id);
     } else {
       toast({ title: "Erro!", description: result.error, variant: "destructive" });
     }

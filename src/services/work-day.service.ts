@@ -1,7 +1,9 @@
-
+import fs from 'fs/promises';
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
-import { getFile, saveFile } from './storage.service';
+import { getFile, saveFile, getUserDataPath } from './storage.service';
+import { getMaintenanceRecords, Maintenance } from './maintenance.service';
+import { Goals, getGoals } from './goal.service';
 
 // --- Tipos e Interfaces ---
 
@@ -18,6 +20,7 @@ export interface WorkDay {
   fuelEntries: FuelEntry[];
   maintenanceEntries: { id: number, description: string, amount: number }[];
 }
+
 export interface GroupedWorkDay {
   date: Date;
   totalProfit: number;
@@ -25,6 +28,7 @@ export interface GroupedWorkDay {
   totalKm: number;
   entries: WorkDay[];
 }
+
 export interface ImportedWorkDay {
     date: string;
     km: string;
@@ -40,16 +44,18 @@ export interface ImportedWorkDay {
 }
 
 const FILE_NAME = 'work-days.json';
+const DEMO_DATA_FILE = 'demo-data.json';
 
-// --- Funções de Leitura/Escrita ---
+// --- Funções de Leitura/Escrita Puras ---
 
 async function readWorkDays(userId: string): Promise<WorkDay[]> {
   if (!userId) return [];
   const data = await getFile<WorkDay[]>(userId, FILE_NAME, []);
   return (data || []).map(day => ({
       ...day,
-      date: parseISO(day.date as any), // Datas são salvas como ISO strings
+      date: parseISO(day.date as any),
       maintenanceEntries: day.maintenanceEntries || [],
+      timeEntries: day.timeEntries || [],
   }));
 }
 
@@ -59,13 +65,11 @@ async function writeWorkDays(userId: string, data: WorkDay[]): Promise<void> {
     await saveFile(userId, FILE_NAME, sortedData);
 }
 
-// --- Funções CRUD ---
+// --- Funções CRUD (ainda puras) ---
 
 export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise<{ success: boolean; id?: string; error?: string, operation: 'created' | 'updated' }> {
-  if (!userId) return { success: false, error: "Usuário não autenticado.", operation: 'created' };
   try {
     const allWorkDays = await readWorkDays(userId);
-    
     const finalDate = startOfDay(new Date(data.date));
 
     if (data.id && data.id !== 'today' && data.id !== 'other-day') {
@@ -77,189 +81,37 @@ export async function addOrUpdateWorkDay(userId: string, data: WorkDay): Promise
       }
     }
     
-    const newWorkDay: WorkDay = {
-      ...data,
-      id: Date.now().toString(),
-      date: finalDate,
-    };
+    const newWorkDay: WorkDay = { ...data, id: Date.now().toString(), date: finalDate };
     allWorkDays.unshift(newWorkDay);
     await writeWorkDays(userId, allWorkDays);
     return { success: true, id: newWorkDay.id, operation: 'created' };
-
   } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : "Failed to save work day.";
-    return { success: false, error: errorMessage, operation: 'created' };
+    return { success: false, error: e instanceof Error ? e.message : "Failed to save work day.", operation: 'created' };
   }
 }
 
-export async function addMultipleWorkDays(userId: string, importedData: ImportedWorkDay[]) {
-    if (!userId) return { success: false, error: "Usuário não fornecido para importação." };
-    
-    try {
-        let allWorkDays = await readWorkDays(userId);
-        const workDaysToUpsert: WorkDay[] = [];
-
-        const groupedByDate = new Map<string, ImportedWorkDay[]>();
-        for (const row of importedData) {
-            if (!row.date) continue;
-            const dateKey = row.date;
-            if (!groupedByDate.has(dateKey)) {
-                groupedByDate.set(dateKey, []);
-            }
-            groupedByDate.get(dateKey)!.push(row);
-        }
-
-        for (const [dateKey, rows] of groupedByDate.entries()) {
-            const date = startOfDay(parseISO(dateKey));
-
-            const dailyKm = rows.reduce((max, row) => Math.max(max, parseFloat(row.km?.replace(',', '.')) || 0), 0);
-            const dailyHours = rows.reduce((max, row) => Math.max(max, parseFloat(row.hours?.replace(',', '.')) || 0), 0);
-
-            const earnings: Earning[] = rows
-                .filter(row => row.earnings_category && row.earnings_amount)
-                .map(row => ({
-                    id: Date.now() + Math.random(),
-                    category: row.earnings_category,
-                    trips: parseInt(row.earnings_trips) || 0,
-                    amount: parseFloat(row.earnings_amount.replace(',', '.')) || 0
-                }));
-
-            const fuelEntries: FuelEntry[] = rows
-                .filter(row => row.fuel_type && row.fuel_paid)
-                .map(row => ({
-                    id: Date.now() + Math.random(),
-                    type: row.fuel_type,
-                    paid: parseFloat(row.fuel_paid.replace(',', '.')) || 0,
-                    price: parseFloat(row.fuel_price?.replace(',', '.')) || 0
-                }));
-            
-            const maintenanceEntries: WorkDay['maintenanceEntries'] = rows
-                .filter(row => row.maintenance_description && row.maintenance_amount)
-                .map(row => ({
-                    id: Date.now() + Math.random(),
-                    description: row.maintenance_description,
-                    amount: parseFloat(row.maintenance_amount.replace(',', '.')) || 0
-                }));
-
-            workDaysToUpsert.push({
-                id: Date.now().toString() + dateKey,
-                date: date,
-                km: dailyKm,
-                hours: dailyHours,
-                earnings,
-                fuelEntries,
-                maintenanceEntries,
-                timeEntries: [],
-            });
-        }
-        
-        const datesToReplace = new Set(workDaysToUpsert.map(wd => format(wd.date, 'yyyy-MM-dd')));
-        const filteredWorkDays = allWorkDays.filter(wd => !datesToReplace.has(format(wd.date, 'yyyy-MM-dd')));
-        const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
-
-        await writeWorkDays(userId, finalWorkDays);
-        return { success: true, count: workDaysToUpsert.length };
-
-    } catch(e) {
-        const errorMessage = e instanceof Error ? e.message : "Failed to import work days.";
-        return { success: false, error: errorMessage };
-    }
-}
-
-export async function deleteWorkDayEntry(userId: string, id: string): Promise<{ success: boolean; error?: string }> {
-  if (!userId) return { success: false, error: "Usuário não autenticado." };
+export async function deleteWorkDay(userId: string, id: string): Promise<{ success: boolean; error?: string }> {
   try {
     let allWorkDays = await readWorkDays(userId);
     allWorkDays = allWorkDays.filter(r => r.id !== id);
     await writeWorkDays(userId, allWorkDays);
     return { success: true };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registro.";
-    return { success: false, error: errorMessage };
+    return { success: false, error: error instanceof Error ? error.message : "Falha ao apagar registro." };
   }
 }
 
 export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilterValues): Promise<{ success: boolean; error?: string, count?: number }> {
-    if (!userId) return { success: false, error: "Usuário não autenticado." };
     try {
         let allWorkDays = await readWorkDays(userId);
         const initialLength = allWorkDays.length;
-
         const workDaysToDelete = getFilteredWorkDays(allWorkDays, filters);
-        
-        const finalWorkDays = allWorkDays.filter(day => {
-            return !workDaysToDelete.some(toDelete => toDelete.id === day.id);
-        });
-
+        const finalWorkDays = allWorkDays.filter(day => !workDaysToDelete.some(toDelete => toDelete.id === day.id));
         const deletedCount = initialLength - finalWorkDays.length;
         await writeWorkDays(userId, finalWorkDays);
         return { success: true, count: deletedCount };
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Falha ao apagar registros em massa.";
-        return { success: false, error: errorMessage };
-    }
-}
-
-// --- Funções de Gerenciamento de Dados ---
-
-const demoData: Omit<WorkDay, 'date'> & { date: string }[] = [
-  { "id": "demo-1", "date": "2024-12-31", "km": 120.8, "hours": 10, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 19, "amount": 172 }, { "id": 2, "category": "Uber Cash", "trips": 4, "amount": 55.46 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 56.33, "price": 4.99 }, { "id": 2, "type": "Etanol", "paid": 50.9, "price": 5.09 } ], "maintenanceEntries": [] },
-  { "id": "demo-2", "date": "2024-12-30", "km": 88, "hours": 6, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 16, "amount": 168.8 } ], "fuelEntries": [], "maintenanceEntries": [] },
-  { "id": "demo-3", "date": "2024-12-28", "km": 119.5, "hours": 9, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 22, "amount": 222.44 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 38.57, "price": 4.99 } ], "maintenanceEntries": [] },
-  { "id": "demo-4", "date": "2024-12-27", "km": 34, "hours": 3, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 6, "amount": 66.97 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 20.85, "price": 4.99 } ], "maintenanceEntries": [] },
-  { "id": "demo-5", "date": "2024-12-21", "km": 136, "hours": 9, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 16, "amount": 234.49 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 71.25, "price": 4.99 } ], "maintenanceEntries": [] },
-  { "id": "demo-6", "date": "2024-12-20", "km": 123.9, "hours": 9.5, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 24, "amount": 275.86 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 40.26, "price": 4.99 }, { "id": 2, "type": "Etanol", "paid": 50, "price": 5.09 } ], "maintenanceEntries": [] },
-  { "id": "demo-7", "date": "2024-12-19", "km": 132.7, "hours": 9.5, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 25, "amount": 272.32 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 54.41, "price": 4.99 } ], "maintenanceEntries": [] },
-  { "id": "demo-8", "date": "2024-12-18", "km": 147.8, "hours": 10, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 21, "amount": 284.54 }, { "id": 2, "category": "Ganhos Extras", "trips": 0, "amount": 7 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 40.26, "price": 5.09 } ], "maintenanceEntries": [] },
-  { "id": "demo-9", "date": "2024-12-17", "km": 76, "hours": 5.92, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 15, "amount": 167.41 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 43.2, "price": 4.99 } ], "maintenanceEntries": [] },
-  { "id": "demo-10", "date": "2024-12-15", "km": 112, "hours": 8, "timeEntries": [], "earnings": [ { "id": 1, "category": "Ganhos Extras", "trips": 0, "amount": 61 }, { "id": 2, "category": "99 Pop", "trips": 25, "amount": 274.6 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 71.73, "price": 4.99 }, { "id": 2, "type": "Etanol", "paid": 30, "price": 5.09 } ], "maintenanceEntries": [] },
-  { "id": "demo-11", "date": "2024-12-12", "km": 94, "hours": 5.92, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 2, "amount": 13.99 }, { "id": 2, "category": "Particular", "trips": 2, "amount": 22 }, { "id": 3, "category": "Uber Cash", "trips": 8, "amount": 83.18 }, { "id": 4, "category": "Ganhos Extras", "trips": 0, "amount": 7 } ], "fuelEntries": [], "maintenanceEntries": [] },
-  { "id": "demo-12", "date": "2024-12-11", "km": 100, "hours": 6, "timeEntries": [], "earnings": [ { "id": 1, "category": "99 Pop", "trips": 12, "amount": 88.79 }, { "id": 2, "category": "Uber Cash", "trips": 3, "amount": 61.63 } ], "fuelEntries": [ { "id": 1, "type": "GNV", "paid": 68.58, "price": 4.99 } ], "maintenanceEntries": [] }
-];
-
-export async function loadDemoData(userId: string): Promise<{ success: boolean; error?: string }> {
-    if (!userId) return { success: false, error: "Nenhum usuário ativo para carregar dados." };
-
-    try {
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth();
-
-        const adjustedDemoData = demoData.map(day => {
-            const originalDate = parseISO(day.date);
-            const newDate = setMonth(setYear(originalDate, currentYear), currentMonth);
-            return {
-                ...day,
-                date: newDate.toISOString() 
-            };
-        });
-
-        await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
-        return { success: true };
-    } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : "Failed to load demo data.";
-        return { success: false, error: errorMessage };
-    }
-}
-
-
-export async function clearAllData(userId: string): Promise<{ success: boolean; error?: string }> {
-     if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
-     try {
-        await writeWorkDays(userId, []);
-        return { success: true };
-    } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : "Failed to clear data.";
-        return { success: false, error: errorMessage };
-    }
-}
-
-export async function clearAllDataForUser(userId: string): Promise<void> {
-    if (!userId) return;
-    try {
-        await writeWorkDays(userId, []);
-    } catch (error) {
-        console.error(`Failed to clear data for new user ${userId}:`, error);
+        return { success: false, error: error instanceof Error ? error.message : "Falha ao apagar registros em massa." };
     }
 }
 
@@ -270,32 +122,16 @@ export async function getWorkDays(userId: string): Promise<WorkDay[]> {
     return await readWorkDays(userId);
 }
 
-export async function getWorkDaysForDate(userId: string, date: Date): Promise<WorkDay[]> {
-    if (!userId) return [];
-    const allWorkDays = await readWorkDays(userId);
-    return allWorkDays.filter(day => isSameDay(day.date, date));
-}
-
-function getFilteredWorkDays(
-  allWorkDays: WorkDay[],
-  filters: ReportFilterValues,
-) {
+export function getFilteredWorkDays(allWorkDays: WorkDay[], filters: ReportFilterValues): WorkDay[] {
   if (allWorkDays.length === 0) return [];
   
   const now = startOfDay(new Date());
   let interval: { start: Date; end: Date } | null = null;
   switch (filters.type) {
-    case 'all':
-      return allWorkDays;
-    case 'today':
-      interval = { start: now, end: endOfDay(now) };
-      break;
-    case 'thisWeek':
-      interval = { start: startOfWeek(now), end: endOfWeek(now) };
-      break;
-    case 'thisMonth':
-      interval = { start: startOfMonth(now), end: endOfMonth(now) };
-      break;
+    case 'all': return allWorkDays;
+    case 'today': interval = { start: now, end: endOfDay(now) }; break;
+    case 'thisWeek': interval = { start: startOfWeek(now), end: endOfWeek(now) }; break;
+    case 'thisMonth': interval = { start: startOfMonth(now), end: endOfMonth(now) }; break;
     case 'specificMonth':
       if (filters.year !== undefined && filters.month !== undefined) {
         const specificDate = new Date(filters.year, filters.month);
@@ -316,43 +152,22 @@ function getFilteredWorkDays(
       }
       break;
   }
-
-  if (interval) {
-    return allWorkDays.filter(d => isWithinInterval(d.date, interval!));
-  } 
-
+  if (interval) return allWorkDays.filter(d => isWithinInterval(d.date, interval!));
   return [];
 }
 
-export async function getFilteredAndGroupedWorkDays(
-  userId: string,
-  filters: ReportFilterValues
-): Promise<GroupedWorkDay[]> {
-  if (!userId) return [];
-  const allWorkDays = await readWorkDays(userId);
-  const filtered = getFilteredWorkDays(allWorkDays, filters);
-  const grouped = groupWorkDays(filtered);
-  return grouped.sort((a, b) => b.date.getTime() - a.date.getTime());
-}
-
-function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
+export function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
   const grouped = new Map<string, GroupedWorkDay>();
 
   workDays.forEach(day => {
     const dateKey = format(startOfDay(day.date), 'yyyy-MM-dd');
-    
     let group = grouped.get(dateKey);
     if (!group) {
       group = {
-        date: startOfDay(day.date),
-        totalProfit: 0,
-        totalHours: 0,
-        totalKm: 0,
-        entries: [],
+        date: startOfDay(day.date), totalProfit: 0, totalHours: 0, totalKm: 0, entries: [],
       };
       grouped.set(dateKey, group);
     }
-    
     const earnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
     const fuel = day.fuelEntries.reduce((sum, f) => sum + f.paid, 0);
     const maintenance = day.maintenanceEntries?.reduce((sum, m) => sum + m.amount, 0) || 0;
@@ -364,79 +179,101 @@ function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
     group.entries.push(day);
   });
 
-  return Array.from(grouped.values());
+  return Array.from(grouped.values()).sort((a, b) => b.date.getTime() - a.date.getTime());
 }
-
 
 // --- Funções de Exportação ---
 
-const CSV_HEADERS = [
-    'date', 'km', 'hours',
-    'earnings_category', 'earnings_trips', 'earnings_amount',
-    'fuel_type', 'fuel_paid', 'fuel_price',
-    'maintenance_description', 'maintenance_amount'
-];
+const CSV_HEADERS = ['date', 'km', 'hours', 'earnings_category', 'earnings_trips', 'earnings_amount', 'fuel_type', 'fuel_paid', 'fuel_price', 'maintenance_description', 'maintenance_amount'];
 
 function escapeCsvValue(value: any): string {
     if (value === null || value === undefined) return '';
     let stringValue = String(value);
-
-    if (typeof value === 'number') {
-        stringValue = stringValue.replace('.', ',');
-    }
-    
-    if (/[",\r\n]/.test(stringValue)) {
-        return `"${stringValue.replace(/"/g, '""')}"`;
-    }
+    if (typeof value === 'number') stringValue = stringValue.replace('.', ',');
+    if (/[",\r\n]/.test(stringValue)) return `"${stringValue.replace(/"/g, '""')}"`;
     return stringValue;
 }
 
-export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
-    if (!workDays || workDays.length === 0) {
-      throw new Error("Nenhum dado para exportar com os filtros selecionados.");
-    }
-
+export function generateCsvContent(workDays: WorkDay[]): string {
     const rows: string[][] = [];
-
     const sortedWorkDays = workDays.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     sortedWorkDays.forEach(day => {
         const dateStr = format(new Date(day.date), 'yyyy-MM-dd');
-        
-        const maxEntries = Math.max(
-            day.earnings.length,
-            day.fuelEntries.length,
-            day.maintenanceEntries.length,
-            1
-        );
-
+        const maxEntries = Math.max(day.earnings.length, day.fuelEntries.length, day.maintenanceEntries.length, 1);
         for (let i = 0; i < maxEntries; i++) {
             const earning = day.earnings[i];
             const fuel = day.fuelEntries[i];
             const maintenance = day.maintenanceEntries[i];
-
             const isFirstRowOfDay = i === 0;
-
             rows.push([
-                isFirstRowOfDay ? dateStr : '',
-                isFirstRowOfDay ? escapeCsvValue(day.km) : '',
-                isFirstRowOfDay ? escapeCsvValue(day.hours) : '',
-                earning ? escapeCsvValue(earning.category) : '',
-                earning ? escapeCsvValue(earning.trips) : '',
-                earning ? escapeCsvValue(earning.amount) : '',
-                fuel ? escapeCsvValue(fuel.type) : '',
-                fuel ? escapeCsvValue(fuel.paid) : '',
-                fuel ? escapeCsvValue(fuel.price) : '',
-                maintenance ? escapeCsvValue(maintenance.description) : '',
-                maintenance ? escapeCsvValue(maintenance.amount) : ''
+                isFirstRowOfDay ? dateStr : '', isFirstRowOfDay ? escapeCsvValue(day.km) : '', isFirstRowOfDay ? escapeCsvValue(day.hours) : '',
+                earning ? escapeCsvValue(earning.category) : '', earning ? escapeCsvValue(earning.trips) : '', earning ? escapeCsvValue(earning.amount) : '',
+                fuel ? escapeCsvValue(fuel.type) : '', fuel ? escapeCsvValue(fuel.paid) : '', fuel ? escapeCsvValue(fuel.price) : '',
+                maintenance ? escapeCsvValue(maintenance.description) : '', maintenance ? escapeCsvValue(maintenance.amount) : ''
             ]);
         }
     });
 
-    const csvContent = [
-        CSV_HEADERS.join(','),
-        ...rows.map(row => row.join(','))
-    ].join('\n');
+    return [CSV_HEADERS.join(','), ...rows.map(row => row.join(','))].join('\n');
+}
 
-    return csvContent;
+// --- Funções de Gerenciamento de Dados (ex: Demo) ---
+
+async function getDemoData(): Promise<WorkDay[]> {
+    try {
+        const filePath = path.join(process.cwd(), 'data', 'user-data', 'paulo-vitor-tiburcio', 'backup.json'); // Usando um backup como fonte
+        const fileContent = await fs.readFile(filePath, 'utf-8');
+        const backupData = JSON.parse(fileContent);
+        const csvContent = backupData.csvContent;
+        const lines = csvContent.split('\n').slice(1);
+
+        const workDaysMap = new Map<string, WorkDay>();
+
+        lines.forEach(line => {
+            const values = line.split(',');
+            const date = values[0];
+            if (!date) return;
+
+            if (!workDaysMap.has(date)) {
+                workDaysMap.set(date, {
+                    id: `demo-${date}`, date: parseISO(date),
+                    km: parseFloat(values[1]) || 0, hours: parseFloat(values[2]) || 0,
+                    earnings: [], fuelEntries: [], maintenanceEntries: [], timeEntries: []
+                });
+            }
+
+            const day = workDaysMap.get(date)!;
+            if (values[3] && values[5]) { // earnings
+                day.earnings.push({ id: Math.random(), category: values[3], trips: parseInt(values[4]) || 0, amount: parseFloat(values[5]) || 0 });
+            }
+            if (values[6] && values[7]) { // fuel
+                day.fuelEntries.push({ id: Math.random(), type: values[6], paid: parseFloat(values[7]) || 0, price: parseFloat(values[8]) || 0 });
+            }
+        });
+        return Array.from(workDaysMap.values());
+    } catch {
+        return []; // Retorna vazio se não conseguir ler os dados de demonstração
+    }
+}
+
+export async function loadDemoData(userId: string): Promise<{ success: boolean; error?: string }> {
+    if (!userId) return { success: false, error: "Nenhum usuário ativo para carregar dados." };
+    try {
+        const demoWorkDays = await getDemoData();
+        await writeWorkDays(userId, demoWorkDays);
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Failed to load demo data." };
+    }
+}
+
+export async function clearAllDataForUser(userId: string): Promise<{ success: boolean; error?: string }> {
+     if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
+     try {
+        await writeWorkDays(userId, []);
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Failed to clear data." };
+    }
 }

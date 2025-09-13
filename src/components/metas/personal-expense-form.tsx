@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -17,9 +16,10 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { addPersonalExpense, updatePersonalExpense, PersonalExpense } from '@/services/personal-expense.service';
+import { PersonalExpense } from '@/services/personal-expense.service';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useAuth } from '@/contexts/auth-context';
+import { addPersonalExpenseAction, updatePersonalExpenseAction } from '@/app/gerenciamento/actions';
 
 export const personalExpenseSchema = z.object({
   id: z.string().optional(),
@@ -54,7 +54,6 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
     defaultValues: initialData ? { ...initialData, date: new Date(initialData.date) } : defaultFormValues(categories),
   });
   
-  // Efeito para resetar o formulário quando o `initialData` mudar (ex: ao editar um item e depois adicionar um novo)
   React.useEffect(() => {
     if (initialData) {
         form.reset({ ...initialData, date: new Date(initialData.date) });
@@ -72,9 +71,9 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
       const operation: 'created' | 'updated' = initialData?.id ? 'updated' : 'created';
 
       if (operation === 'updated') {
-        result = await updatePersonalExpense(user.id, initialData!.id, dataToSend);
+        result = await updatePersonalExpenseAction(user.id, initialData!.id, dataToSend);
       } else {
-        result = await addPersonalExpense(user.id, dataToSend);
+        result = await addPersonalExpenseAction(user.id, dataToSend);
       }
 
       if (result.success && result.id) {
@@ -86,7 +85,6 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
         const returnedRecord = { ...data, id: result.id };
         onSuccess(returnedRecord as PersonalExpense, operation);
         
-        // Limpa o formulário apenas se foi uma nova entrada
         if(operation === 'created') {
            form.reset(defaultFormValues(categories));
         }

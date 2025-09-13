@@ -1,6 +1,3 @@
-
-"use server";
-
 import { isWithinInterval, startOfDay, endOfDay, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO } from "date-fns";
 import type { ReportFilterValues } from "@/app/relatorios/actions";
 import { getFile, saveFile } from './storage.service';
@@ -80,17 +77,10 @@ export async function getFilteredMaintenanceRecords(userId: string, filters?: Re
     const now = new Date();
 
     switch (filters.type) {
-        case 'all':
-          return allRecords;
-        case 'today':
-            interval = { start: startOfDay(now), end: endOfDay(now) };
-            break;
-        case 'thisWeek':
-          interval = { start: startOfWeek(now), end: endOfWeek(now) };
-          break;
-        case 'thisMonth':
-          interval = { start: startOfMonth(now), end: endOfMonth(now) };
-          break;
+        case 'all': return allRecords;
+        case 'today': interval = { start: startOfDay(now), end: endOfDay(now) }; break;
+        case 'thisWeek': interval = { start: startOfWeek(now), end: endOfWeek(now) }; break;
+        case 'thisMonth': interval = { start: startOfMonth(now), end: endOfMonth(now) }; break;
         case 'specificMonth':
           if (filters.year !== undefined && filters.month !== undefined) {
             interval = { start: startOfMonth(new Date(filters.year, filters.month)), end: endOfMonth(new Date(filters.year, filters.month)) };
