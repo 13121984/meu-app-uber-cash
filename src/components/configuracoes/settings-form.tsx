@@ -92,13 +92,23 @@ export function SettingsForm() {
       try {
         await setTheme(theme);
         toast({
-          title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Tema Salvo!</span></div>,
-          description: "A nova aparência foi aplicada.",
+            title: "Tema Salvo!",
+            description: (
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>A nova aparência foi aplicada.</span>
+              </div>
+            ),
         });
       } catch (error) {
         toast({
-          title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar</span></div>,
-          description: "Não foi possível salvar o tema.",
+          title: "Erro ao Salvar",
+          description: (
+             <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <span>Não foi possível salvar o tema.</span>
+             </div>
+          ),
           variant: "destructive",
         });
       } finally {
