@@ -1,3 +1,4 @@
+
 import { isWithinInterval, startOfDay, endOfDay, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO } from "date-fns";
 import type { ReportFilterValues } from "@/app/relatorios/actions";
 import { getFile, saveFile } from './storage.service';
@@ -70,7 +71,7 @@ export async function getFilteredMaintenanceRecords(userId: string, filters?: Re
     const allRecords = await getMaintenanceRecords(userId);
     
     if (!filters || !filters.type) {
-        return allRecords;
+        return allRecords || [];
     }
     
     let interval: { start: Date; end: Date } | null = null;
@@ -99,10 +100,11 @@ export async function getFilteredMaintenanceRecords(userId: string, filters?: Re
     }
     
     if (interval) {
-        return allRecords.filter(record => isWithinInterval(record.date, interval!));
+        const filtered = allRecords.filter(record => isWithinInterval(record.date, interval!));
+        return filtered || [];
     }
 
-    return allRecords;
+    return allRecords || [];
 }
 
 

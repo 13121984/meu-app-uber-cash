@@ -154,7 +154,10 @@ function calculatePeriodData(workDays: WorkDay[], maintenanceRecords: Maintenanc
         });
     });
 
-    const maintenanceTotal = maintenanceRecords.reduce((sum, r) => sum + r.amount, 0);
+    const maintenanceTotal = Array.isArray(maintenanceRecords) 
+        ? maintenanceRecords.reduce((sum, r) => sum + r.amount, 0)
+        : 0;
+
     totalExtras += maintenanceTotal;
     
     const diasTrabalhados = new Set(workDays.map(d => startOfDay(d.date).toISOString())).size;
@@ -182,7 +185,7 @@ function calculatePeriodData(workDays: WorkDay[], maintenanceRecords: Maintenanc
         mediaHorasPorDia, mediaKmPorDia, ganhoPorHora, ganhoPorKm, eficiencia,
         earningsByCategory: Array.from(earningsByCategory.entries()).map(([name, total]) => ({ name, total })),
         tripsByCategory: Array.from(tripsByCategory.entries()).map(([name, total]) => ({ name, total })),
-        maintenance: { totalSpent: maintenanceTotal, servicesPerformed: maintenanceRecords.length },
+        maintenance: { totalSpent: maintenanceTotal, servicesPerformed: Array.isArray(maintenanceRecords) ? maintenanceRecords.length : 0 },
         meta: { target: goals[period] || 0, period: `${period}` },
         profitComposition, performanceByShift: finalPerformanceByShift,
     };
