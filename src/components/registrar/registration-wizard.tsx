@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useReducer, useEffect } from 'react';
@@ -13,7 +12,7 @@ import { toast } from "@/hooks/use-toast"
 import { useRouter } from 'next/navigation';
 import { parseISO, startOfDay } from 'date-fns';
 import type { WorkDay } from '@/services/work-day.service';
-import { addOrUpdateWorkDayAction, deleteWorkDayEntryAction } from '@/app/gerenciamento/actions';
+import { addOrUpdateWorkDayAction, deleteWorkDayAction, getCatalogAction } from '@/app/gerenciamento/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { getCatalog, Catalog } from '@/services/catalog.service';
+import type { Catalog } from '@/services/catalog.service';
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
@@ -152,7 +151,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
    
    useEffect(() => {
        const fetchCatalog = async () => {
-           const catalogData = await getCatalog();
+           const catalogData = await getCatalogAction();
            setCatalog(catalogData);
        }
        fetchCatalog();
@@ -220,7 +219,7 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
   const handleDeleteEntry = async (id: string) => {
       if (!user) return;
       setDeletingId(id);
-      const result = await deleteWorkDayEntryAction(user.id, id);
+      const result = await deleteWorkDayAction(user.id, id);
       if (result.success) {
           toast({ description: "Período removido com sucesso."});
           router.refresh();

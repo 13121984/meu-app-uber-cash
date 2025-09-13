@@ -6,17 +6,17 @@ import { DataTable } from "./data-table";
 import { HistoryFilters } from "./history-filters";
 import { Button } from "../ui/button";
 import { Loader2, Trash2, History, BarChart3, Smartphone } from "lucide-react";
-import { deleteFilteredWorkDaysAction } from "@/app/gerenciamento/actions";
+import { deleteFilteredWorkDaysAction, getFilteredWorkDaysAction } from "@/app/gerenciamento/actions";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { getFilteredWorkDays, groupWorkDays, type WorkDay } from '@/services/work-day.service';
+import { WorkDay } from '@/services/work-day.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getWorkDays } from "@/services/work-day.service";
+
 
 export interface GroupedWorkDay {
   date: Date;
@@ -54,10 +54,8 @@ export function GerenciamentoClient() {
     setCurrentFilters(filters);
     startTransition(async () => {
       try {
-        const allWorkDays = await getWorkDays(user.id);
-        const filtered = getFilteredWorkDays(allWorkDays, filters);
-        const grouped = groupWorkDays(filtered);
-        setGroupedWorkDays(grouped);
+        const groupedData = await getFilteredWorkDaysAction(user.id, filters);
+        setGroupedWorkDays(groupedData);
       } catch (e) {
         console.error("Failed to fetch work days", e);
         toast({ title: "Erro ao buscar dados", description: "Não foi possível carregar os registros.", variant: "destructive" });
@@ -148,7 +146,7 @@ export function GerenciamentoClient() {
               )}
             <DataTable 
               columns={columns} 
-              data={groupedWorkDays}
+              data={groupedWorkDays.map(g => ({...g, date: new Date(g.date)}))} // Ensure date is a Date object for the table
               onRowClick={(row) => setEditingDay(row.original)} 
             />
          </div>

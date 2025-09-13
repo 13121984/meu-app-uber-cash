@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -13,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { toast } from "@/hooks/use-toast";
 import { getSettings } from '@/services/settings.service';
-import { getCatalog, Catalog } from '@/services/catalog.service';
+import { getCatalogAction } from '@/app/gerenciamento/actions';
+import type { Catalog } from '@/services/catalog.service';
 import { useRouter } from 'next/navigation';
 import { Bell, Save, Loader2, CheckCircle, AlertTriangle, Moon, Sun, Lock } from 'lucide-react';
 import type { Settings, AppTheme } from '@/types/settings';
@@ -160,7 +160,7 @@ export function SettingsForm() {
             try {
                 const [settingsData, catalogData] = await Promise.all([
                     getSettings(user!.id),
-                    getCatalog(),
+                    getCatalogAction(),
                 ]);
                 setSettings(settingsData);
                 setCatalog(catalogData);

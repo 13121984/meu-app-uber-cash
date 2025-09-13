@@ -4,13 +4,19 @@ import { revalidatePath } from 'next/cache';
 import {
   addOrUpdateWorkDay as serviceAddOrUpdate,
   deleteWorkDay as serviceDeleteWorkDay,
-  clearAllDataForUser as serviceClearAllData
+  deleteWorkDaysByFilter as serviceDeleteWorkDaysByFilter,
+  clearAllDataForUser as serviceClearAllData,
+  WorkDay,
+  getWorkDays as serviceGetWorkDays,
+  getFilteredWorkDays,
+  groupWorkDays,
 } from '@/services/work-day.service';
 import { getGoals, Goals, saveGoals as serviceSaveGoals } from '@/services/goal.service';
 import { addMaintenance as serviceAddMaintenance, updateMaintenance as serviceUpdateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance as serviceDeleteAllMaintenance } from '@/services/maintenance.service';
 import { addPersonalExpense as serviceAddPersonalExpense, updatePersonalExpense as serviceUpdatePersonalExpense, deletePersonalExpense as serviceDeletePersonalExpense, deleteAllPersonalExpenses as serviceDeleteAllPersonalExpenses } from '@/services/personal-expense.service';
-import { saveCatalog as serviceSaveCatalog, Catalog } from '@/services/catalog.service';
+import { saveCatalogData, getCatalogData as serviceGetCatalogData, Catalog } from '@/services/catalog.service';
 import { runBackupAction as serviceRunBackupAction, BackupInput, BackupOutput } from "@/ai/flows/backup-flow";
+import type { ReportFilterValues } from '@/app/relatorios/actions';
 
 export async function addOrUpdateWorkDayAction(userId: string, workDay: any) {
     const result = await serviceAddOrUpdate(userId, workDay);
@@ -24,6 +30,22 @@ export async function deleteWorkDayAction(userId: string, workDayId: string) {
     const result = await serviceDeleteWorkDay(userId, workDayId);
     if (result.success) {
         revalidatePath('/', 'layout');
+    }
+    return result;
+}
+
+export async function deleteWorkDayEntryAction(userId: string, workDayId: string) {
+    const result = await serviceDeleteWorkDay(userId, workDayId);
+    if (result.success) {
+        revalidatePath('/gerenciamento');
+    }
+    return result;
+}
+
+export async function deleteFilteredWorkDaysAction(userId: string, filters: ReportFilterValues): Promise<{ success: boolean; count?: number; error?: string }> {
+    const result = await serviceDeleteWorkDaysByFilter(userId, filters);
+    if (result.success) {
+        revalidatePath('/gerenciamento');
     }
     return result;
 }
@@ -109,12 +131,16 @@ export async function deleteAllPersonalExpensesAction(userId: string) {
 }
 
 export async function saveCatalogAction(catalog: Catalog) {
-    const result = await serviceSaveCatalog(catalog);
+    const result = await saveCatalogData(catalog);
     if (result.success) {
         revalidatePath('/configuracoes/catalogos');
         revalidatePath('/registrar', 'layout');
     }
     return result;
+}
+
+export async function getCatalogAction(): Promise<Catalog> {
+    return await serviceGetCatalogData();
 }
 
 export async function runBackupAction(input: BackupInput): Promise<BackupOutput> {
@@ -131,4 +157,11 @@ export async function clearAllDataForUserAction(userId: string) {
        revalidatePath('/', 'layout');
     }
     return result;
+}
+
+export async function getFilteredWorkDaysAction(userId: string, filters: ReportFilterValues) {
+    const allWorkDays = await serviceGetWorkDays(userId);
+    const filtered = getFilteredWorkDays(allWorkDays, filters);
+    const grouped = groupWorkDays(filtered);
+    return grouped;
 }

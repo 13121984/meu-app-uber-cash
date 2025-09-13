@@ -1,11 +1,11 @@
-
 "use client";
 
 import { CatalogManager } from '@/components/configuracoes/catalog-manager';
 import { BookCopy, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { getCatalog, type Catalog } from '@/services/catalog.service';
+import { getCatalogAction } from '@/app/gerenciamento/actions';
+import type { Catalog } from '@/services/catalog.service';
 import { useState, useEffect } from 'react';
 
 export default function GerenciarCatalogosPage() {
@@ -13,7 +13,7 @@ export default function GerenciarCatalogosPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getCatalog().then(data => {
+    getCatalogAction().then(data => {
       setInitialCatalog(data);
       setIsLoading(false);
     });
