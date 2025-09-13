@@ -6,7 +6,6 @@ import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth,
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile } from './storage.service';
 import { revalidatePath } from 'next/cache';
-import { updateAllSummaries } from './summary.service';
 
 // --- Tipos e Interfaces ---
 
@@ -168,7 +167,6 @@ export async function addMultipleWorkDays(userId: string, importedData: Imported
         const finalWorkDays = [...filteredWorkDays, ...workDaysToUpsert];
 
         await writeWorkDays(userId, finalWorkDays);
-        await updateAllSummaries(userId); // Centraliza a atualização aqui
         revalidatePath('/', 'layout');
         return { success: true, count: workDaysToUpsert.length };
 
@@ -248,7 +246,6 @@ export async function loadDemoData(userId: string): Promise<{ success: boolean; 
         });
 
         await writeWorkDays(userId, adjustedDemoData as unknown as WorkDay[]);
-        await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
         return { success: true };
     } catch (e) {
@@ -262,7 +259,6 @@ export async function clearAllData(userId: string): Promise<{ success: boolean; 
      if (!userId) return { success: false, error: "Nenhum usuário especificado para limpar dados." };
      try {
         await writeWorkDays(userId, []);
-        await updateAllSummaries(userId);
         revalidatePath('/', 'layout');
         return { success: true };
     } catch (e) {
