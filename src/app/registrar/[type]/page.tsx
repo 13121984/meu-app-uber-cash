@@ -5,6 +5,14 @@ import { startOfDay } from 'date-fns';
 import { notFound } from 'next/navigation';
 import { getCatalogAction } from '@/app/gerenciamento/actions';
 
+// Adiciona a função para gerar os parâmetros estáticos
+export async function generateStaticParams() {
+  return [
+    { type: 'today' },
+    { type: 'other-day' },
+  ];
+}
+
 export default async function RegistrarPage({ params }: { params: { type: 'today' | 'other-day' }}) {
   const registrationType = params.type;
   
