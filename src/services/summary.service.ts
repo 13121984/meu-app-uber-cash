@@ -83,49 +83,9 @@ export async function getTodayData(userId: string): Promise<PeriodData> {
     return summary.hoje;
 }
 
-export async function updateAllSummaries(userId: string): Promise<SummaryData> {
-    if (!userId) return defaultSummaryData;
-    const allWorkDays = await getWorkDays(userId);
-    const allMaintenance = await getMaintenanceRecords(userId);
-    const goals = await getGoals(userId);
-    
-    const now = startOfDay(new Date());
-
-    const todayWorkDays = allWorkDays.filter(day => isSameDay(day.date, now));
-    const thisWeekWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfWeek(now), end: endOfWeek(now) }));
-    const thisMonthWorkDays = allWorkDays.filter(day => isWithinInterval(day.date, { start: startOfMonth(now), end: endOfMonth(now) }));
-    
-    const todayMaintenance = allMaintenance.filter(m => isSameDay(m.date, now));
-    const thisWeekMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfWeek(now), end: endOfWeek(now) }));
-    const thisMonthMaintenance = allMaintenance.filter(m => isWithinInterval(m.date, { start: startOfMonth(now), end: endOfMonth(now) }));
-
-    const hoje = calculatePeriodData(todayWorkDays, "diária", goals, todayMaintenance);
-    const semana = calculatePeriodData(thisWeekWorkDays, "semanal", goals, thisWeekMaintenance);
-    const mes = calculatePeriodData(thisMonthWorkDays, "mensal", goals, thisMonthMaintenance);
-
-    const summaryData = { hoje, semana, mes };
-    await saveFile(userId, FILE_NAME, summaryData);
-    return summaryData;
-}
-
-const timeToMinutes = (time: string): number => {
-    if (!time || !time.includes(':')) return 0;
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
-};
-
-const getShift = (startTime: string): PerformanceByShift['shift'] => {
-    if (typeof startTime !== 'string' || !startTime.includes(':')) {
-        return 'Manhã'; 
-    }
-    const startMinutes = timeToMinutes(startTime);
-    if (startMinutes >= timeToMinutes("06:01") && startMinutes <= timeToMinutes("12:00")) return 'Manhã';
-    if (startMinutes > timeToMinutes("12:00") && startMinutes <= timeToMinutes("18:00")) return 'Tarde';
-    if (startMinutes > timeToMinutes("18:00") && startMinutes <= timeToMinutes("23:59")) return 'Noite';
-    return 'Madrugada';
-};
-
-function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): PeriodData {
+// A função de recálculo será movida para um local que não crie dependência cíclica
+// Em vez disso, vamos exportar a lógica de cálculo para que possa ser chamada de fora
+export async function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' | 'mensal', goals: Goals, maintenanceRecords: Maintenance[]): Promise<PeriodData> {
     const earningsByCategoryMap = new Map<string, number>();
     const tripsByCategoryMap = new Map<string, number>();
     const shiftPerformanceMap = new Map<PerformanceByShift['shift'], { profit: number; hours: number, rawEarnings: number }>();
@@ -159,6 +119,23 @@ function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'semanal' 
             tripsByCategoryMap.set(earning.category, (tripsByCategoryMap.get(earning.category) || 0) + earning.trips);
             data.totalViagens += earning.trips;
         });
+
+        const timeToMinutes = (time: string): number => {
+            if (!time || !time.includes(':')) return 0;
+            const [hours, minutes] = time.split(':').map(Number);
+            return hours * 60 + minutes;
+        };
+
+        const getShift = (startTime: string): PerformanceByShift['shift'] => {
+            if (typeof startTime !== 'string' || !startTime.includes(':')) {
+                return 'Manhã'; 
+            }
+            const startMinutes = timeToMinutes(startTime);
+            if (startMinutes >= timeToMinutes("06:01") && startMinutes <= timeToMinutes("12:00")) return 'Manhã';
+            if (startMinutes > timeToMinutes("12:00") && startMinutes <= timeToMinutes("18:00")) return 'Tarde';
+            if (startMinutes > timeToMinutes("18:00") && startMinutes <= timeToMinutes("23:59")) return 'Noite';
+            return 'Madrugada';
+        };
 
         if (day.timeEntries && day.timeEntries.length > 0 && day.timeEntries.every(t => t.start && t.end)) {
              const totalDayHoursFromEntries = day.timeEntries.reduce((sum, entry) => {
