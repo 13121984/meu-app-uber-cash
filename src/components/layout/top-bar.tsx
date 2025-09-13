@@ -105,13 +105,25 @@ const NavButton = ({ href, label, icon: Icon, iconColor }: { href: string; label
 
 export function TopBar() {
   const pathname = usePathname();
-  const { user, isPro, logout } = useAuth();
+  const { user, isPro, logout, loading } = useAuth();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
       setIsClient(true);
   }, []);
+
+  if (loading) {
+    return (
+        <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6">
+        </header>
+    );
+  }
+
+  // Prevent rendering on server or before client-side hydration is complete
+  if (!isClient || !user) {
+    return null;
+  }
 
   const handleLogout = () => {
     logout();
@@ -161,7 +173,7 @@ export function TopBar() {
                     </Tooltip>
                 )}
             </div>
-            {isClient && (
+
                 <nav className="flex items-center gap-1">
                     {itemsToRender.map((item, index) => (
                         <React.Fragment key={item.href}>
@@ -182,7 +194,6 @@ export function TopBar() {
                         </TooltipContent>
                     </Tooltip>
                 </nav>
-            )}
         </header>
     </TooltipProvider>
   )
