@@ -3,7 +3,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import type { ProfitEvolutionData } from "@/services/work-day.service"
+import type { ProfitEvolutionData } from "@/services/summary.service"
 
 interface ProfitEvolutionChartProps {
   data: ProfitEvolutionData[];
