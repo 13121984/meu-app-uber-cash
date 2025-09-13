@@ -78,8 +78,13 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
 
       if (result.success && result.id) {
         toast({
-          title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><span>Sucesso!</span></div>,
-          description: `Despesa ${operation === 'updated' ? 'atualizada' : 'adicionada'}.`,
+          title: "Sucesso!",
+          description: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span>{`Despesa ${operation === 'updated' ? 'atualizada' : 'adicionada'}.`}</span>
+            </div>
+          ),
         });
         
         const returnedRecord = { ...data, id: result.id };
@@ -95,8 +100,13 @@ export function PersonalExpenseForm({ initialData, categories, onSuccess }: Pers
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Não foi possível salvar a despesa.";
       toast({
-        title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro!</span></div>,
-        description: errorMessage,
+        title: "Erro!",
+        description: (
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            <span>{errorMessage}</span>
+          </div>
+        ),
         variant: "destructive",
       });
     } finally {
