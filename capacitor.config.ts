@@ -2,8 +2,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.uber.cash',
-  appName: 'Uber Cash', // Nome mais curto para a home screen do celular
+  appId: 'com.txia.ubercash',
+  appName: 'Uber Cash TX IA', // Nome mais curto para a home screen do celular
   webDir: 'out',
   bundledWebRuntime: false,
   server: {
