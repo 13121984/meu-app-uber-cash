@@ -2,10 +2,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { cn } from '@/lib/utils';
-import { AuthProvider } from '@/contexts/auth-context';
-import { AppContent } from './app-content';
-
+import RootClient from './root-client';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
 const APP_NAME = "Uber Cash TX IA";
 const APP_DEFAULT_TITLE = "Uber Cash TX IA";
@@ -29,18 +28,24 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/favicon.ico', // Referência ao favicon
+    icon: '/favicon.ico',
     apple: '/icon-192x192.png',
   },
 };
+
+function RootFallback() {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // A classe de tema (light/dark) será aplicada dinamicamente no AppContent
-  // para evitar conflitos de renderização no servidor.
   return (
     <html 
       lang="pt-BR" 
@@ -54,11 +59,9 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
       <body className="font-body antialiased h-full">
-        <AuthProvider>
-            <AppContent>
-              {children}
-            </AppContent>
-        </AuthProvider>
+        <Suspense fallback={<RootFallback />}>
+          <RootClient>{children}</RootClient>
+        </Suspense>
         <Toaster />
       </body>
     </html>
