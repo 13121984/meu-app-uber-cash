@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useReducer, useEffect } from 'react';
@@ -199,8 +200,13 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       
       if (result.success) {
         toast({
-            title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><span>Sucesso!</span></div>,
-            description: `Seu período de trabalho foi ${result.operation === 'updated' ? 'atualizado' : 'registrado'}.`,
+            title: "Sucesso!",
+            description: (
+                <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span>Seu período de trabalho foi {result.operation === 'updated' ? 'atualizado' : 'registrado'}.</span>
+                </div>
+            ),
         });
         
         if (onSuccess) {
@@ -217,8 +223,13 @@ export function RegistrationWizard({ initialData: propsInitialData, isEditing = 
       console.error(error);
       const errorMessage = error instanceof Error ? error.message : `Não foi possível ${isEditing ? 'atualizar' : 'registrar'} seu dia de trabalho.`;
       toast({
-          title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro ao Salvar!</span></div>,
-          description: errorMessage,
+          title: "Erro ao Salvar!",
+          description: (
+            <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <span>{errorMessage}</span>
+            </div>
+          ),
           variant: "destructive",
       });
     } finally {
