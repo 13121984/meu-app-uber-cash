@@ -1,9 +1,11 @@
+
 /** @type {import('next').NextConfig} */
 
 // Carrega as variáveis de ambiente do arquivo .env
 require('dotenv').config({ path: './.env' });
 
 const nextConfig = {
+  output: 'export',
   images: {
     unoptimized: true, 
     remotePatterns: [

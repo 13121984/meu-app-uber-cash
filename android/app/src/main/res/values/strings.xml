@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Uber Cash TX IA</string>
+    <string name="title_activity_main">Uber Cash TX IA</string>
+    <string name="package_name">com.txia.ubercash</string>
+    <string name="custom_url_scheme">com.txia.ubercash</string>
+</resources>
