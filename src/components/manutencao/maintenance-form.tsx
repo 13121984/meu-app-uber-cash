@@ -23,6 +23,7 @@ import { Separator } from '../ui/separator';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { addMaintenanceAction, updateMaintenanceAction } from '@/app/gerenciamento/actions';
 import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const maintenanceItemSchema = z.object({
     id: z.string().optional(),
@@ -68,7 +69,7 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
       type: 'corrective',
       kmAtService: null,
       items: [{
-          description: '', amount: 0, reminderKm: null, reminderDate: null
+          id: `item-${Date.now()}`, description: '', amount: 0, reminderKm: null, reminderDate: null
       }]
     },
   });
@@ -210,70 +211,74 @@ export function MaintenanceForm({ initialData, onSuccess }: MaintenanceFormProps
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold font-headline flex items-center gap-2"><Package className="h-5 w-5 text-primary"/> Itens do Serviço</h3>
-            <Button type="button" size="sm" variant="outline" onClick={() => append({ description: '', amount: 0, reminderKm: null, reminderDate: null })}>
+            <Button type="button" size="sm" variant="destructive" onClick={() => append({ id: `item-${Date.now()}`, description: '', amount: 0, reminderKm: null, reminderDate: null })}>
               <PlusCircle className="mr-2 h-4 w-4"/> Adicionar Item
             </Button>
           </div>
-          {fields.map((field, index) => (
-            <Card key={field.id} className="p-4 bg-secondary/30 relative">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição do Item</FormLabel>
-                      <FormControl><Input placeholder="Ex: Mão de obra, Troca de óleo" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-                  <FormField control={form.control} name={`items.${index}.amount`} render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Custo do Item</FormLabel>
-                      <FormControl><Input type="number" placeholder="150,00" {...field} value={field.value || ''} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}/>
-                </div>
-                {/* Reminder Section (Autopilot only) */}
-                <div className="space-y-3 rounded-md border p-3">
-                    <div className="flex justify-between items-center">
-                        <FormLabel className="flex items-center gap-2"><BellRing className="h-4 w-4 text-primary"/> Lembrete (Opcional)</FormLabel>
-                        {!isAutopilot && <Link href="/premium"><Button variant="link" size="sm" className="text-amber-500 h-auto p-0"><Lock className="mr-1 h-3 w-3 text-primary"/> Autopilot</Button></Link>}
-                    </div>
+          <ScrollArea className="h-72 w-full pr-4">
+            <div className="space-y-4">
+            {fields.map((field, index) => (
+                <Card key={field.id} className="p-4 bg-secondary/30 relative">
+                <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name={`items.${index}.reminderKm`} render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Lembrar após (KM)</FormLabel>
-                            <FormControl><Input type="number" placeholder="Ex: 10000" {...field} value={field.value || ''} onChange={e => field.onChange(parseInt(e.target.value) || null)} disabled={!isAutopilot}/></FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}/>
-                        <FormField control={form.control} name={`items.${index}.reminderDate`} render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                            <FormLabel>Lembrar em (Data)</FormLabel>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-card", !field.value && "text-muted-foreground")} disabled={!isAutopilot}>
-                                    {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR}/></PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                            </FormItem>
-                        )}/>
+                    <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Descrição do Item</FormLabel>
+                        <FormControl><Input placeholder="Ex: Mão de obra, Troca de óleo" {...field} /></FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}/>
+                    <FormField control={form.control} name={`items.${index}.amount`} render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Custo do Item</FormLabel>
+                        <FormControl><Input type="number" placeholder="150,00" {...field} value={field.value || ''} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}/>
+                    </div>
+                    {/* Reminder Section (Autopilot only) */}
+                    <div className="space-y-3 rounded-md border p-3">
+                        <div className="flex justify-between items-center">
+                            <FormLabel className="flex items-center gap-2"><BellRing className="h-4 w-4 text-primary"/> Lembrete (Opcional)</FormLabel>
+                            {!isAutopilot && <Link href="/premium"><Button variant="link" size="sm" className="text-amber-500 h-auto p-0"><Lock className="mr-1 h-3 w-3 text-primary"/> Autopilot</Button></Link>}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField control={form.control} name={`items.${index}.reminderKm`} render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Lembrar após (KM)</FormLabel>
+                                <FormControl><Input type="number" placeholder="Ex: 10000" {...field} value={field.value || ''} onChange={e => field.onChange(parseInt(e.target.value) || null)} disabled={!isAutopilot}/></FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}/>
+                            <FormField control={form.control} name={`items.${index}.reminderDate`} render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                <FormLabel>Lembrar em (Data)</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-card", !field.value && "text-muted-foreground")} disabled={!isAutopilot}>
+                                        {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR}/></PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                                </FormItem>
+                            )}/>
+                        </div>
                     </div>
                 </div>
-              </div>
-              {fields.length > 1 && (
-                  <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-7 w-7 text-destructive" onClick={() => remove(index)}>
-                      <Trash2 className="h-4 w-4" />
-                  </Button>
-              )}
-            </Card>
-          ))}
+                {fields.length > 1 && (
+                    <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-7 w-7 text-destructive" onClick={() => remove(index)}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                )}
+                </Card>
+            ))}
+            </div>
+          </ScrollArea>
           {form.formState.errors.items && <p className="text-sm font-medium text-destructive">{form.formState.errors.items.message}</p>}
         </div>
         
