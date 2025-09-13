@@ -39,12 +39,7 @@ export default function LoginPage() {
       router.push('/');
     } else {
       toast({
-        title: (
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            <span>Falha no Login</span>
-          </div>
-        ),
+        title: "Falha no Login",
         description: result.error,
         variant: 'destructive',
       });

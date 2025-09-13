@@ -54,7 +54,7 @@ export default function RecuperarPage() {
       setStep('answerQuestions');
     } else {
       toast({
-        title: ( <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro</span></div>),
+        title: "Erro",
         description: result.error || 'Usuário não encontrado.',
         variant: 'destructive',
       });
@@ -69,7 +69,7 @@ export default function RecuperarPage() {
       setStep('resetPassword');
     } else {
       toast({
-        title: ( <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro</span></div>),
+        title: "Erro",
         description: result.error || 'Respostas incorretas.',
         variant: 'destructive',
       });
@@ -82,13 +82,14 @@ export default function RecuperarPage() {
      const result = await resetPassword(userId, data.newPassword);
      if (result.success) {
         toast({
-            title: ( <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><span>Sucesso!</span></div>),
+            title: "Sucesso!",
             description: "Sua senha foi redefinida. Você já pode fazer o login.",
+            variant: "success",
         });
         router.push('/login');
      } else {
         toast({
-            title: ( <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro</span></div>),
+            title: "Erro",
             description: result.error || 'Não foi possível redefinir a senha.',
             variant: 'destructive',
         });

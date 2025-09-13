@@ -56,12 +56,7 @@ export default function SignupPage() {
       router.push('/login');
     } else {
       toast({
-        title: (
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            <span>Falha no Cadastro</span>
-          </div>
-        ),
+        title: "Falha no Cadastro",
         description: result.error,
         variant: 'destructive',
       });
