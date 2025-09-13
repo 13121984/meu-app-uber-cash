@@ -1,8 +1,9 @@
+
 import fs from 'fs/promises';
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { getFile, saveFile, getUserDataPath } from './storage.service';
-import { getMaintenanceRecords, Maintenance } from './maintenance.service';
+import { getFilteredMaintenanceRecords, Maintenance } from './maintenance.service';
 import { Goals, getGoals } from './goal.service';
 import { updateAllSummaries } from './summary.service';
 
