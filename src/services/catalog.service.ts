@@ -39,25 +39,26 @@ const defaultCatalog: Catalog = {
   ]
 };
 
-async function ensureDataFile() {
-  try {
-    await fs.access(dataFilePath);
-  } catch {
-    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
-    await fs.writeFile(dataFilePath, JSON.stringify(defaultCatalog, null, 2), 'utf8');
-  }
+async function readCatalogFile(): Promise<Partial<Catalog>> {
+    try {
+        await fs.access(dataFilePath);
+        const fileContent = await fs.readFile(dataFilePath, 'utf8');
+        if (!fileContent) {
+            return {};
+        }
+        return JSON.parse(fileContent);
+    } catch (error) {
+        // If file doesn't exist or is invalid JSON, return empty object
+        return {};
+    }
 }
 
 /**
  * Busca o catálogo de categorias do arquivo local.
  */
 export async function getCatalog(): Promise<Catalog> {
-  await ensureDataFile();
-  const fileContent = await fs.readFile(dataFilePath, 'utf8');
-  const data = JSON.parse(fileContent);
+  const data = await readCatalogFile();
   
-  // Merge saved data with defaults to ensure `isDefault` is always correct
-  // and new default items are added if they don't exist.
   const mergeCatalogs = (defaults: CatalogItem[], saved: CatalogItem[] = []): CatalogItem[] => {
       const savedMap = new Map(saved.map(item => [item.name, item]));
       const finalItems: CatalogItem[] = [];
@@ -89,10 +90,17 @@ export async function getCatalog(): Promise<Catalog> {
       return finalItems;
   };
   
-  return {
+  const finalCatalog = {
       earnings: mergeCatalogs(defaultCatalog.earnings, data.earnings),
       fuel: mergeCatalogs(defaultCatalog.fuel, data.fuel)
   };
+
+  // If the file was empty, write the defaults back to it
+  if (!data.earnings && !data.fuel) {
+      await saveCatalog(finalCatalog);
+  }
+
+  return finalCatalog;
 }
 
 
@@ -101,7 +109,7 @@ export async function getCatalog(): Promise<Catalog> {
  */
 export async function saveCatalog(catalog: Catalog): Promise<{ success: boolean, error?: string }> {
   try {
-    await ensureDataFile();
+    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
     await fs.writeFile(dataFilePath, JSON.stringify(catalog, null, 2), 'utf8');
     
     // Revalidate all relevant paths that might use this catalog data
