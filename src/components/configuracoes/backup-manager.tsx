@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Download, Loader2, CheckCircle, AlertTriangle, HardDriveUpload } from 'lucide-react';
-import { runBackupAction } from '@/app/gerenciamento/actions';
+import { runBackupFlow } from '@/app/configuracoes/backup/actions';
 import type { BackupData } from '@/services/backup.service';
 import { getBackupForDownload } from '@/services/backup.service';
 import { format, parseISO } from 'date-fns';
@@ -41,7 +41,7 @@ export function BackupManager({ initialBackupData }: BackupManagerProps) {
   const handleGenerateBackup = () => {
     if(!user) return;
     startTransition(async () => {
-        const result = await runBackupAction({ userId: user.id });
+        const result = await runBackupFlow({ userId: user.id });
         if (result.success && result.backupDate) {
             toast({
                 title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Backup Criado!</span></div>,

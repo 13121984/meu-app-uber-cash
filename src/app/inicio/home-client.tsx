@@ -5,16 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle, Wrench, Settings, History, Calendar, LayoutDashboard, BarChart, Calculator, ArrowRight, DollarSign } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { DailySummaryCard } from "./daily-summary-card";
-import { ShiftPerformance } from "./shift-performance";
+import { DailySummaryCard } from "@/components/inicio/daily-summary-card";
+import { ShiftPerformance } from "@/components/inicio/shift-performance";
 import { getTodayData, PeriodData } from "@/services/summary.service";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
-import { Button } from "../ui/button";
-import { MaintenanceReminderCard } from "./maintenance-reminder-card";
+import { Button } from "@/components/ui/button";
+import { MaintenanceReminderCard } from "@/components/inicio/maintenance-reminder-card";
 import { getMaintenanceRecords } from "@/services/maintenance.service";
 import { useAuth } from '@/contexts/auth-context';
-import { IconTargetArrow } from "../ui/icons/target-arrow";
+import { IconTargetArrow } from "@/components/ui/icons/target-arrow";
 
 
 const mainActions = [
