@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getFilteredAndGroupedWorkDays, generateCsvContent, WorkDay } from '@/services/work-day.service';
+import { getWorkDays, getFilteredWorkDays, generateCsvContent, WorkDay } from '@/services/work-day.service';
 import { z } from 'zod';
 import type { DateRange } from "react-day-picker";
 
@@ -15,11 +15,15 @@ export type ReportFilterValues = z.infer<typeof ReportFilterValuesSchema>;
 
 export async function exportReportAction(userId: string, filters: ReportFilterValues): Promise<{csvContent: string}> {
   const validatedFilters = ReportFilterValuesSchema.parse(filters);
-  const groupedWorkDays = await getFilteredAndGroupedWorkDays(userId, validatedFilters);
   
-  // Extrai todos os WorkDay individuais dos grupos
-  const allWorkDays: WorkDay[] = groupedWorkDays.flatMap(group => group.entries);
+  // Etapa 1: Obter todos os dias de trabalho
+  const allWorkDaysRaw = await getWorkDays(userId);
   
-  const csvContent = await generateCsvContent(allWorkDays);
+  // Etapa 2: Filtrar os dias com base nos filtros fornecidos
+  const filteredWorkDays = getFilteredWorkDays(allWorkDaysRaw, validatedFilters);
+
+  // Etapa 3: Gerar o conteúdo CSV a partir dos dias filtrados
+  const csvContent = await generateCsvContent(filteredWorkDays);
+
   return { csvContent };
 }
