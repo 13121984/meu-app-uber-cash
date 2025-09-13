@@ -25,55 +25,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const getActiveUserId = useCallback(() => {
-    // This function will only run on the client
+  const loadUserFromStorage = useCallback(async () => {
     const storedUserJSON = localStorage.getItem('rota-certa-user');
     if (storedUserJSON) {
       try {
         const storedUser = JSON.parse(storedUserJSON);
-        return storedUser.id;
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }, []);
-
-  const loadUserFromStorage = useCallback(async () => {
-    const userId = getActiveUserId();
-    if (userId) {
-      try {
-        const freshUser = await getUserById(userId);
+        const freshUser = await getUserById(storedUser.id);
         if (freshUser) {
-            setUser(freshUser);
-            localStorage.setItem('rota-certa-user', JSON.stringify(freshUser));
+          setUser(freshUser);
         } else {
-            // User might have been deleted, clear storage
-            setUser(null);
-            localStorage.removeItem('rota-certa-user');
+          // User might have been deleted from the backend
+          setUser(null);
+          localStorage.removeItem('rota-certa-user');
         }
       } catch (error) {
-        console.error("Failed to fetch user from server, using stale local data.", error);
-        // Fallback to local data if server is unreachable
-        const storedUserJSON = localStorage.getItem('rota-certa-user');
-        if (storedUserJSON) {
-            setUser(JSON.parse(storedUserJSON));
-        }
+        console.error("Failed to fetch user, clearing stored data.", error);
+        setUser(null);
+        localStorage.removeItem('rota-certa-user');
       }
     }
     setLoading(false);
-  }, [getActiveUserId]);
+  }, []);
 
   useEffect(() => {
-    // This effect runs only on the client side
+    // This effect runs only on the client side after hydration
     loadUserFromStorage();
   }, [loadUserFromStorage]);
 
   const refreshUser = async () => {
-    if (!user) return;
+    const storedUserJSON = localStorage.getItem('rota-certa-user');
+    if (!storedUserJSON) return;
+
     setLoading(true);
     try {
-        const updatedUser = await getUserById(user.id);
+        const storedUser = JSON.parse(storedUserJSON);
+        const updatedUser = await getUserById(storedUser.id);
         if(updatedUser) {
             setUser(updatedUser);
             localStorage.setItem('rota-certa-user', JSON.stringify(updatedUser));
