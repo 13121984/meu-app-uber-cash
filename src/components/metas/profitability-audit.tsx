@@ -3,7 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { generateReportData, AverageEarningByCategory } from '@/services/summary.service';
+import { generateReportData } from '@/services/summary.service';
+import type { AverageEarningByCategory } from '@/services/summary.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, TrendingUp, TrendingDown, CheckCircle, BarChart3, Calendar, Award } from 'lucide-react';
@@ -74,7 +75,7 @@ export function ProfitabilityAudit() {
                         const dateKey = format(day.date, 'yyyy-MM-dd');
                         const dayData = dailyPerformance.get(dateKey) || { earnings: 0, hours: 0 };
                         
-                        const dayEarnings = day.earnings.reduce((sum, e) => sum + e.amount, 0);
+                        const dayEarnings = day.earnings.reduce((sum: number, e: { amount: number }) => sum + e.amount, 0);
                         
                         dayData.earnings += dayEarnings;
                         dayData.hours += day.hours;
