@@ -95,13 +95,24 @@ export function LayoutCustomizationClient() {
     if (result.success) {
         await refreshUser();
         toast({
-            title: <div className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500"/><span>Layout Salvo!</span></div>,
-            description: "Seu novo layout foi salvo e será aplicado."
+            title: "Layout Salvo!",
+            description: (
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500"/>
+                <span>Seu novo layout foi salvo e será aplicado.</span>
+              </div>
+            )
         });
     } else {
         toast({ 
-             title: <div className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /><span>Erro!</span></div>,
-             description: "Não foi possível salvar seu layout." 
+             title: "Erro!",
+             description: (
+                <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    <span>Não foi possível salvar seu layout.</span>
+                </div>
+             ),
+             variant: 'destructive',
         });
     }
     setIsSaving(false);
