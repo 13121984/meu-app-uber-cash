@@ -4,7 +4,7 @@
 import { getFile, saveFile } from './storage.service';
 import { getWorkDays, getFilteredWorkDays, WorkDay } from './work-day.service';
 import { getGoals } from './goal.service';
-import { getFilteredMaintenanceRecords, Maintenance } from './maintenance.service';
+import { getMaintenanceRecords, getFilteredMaintenanceRecords, Maintenance } from './maintenance.service';
 import type { ReportFilterValues } from '@/app/relatorios/actions';
 import { format, startOfDay } from 'date-fns';
 
