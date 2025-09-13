@@ -1,12 +1,19 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, format } from 'date-fns';
-import { addOrUpdateWorkDay as serviceAddOrUpdate, deleteWorkDay as serviceDeleteWorkDay, getWorkDays, WorkDay, deleteWorkDaysByFilter as serviceDeleteFiltered } from '@/services/work-day.service';
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import {
+  addOrUpdateWorkDay as serviceAddOrUpdate,
+  deleteWorkDay as serviceDeleteWorkDay,
+  getWorkDays,
+  WorkDay,
+  deleteWorkDaysByFilter as serviceDeleteFiltered,
+  clearAllDataForUser as serviceClearAllData
+} from '@/services/work-day.service';
 import { getMaintenanceRecords, Maintenance, addMaintenance, updateMaintenance, deleteMaintenance as serviceDeleteMaintenance, deleteAllMaintenance } from '@/services/maintenance.service';
 import { getGoals, Goals, saveGoals as serviceSaveGoals } from '@/services/goal.service';
 import { getPersonalExpenses, addPersonalExpense, updatePersonalExpense, deletePersonalExpense, deleteAllPersonalExpenses } from '@/services/personal-expense.service';
-import { saveSummaryData, SummaryData, PeriodData, defaultPeriodData } from '@/services/summary.service';
+import { saveSummaryData, PeriodData, defaultPeriodData, getSummaryForPeriod } from '@/services/summary.service';
 import { getCatalog, Catalog, saveCatalog as serviceSaveCatalog } from '@/services/catalog.service';
 import { runBackupAction as serviceRunBackupAction, BackupInput, BackupOutput } from "@/ai/flows/backup-flow";
 
@@ -110,7 +117,7 @@ async function calculatePeriodData(workDays: WorkDay[], period: 'diária' | 'sem
         mediaHorasPorDia: data.diasTrabalhados > 0 ? data.totalHoras / data.diasTrabalhados : 0,
         mediaKmPorDia: data.diasTrabalhados > 0 ? data.totalKm / data.diasTrabalhados : 0,
         ganhoPorHora: data.totalHoras > 0 ? data.totalGanho / data.totalHoras : 0,
-        ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.totalKm : 0,
+        ganhoPorKm: data.totalKm > 0 ? data.totalGanho / data.km : 0,
         eficiencia: data.totalKm > 0 && data.totalLitros > 0 ? data.totalKm / data.totalLitros : 0,
         earningsByCategory, tripsByCategory, maintenance: maintenanceData,
         meta: { target: targetGoal, period },
@@ -164,6 +171,15 @@ export async function deleteWorkDayEntryAction(userId: string, workDayId: string
 
 export async function deleteFilteredWorkDaysAction(userId: string, filters: any) {
     const result = await serviceDeleteFiltered(userId, filters);
+    if (result.success) {
+        await updateAllSummaries(userId);
+        revalidatePath('/', 'layout');
+    }
+    return result;
+}
+
+export async function clearAllDataForUserAction(userId: string) {
+    const result = await serviceClearAllData(userId);
     if (result.success) {
         await updateAllSummaries(userId);
         revalidatePath('/', 'layout');

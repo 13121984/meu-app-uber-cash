@@ -4,21 +4,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CalendarCheck, Gauge, Wrench, ArrowRight } from 'lucide-react';
-import { getMaintenanceRecords, Maintenance } from '@/services/maintenance.service';
-import { getWorkDays } from '@/services/work-day.service';
+import { AlertTriangle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { format, differenceInDays, isBefore } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/auth-context';
-
-
-interface Reminder {
-  id: string;
-  description: string;
-  reason: string;
-  isUrgent: boolean;
-}
+import { getMaintenanceRemindersAction, Reminder } from '@/app/inicio/actions';
 
 export function MaintenanceReminderCard() {
   const { user } = useAuth();
@@ -32,51 +21,12 @@ export function MaintenanceReminderCard() {
     }
 
     async function checkReminders() {
+      setIsLoading(true);
       try {
-        const maintenanceRecords = await getMaintenanceRecords(user!.id);
-        const workDays = await getWorkDays(user!.id);
-        
-        const latestKm = workDays.length > 0 ? Math.max(...workDays.map(d => d.km)) : 0;
-        
-        const activeReminders: Reminder[] = [];
-        
-        maintenanceRecords.forEach(record => {
-          // Lembrete por Data
-          if (record.reminderDate) {
-            const today = new Date();
-            const reminderDate = new Date(record.reminderDate);
-            const daysUntilReminder = differenceInDays(reminderDate, today);
-
-            if (isBefore(reminderDate, today) || daysUntilReminder <= 7) {
-                activeReminders.push({
-                    id: record.id,
-                    description: record.description,
-                    reason: `Agendado para ${format(reminderDate, 'dd/MM/yyyy')}`,
-                    isUrgent: isBefore(reminderDate, today) || daysUntilReminder <= 2
-                });
-            }
-          }
-
-          // Lembrete por KM
-          if (record.kmAtService && record.reminderKm) {
-              const targetKm = record.kmAtService + record.reminderKm;
-              const kmRemaining = targetKm - latestKm;
-
-              if (kmRemaining <= 500) {
-                   activeReminders.push({
-                    id: record.id,
-                    description: record.description,
-                    reason: `Vence em ${targetKm.toLocaleString('pt-BR')} km (${kmRemaining.toLocaleString('pt-BR')} km restantes)`,
-                    isUrgent: kmRemaining <= 100
-                });
-              }
-          }
-        });
-        
+        const activeReminders = await getMaintenanceRemindersAction(user!.id);
         setReminders(activeReminders);
-
       } catch (error) {
-        console.error("Failed to check maintenance reminders:", error);
+        console.error("Failed to fetch maintenance reminders:", error);
       } finally {
         setIsLoading(false);
       }

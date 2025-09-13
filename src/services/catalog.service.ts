@@ -37,18 +37,26 @@ const defaultCatalog: Catalog = {
 export async function getCatalog(): Promise<Catalog> {
   try {
     const fileContent = await fs.readFile(dataFilePath, 'utf8');
-    if (!fileContent) {
+    if (!fileContent.trim()) {
+        // If file is empty, write default data and return it
         await fs.writeFile(dataFilePath, JSON.stringify(defaultCatalog, null, 2), 'utf8');
         return defaultCatalog;
     }
     const data = JSON.parse(fileContent);
+    // Ensure both keys exist, even if the file is partially corrupt
     return {
         earnings: data.earnings || defaultCatalog.earnings,
         fuel: data.fuel || defaultCatalog.fuel
     };
   } catch (error) {
-    // If file doesn't exist or is corrupt, create it with default data
-    await fs.writeFile(dataFilePath, JSON.stringify(defaultCatalog, null, 2), 'utf8');
+    // If file doesn't exist, create it with default data and return it
+    if (error instanceof Error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+        await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
+        await fs.writeFile(dataFilePath, JSON.stringify(defaultCatalog, null, 2), 'utf8');
+        return defaultCatalog;
+    }
+    // For other errors (like parsing), re-throw or handle as needed
+    console.error("Failed to read or parse catalog.json, returning default. Error:", error);
     return defaultCatalog;
   }
 }
