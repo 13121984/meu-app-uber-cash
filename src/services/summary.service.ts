@@ -54,7 +54,7 @@ export interface ReportData extends PeriodData {
 
 const FILE_NAME = 'summary.json';
 
-export const defaultPeriodData: PeriodData = {
+const defaultPeriodData: PeriodData = {
     totalGanho: 0, totalLucro: 0, totalCombustivel: 0, totalExtras: 0,
     diasTrabalhados: 0, totalKm: 0, totalHoras: 0, totalLitros: 0, mediaHorasPorDia: 0, mediaKmPorDia: 0,
     ganhoPorHora: 0, ganhoPorKm: 0, totalViagens: 0, eficiencia: 0,
@@ -64,7 +64,7 @@ export const defaultPeriodData: PeriodData = {
     profitComposition: [], performanceByShift: [],
 };
 
-export const defaultSummaryData: SummaryData = {
+const defaultSummaryData: SummaryData = {
     hoje: { ...defaultPeriodData, meta: { target: 0, period: 'diária' } },
     semana: { ...defaultPeriodData, meta: { target: 0, period: 'semanal' } },
     mes: { ...defaultPeriodData, meta: { target: 0, period: 'mensal' } },
