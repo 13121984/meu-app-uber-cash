@@ -102,3 +102,45 @@ export async function getSummaryForPeriod(userId: string): Promise<SummaryData> 
     if (!userId) return defaultSummaryData;
     return await getSummaryData(userId);
 }
+
+
+// --- Funções de Relatório ---
+// Estas funções dependem dos dados já calculados e salvos no summary.json,
+// ou calculam dados adicionais que não criam ciclos.
+
+export async function getReportData(userId: string, filters: ReportFilterValues): Promise<ReportData> {
+    // Placeholder, a lógica de cálculo detalhada foi movida para `gerenciamento/actions.ts`
+    // para ser chamada pelo cliente, evitando ciclos no servidor.
+    // No futuro, podemos criar um serviço de relatório mais robusto aqui.
+
+    const summary = await getSummaryData(userId);
+    let periodData: PeriodData;
+
+    switch (filters.type) {
+        case 'today':
+            periodData = summary.hoje;
+            break;
+        case 'thisWeek':
+            periodData = summary.semana;
+            break;
+        case 'thisMonth':
+        default:
+            periodData = summary.mes;
+            break;
+    }
+
+    // Retorna uma estrutura ReportData básica, pois os cálculos complexos
+    // que dependem de outros serviços foram removidos daqui.
+    const { performanceByShift, ...restOfPeriodData } = periodData;
+
+    return {
+        ...restOfPeriodData,
+        totalGastos: periodData.totalCombustivel + periodData.maintenance.totalSpent,
+        fuelExpenses: [], // Cálculo movido
+        profitEvolution: [], // Cálculo movido
+        dailyTrips: [], // Cálculo movido
+        averageEarningPerTrip: [], // Cálculo movido
+        averageEarningPerHour: [], // Cálculo movido
+        rawWorkDays: [], // Deve ser preenchido pela action que chama isso
+    };
+}
