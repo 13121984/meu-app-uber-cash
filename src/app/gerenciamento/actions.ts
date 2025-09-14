@@ -163,7 +163,7 @@ export async function clearAllDataForUserAction(userId: string) {
 export async function getFilteredWorkDaysAction(userId: string, filters: ReportFilterValues) {
     const allWorkDays = await serviceGetWorkDays(userId);
     const filtered = getFilteredWorkDays(allWorkDays, filters);
-    const grouped = groupWorkDays(filtered);
+    const grouped = await groupWorkDays(filtered);
     return grouped;
 }
 

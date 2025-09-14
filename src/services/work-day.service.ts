@@ -139,7 +139,7 @@ export async function getWorkDaysForDate(userId: string, date: Date): Promise<Wo
     return allDays.filter(day => isSameDay(day.date, date));
 }
 
-export function getFilteredWorkDays(allWorkDays: WorkDay[], filters: ReportFilterValues): WorkDay[] {
+export async function getFilteredWorkDays(allWorkDays: WorkDay[], filters: ReportFilterValues): Promise<WorkDay[]> {
   if (allWorkDays.length === 0) return [];
   
   const now = startOfDay(new Date());
@@ -393,7 +393,3 @@ export async function clearAllDataForUser(userId: string): Promise<{ success: bo
         return { success: false, error: e instanceof Error ? e.message : "Failed to clear data." };
     }
 }
-
-    
-
-    
