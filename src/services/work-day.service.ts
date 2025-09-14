@@ -115,7 +115,7 @@ export async function deleteWorkDaysByFilter(userId: string, filters: ReportFilt
     try {
         let allWorkDays = await readWorkDays(userId);
         const initialLength = allWorkDays.length;
-        const workDaysToDelete = getFilteredWorkDays(allWorkDays, filters);
+        const workDaysToDelete = await getFilteredWorkDays(allWorkDays, filters);
         const finalWorkDays = allWorkDays.filter(day => !workDaysToDelete.some(toDelete => toDelete.id === day.id));
         const deletedCount = initialLength - finalWorkDays.length;
         await writeWorkDays(userId, finalWorkDays);
