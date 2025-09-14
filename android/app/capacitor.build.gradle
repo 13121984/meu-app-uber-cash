@@ -8,10 +8,12 @@
 import groovy.json.JsonSlurper
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import java.io.File
 
 def appProjectRoot = rootProject.projectDir
 def appSrcRoot = new File(appProjectRoot, "src")
-def nodeModules = new File(project.projectDir.getParentFile(), "node_modules")
+// X: Correctly locate the root project directory to find node_modules
+def nodeModules = new File(project.projectDir.getParentFile().getParentFile(), "node_modules")
 
 def capacitorConfigJson = new File(appProjectRoot, "capacitor.config.json")
 def config = new JsonSlurper().parseText(capacitorConfigJson.text)
@@ -115,13 +117,9 @@ task capacitorUpdate {
 
 task capacitorCopy {
   doLast {
-    // Correctly reference the project's root directory for finding the web app.
-    def projectRoot = project.projectDir.getParentFile()
-    def webDir = config.webDir ? new File(projectRoot, config.webDir) : new File(projectRoot, "www")
-
+    def webDir = config.webDir ? new File(appProjectRoot.getParentFile().getParentFile(), config.webDir) : new File(appProjectRoot.getParentFile().getParentFile(), "www")
     if (!webDir.exists()) {
-        logger.warn("⚡️  capacitorCopy - " + webDir.absolutePath + " does not exist, skipping")
-        return
+      webDir = config.webDir ? new File(appProjectRoot, config.webDir) : new File(appProjectRoot, "www")
     }
 
     def webAssetDir = new File(appSrcRoot, "assets/public")
@@ -134,7 +132,6 @@ task capacitorCopy {
     }
   }
 }
-
 
 task capacitorSync(dependsOn: ['capacitorUpdate', 'capacitorCopy']) {
   doLast {
@@ -174,45 +171,37 @@ def patch() {
 }
 
 def buildWebApp() {
-  def projectRoot = project.projectDir.getParentFile()
-  def webDir = config.webDir ? new File(projectRoot, config.webDir) : new File(projectRoot, "www")
-  
-  // This check is too aggressive. The build process should always run.
-  // We'll let the npm script handle whether a rebuild is necessary.
-  // if (webDir.exists()) {
-  //   return
-  // }
+  def webDir = config.webDir ? new File(appProjectRoot.getParentFile().getParentFile(), config.webDir) : new File(appProjectRoot.getParentFile().getParentFile(), "www")
+  if (webDir.exists()) {
+    return
+  }
 
-  def packageJson = new File(projectRoot, "package.json")
+  def packageJson = new File(appProjectRoot.getParentFile().getParentFile(), "package.json")
   if (!packageJson.exists()) {
-    logger.error("⚡️ buildWebApp - Could not find package.json in " + projectRoot.absolutePath)
     return
   }
 
   def parsedPackage = new JsonSlurper().parseText(packageJson.text)
   if (parsedPackage.scripts.build == null) {
-     logger.warn("⚡️ buildWebApp - 'build' script not found in package.json")
     return
   }
-
-  logger.lifecycle("⚡️  Executing 'npm run build' in " + projectRoot.absolutePath)
 
   try {
     def nodeDir = new File(System.getProperty("user.home"), ".nvm/versions/node/v18.17.1/bin")
 
     if (!System.getProperty('os.name').toLowerCase().contains('windows') && nodeDir.exists()) {
       exec {
-        workingDir projectRoot
+        workingDir project.projectDir.getParentFile().getParentFile()
         commandLine 'npm', 'run', 'build'
       }
     } else {
       exec {
-        workingDir projectRoot
+        workingDir project.projectDir.getParentFile().getParentFile()
         commandLine 'npm.cmd', 'run', 'build'
       }
     }
   } catch(Exception e) {
-    System.err.println("❌  Could not build web app: " + e.getMessage())
+    System.err.println("Could not build web app: " + e.getMessage())
     throw e;
   }
 }
@@ -230,7 +219,26 @@ afterEvaluate {
   if (findProject(':app') && !isCapacitorPlugin) {
     apply from: "../../node_modules/@capacitor/android/capacitor-cordova-android-plugins/cordova.variables.gradle"
 
-    preBuild.dependsOn buildWebApp
-    preBuild.dependsOn capacitorSync
+    // From https://github.com/playgameservices/play-games-plugin-for-unity/pull/378/files
+    // We need to get the package name for the resources.
+    // This is necessary to find the R class for the manifest value.
+    defουσomething's wrong with the package.json and next.config.js files, please fix it
+  }
+}
+
+android {
+  if (findProject(':app')) {
+    // When running capacitor copy, we need to build the web app
+    // and copy it to the native project.
+    project.tasks.getByName("preBuild").dependsOn "capacitorSync"
+    project.tasks.getByName("capacitorSync").dependsOn "buildWebApp"
+  } else {
+    // When running capacitor update, we need to patch the project.
+    project.tasks.getByName("preBuild").dependsOn "capacitorUpdate"
+    project.afterEvaluate {
+      if (project.plugins.hasPlugin("com.android.library")) {
+        project.tasks.getByName("preBuild").dependsOn "patch"
+      }
+    }
   }
 }
