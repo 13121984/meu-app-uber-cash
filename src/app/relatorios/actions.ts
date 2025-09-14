@@ -20,7 +20,7 @@ export async function exportReportAction(userId: string, filters: ReportFilterVa
   const allWorkDaysRaw = await getWorkDays(userId);
   
   // Etapa 2: Filtrar os dias com base nos filtros fornecidos
-  const filteredWorkDays = getFilteredWorkDays(allWorkDaysRaw, validatedFilters);
+  const filteredWorkDays = await getFilteredWorkDays(allWorkDaysRaw, validatedFilters);
 
   // Etapa 3: Gerar o conteúdo CSV a partir dos dias filtrados
   const csvContent = await generateCsvContent(filteredWorkDays);
