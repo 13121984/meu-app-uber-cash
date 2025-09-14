@@ -7,11 +7,11 @@
     "dev": "next dev",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build && next export",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "android": "npm run build && npx cap sync android && npx cap open android"
+    "android": "npx cap sync android && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.0",
