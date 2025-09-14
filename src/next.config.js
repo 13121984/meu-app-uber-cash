@@ -5,9 +5,7 @@
 require('dotenv').config({ path: './.env' });
 
 const nextConfig = {
-  // Recommended: disable built-in image optimization for static export
   images: {
-    unoptimized: true, 
     remotePatterns: [
       {
         protocol: 'https',
@@ -16,7 +14,7 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https://',
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
