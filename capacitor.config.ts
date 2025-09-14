@@ -6,10 +6,10 @@ const config: CapacitorConfig = {
   appName: 'Uber Cash TX IA', // Nome mais curto para a home screen do celular
   webDir: 'out',
   server: {
-    // A configuração do servidor é usada para desenvolvimento com live reload.
-    // Para a versão de produção, o Capacitor usa o conteúdo da pasta `out`.
-    url: 'http://192.168.0.10:3000', // Exemplo: Substitua pelo seu IP local para testes
-    cleartext: true
+    // A configuração do servidor foi removida para usar o webDir 'out' em produção.
+    // Para usar live-reload em desenvolvimento, descomente e ajuste o IP.
+    // url: 'http://192.168.0.10:3000',
+    // cleartext: true
   },
    plugins: {
     SplashScreen: {
