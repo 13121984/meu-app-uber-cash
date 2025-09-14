@@ -10,12 +10,11 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import java.io.File
 
-// Correctly locate the root project directory to find node_modules
 def appProjectRoot = project.projectDir.getParentFile()
 
 def capacitorConfigFile = new File(appProjectRoot, "capacitor.config.json")
 if (!capacitorConfigFile.exists()) {
-    println "capacitor.config.json not found in " + appProjectRoot
+    println "capacitor.config.json not found in ${appProjectRoot}"
     return
 }
 
@@ -121,9 +120,11 @@ task capacitorUpdate {
 task capacitorCopy {
   dependsOn "buildWebApp"
   doLast {
-    def webDir = config.webDir ? new File(appProjectRoot, config.webDir) : new File(appProjectRoot, "www")
+    def webDirVal = config.webDir ?: "www"
+    def webDir = new File(appProjectRoot, webDirVal)
+
     if (!webDir.exists()) {
-      webDir = config.webDir ? new File(appProjectRoot.getParentFile(), config.webDir) : new File(appProjectRoot.getParentFile(), "www")
+      webDir = new File(appProjectRoot.getParentFile(), webDirVal)
     }
 
     def webAssetDir = new File(project.projectDir, "src/main/assets/public")
@@ -148,9 +149,6 @@ task cap(dependsOn: 'capacitorSync') {
   }
 }
 
-/**
- * Hook into the Android build process to patch files.
- */
 def patch() {
   def nodeModules = new File(project.projectDir.getParentFile(), "node_modules")
   def patcherFile = new File(nodeModules, "patch-package/index.js")
@@ -177,7 +175,7 @@ def patch() {
 
 def buildWebApp() {
   def projectRoot = project.projectDir.getParentFile()
-  def webDir = new File(projectRoot, config.webDir)
+  def webDir = new File(projectRoot, (config.webDir ?: "www"))
 
   def packageJson = new File(projectRoot, "package.json")
   if (!packageJson.exists()) {
