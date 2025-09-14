@@ -8,8 +8,8 @@ const config: CapacitorConfig = {
   server: {
     // A configuração do servidor é usada para desenvolvimento com live reload.
     // Para a versão de produção, o Capacitor usa o conteúdo da pasta `out`.
-    // url: 'http://192.168.0.10:3000', // Exemplo: Substitua pelo seu IP local para testes
-    // cleartext: true
+    url: 'http://192.168.0.10:3000', // Exemplo: Substitua pelo seu IP local para testes
+    cleartext: true
   },
    plugins: {
     SplashScreen: {
