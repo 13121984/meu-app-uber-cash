@@ -10,6 +10,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import java.io.File
 
+// Correctly locate the root project directory to find node_modules
 def appProjectRoot = project.projectDir.getParentFile()
 
 def capacitorConfigFile = new File(appProjectRoot, "capacitor.config.json")
