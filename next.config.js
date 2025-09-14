@@ -5,7 +5,6 @@
 require('dotenv').config({ path: './.env' });
 
 const nextConfig = {
-  output: 'export',
   images: {
     unoptimized: true, 
     remotePatterns: [
@@ -16,8 +15,7 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https'
-      ,
+        protocol: 'https',
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
