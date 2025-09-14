@@ -169,7 +169,7 @@ export default function AjudaPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Accordion type="multiple" className="w-full">
+                        <Accordion type="multiple" defaultValue={['github-sync']} className="w-full">
                             <AccordionItem value="structure">
                                 <AccordionTrigger>
                                     <div className="flex items-center gap-2">
@@ -197,12 +197,12 @@ export default function AjudaPage() {
                                 <AccordionTrigger>
                                     <div className="flex items-center gap-2">
                                         <Github className="h-5 w-5 text-primary" />
-                                        <span className="font-semibold text-left">Manual: Backup do Código no GitHub</span>
+                                        <span className="font-semibold text-left">Manual: Exportar o Projeto (via GitHub)</span>
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="prose prose-sm dark:prose-invert max-w-none">
-                                        <p>Salvar seu código em uma fonte externa como o GitHub é a melhor forma de garantir que você nunca perca seu trabalho. Este guia mostra como fazer isso pela primeira vez.</p>
+                                        <p>Salvar seu código em uma fonte externa como o GitHub é a melhor forma de garantir que você nunca perca seu trabalho e consiga movê-lo para seu computador. Este guia mostra como fazer isso pela primeira vez.</p>
                                         <h5 className="font-semibold mt-2">Parte 1: Preparando o GitHub</h5>
                                         <ol>
                                             <li><strong>Crie uma Conta:</strong> Se ainda não tiver, acesse <a href="https://github.com/join" target="_blank" rel="noopener noreferrer">github.com/join</a> e crie uma conta gratuita.</li>
@@ -226,7 +226,7 @@ export default function AjudaPage() {
                                             <li>
                                                 <strong>Inicialize o Git:</strong> O Git é o sistema que controla as versões do seu código. Se for a primeira vez, rode este comando:
                                                 <br/>
-                                                <code className="bg-muted px-1 py-0.5 rounded">git init</code>
+                                                <code className="bg-muted px-1 py-0.5 rounded">git init -b main</code>
                                             </li>
                                              <li>
                                                 <strong>Configure seu Nome e Email (se for a primeira vez):</strong>
@@ -235,7 +235,7 @@ export default function AjudaPage() {
                                                 <code className="block bg-muted px-1 py-0.5 rounded">git config --global user.email "seu-email@exemplo.com"</code>
                                             </li>
                                             <li>
-                                                <strong>Adicione a URL do seu Repositório:</strong> Diga ao Git para onde enviar o código. Substitua a URL pela que você copiou do GitHub:
+                                                <strong>Adicione a URL do seu Repositório:</strong> Diga ao Git para onde enviar o código. Substitua a URL pela que você copiou do GitHub. Se der erro de "remote origin already exists", pule este passo.
                                                 <br/>
                                                 <code className="bg-muted px-1 py-0.5 rounded">git remote add origin https://github.com/seu-usuario/seu-repositorio.git</code>
                                             </li>
@@ -252,17 +252,16 @@ export default function AjudaPage() {
                                             <li>
                                                 <strong>Envie para o GitHub:</strong> Finalmente, envie tudo para o seu repositório online.
                                                 <br/>
-                                                <code className="bg-muted px-1 py-0.5 rounded">git push -u origin master</code>
+                                                <code className="bg-muted px-1 py-0.5 rounded">git push -u origin main</code>
                                                 <br/>
-                                                <em>Pode ser que o nome da branch principal seja `main`. Se `master` der erro, tente `git push -u origin main`.</em>
+                                                <em>Neste passo, o terminal pode pedir seu usuário e senha do GitHub. Use um <a href="https://github.com/settings/tokens?type=beta" target="_blank">Personal Access Token</a> como senha.</em>
                                             </li>
                                         </ol>
-                                        <p className="mt-4"><strong>Pronto!</strong> Se você atualizar a página do seu repositório no GitHub, verá todos os arquivos do seu projeto lá. Agora seu trabalho está seguro.</p>
-                                         <h5 className="font-semibold mt-4">Como Manter Sincronizado</h5>
-                                         <p>Após fazer novas alterações aqui no Firebase Studio, para salvar a nova versão no GitHub, basta rodar os seguintes comandos no terminal:</p>
-                                          <code className="block bg-muted px-1 py-0.5 rounded">git add .</code>
-                                          <code className="block bg-muted px-1 py-0.5 rounded">git commit -m "Descreva o que você mudou aqui"</code>
-                                          <code className="block bg-muted px-1 py-0.5 rounded">git push</code>
+                                        <p className="mt-4"><strong>Pronto!</strong> Se você atualizar a página do seu repositório no GitHub, verá todos os arquivos do seu projeto lá. Agora seu trabalho está seguro e acessível de qualquer lugar.</p>
+                                         <h5 className="font-semibold mt-4">Como Baixar no Seu PC</h5>
+                                         <p>No seu computador, abra o terminal (Prompt de Comando ou PowerShell), navegue até a pasta onde quer salvar o projeto (ex: `cd Desktop`) e rode:</p>
+                                         <code className="block bg-muted px-1 py-0.5 rounded">git clone https://github.com/seu-usuario/seu-repositorio.git</code>
+                                         <p>Isso vai baixar a pasta completa para o seu PC.</p>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -329,3 +328,5 @@ export default function AjudaPage() {
         </div>
     )
 }
+
+    
