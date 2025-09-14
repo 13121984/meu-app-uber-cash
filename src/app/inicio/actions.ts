@@ -1,4 +1,3 @@
-
 'use server';
 
 import { getMaintenanceRecords, Maintenance } from '@/services/maintenance.service';

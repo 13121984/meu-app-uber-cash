@@ -1,4 +1,3 @@
-
 'use server';
 
 import type { Settings } from "@/types/settings";

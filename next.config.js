@@ -5,7 +5,6 @@
 require('dotenv').config({ path: './.env' });
 
 const nextConfig = {
-  output: 'export',
   images: {
     unoptimized: true, 
     remotePatterns: [

@@ -1,4 +1,3 @@
-
 'use server';
 
 import { getWorkDays, getFilteredWorkDays, generateCsvContent, WorkDay } from '@/services/work-day.service';
