@@ -10,18 +10,18 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import java.io.File
 
-def appProjectRoot = rootProject.projectDir
-def appSrcRoot = new File(appProjectRoot, "src")
-// X: Correctly locate the root project directory to find node_modules
-def nodeModules = new File(project.projectDir.getParentFile().getParentFile(), "node_modules")
+// Correctly locate the root project directory to find node_modules
+def appProjectRoot = project.projectDir.getParentFile()
 
 def capacitorConfigJson = new File(appProjectRoot, "capacitor.config.json")
+if (!capacitorConfigJson.exists()) {
+    println "capacitor.config.json not found in ${appProjectRoot.absolutePath}"
+    return
+}
 def config = new JsonSlurper().parseText(capacitorConfigJson.text)
 
 ext {
   cdvMinSdkVersion = config.android?.minSdkVersion ?: 22
-  // Overriding this to 34 to align with latest Android requirements
-  // Might need to be updated in the future.
   cdvCompileSdkVersion = config.android?.compileSdkVersion ?: 34
   cdvTargetSdkVersion = config.android?.targetSdkVersion ?: 34
   cdvBuildToolsVersion = config.android?.buildToolsVersion ?: "34.0.0"
@@ -55,128 +55,29 @@ def getAndroidPackageName() {
   }
 }
 
-static def findUnusedExcludedFile(project, file) {
-  def found = false
-  project.tasks.whenTaskAdded { task ->
-    if (task.name.startsWith("package")) {
-      if (task.excludes.contains(file)) {
-        found = true
-      }
-    }
-  }
-  return found
-}
-
-static def copyAndReplace(src, dest, replacements) {
-  if (src.isDirectory()) {
-    if (!dest.exists()) {
-      dest.mkdirs()
-    }
-
-    src.list().each {
-      copyAndReplace(new File(src, it), new File(dest, it), replacements)
-    }
-  } else {
-    def text = src.text
-    replacements.each { key, value ->
-      text = text.replaceAll(key, value)
-    }
-    dest.write(text)
-  }
-}
-
-task capacitorUpdate {
+task capacitorSync {
   doLast {
-    def plugins = new ArrayList<String>()
-    def capacitorPluginsFile = new File(appSrcRoot, "assets/capacitor.plugins.json")
-    if (capacitorPluginsFile.exists()) {
-      def parsedPlugins = new JsonSlurper().parseText(capacitorPluginsFile.text)
-      for (plugin in parsedPlugins) {
-        if (plugin.android) {
-          def pluginPath = plugin.android.path
-          plugins.add(pluginPath)
-        }
+    def webDir = new File(appProjectRoot, config.webDir)
+    if (config.webDir && webDir.exists()) {
+      def webAssetDir = new File(project.projectDir, "src/main/assets/public")
+      if (webAssetDir.exists()) {
+        delete webAssetDir
       }
-    }
-
-    def replacements = [
-            "CAP_PLUGIN_PATH"  : plugins.join(",\n        ")
-    ]
-    def pluginSrc = new File(nodeModules, "@capacitor/android/capacitor/src/main/java/com/getcapacitor/PluginHandle.java")
-    def pluginDest = new File(appSrcRoot, "java/com/getcapacitor/PluginHandle.java")
-
-    copyAndReplace(pluginSrc, pluginDest, replacements)
-
-    def excludedFiles = ["com/getcapacitor/PluginHandle.java"]
-    excludedFiles.each {
-      if (!findUnusedExcludedFile(project, it)) {
+      copy {
+        from webDir
+        into webAssetDir
       }
-    }
-  }
-}
-
-task capacitorCopy {
-  doLast {
-    def webDir = config.webDir ? new File(appProjectRoot.getParentFile().getParentFile(), config.webDir) : new File(appProjectRoot.getParentFile().getParentFile(), "www")
-    if (!webDir.exists()) {
-      webDir = config.webDir ? new File(appProjectRoot, config.webDir) : new File(appProjectRoot, "www")
-    }
-
-    def webAssetDir = new File(appSrcRoot, "assets/public")
-    if (webAssetDir.exists()) {
-      delete webAssetDir
-    }
-    copy {
-      from webDir
-      into webAssetDir
-    }
-  }
-}
-
-task capacitorSync(dependsOn: ['capacitorUpdate', 'capacitorCopy']) {
-  doLast {
-  }
-}
-
-task cap(dependsOn: 'capacitorSync') {
-  doLast {
-    println "DONE!"
-  }
-}
-
-/**
- * Hook into the Android build process to patch files.
- */
-def patch() {
-  def patcherFile = new File(nodeModules, "patch-package/index.js")
-  if (patcherFile.exists()) {
-    try {
-      def nodeDir = new File(System.getProperty("user.home"), ".nvm/versions/node/v18.17.1/bin")
-
-      if (!System.getProperty('os.name').toLowerCase().contains('windows') && nodeDir.exists()) {
-        exec {
-          workingDir project.projectDir.getParentFile()
-          commandLine 'npx', 'patch-package'
-        }
-      } else {
-        exec {
-          workingDir project.projectDir.getParentFile()
-          commandLine 'npx.cmd', 'patch-package'
-        }
-      }
-    } catch(Exception e) {
-      System.err.println("Failed to apply patch-package patches: " + e.getMessage())
     }
   }
 }
 
 def buildWebApp() {
-  def webDir = config.webDir ? new File(appProjectRoot.getParentFile().getParentFile(), config.webDir) : new File(appProjectRoot.getParentFile().getParentFile(), "www")
+  def webDir = new File(appProjectRoot, config.webDir)
   if (webDir.exists()) {
     return
   }
 
-  def packageJson = new File(appProjectRoot.getParentFile().getParentFile(), "package.json")
+  def packageJson = new File(appProjectRoot, "package.json")
   if (!packageJson.exists()) {
     return
   }
@@ -185,19 +86,17 @@ def buildWebApp() {
   if (parsedPackage.scripts.build == null) {
     return
   }
-
+  println "Capacitor: Running npm run build in ${appProjectRoot.absolutePath}"
   try {
-    def nodeDir = new File(System.getProperty("user.home"), ".nvm/versions/node/v18.17.1/bin")
-
-    if (!System.getProperty('os.name').toLowerCase().contains('windows') && nodeDir.exists()) {
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
       exec {
-        workingDir project.projectDir.getParentFile().getParentFile()
-        commandLine 'npm', 'run', 'build'
+        workingDir appProjectRoot
+        commandLine 'npm.cmd', 'run', 'build'
       }
     } else {
       exec {
-        workingDir project.projectDir.getParentFile().getParentFile()
-        commandLine 'npm.cmd', 'run', 'build'
+        workingDir appProjectRoot
+        commandLine 'npm', 'run', 'build'
       }
     }
   } catch(Exception e) {
@@ -206,39 +105,7 @@ def buildWebApp() {
   }
 }
 
-afterEvaluate {
-  def isCapacitorPlugin = false
-  try {
-    def f = new File(project.projectDir, "build.gradle")
-    if (f.text.contains("apply from: \"../../node_modules/@capacitor/android/capacitor.build.gradle\"")) {
-      isCapacitorPlugin = true
-    }
-  } catch (Exception e) {
-  }
-
-  if (findProject(':app') && !isCapacitorPlugin) {
-    apply from: "../../node_modules/@capacitor/android/capacitor-cordova-android-plugins/cordova.variables.gradle"
-
-    // From https://github.com/playgameservices/play-games-plugin-for-unity/pull/378/files
-    // We need to get the package name for the resources.
-    // This is necessary to find the R class for the manifest value.
-    defουσomething's wrong with the package.json and next.config.js files, please fix it
-  }
-}
-
-android {
-  if (findProject(':app')) {
-    // When running capacitor copy, we need to build the web app
-    // and copy it to the native project.
-    project.tasks.getByName("preBuild").dependsOn "capacitorSync"
-    project.tasks.getByName("capacitorSync").dependsOn "buildWebApp"
-  } else {
-    // When running capacitor update, we need to patch the project.
-    project.tasks.getByName("preBuild").dependsOn "capacitorUpdate"
-    project.afterEvaluate {
-      if (project.plugins.hasPlugin("com.android.library")) {
-        project.tasks.getByName("preBuild").dependsOn "patch"
-      }
-    }
-  }
-}
+// Hook into the build process
+preBuild.dependsOn(buildWebApp)
+preBuild.dependsOn(capacitorSync)
+    
