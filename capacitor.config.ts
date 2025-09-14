@@ -6,8 +6,9 @@ const config: CapacitorConfig = {
   appName: 'Uber Cash TX IA',
   webDir: '.next',
   server: {
-    url: 'http://192.168.0.10:3000', // Substitua pelo seu IP local de desenvolvimento
-    cleartext: true
+    // A URL do servidor é para live-reload, não para build final.
+    // url: 'http://192.168.0.10:3000', 
+    // cleartext: true
   },
    plugins: {
     SplashScreen: {
