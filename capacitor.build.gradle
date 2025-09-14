@@ -1,0 +1,20 @@
+
+// A robust way to find the root of the project
+def projectRoot = new File(project.projectDir, "../../")
+
+// Defines a task to build the web project
+task capBuild(type: Exec) {
+    // Set the working directory to the root of the project
+    workingDir projectRoot
+    
+    // Set the command to run (npm build)
+    // On Windows, you might need to use "cmd", "/c", "npm", ...
+    if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+        commandLine "cmd", "/c", "npm", "run", "build"
+    } else {
+        commandLine "npm", "run", "build"
+    }
+}
+
+// Ensure the web project is built before the Android project
+preBuild.dependsOn(capBuild)
