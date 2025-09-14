@@ -5,6 +5,7 @@
 require('dotenv').config({ path: './.env' });
 
 const nextConfig = {
+  output: 'export',
   images: {
     unoptimized: true, 
     remotePatterns: [
@@ -22,6 +23,8 @@ const nextConfig = {
       },
     ],
   },
+  // Workaround for issues with fetch cache and static export
+  fetchCache: 'only-no-store',
 };
 
 module.exports = nextConfig;
