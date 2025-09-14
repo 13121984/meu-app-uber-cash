@@ -1,5 +1,6 @@
 
 'use server';
+
 /**
  * @fileOverview Um fluxo de IA para analisar capturas de tela de ofertas de corrida.
  *

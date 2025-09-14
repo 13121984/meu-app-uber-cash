@@ -1,5 +1,5 @@
 
-"use server";
+'use server';
 
 import type { Settings } from "@/types/settings";
 import { getFile, saveFile } from './storage.service';

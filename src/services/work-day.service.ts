@@ -1,4 +1,6 @@
 
+'use server';
+
 import fs from 'fs/promises';
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, startOfYear, endOfYear, format, parseISO, isSameDay, setYear, setMonth } from 'date-fns';
 import type { ReportFilterValues } from '@/app/relatorios/actions';

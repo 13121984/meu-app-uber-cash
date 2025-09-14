@@ -1,5 +1,5 @@
 
-"use server";
+'use server';
 
 import { getFile, saveFile } from './storage.service';
 import { getWorkDays, getFilteredWorkDays, WorkDay } from './work-day.service';
