@@ -15,7 +15,7 @@ def appProjectRoot = project.projectDir.getParentFile()
 
 def capacitorConfigFile = new File(appProjectRoot, "capacitor.config.json")
 if (!capacitorConfigFile.exists()) {
-    println "capacitor.config.json not found in ${appProjectRoot}"
+    println "capacitor.config.json not found in " + appProjectRoot
     return
 }
 
@@ -54,6 +54,7 @@ def getAndroidPackageName() {
     def parsedConfig = new JsonSlurper().parseText(userConfig.text)
     return parsedConfig.appId
   }
+  return null
 }
 
 static def findUnusedExcludedFile(project, file) {
