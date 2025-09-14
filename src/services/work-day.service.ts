@@ -173,7 +173,7 @@ export function getFilteredWorkDays(allWorkDays: WorkDay[], filters: ReportFilte
   return [];
 }
 
-export function groupWorkDays(workDays: WorkDay[]): GroupedWorkDay[] {
+export async function groupWorkDays(workDays: WorkDay[]): Promise<GroupedWorkDay[]> {
   const grouped = new Map<string, GroupedWorkDay>();
 
   workDays.forEach(day => {
@@ -211,7 +211,7 @@ function escapeCsvValue(value: any): string {
     return stringValue;
 }
 
-export function generateCsvContent(workDays: WorkDay[]): string {
+export async function generateCsvContent(workDays: WorkDay[]): Promise<string> {
     const rows: string[][] = [];
     const sortedWorkDays = workDays.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -393,3 +393,7 @@ export async function clearAllDataForUser(userId: string): Promise<{ success: bo
         return { success: false, error: e instanceof Error ? e.message : "Failed to clear data." };
     }
 }
+
+    
+
+    
