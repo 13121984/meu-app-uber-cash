@@ -4,8 +4,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.uber.cash',
   appName: 'Uber Cash',
-  webDir: '.next',
-  bundledWebRuntime: false,
+  webDir: 'out',
   server: {
     // Isso é para desenvolvimento com live reload. Para produção, o webDir é usado.
     // url: 'http://192.168.0.10:3000', // Substitua pelo seu IP local
