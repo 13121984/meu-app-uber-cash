@@ -5,7 +5,6 @@
 require('dotenv').config({ path: './.env' });
 
 const nextConfig = {
-  output: 'export',
   // Recommended: disable built-in image optimization for static export
   images: {
     unoptimized: true, 
