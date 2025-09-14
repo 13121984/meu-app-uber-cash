@@ -117,48 +117,6 @@ task capacitorUpdate {
   }
 }
 
-def buildWebApp() {
-  def projectRoot = project.projectDir.getParentFile()
-  def webDir = new File(projectRoot, config.webDir)
-
-  // Do not build if the web dir already exists (e.g. from previous build)
-  if (webDir.exists()) {
-    println "capacitor-android: Found web asset directory, skipping build."
-    return
-  }
-
-  def packageJson = new File(projectRoot, "package.json")
-  if (!packageJson.exists()) {
-    println "capacitor-android: package.json not found, skipping build."
-    return
-  }
-
-  def parsedPackage = new JsonSlurper().parseText(packageJson.text)
-  if (parsedPackage.scripts == null || parsedPackage.scripts.build == null) {
-    println "capacitor-android: build script not found in package.json, skipping build."
-    return
-  }
-
-  try {
-    println "capacitor-android: Running web app build..."
-    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
-        exec {
-            workingDir projectRoot
-            commandLine 'npm.cmd', 'run', 'build'
-        }
-    } else {
-        exec {
-            workingDir projectRoot
-            commandLine 'npm', 'run', 'build'
-        }
-    }
-  } catch(Exception e) {
-    System.err.println("Could not build web app: " + e.getMessage())
-    throw e;
-  }
-}
-
-
 task capacitorCopy {
   dependsOn "buildWebApp"
   doLast {
@@ -213,6 +171,39 @@ def patch() {
     } catch(Exception e) {
       System.err.println("Failed to apply patch-package patches: " + e.getMessage())
     }
+  }
+}
+
+def buildWebApp() {
+  def projectRoot = project.projectDir.getParentFile()
+  def webDir = new File(projectRoot, config.webDir)
+
+  def packageJson = new File(projectRoot, "package.json")
+  if (!packageJson.exists()) {
+    return
+  }
+
+  def parsedPackage = new JsonSlurper().parseText(packageJson.text)
+  if (parsedPackage.scripts == null || parsedPackage.scripts.build == null) {
+    return
+  }
+
+  try {
+    println "capacitor-android: Running web app build..."
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        exec {
+            workingDir projectRoot
+            commandLine 'npm.cmd', 'run', 'build'
+        }
+    } else {
+        exec {
+            workingDir projectRoot
+            commandLine 'npm', 'run', 'build'
+        }
+    }
+  } catch(Exception e) {
+    System.err.println("Could not build web app: " + e.getMessage())
+    throw e;
   }
 }
 
